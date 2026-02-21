@@ -411,6 +411,75 @@ table.gt tr:hover td { background: rgba(232,255,71,0.03); }
 
 .download-btn:hover { border-color: var(--accent2); color: var(--accent2); }
 
+/* クロス集計軸 */
+.cross-col-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cross-col-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.cross-col-item:hover { background: var(--surface2); }
+
+/* クロス集計テーブル */
+.tables-grid.cross-mode {
+  grid-template-columns: 1fr;
+}
+
+.gt-table-card.has-cross {
+  overflow-x: auto;
+}
+
+table.gt.cross-table {
+  min-width: 400px;
+}
+
+table.gt th.cross-group-header {
+  text-align: center;
+  background: rgba(71,200,255,0.06);
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--accent2);
+}
+
+table.gt th.gt-group {
+  background: rgba(232,255,71,0.06);
+  color: var(--accent);
+}
+
+table.gt th.cross-val-header {
+  text-align: right;
+  border-left: 1px solid rgba(42,42,53,0.6);
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+.cross-n {
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: normal;
+}
+
+table.gt td.cross-pct {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent2);
+  border-left: 1px solid rgba(42,42,53,0.6);
+  opacity: 0.85;
+}
+
 /* ユーティリティ */
 .hidden { display: none !important; }
 
