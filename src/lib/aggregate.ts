@@ -6,11 +6,26 @@ export interface AggRow {
   pct: number;
 }
 
+export interface CrossHeader {
+  label: string;
+  n: number;
+}
+
+export interface CrossSection {
+  cross_col: string;
+  headers: CrossHeader[];
+  rows: {
+    label: string;
+    cells: { count: number; pct: number }[];
+  }[];
+}
+
 export interface AggResult {
   col: string;
   type: "SA" | "MA";
   n: number;
   rows: AggRow[];
+  cross?: CrossSection[];
 }
 
 function totalN(
@@ -21,16 +36,60 @@ function totalN(
   return data.reduce((s, r) => s + (parseFloat(r[weightCol]) || 0), 0);
 }
 
+function computeCrossSection(
+  data: Record<string, string>[],
+  rowCol: string,
+  rowValues: string[],
+  crossCol: string,
+  weightCol: string
+): CrossSection {
+  const crossValSet = new Set<string>();
+  data.forEach((r) => {
+    const v = r[crossCol];
+    if (v !== "" && v !== null && v !== undefined) crossValSet.add(v);
+  });
+  const crossValues = Array.from(crossValSet).sort((a, b) => {
+    const na = parseFloat(a), nb = parseFloat(b);
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    return a.localeCompare(b);
+  });
+
+  const headers: CrossHeader[] = crossValues.map((cv) => {
+    const subset = data.filter((r) => r[crossCol] === cv);
+    const n = weightCol
+      ? subset.reduce((s, r) => s + (parseFloat(r[weightCol]) || 0), 0)
+      : subset.length;
+    return { label: cv, n };
+  });
+
+  const rows = rowValues.map((rv) => {
+    const cells = crossValues.map((cv, i) => {
+      const subset = data.filter((r) => r[rowCol] === rv && r[crossCol] === cv);
+      const count = weightCol
+        ? subset.reduce((s, r) => s + (parseFloat(r[weightCol]) || 0), 0)
+        : subset.length;
+      const crossN = headers[i].n;
+      return { count, pct: crossN > 0 ? (count / crossN) * 100 : 0 };
+    });
+    return { label: rv, cells };
+  });
+
+  return { cross_col: crossCol, headers, rows };
+}
+
 export function aggregate(
   data: Record<string, string>[],
   headers: string[],
   colTypes: Record<string, string>,
-  weightCol: string
+  weightCol: string,
+  crossCols: string[] = []
 ): AggResult[] {
   const results: AggResult[] = [];
 
-  // SA集計
-  const saColumns = headers.filter((col) => colTypes[col] === "sa");
+  // SA集計（クロス軸列は除外）
+  const saColumns = headers.filter(
+    (col) => colTypes[col] === "sa" && !crossCols.includes(col)
+  );
   saColumns.forEach((col) => {
     const n = totalN(data, weightCol);
     const counts: Record<string, number> = {};
@@ -48,16 +107,21 @@ export function aggregate(
       return a.localeCompare(b);
     });
 
-    results.push({
-      col,
-      type: "SA",
-      n,
-      rows: sortedKeys.map((k) => ({
-        label: k,
-        count: counts[k],
-        pct: n > 0 ? (counts[k] / n) * 100 : 0,
-      })),
-    });
+    const rows: AggRow[] = sortedKeys.map((k) => ({
+      label: k,
+      count: counts[k],
+      pct: n > 0 ? (counts[k] / n) * 100 : 0,
+    }));
+
+    const result: AggResult = { col, type: "SA", n, rows };
+
+    if (crossCols.length > 0) {
+      result.cross = crossCols.map((cc) =>
+        computeCrossSection(data, col, sortedKeys, cc, weightCol)
+      );
+    }
+
+    results.push(result);
   });
 
   // MAグループ集計

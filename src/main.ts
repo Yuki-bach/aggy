@@ -1,6 +1,7 @@
 import "./style.css";
 import { initDropzone } from "./components/Dropzone";
 import { initColConfig, type ColConfigState } from "./components/ColConfig";
+import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
 import { aggregate, type AggResult } from "./lib/aggregate";
 import {
@@ -30,8 +31,16 @@ function onCSVLoaded(result: ParseResult, fileName: string): void {
 
   colConfig = initColConfig(headers);
 
+  // クロス集計軸候補: SA列（MA以外）
+  const saColumns = headers.filter((col) => {
+    const t = colConfig!.colTypes[col];
+    return t === "sa";
+  });
+  initCrossConfig(saColumns);
+
   document.getElementById("col-config-section")!.classList.remove("hidden");
   document.getElementById("weight-section")!.classList.remove("hidden");
+  document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
 }
@@ -70,20 +79,34 @@ function runAggregation(): void {
   const weightCol = (
     document.getElementById("weight-col-select") as HTMLSelectElement
   ).value;
+  const crossCols = getCrossColsSelected();
+
   const selectedColumns = headers.filter((col) => cfg.colSelected[col]);
   const selectedSet = new Set(selectedColumns);
   const effectiveWeightCol =
     weightCol && selectedSet.has(weightCol) ? weightCol : "";
 
+  // クロス軸列とウェイト列も投影に含める
+  const allNeededCols = [
+    ...new Set([
+      ...selectedColumns,
+      ...crossCols,
+      ...(effectiveWeightCol ? [effectiveWeightCol] : []),
+    ]),
+  ];
+
   try {
     let results: AggResult[];
 
     if (isWasmReady()) {
-      // Ruby Wasm で集計
+      // Ruby Wasm で集計（クロス軸列は columns に含めない）
       const columns = selectedColumns
         .filter((col) => {
           const t = cfg.colTypes[col];
-          return t === "sa" || (t && t.startsWith("ma:"));
+          return (
+            (t === "sa" || (t && t.startsWith("ma:"))) &&
+            !crossCols.includes(col)
+          );
         })
         .map((col) => {
           const t = cfg.colTypes[col];
@@ -93,12 +116,14 @@ function runAggregation(): void {
           return { name: col, type: "sa" };
         });
 
-      const projectedData = projectRowsForWasm(parsedData, selectedColumns);
+      const projectedData = projectRowsForWasm(parsedData, allNeededCols);
 
       const payload = {
         data: projectedData,
         columns,
         weight_col: effectiveWeightCol,
+        mode: crossCols.length > 0 ? "cross" : "gt",
+        cross_cols: crossCols,
       };
 
       results = runRubyAggregation(payload);
@@ -106,17 +131,18 @@ function runAggregation(): void {
       // JSフォールバック
       const effectiveColTypes = { ...cfg.colTypes };
       headers.forEach((col) => {
-        if (!selectedSet.has(col)) {
+        if (!selectedSet.has(col) && !crossCols.includes(col)) {
           effectiveColTypes[col] = "exclude";
         }
       });
 
-      const projectedData = projectRowsForWasm(parsedData, selectedColumns);
+      const projectedData = projectRowsForWasm(parsedData, allNeededCols);
       results = aggregate(
         projectedData,
         headers,
         effectiveColTypes,
-        effectiveWeightCol
+        effectiveWeightCol,
+        crossCols
       );
     }
 
