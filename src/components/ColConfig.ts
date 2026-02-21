@@ -2,12 +2,14 @@ import { detectMAGroups, guessColType } from "../lib/colDetect";
 
 export interface ColConfigState {
   colTypes: Record<string, string>;
+  colSelected: Record<string, boolean>;
 }
 
 export function initColConfig(
   headers: string[]
 ): ColConfigState {
   const colTypes: Record<string, string> = {};
+  const colSelected: Record<string, boolean> = {};
   const list = document.getElementById("col-list")!;
   list.innerHTML = "";
 
@@ -22,11 +24,20 @@ export function initColConfig(
   headers.forEach((col) => {
     const defaultType = guessColType(col, maGroups);
     colTypes[col] = defaultType;
+    colSelected[col] = defaultType !== "id" && defaultType !== "weight";
 
     const maPrefix = maGroups[col];
 
     const item = document.createElement("div");
     item.className = "col-item";
+
+    const pick = document.createElement("input");
+    pick.type = "checkbox";
+    pick.className = "col-pick";
+    pick.checked = colSelected[col];
+    pick.addEventListener("change", () => {
+      colSelected[col] = pick.checked;
+    });
 
     const nameEl = document.createElement("div");
     nameEl.className = "col-name";
@@ -43,6 +54,7 @@ export function initColConfig(
     const options = [
       { value: `ma:${maPrefix || col}`, label: "MA" },
       { value: "sa", label: "SA" },
+      { value: "weight", label: "WEIGHT" },
       { value: "id", label: "ID（除外）" },
       { value: "exclude", label: "除外" },
     ];
@@ -56,8 +68,13 @@ export function initColConfig(
 
     sel.addEventListener("change", () => {
       colTypes[col] = sel.value;
+      if (sel.value === "id" || sel.value === "weight") {
+        pick.checked = false;
+        colSelected[col] = false;
+      }
     });
 
+    item.appendChild(pick);
     item.appendChild(nameEl);
     item.appendChild(sel);
     list.appendChild(item);
@@ -70,5 +87,5 @@ export function initColConfig(
     weightSel.appendChild(wOpt);
   });
 
-  return { colTypes };
+  return { colTypes, colSelected };
 }

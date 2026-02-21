@@ -46,46 +46,81 @@ function showError(msg: string): void {
   }
 }
 
+function projectRowsForWasm(
+  data: Record<string, string>[],
+  columnNames: string[]
+): Record<string, string>[] {
+  const needed = new Set(columnNames);
+
+  return data.map((row) => {
+    const projected: Record<string, string> = {};
+    needed.forEach((key) => {
+      projected[key] = row[key] ?? "";
+    });
+    return projected;
+  });
+}
+
 // 集計実行
 function runAggregation(): void {
   if (!colConfig) return;
+  const cfg = colConfig;
   showError("");
 
   const weightCol = (
     document.getElementById("weight-col-select") as HTMLSelectElement
   ).value;
+  const selectedColumns = headers.filter((col) => cfg.colSelected[col]);
+  const selectedSet = new Set(selectedColumns);
+  const effectiveWeightCol =
+    weightCol && selectedSet.has(weightCol) ? weightCol : "";
 
   try {
     let results: AggResult[];
 
     if (isWasmReady()) {
       // Ruby Wasm で集計
-      const columns = headers
+      const columns = selectedColumns
         .filter((col) => {
-          const t = colConfig!.colTypes[col];
+          const t = cfg.colTypes[col];
           return t === "sa" || (t && t.startsWith("ma:"));
         })
         .map((col) => {
-          const t = colConfig!.colTypes[col];
+          const t = cfg.colTypes[col];
           if (t.startsWith("ma:")) {
             return { name: col, type: "ma", ma_group: t.slice(3) };
           }
           return { name: col, type: "sa" };
         });
 
+      const projectedData = projectRowsForWasm(parsedData, selectedColumns);
+
       const payload = {
-        data: parsedData,
+        data: projectedData,
         columns,
-        weight_col: weightCol,
+        weight_col: effectiveWeightCol,
       };
 
       results = runRubyAggregation(payload);
     } else {
       // JSフォールバック
-      results = aggregate(parsedData, headers, colConfig.colTypes, weightCol);
+      const effectiveColTypes = { ...cfg.colTypes };
+      headers.forEach((col) => {
+        if (!selectedSet.has(col)) {
+          effectiveColTypes[col] = "exclude";
+        }
+      });
+
+      const projectedData = projectRowsForWasm(parsedData, selectedColumns);
+      results = aggregate(
+        projectedData,
+        headers,
+        effectiveColTypes,
+        effectiveWeightCol
+      );
     }
 
-    renderResults(results, weightCol, parsedData.length);
+    renderResults(results, effectiveWeightCol, parsedData.length);
   } catch (e) {
     showError("集計エラー: " + (e as Error).message);
     console.error(e);

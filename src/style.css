@@ -150,7 +150,7 @@ main {
 
 .col-item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.5rem;
   padding: 0.4rem 0.6rem;
@@ -161,6 +161,13 @@ main {
 }
 
 .col-item:hover { border-color: var(--border); }
+
+.col-pick {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
 
 .col-name {
   font-size: 0.78rem;
