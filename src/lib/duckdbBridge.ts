@@ -82,12 +82,51 @@ async function computeTotalN(
   return Number(result.toArray()[0].n);
 }
 
+// クロス軸ヘッダー（ユニーク値＋N）のキャッシュ型
+type CrossHeaderCache = Map<
+  string,
+  { headers: Array<{ label: string; n: number }>; crossValues: string[] }
+>;
+
+async function fetchCrossHeaders(
+  conn: duckdb.AsyncDuckDBConnection,
+  crossCols: string[],
+  weightCol: string
+): Promise<CrossHeaderCache> {
+  const cache: CrossHeaderCache = new Map();
+  const weightExpr = weightCol
+    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
+    : `COUNT(*)::DOUBLE`;
+
+  for (const crossCol of crossCols) {
+    const sql = `
+      SELECT
+        "${esc(crossCol)}" AS cv,
+        ${weightExpr} AS n
+      FROM survey
+      WHERE "${esc(crossCol)}" IS NOT NULL
+        AND "${esc(crossCol)}" != ''
+      GROUP BY "${esc(crossCol)}"
+      ORDER BY
+        TRY_CAST("${esc(crossCol)}" AS DOUBLE) NULLS LAST,
+        "${esc(crossCol)}" ASC
+    `;
+    const result = await conn.query(sql);
+    const headers = result
+      .toArray()
+      .map((r) => ({ label: String(r.cv), n: Number(r.n) }));
+    cache.set(crossCol, { headers, crossValues: headers.map((h) => h.label) });
+  }
+  return cache;
+}
+
 async function aggregateSA(
   conn: duckdb.AsyncDuckDBConnection,
   col: string,
   totalN: number,
   weightCol: string,
-  crossCols: string[]
+  crossCols: string[],
+  crossHeaderCache: CrossHeaderCache
 ): Promise<AggResult> {
   const weightExpr = weightCol
     ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
@@ -125,7 +164,8 @@ async function aggregateSA(
         col,
         rows.map((r) => r.label),
         crossCol,
-        weightCol
+        weightCol,
+        crossHeaderCache.get(crossCol)!
       );
       result.cross.push(section);
     }
@@ -139,32 +179,14 @@ async function computeCrossSection(
   rowCol: string,
   rowValues: string[],
   crossCol: string,
-  weightCol: string
+  weightCol: string,
+  cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] }
 ): Promise<CrossSection> {
   const weightExpr = weightCol
     ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
     : `COUNT(*)::DOUBLE`;
 
-  // cross_col のユニーク値と各グループ n
-  const headerSQL = `
-    SELECT
-      "${esc(crossCol)}" AS cv,
-      ${weightExpr} AS n
-    FROM survey
-    WHERE "${esc(crossCol)}" IS NOT NULL
-      AND "${esc(crossCol)}" != ''
-    GROUP BY "${esc(crossCol)}"
-    ORDER BY
-      TRY_CAST("${esc(crossCol)}" AS DOUBLE) NULLS LAST,
-      "${esc(crossCol)}" ASC
-  `;
-
-  const headerResult = await conn.query(headerSQL);
-  const headers: Array<{ label: string; n: number }> = headerResult
-    .toArray()
-    .map((r) => ({ label: String(r.cv), n: Number(r.n) }));
-
-  const crossValues = headers.map((h) => h.label);
+  const { headers, crossValues } = cached;
 
   // (rowVal, crossVal) の全組み合わせカウント
   const cellSQL = `
@@ -181,7 +203,6 @@ async function computeCrossSection(
   `;
 
   const cellResult = await conn.query(cellSQL);
-  // null byte をキー区切り文字として使用（CSV値には現れない）
   const cellMap = new Map<string, number>();
   for (const r of cellResult.toArray()) {
     cellMap.set(`${r.rv}\0${r.cv}`, Number(r.cnt));
@@ -206,22 +227,22 @@ async function aggregateMA(
   totalN: number,
   weightCol: string
 ): Promise<AggResult> {
-  const rows: AggRow[] = [];
-
-  for (const col of cols) {
-    const weightExpr = weightCol
+  // 全MA列を1クエリで集計
+  const selectClauses = cols.map((col, i) => {
+    const expr = weightCol
       ? `SUM(CASE WHEN "${esc(col)}" IN ('1','true') THEN TRY_CAST("${esc(weightCol)}" AS DOUBLE) ELSE 0 END)`
       : `COUNT(CASE WHEN "${esc(col)}" IN ('1','true') THEN 1 END)::DOUBLE`;
+    return `${expr} AS c${i}`;
+  });
 
-    const sql = `SELECT ${weightExpr} AS cnt FROM survey`;
-    const result = await conn.query(sql);
-    const count = Number(result.toArray()[0].cnt ?? 0);
-    rows.push({
-      label: col,
-      count,
-      pct: totalN > 0 ? (count / totalN) * 100 : 0,
-    });
-  }
+  const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
+  const result = await conn.query(sql);
+  const row = result.toArray()[0];
+
+  const rows: AggRow[] = cols.map((col, i) => {
+    const count = Number(row[`c${i}`] ?? 0);
+    return { label: col, count, pct: totalN > 0 ? (count / totalN) * 100 : 0 };
+  });
 
   return { col: prefix, type: "MA", n: totalN, rows };
 }
@@ -270,10 +291,16 @@ export async function runDuckDBAggregation(payload: {
     const crossCols = payload.mode === "cross" ? payload.cross_cols : [];
     const results: AggResult[] = [];
 
+    // クロス軸ヘッダーを事前に1回だけ取得してキャッシュ
+    const crossHeaderCache =
+      crossCols.length > 0
+        ? await fetchCrossHeaders(conn, crossCols, payload.weight_col)
+        : new Map() as CrossHeaderCache;
+
     const saCols = payload.columns.filter((c) => c.type === "sa");
     for (const col of saCols) {
       results.push(
-        await aggregateSA(conn, col.name, totalN, payload.weight_col, crossCols)
+        await aggregateSA(conn, col.name, totalN, payload.weight_col, crossCols, crossHeaderCache)
       );
     }
 
