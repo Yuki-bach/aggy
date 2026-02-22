@@ -4,33 +4,35 @@ import type * as duckdb from "@duckdb/duckdb-wasm";
 
 // --- 集計結果の型定義 ---
 
-export interface AggRow {
-  label: string;
+export interface Cell {
+  main: string;   // 選択肢ラベル（集計対象の設問値）
+  sub: string;    // "GT" or クロス集計軸の値 ("男", "女", ...)
+  n: number;      // その sub の母数
   count: number;
   pct: number;
 }
 
-export interface CrossHeader {
-  label: string;
-  n: number;
-}
-
-export interface CrossSection {
-  cross_col: string;
-  headers: CrossHeader[];
-  rows: {
-    label: string;
-    cells: { count: number; pct: number }[];
-  }[];
-}
-
 export interface AggResult {
-  col: string;
+  question: string;
   type: "SA" | "MA";
-  n: number;
-  rows: AggRow[];
-  cross?: CrossSection[];
+  cells: Cell[];
 }
+
+/** cells をグリッド構造に変換する */
+export function pivotCells(cells: Cell[]): {
+  mains: string[];
+  subs: { label: string; n: number }[];
+  lookup: Map<string, Cell>;
+} {
+  const mains = [...new Set(cells.map((c) => c.main))];
+  const subMap = new Map<string, number>();
+  for (const c of cells) subMap.set(c.sub, c.n);
+  const subs = [...subMap.entries()].map(([label, n]) => ({ label, n }));
+  const lookup = new Map(cells.map((c) => [`${c.main}\0${c.sub}`, c]));
+  return { mains, subs, lookup };
+}
+
+// --- 集計 payload ---
 
 export interface AggPayload {
   columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>;
@@ -71,7 +73,8 @@ export async function runAggregation(
   return results;
 }
 
-// SQL識別子内のダブルクォートをエスケープ
+// --- 内部ユーティリティ ---
+
 function esc(name: string): string {
   return name.replace(/"/g, '""');
 }
@@ -87,7 +90,6 @@ async function computeTotalN(
   return Number(result.toArray()[0].n);
 }
 
-// クロス軸ヘッダー（ユニーク値＋N）のキャッシュ型
 type CrossHeaderCache = Map<
   string,
   { headers: Array<{ label: string; n: number }>; crossValues: string[] }
@@ -152,77 +154,84 @@ async function aggregateSA(
 
   const arrowResult = await conn.query(sql);
   const rowArr = arrowResult.toArray();
-  const n = totalN;
 
-  const rows: AggRow[] = rowArr.map((r) => {
+  // GT セル
+  const cells: Cell[] = rowArr.map((r) => {
     const count = Number(r.cnt);
-    return { label: String(r.label), count, pct: n > 0 ? (count / n) * 100 : 0 };
+    return {
+      main: String(r.label),
+      sub: "GT",
+      n: totalN,
+      count,
+      pct: totalN > 0 ? (count / totalN) * 100 : 0,
+    };
   });
 
-  const result: AggResult = { col, type: "SA", n, rows };
-
+  // クロスセル
   if (crossCols.length > 0) {
-    result.cross = [];
+    const mainValues = rowArr.map((r) => String(r.label));
     for (const crossCol of crossCols) {
-      const section = await computeCrossSection(
-        conn,
-        col,
-        rows.map((r) => r.label),
-        crossCol,
-        weightCol,
-        crossHeaderCache.get(crossCol)!
+      const cached = crossHeaderCache.get(crossCol)!;
+      const crossCells = await buildCrossCells(
+        conn, col, mainValues, crossCol, weightCol, cached
       );
-      result.cross.push(section);
+      cells.push(...crossCells);
     }
   }
 
-  return result;
+  return { question: col, type: "SA", cells };
 }
 
-async function computeCrossSection(
+async function buildCrossCells(
   conn: duckdb.AsyncDuckDBConnection,
-  rowCol: string,
-  rowValues: string[],
+  mainCol: string,
+  mainValues: string[],
   crossCol: string,
   weightCol: string,
   cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] }
-): Promise<CrossSection> {
+): Promise<Cell[]> {
   const weightExpr = weightCol
     ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
     : `COUNT(*)::DOUBLE`;
 
   const { headers, crossValues } = cached;
 
-  // (rowVal, crossVal) の全組み合わせカウント
   const cellSQL = `
     SELECT
-      "${esc(rowCol)}" AS rv,
-      "${esc(crossCol)}" AS cv,
+      "${esc(mainCol)}" AS mv,
+      "${esc(crossCol)}" AS sv,
       ${weightExpr} AS cnt
     FROM survey
-    WHERE "${esc(rowCol)}" IS NOT NULL
-      AND "${esc(rowCol)}" != ''
+    WHERE "${esc(mainCol)}" IS NOT NULL
+      AND "${esc(mainCol)}" != ''
       AND "${esc(crossCol)}" IS NOT NULL
       AND "${esc(crossCol)}" != ''
-    GROUP BY "${esc(rowCol)}", "${esc(crossCol)}"
+    GROUP BY "${esc(mainCol)}", "${esc(crossCol)}"
   `;
 
   const cellResult = await conn.query(cellSQL);
   const cellMap = new Map<string, number>();
   for (const r of cellResult.toArray()) {
-    cellMap.set(`${r.rv}\0${r.cv}`, Number(r.cnt));
+    cellMap.set(`${r.mv}\0${r.sv}`, Number(r.cnt));
   }
 
-  const crossRows = rowValues.map((rv) => {
-    const cells = crossValues.map((cv, i) => {
-      const count = cellMap.get(`${rv}\0${cv}`) ?? 0;
+  const cells: Cell[] = [];
+  for (const mv of mainValues) {
+    for (let i = 0; i < crossValues.length; i++) {
+      const sv = crossValues[i];
+      const count = cellMap.get(`${mv}\0${sv}`) ?? 0;
       const crossN = headers[i].n;
-      return { count, pct: crossN > 0 ? (count / crossN) * 100 : 0 };
-    });
-    return { label: rv, cells };
-  });
+      cells.push({
+        main: mv,
+        sub: sv,
+        n: crossN,
+        count,
+        pct: crossN > 0 ? (count / crossN) * 100 : 0,
+      });
+    }
+  }
 
-  return { cross_col: crossCol, headers, rows: crossRows };
+  return cells;
 }
 
 async function aggregateMA(
@@ -232,7 +241,6 @@ async function aggregateMA(
   totalN: number,
   weightCol: string
 ): Promise<AggResult> {
-  // 全MA列を1クエリで集計
   const selectClauses = cols.map((col, i) => {
     const expr = weightCol
       ? `SUM(CASE WHEN "${esc(col)}" IN ('1','true') THEN TRY_CAST("${esc(weightCol)}" AS DOUBLE) ELSE 0 END)`
@@ -244,12 +252,18 @@ async function aggregateMA(
   const result = await conn.query(sql);
   const row = result.toArray()[0];
 
-  const rows: AggRow[] = cols.map((col, i) => {
+  const cells: Cell[] = cols.map((col, i) => {
     const count = Number(row[`c${i}`] ?? 0);
-    return { label: col, count, pct: totalN > 0 ? (count / totalN) * 100 : 0 };
+    return {
+      main: col,
+      sub: "GT",
+      n: totalN,
+      count,
+      pct: totalN > 0 ? (count / totalN) * 100 : 0,
+    };
   });
 
-  return { col: prefix, type: "MA", n: totalN, rows };
+  return { question: prefix, type: "MA", cells };
 }
 
 function groupMAColumns(
