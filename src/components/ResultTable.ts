@@ -1,4 +1,5 @@
 import type { AggResult } from "../lib/aggregate";
+import type { LayoutMeta } from "../lib/layout";
 import { downloadAllCSV } from "../lib/download";
 
 function escHtml(str: string): string {
@@ -8,10 +9,35 @@ function escHtml(str: string): string {
     .replace(/>/g, "&gt;");
 }
 
+/** 設問ラベルを解決する。なければ列名をそのまま返す */
+function resolveQuestionLabel(col: string, meta?: LayoutMeta): string {
+  return meta?.questionLabels[col] ?? col;
+}
+
+/** 選択肢ラベルを解決する
+ *  SA: valueLabels[col][code]
+ *  MA: valueLabels[colName]["1"]（colName = row.label）
+ */
+function resolveValueLabel(
+  type: "SA" | "MA",
+  col: string,
+  rowLabel: string,
+  meta?: LayoutMeta
+): string {
+  if (!meta) return rowLabel;
+  if (type === "SA") {
+    return meta.valueLabels[col]?.[rowLabel] ?? rowLabel;
+  } else {
+    // MA: rowLabel は個別列名（例 "q3_1"）。item.labelは "1" キーで保持
+    return meta.valueLabels[rowLabel]?.["1"] ?? rowLabel;
+  }
+}
+
 export function renderResults(
   results: AggResult[],
   weightCol: string,
-  _rawN: number
+  _rawN: number,
+  layoutMeta?: LayoutMeta
 ): void {
   document.getElementById("empty-state")!.classList.add("hidden");
   const area = document.getElementById("results-area")!;
@@ -54,18 +80,24 @@ export function renderResults(
       ? `n=${res.n.toFixed(1)}（ウェイト後）`
       : `n=${res.n.toLocaleString()}`;
 
+    const questionLabel = resolveQuestionLabel(res.col, layoutMeta);
+    const hasLabel = questionLabel !== res.col;
+
     card.innerHTML = `
       <div class="gt-table-head">
-        <span class="q-label">${escHtml(res.col)}</span>
+        <div class="q-header">
+          <span class="q-label">${escHtml(questionLabel)}</span>
+          ${hasLabel ? `<span class="q-key">${escHtml(res.col)}</span>` : ""}
+        </div>
         <span class="q-type">${res.type}</span>
         <span class="q-n">${nLabel}</span>
       </div>
     `;
 
     if (res.cross && res.cross.length > 0) {
-      card.appendChild(buildCrossTable(res, weightCol, maxPct));
+      card.appendChild(buildCrossTable(res, weightCol, maxPct, layoutMeta));
     } else {
-      card.appendChild(buildGtTable(res, weightCol, maxPct));
+      card.appendChild(buildGtTable(res, weightCol, maxPct, layoutMeta));
     }
 
     grid.appendChild(card);
@@ -75,7 +107,8 @@ export function renderResults(
 function buildGtTable(
   res: AggResult,
   weightCol: string,
-  maxPct: number
+  maxPct: number,
+  layoutMeta?: LayoutMeta
 ): HTMLTableElement {
   const table = document.createElement("table");
   table.className = "gt";
@@ -93,7 +126,7 @@ function buildGtTable(
         .map(
           (row) => `
         <tr>
-          <td>${escHtml(row.label)}</td>
+          <td>${escHtml(resolveValueLabel(res.type, res.col, row.label, layoutMeta))}</td>
           <td class="num">${
             res.type === "SA" && !weightCol
               ? row.count.toLocaleString()
@@ -115,7 +148,8 @@ function buildGtTable(
 function buildCrossTable(
   res: AggResult,
   weightCol: string,
-  _maxPct: number
+  _maxPct: number,
+  layoutMeta?: LayoutMeta
 ): HTMLTableElement {
   const cross = res.cross!;
   const table = document.createElement("table");
@@ -141,7 +175,7 @@ function buildCrossTable(
     const th = document.createElement("th");
     th.colSpan = section.headers.length;
     th.className = "cross-group-header";
-    th.textContent = section.cross_col;
+    th.textContent = resolveQuestionLabel(section.cross_col, layoutMeta);
     tr1.appendChild(th);
   });
 
@@ -163,7 +197,8 @@ function buildCrossTable(
       const th = document.createElement("th");
       th.className = "right cross-val-header";
       const nStr = weightCol ? h.n.toFixed(1) : h.n.toLocaleString();
-      th.innerHTML = `${escHtml(h.label)}<br><span class="cross-n">n=${nStr}</span>`;
+      const valLabel = resolveValueLabel("SA", section.cross_col, h.label, layoutMeta);
+      th.innerHTML = `${escHtml(valLabel)}<br><span class="cross-n">n=${nStr}</span>`;
       tr2.appendChild(th);
     });
   });
@@ -179,7 +214,7 @@ function buildCrossTable(
     const tr = document.createElement("tr");
 
     const tdLabel = document.createElement("td");
-    tdLabel.textContent = row.label;
+    tdLabel.textContent = resolveValueLabel(res.type, res.col, row.label, layoutMeta);
     tr.appendChild(tdLabel);
 
     const tdCount = document.createElement("td");
