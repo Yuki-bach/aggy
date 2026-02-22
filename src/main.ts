@@ -115,7 +115,6 @@ async function runAggregation(): Promise<void> {
       sa_cols,
       ma_groups,
       weight_col: effectiveWeightCol,
-      mode: (crossCols.length > 0 ? "cross" : "gt") as "gt" | "cross",
       cross_cols: crossCols,
     };
 

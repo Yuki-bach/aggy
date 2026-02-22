@@ -24,7 +24,6 @@ export interface Query {
   sa_cols: string[];
   ma_groups: Record<string, string[]>;  // { "Q1": ["Q1_1","Q1_2","Q1_3"] }
   weight_col: string;
-  mode: "gt" | "cross";
   cross_cols: string[];
 }
 
@@ -34,7 +33,7 @@ export async function aggregate(
   payload: Query
 ): Promise<AggResult[]> {
   const totalN = await computeTotalN(conn, payload.weight_col);
-  const crossCols = payload.mode === "cross" ? payload.cross_cols : [];
+  const crossCols = payload.cross_cols ?? [];
   const results: AggResult[] = [];
 
   // クロス軸ヘッダーを事前に1回だけ取得してキャッシュ
