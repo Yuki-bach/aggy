@@ -1,4 +1,4 @@
-import type { AggResult } from "../lib/aggregate";
+import type { AggResult } from "../lib/aggregator";
 import { downloadAllCSV } from "../lib/download";
 
 function escHtml(str: string): string {

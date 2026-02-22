@@ -3,7 +3,7 @@ import { initDropzone } from "./components/Dropzone";
 import { initColConfig, type ColConfigState } from "./components/ColConfig";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
-import type { AggResult } from "./lib/aggregate";
+import type { AggResult } from "./lib/aggregator";
 import {
   initDuckDB,
   runDuckDBAggregation,

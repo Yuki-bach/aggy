@@ -1,4 +1,4 @@
-import type { AggResult } from "./aggregate";
+import type { AggResult } from "./aggregator";
 
 export function downloadAllCSV(
   results: AggResult[],

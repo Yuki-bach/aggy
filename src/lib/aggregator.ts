@@ -1,7 +1,36 @@
 /** DuckDB SQL集計ロジック */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggResult, AggRow, CrossSection } from "./aggregate";
+
+// --- 集計結果の型定義 ---
+
+export interface AggRow {
+  label: string;
+  count: number;
+  pct: number;
+}
+
+export interface CrossHeader {
+  label: string;
+  n: number;
+}
+
+export interface CrossSection {
+  cross_col: string;
+  headers: CrossHeader[];
+  rows: {
+    label: string;
+    cells: { count: number; pct: number }[];
+  }[];
+}
+
+export interface AggResult {
+  col: string;
+  type: "SA" | "MA";
+  n: number;
+  rows: AggRow[];
+  cross?: CrossSection[];
+}
 
 export interface AggPayload {
   columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>;
