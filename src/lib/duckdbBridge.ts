@@ -3,7 +3,7 @@ import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
 import mvp_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
 import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
 import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-import { runAggregation, type AggPayload, type AggResult } from "./aggregator";
+import { aggregate, type Query, type AggResult } from "./aggregator";
 
 type DuckStatus = "loading" | "ready" | "error";
 
@@ -64,7 +64,7 @@ function serializeToCSV(data: Record<string, string>[], cols: string[]): string 
 
 export async function runDuckDBAggregation(payload: {
   data: Record<string, string>[];
-} & AggPayload): Promise<AggResult[]> {
+} & Query): Promise<AggResult[]> {
   if (!db || status !== "ready") throw new Error("DuckDB is not ready");
 
   const allColNames = [
@@ -85,7 +85,7 @@ export async function runDuckDBAggregation(payload: {
        SELECT * FROM read_csv('survey.csv', all_varchar=true)`
     );
 
-    return await runAggregation(conn, payload);
+    return await aggregate(conn, payload);
   } finally {
     await conn.close();
     await db.dropFile("survey.csv");

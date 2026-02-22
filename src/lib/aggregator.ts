@@ -18,23 +18,9 @@ export interface AggResult {
   cells: Cell[];
 }
 
-/** cells をグリッド構造に変換する */
-export function pivotCells(cells: Cell[]): {
-  mains: string[];
-  subs: { label: string; n: number }[];
-  lookup: Map<string, Cell>;
-} {
-  const mains = [...new Set(cells.map((c) => c.main))];
-  const subMap = new Map<string, number>();
-  for (const c of cells) subMap.set(c.sub, c.n);
-  const subs = [...subMap.entries()].map(([label, n]) => ({ label, n }));
-  const lookup = new Map(cells.map((c) => [`${c.main}\0${c.sub}`, c]));
-  return { mains, subs, lookup };
-}
-
 // --- 集計 payload ---
 
-export interface AggPayload {
+export interface Query {
   columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>;
   weight_col: string;
   mode: "gt" | "cross";
@@ -42,9 +28,9 @@ export interface AggPayload {
 }
 
 /** 集計のエントリポイント。conn上のsurveyビューに対して全設問を集計する */
-export async function runAggregation(
+export async function aggregate(
   conn: duckdb.AsyncDuckDBConnection,
-  payload: AggPayload
+  payload: Query
 ): Promise<AggResult[]> {
   const totalN = await computeTotalN(conn, payload.weight_col);
   const crossCols = payload.mode === "cross" ? payload.cross_cols : [];

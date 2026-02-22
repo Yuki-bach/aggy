@@ -1,5 +1,5 @@
 import type { AggResult } from "../lib/aggregator";
-import { pivotCells } from "../lib/aggregator";
+import { pivot } from "../lib/pivot";
 import { downloadAllCSV } from "../lib/download";
 
 function escHtml(str: string): string {
@@ -20,7 +20,7 @@ export function renderResults(
   area.innerHTML = "";
 
   const hasCross = results.some((r) => {
-    const { subs } = pivotCells(r.cells);
+    const { subs } = pivot(r.cells);
     return subs.length > 1;
   });
 
@@ -54,13 +54,13 @@ export function renderResults(
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 
   results.forEach((res) => {
-    const pivot = pivotCells(res.cells);
-    const isCross = pivot.subs.length > 1;
+    const pv = pivot(res.cells);
+    const isCross = pv.subs.length > 1;
 
     const card = document.createElement("div");
     card.className = isCross ? "gt-table-card has-cross" : "gt-table-card";
 
-    const gtSub = pivot.subs.find((s) => s.label === "GT")!;
+    const gtSub = pv.subs.find((s) => s.label === "GT")!;
     const nLabel = weightCol
       ? `n=${gtSub.n.toFixed(1)}（ウェイト後）`
       : `n=${gtSub.n.toLocaleString()}`;
@@ -74,9 +74,9 @@ export function renderResults(
     `;
 
     if (isCross) {
-      card.appendChild(buildCrossTable(res, pivot, weightCol));
+      card.appendChild(buildCrossTable(res, pv, weightCol));
     } else {
-      card.appendChild(buildGtTable(res, pivot, weightCol, maxPct));
+      card.appendChild(buildGtTable(res, pv, weightCol, maxPct));
     }
 
     grid.appendChild(card);
@@ -85,11 +85,11 @@ export function renderResults(
 
 function buildGtTable(
   res: AggResult,
-  pivot: ReturnType<typeof pivotCells>,
+  pv: ReturnType<typeof pivot>,
   weightCol: string,
   maxPct: number
 ): HTMLTableElement {
-  const { mains, lookup } = pivot;
+  const { mains, lookup } = pv;
 
   const table = document.createElement("table");
   table.className = "gt";
@@ -129,10 +129,10 @@ function buildGtTable(
 
 function buildCrossTable(
   res: AggResult,
-  pivot: ReturnType<typeof pivotCells>,
+  pv: ReturnType<typeof pivot>,
   weightCol: string
 ): HTMLTableElement {
-  const { mains, subs, lookup } = pivot;
+  const { mains, subs, lookup } = pv;
   const gtSub = subs.find((s) => s.label === "GT")!;
   const crossSubs = subs.filter((s) => s.label !== "GT");
 

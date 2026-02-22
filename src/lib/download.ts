@@ -1,12 +1,12 @@
 import type { AggResult } from "./aggregator";
-import { pivotCells } from "./aggregator";
+import { pivot } from "./pivot";
 
 export function downloadAllCSV(
   results: AggResult[],
   _weightCol: string
 ): void {
   const hasCross = results.some((r) => {
-    const { subs } = pivotCells(r.cells);
+    const { subs } = pivot(r.cells);
     return subs.length > 1;
   });
 
@@ -21,8 +21,8 @@ function downloadGtCSV(results: AggResult[]): void {
   const rows: string[][] = [["変数名", "種別", "選択肢", "件数", "%"]];
 
   results.forEach((res) => {
-    const { mains, lookup } = pivotCells(res.cells);
-    const gtSub = pivotCells(res.cells).subs.find((s) => s.label === "GT")!;
+    const { mains, lookup } = pivot(res.cells);
+    const gtSub = pivot(res.cells).subs.find((s) => s.label === "GT")!;
 
     mains.forEach((main) => {
       const cell = lookup.get(`${main}\0GT`)!;
@@ -44,7 +44,7 @@ function downloadGtCSV(results: AggResult[]): void {
 function downloadCrossCSV(results: AggResult[]): void {
   // 最初の結果からクロス軸構造を取得
   const firstResult = results.find((r) => {
-    const { subs } = pivotCells(r.cells);
+    const { subs } = pivot(r.cells);
     return subs.length > 1;
   });
   if (!firstResult) {
@@ -52,7 +52,7 @@ function downloadCrossCSV(results: AggResult[]): void {
     return;
   }
 
-  const firstPivot = pivotCells(firstResult.cells);
+  const firstPivot = pivot(firstResult.cells);
   const crossSubs = firstPivot.subs.filter((s) => s.label !== "GT");
 
   // ヘッダー行
@@ -66,7 +66,7 @@ function downloadCrossCSV(results: AggResult[]): void {
   const rows: string[][] = [headerRow1, headerRow2];
 
   results.forEach((res) => {
-    const { mains, subs, lookup } = pivotCells(res.cells);
+    const { mains, subs, lookup } = pivot(res.cells);
     const resCrossSubs = subs.filter((s) => s.label !== "GT");
     const gtSub = subs.find((s) => s.label === "GT")!;
 
