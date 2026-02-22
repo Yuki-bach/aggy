@@ -1,0 +1,292 @@
+import * as duckdb from "@duckdb/duckdb-wasm";
+import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
+import mvp_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
+import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
+import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
+import type { AggResult, AggRow, CrossSection } from "./aggregate";
+
+type DuckStatus = "loading" | "ready" | "error";
+
+let db: duckdb.AsyncDuckDB | null = null;
+let status: DuckStatus = "loading";
+let initPromise: Promise<void> | null = null;
+
+export function isReady(): boolean {
+  return status === "ready";
+}
+
+function updateStatusUI(s: DuckStatus, label?: string): void {
+  const dot = document.getElementById("wasm-dot");
+  const lbl = document.getElementById("wasm-label");
+  if (dot) dot.className = `status-dot ${s}`;
+  if (lbl) lbl.textContent = label ?? s;
+}
+
+export async function initDuckDB(): Promise<void> {
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    try {
+      updateStatusUI("loading", "DuckDB 読み込み中...");
+
+      const BUNDLES: duckdb.DuckDBBundles = {
+        mvp: { mainModule: duckdb_wasm, mainWorker: mvp_worker },
+        eh: { mainModule: duckdb_wasm_eh, mainWorker: eh_worker },
+      };
+
+      const bundle = await duckdb.selectBundle(BUNDLES);
+      const worker = new Worker(bundle.mainWorker!);
+      const logger = new duckdb.ConsoleLogger();
+      db = new duckdb.AsyncDuckDB(logger, worker);
+      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+
+      status = "ready";
+      updateStatusUI("ready", "DuckDB Ready");
+    } catch (err) {
+      status = "error";
+      updateStatusUI("error", `DuckDB エラー: ${(err as Error).message}`);
+      console.error("DuckDB init error:", err);
+      throw err;
+    }
+  })();
+
+  return initPromise;
+}
+
+// SQL識別子内のダブルクォートをエスケープ
+function esc(name: string): string {
+  return name.replace(/"/g, '""');
+}
+
+// CSV値をRFC 4180形式にクォート
+function quoteCSVField(v: string): string {
+  return `"${String(v ?? "").replace(/"/g, '""')}"`;
+}
+
+function serializeToCSV(data: Record<string, string>[], cols: string[]): string {
+  const header = cols.map(quoteCSVField).join(",");
+  const rows = data.map((row) =>
+    cols.map((c) => quoteCSVField(row[c] ?? "")).join(",")
+  );
+  return [header, ...rows].join("\n");
+}
+
+async function computeTotalN(
+  conn: duckdb.AsyncDuckDBConnection,
+  weightCol: string
+): Promise<number> {
+  const sql = weightCol
+    ? `SELECT COALESCE(SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE)), 0) AS n FROM survey`
+    : `SELECT COUNT(*) AS n FROM survey`;
+  const result = await conn.query(sql);
+  return Number(result.toArray()[0].n);
+}
+
+async function aggregateSA(
+  conn: duckdb.AsyncDuckDBConnection,
+  col: string,
+  totalN: number,
+  weightCol: string,
+  crossCols: string[]
+): Promise<AggResult> {
+  const weightExpr = weightCol
+    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
+    : `COUNT(*)::DOUBLE`;
+
+  const sql = `
+    SELECT
+      "${esc(col)}" AS label,
+      ${weightExpr} AS cnt
+    FROM survey
+    WHERE "${esc(col)}" IS NOT NULL
+      AND "${esc(col)}" != ''
+    GROUP BY "${esc(col)}"
+    ORDER BY
+      TRY_CAST("${esc(col)}" AS DOUBLE) NULLS LAST,
+      "${esc(col)}" ASC
+  `;
+
+  const arrowResult = await conn.query(sql);
+  const rowArr = arrowResult.toArray();
+  const n = totalN;
+
+  const rows: AggRow[] = rowArr.map((r) => {
+    const count = Number(r.cnt);
+    return { label: String(r.label), count, pct: n > 0 ? (count / n) * 100 : 0 };
+  });
+
+  const result: AggResult = { col, type: "SA", n, rows };
+
+  if (crossCols.length > 0) {
+    result.cross = [];
+    for (const crossCol of crossCols) {
+      const section = await computeCrossSection(
+        conn,
+        col,
+        rows.map((r) => r.label),
+        crossCol,
+        weightCol
+      );
+      result.cross.push(section);
+    }
+  }
+
+  return result;
+}
+
+async function computeCrossSection(
+  conn: duckdb.AsyncDuckDBConnection,
+  rowCol: string,
+  rowValues: string[],
+  crossCol: string,
+  weightCol: string
+): Promise<CrossSection> {
+  const weightExpr = weightCol
+    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
+    : `COUNT(*)::DOUBLE`;
+
+  // cross_col のユニーク値と各グループ n
+  const headerSQL = `
+    SELECT
+      "${esc(crossCol)}" AS cv,
+      ${weightExpr} AS n
+    FROM survey
+    WHERE "${esc(crossCol)}" IS NOT NULL
+      AND "${esc(crossCol)}" != ''
+    GROUP BY "${esc(crossCol)}"
+    ORDER BY
+      TRY_CAST("${esc(crossCol)}" AS DOUBLE) NULLS LAST,
+      "${esc(crossCol)}" ASC
+  `;
+
+  const headerResult = await conn.query(headerSQL);
+  const headers: Array<{ label: string; n: number }> = headerResult
+    .toArray()
+    .map((r) => ({ label: String(r.cv), n: Number(r.n) }));
+
+  const crossValues = headers.map((h) => h.label);
+
+  // (rowVal, crossVal) の全組み合わせカウント
+  const cellSQL = `
+    SELECT
+      "${esc(rowCol)}" AS rv,
+      "${esc(crossCol)}" AS cv,
+      ${weightExpr} AS cnt
+    FROM survey
+    WHERE "${esc(rowCol)}" IS NOT NULL
+      AND "${esc(rowCol)}" != ''
+      AND "${esc(crossCol)}" IS NOT NULL
+      AND "${esc(crossCol)}" != ''
+    GROUP BY "${esc(rowCol)}", "${esc(crossCol)}"
+  `;
+
+  const cellResult = await conn.query(cellSQL);
+  // null byte をキー区切り文字として使用（CSV値には現れない）
+  const cellMap = new Map<string, number>();
+  for (const r of cellResult.toArray()) {
+    cellMap.set(`${r.rv}\0${r.cv}`, Number(r.cnt));
+  }
+
+  const crossRows = rowValues.map((rv) => {
+    const cells = crossValues.map((cv, i) => {
+      const count = cellMap.get(`${rv}\0${cv}`) ?? 0;
+      const crossN = headers[i].n;
+      return { count, pct: crossN > 0 ? (count / crossN) * 100 : 0 };
+    });
+    return { label: rv, cells };
+  });
+
+  return { cross_col: crossCol, headers, rows: crossRows };
+}
+
+async function aggregateMA(
+  conn: duckdb.AsyncDuckDBConnection,
+  prefix: string,
+  cols: string[],
+  totalN: number,
+  weightCol: string
+): Promise<AggResult> {
+  const rows: AggRow[] = [];
+
+  for (const col of cols) {
+    const weightExpr = weightCol
+      ? `SUM(CASE WHEN "${esc(col)}" IN ('1','true') THEN TRY_CAST("${esc(weightCol)}" AS DOUBLE) ELSE 0 END)`
+      : `COUNT(CASE WHEN "${esc(col)}" IN ('1','true') THEN 1 END)::DOUBLE`;
+
+    const sql = `SELECT ${weightExpr} AS cnt FROM survey`;
+    const result = await conn.query(sql);
+    const count = Number(result.toArray()[0].cnt ?? 0);
+    rows.push({
+      label: col,
+      count,
+      pct: totalN > 0 ? (count / totalN) * 100 : 0,
+    });
+  }
+
+  return { col: prefix, type: "MA", n: totalN, rows };
+}
+
+function groupMAColumns(
+  columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>
+): Record<string, string[]> {
+  const groups: Record<string, string[]> = {};
+  for (const col of columns) {
+    if (col.type === "ma" && col.ma_group) {
+      if (!groups[col.ma_group]) groups[col.ma_group] = [];
+      groups[col.ma_group].push(col.name);
+    }
+  }
+  return groups;
+}
+
+export async function runDuckDBAggregation(payload: {
+  data: Record<string, string>[];
+  columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>;
+  weight_col: string;
+  mode: "gt" | "cross";
+  cross_cols: string[];
+}): Promise<AggResult[]> {
+  if (!db || status !== "ready") throw new Error("DuckDB is not ready");
+
+  const allColNames = [
+    ...new Set([
+      ...payload.columns.map((c) => c.name),
+      ...payload.cross_cols,
+      ...(payload.weight_col ? [payload.weight_col] : []),
+    ]),
+  ];
+
+  const csvText = serializeToCSV(payload.data, allColNames);
+  await db.registerFileText("survey.csv", csvText);
+
+  const conn = await db.connect();
+  try {
+    await conn.query(
+      `CREATE OR REPLACE VIEW survey AS
+       SELECT * FROM read_csv('survey.csv', all_varchar=true)`
+    );
+
+    const totalN = await computeTotalN(conn, payload.weight_col);
+    const crossCols = payload.mode === "cross" ? payload.cross_cols : [];
+    const results: AggResult[] = [];
+
+    const saCols = payload.columns.filter((c) => c.type === "sa");
+    for (const col of saCols) {
+      results.push(
+        await aggregateSA(conn, col.name, totalN, payload.weight_col, crossCols)
+      );
+    }
+
+    const maGroups = groupMAColumns(payload.columns);
+    for (const [prefix, cols] of Object.entries(maGroups)) {
+      results.push(
+        await aggregateMA(conn, prefix, cols, totalN, payload.weight_col)
+      );
+    }
+
+    return results;
+  } finally {
+    await conn.close();
+    await db.dropFile("survey.csv");
+  }
+}

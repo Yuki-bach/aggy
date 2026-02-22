@@ -5,10 +5,10 @@ import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig"
 import { renderResults } from "./components/ResultTable";
 import { aggregate, type AggResult } from "./lib/aggregate";
 import {
-  initRubyVM,
+  initDuckDB,
   isReady as isWasmReady,
-  runRubyAggregation,
-} from "./lib/wasmBridge";
+  runDuckDBAggregation,
+} from "./lib/duckdbBridge";
 import type { ParseResult } from "./lib/csv";
 
 // データストア
@@ -16,9 +16,9 @@ let parsedData: Record<string, string>[] = [];
 let headers: string[] = [];
 let colConfig: ColConfigState | null = null;
 
-// Ruby Wasm をバックグラウンドで初期化開始
-initRubyVM().catch(() => {
-  // エラーはwasmBridge内でUI表示済み。JSフォールバックで動作継続。
+// DuckDB Wasm をバックグラウンドで初期化開始
+initDuckDB().catch(() => {
+  // エラーはduckdbBridge内でUI表示済み。JSフォールバックで動作継続。
 });
 
 // CSV読み込みハンドラ
@@ -71,7 +71,7 @@ function projectRowsForWasm(
 }
 
 // 集計実行
-function runAggregation(): void {
+async function runAggregation(): Promise<void> {
   if (!colConfig) return;
   const cfg = colConfig;
   showError("");
@@ -111,9 +111,9 @@ function runAggregation(): void {
         .map((col) => {
           const t = cfg.colTypes[col];
           if (t.startsWith("ma:")) {
-            return { name: col, type: "ma", ma_group: t.slice(3) };
+            return { name: col, type: "ma" as const, ma_group: t.slice(3) };
           }
-          return { name: col, type: "sa" };
+          return { name: col, type: "sa" as const };
         });
 
       const projectedData = projectRowsForWasm(parsedData, allNeededCols);
@@ -122,11 +122,11 @@ function runAggregation(): void {
         data: projectedData,
         columns,
         weight_col: effectiveWeightCol,
-        mode: crossCols.length > 0 ? "cross" : "gt",
+        mode: (crossCols.length > 0 ? "cross" : "gt") as "gt" | "cross",
         cross_cols: crossCols,
       };
 
-      results = runRubyAggregation(payload);
+      results = await runDuckDBAggregation(payload);
     } else {
       // JSフォールバック
       const effectiveColTypes = { ...cfg.colTypes };
@@ -156,4 +156,6 @@ function runAggregation(): void {
 // イベントバインド
 initDropzone(onCSVLoaded, (msg) => showError(msg));
 
-document.getElementById("run-btn")!.addEventListener("click", runAggregation);
+document.getElementById("run-btn")!.addEventListener("click", () => {
+  runAggregation().catch((e) => showError("集計エラー: " + (e as Error).message));
+});
