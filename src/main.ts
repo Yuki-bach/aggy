@@ -3,10 +3,9 @@ import { initDropzone } from "./components/Dropzone";
 import { initColConfig, type ColConfigState } from "./components/ColConfig";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
-import { aggregate, type AggResult } from "./lib/aggregate";
+import type { AggResult } from "./lib/aggregator";
 import {
   initDuckDB,
-  isReady as isWasmReady,
   runDuckDBAggregation,
 } from "./lib/duckdbBridge";
 import type { ParseResult } from "./lib/csv";
@@ -18,7 +17,7 @@ let colConfig: ColConfigState | null = null;
 
 // DuckDB Wasm をバックグラウンドで初期化開始
 initDuckDB().catch(() => {
-  // エラーはduckdbBridge内でUI表示済み。JSフォールバックで動作継続。
+  // エラーはduckdbBridge内でUI表示済み
 });
 
 // CSV読み込みハンドラ
@@ -96,56 +95,30 @@ async function runAggregation(): Promise<void> {
   ];
 
   try {
-    let results: AggResult[];
-
-    if (isWasmReady()) {
-      // Ruby Wasm で集計（クロス軸列は columns に含めない）
-      const columns = selectedColumns
-        .filter((col) => {
-          const t = cfg.colTypes[col];
-          return (
-            (t === "sa" || (t && t.startsWith("ma:"))) &&
-            !crossCols.includes(col)
-          );
-        })
-        .map((col) => {
-          const t = cfg.colTypes[col];
-          if (t.startsWith("ma:")) {
-            return { name: col, type: "ma" as const, ma_group: t.slice(3) };
-          }
-          return { name: col, type: "sa" as const };
-        });
-
-      const projectedData = projectRowsForWasm(parsedData, allNeededCols);
-
-      const payload = {
-        data: projectedData,
-        columns,
-        weight_col: effectiveWeightCol,
-        mode: (crossCols.length > 0 ? "cross" : "gt") as "gt" | "cross",
-        cross_cols: crossCols,
-      };
-
-      results = await runDuckDBAggregation(payload);
-    } else {
-      // JSフォールバック
-      const effectiveColTypes = { ...cfg.colTypes };
-      headers.forEach((col) => {
-        if (!selectedSet.has(col) && !crossCols.includes(col)) {
-          effectiveColTypes[col] = "exclude";
-        }
-      });
-
-      const projectedData = projectRowsForWasm(parsedData, allNeededCols);
-      results = aggregate(
-        projectedData,
-        headers,
-        effectiveColTypes,
-        effectiveWeightCol,
-        crossCols
-      );
+    const sa_cols: string[] = [];
+    const ma_groups: Record<string, string[]> = {};
+    for (const col of selectedColumns) {
+      if (crossCols.includes(col)) continue;
+      const t = cfg.colTypes[col];
+      if (t === "sa") {
+        sa_cols.push(col);
+      } else if (t?.startsWith("ma:")) {
+        const prefix = t.slice(3);
+        (ma_groups[prefix] ??= []).push(col);
+      }
     }
 
+    const projectedData = projectRowsForWasm(parsedData, allNeededCols);
+
+    const payload = {
+      data: projectedData,
+      sa_cols,
+      ma_groups,
+      weight_col: effectiveWeightCol,
+      cross_cols: crossCols,
+    };
+
+    const results: AggResult[] = await runDuckDBAggregation(payload);
     renderResults(results, effectiveWeightCol, parsedData.length);
   } catch (e) {
     showError("集計エラー: " + (e as Error).message);
