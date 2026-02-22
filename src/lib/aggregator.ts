@@ -21,7 +21,8 @@ export interface AggResult {
 // --- 集計 payload ---
 
 export interface Query {
-  columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>;
+  sa_cols: string[];
+  ma_groups: Record<string, string[]>;  // { "Q1": ["Q1_1","Q1_2","Q1_3"] }
   weight_col: string;
   mode: "gt" | "cross";
   cross_cols: string[];
@@ -42,15 +43,13 @@ export async function aggregate(
       ? await fetchCrossHeaders(conn, crossCols, payload.weight_col)
       : (new Map() as CrossHeaderCache);
 
-  const saCols = payload.columns.filter((c) => c.type === "sa");
-  for (const col of saCols) {
+  for (const col of payload.sa_cols) {
     results.push(
-      await aggregateSA(conn, col.name, totalN, payload.weight_col, crossCols, crossHeaderCache)
+      await aggregateSA(conn, col, totalN, payload.weight_col, crossCols, crossHeaderCache)
     );
   }
 
-  const maGroups = groupMAColumns(payload.columns);
-  for (const [prefix, cols] of Object.entries(maGroups)) {
+  for (const [prefix, cols] of Object.entries(payload.ma_groups)) {
     results.push(
       await aggregateMA(conn, prefix, cols, totalN, payload.weight_col)
     );
@@ -250,17 +249,4 @@ async function aggregateMA(
   });
 
   return { question: prefix, type: "MA", cells };
-}
-
-function groupMAColumns(
-  columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>
-): Record<string, string[]> {
-  const groups: Record<string, string[]> = {};
-  for (const col of columns) {
-    if (col.type === "ma" && col.ma_group) {
-      if (!groups[col.ma_group]) groups[col.ma_group] = [];
-      groups[col.ma_group].push(col.name);
-    }
-  }
-  return groups;
 }

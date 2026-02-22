@@ -69,7 +69,8 @@ export async function runDuckDBAggregation(payload: {
 
   const allColNames = [
     ...new Set([
-      ...payload.columns.map((c) => c.name),
+      ...payload.sa_cols,
+      ...Object.values(payload.ma_groups).flat(),
       ...payload.cross_cols,
       ...(payload.weight_col ? [payload.weight_col] : []),
     ]),

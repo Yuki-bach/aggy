@@ -95,27 +95,25 @@ async function runAggregation(): Promise<void> {
   ];
 
   try {
-    const columns = selectedColumns
-      .filter((col) => {
-        const t = cfg.colTypes[col];
-        return (
-          (t === "sa" || (t && t.startsWith("ma:"))) &&
-          !crossCols.includes(col)
-        );
-      })
-      .map((col) => {
-        const t = cfg.colTypes[col];
-        if (t.startsWith("ma:")) {
-          return { name: col, type: "ma" as const, ma_group: t.slice(3) };
-        }
-        return { name: col, type: "sa" as const };
-      });
+    const sa_cols: string[] = [];
+    const ma_groups: Record<string, string[]> = {};
+    for (const col of selectedColumns) {
+      if (crossCols.includes(col)) continue;
+      const t = cfg.colTypes[col];
+      if (t === "sa") {
+        sa_cols.push(col);
+      } else if (t?.startsWith("ma:")) {
+        const prefix = t.slice(3);
+        (ma_groups[prefix] ??= []).push(col);
+      }
+    }
 
     const projectedData = projectRowsForWasm(parsedData, allNeededCols);
 
     const payload = {
       data: projectedData,
-      columns,
+      sa_cols,
+      ma_groups,
       weight_col: effectiveWeightCol,
       mode: (crossCols.length > 0 ? "cross" : "gt") as "gt" | "cross",
       cross_cols: crossCols,
