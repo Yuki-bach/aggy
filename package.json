@@ -9,8 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ruby/3.3-wasm-wasi": "^2.8.1",
-    "@ruby/wasm-wasi": "^2.8.1",
+    "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
     "@types/papaparse": "^5.5.2",
     "papaparse": "^5.5.3",
     "typescript": "^5.9.3",
