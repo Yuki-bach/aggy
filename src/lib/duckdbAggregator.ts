@@ -3,12 +3,51 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { AggResult, AggRow, CrossSection } from "./aggregate";
 
+export interface AggPayload {
+  columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>;
+  weight_col: string;
+  mode: "gt" | "cross";
+  cross_cols: string[];
+}
+
+/** 集計のエントリポイント。conn上のsurveyビューに対して全設問を集計する */
+export async function runAggregation(
+  conn: duckdb.AsyncDuckDBConnection,
+  payload: AggPayload
+): Promise<AggResult[]> {
+  const totalN = await computeTotalN(conn, payload.weight_col);
+  const crossCols = payload.mode === "cross" ? payload.cross_cols : [];
+  const results: AggResult[] = [];
+
+  // クロス軸ヘッダーを事前に1回だけ取得してキャッシュ
+  const crossHeaderCache =
+    crossCols.length > 0
+      ? await fetchCrossHeaders(conn, crossCols, payload.weight_col)
+      : (new Map() as CrossHeaderCache);
+
+  const saCols = payload.columns.filter((c) => c.type === "sa");
+  for (const col of saCols) {
+    results.push(
+      await aggregateSA(conn, col.name, totalN, payload.weight_col, crossCols, crossHeaderCache)
+    );
+  }
+
+  const maGroups = groupMAColumns(payload.columns);
+  for (const [prefix, cols] of Object.entries(maGroups)) {
+    results.push(
+      await aggregateMA(conn, prefix, cols, totalN, payload.weight_col)
+    );
+  }
+
+  return results;
+}
+
 // SQL識別子内のダブルクォートをエスケープ
-export function esc(name: string): string {
+function esc(name: string): string {
   return name.replace(/"/g, '""');
 }
 
-export async function computeTotalN(
+async function computeTotalN(
   conn: duckdb.AsyncDuckDBConnection,
   weightCol: string
 ): Promise<number> {
@@ -20,12 +59,12 @@ export async function computeTotalN(
 }
 
 // クロス軸ヘッダー（ユニーク値＋N）のキャッシュ型
-export type CrossHeaderCache = Map<
+type CrossHeaderCache = Map<
   string,
   { headers: Array<{ label: string; n: number }>; crossValues: string[] }
 >;
 
-export async function fetchCrossHeaders(
+async function fetchCrossHeaders(
   conn: duckdb.AsyncDuckDBConnection,
   crossCols: string[],
   weightCol: string
@@ -57,7 +96,7 @@ export async function fetchCrossHeaders(
   return cache;
 }
 
-export async function aggregateSA(
+async function aggregateSA(
   conn: duckdb.AsyncDuckDBConnection,
   col: string,
   totalN: number,
@@ -157,7 +196,7 @@ async function computeCrossSection(
   return { cross_col: crossCol, headers, rows: crossRows };
 }
 
-export async function aggregateMA(
+async function aggregateMA(
   conn: duckdb.AsyncDuckDBConnection,
   prefix: string,
   cols: string[],
@@ -184,7 +223,7 @@ export async function aggregateMA(
   return { col: prefix, type: "MA", n: totalN, rows };
 }
 
-export function groupMAColumns(
+function groupMAColumns(
   columns: Array<{ name: string; type: "sa" | "ma"; ma_group?: string }>
 ): Record<string, string[]> {
   const groups: Record<string, string[]> = {};
