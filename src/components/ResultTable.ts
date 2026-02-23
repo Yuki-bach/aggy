@@ -86,9 +86,7 @@ export function renderResults(
   `;
 
   const csvBtn = document.createElement("button");
-  csvBtn.className = "run-btn";
-  csvBtn.style.cssText =
-    "margin:0;width:auto;padding:0.4rem 1rem;font-size:0.8rem;";
+  csvBtn.className = "csv-export-btn";
   csvBtn.textContent = "全件CSV出力";
   csvBtn.addEventListener("click", () => downloadAllCSV(results, weightCol, layoutMeta));
   hdr.appendChild(csvBtn);
