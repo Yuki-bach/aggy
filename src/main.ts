@@ -2,7 +2,7 @@ import "./style.css";
 import { initCsvInput, initLayoutInput } from "./components/FileInput";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
-import type { QuestionDef } from "./lib/aggregator";
+import type { QuestionDef } from "./lib/aggregate";
 import {
   initDuckDB,
   loadCSV,

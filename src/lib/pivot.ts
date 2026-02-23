@@ -1,4 +1,4 @@
-import type { Cell } from "./aggregator";
+import type { Cell } from "./aggregate";
 
 /** cells をグリッド構造に変換する */
 export function pivot(cells: Cell[]): {

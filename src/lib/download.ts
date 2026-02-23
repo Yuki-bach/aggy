@@ -1,4 +1,4 @@
-import type { AggResult } from "./aggregator";
+import type { AggResult } from "./aggregate";
 import type { LayoutMeta } from "./layout";
 import { pivot } from "./pivot";
 

@@ -1,4 +1,4 @@
-import type { AggResult } from "../lib/aggregator";
+import type { AggResult } from "../lib/aggregate";
 import type { LayoutMeta } from "../lib/layout";
 import { pivot } from "../lib/pivot";
 import { downloadAllCSV } from "../lib/download";
