@@ -1,13 +1,12 @@
 import { initCsvInput, initLayoutInput } from "./components/FileInput";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
-import type { QuestionDef } from "./lib/aggregate";
 import {
   initDuckDB,
   loadCSV,
   runDuckDBAggregation,
 } from "./lib/duckdbBridge";
-import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "./lib/layout";
+import { parseLayout, buildLayoutMeta, buildQuestionDefs, type Layout, type LayoutMeta } from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
 import { initSavedFiles, refreshList } from "./components/SavedFiles";
 
@@ -27,25 +26,6 @@ let skipNextSave = false;
 initDuckDB().catch(() => {
   // エラーはduckdbBridge内でUI表示済み
 });
-
-// headers + colTypes から QuestionDef[] を組み立てる
-function buildQuestionDefs(hdrs: string[], colTypes: Record<string, string>): QuestionDef[] {
-  const questions: QuestionDef[] = [];
-  const maAccum: Record<string, string[]> = {};
-  for (const col of hdrs) {
-    const t = colTypes[col];
-    if (!t) continue;
-    if (t === "sa") {
-      questions.push({ type: "SA", column: col });
-    } else if (t.startsWith("ma:")) {
-      (maAccum[t.slice(3)] ??= []).push(col);
-    }
-  }
-  for (const [prefix, cols] of Object.entries(maAccum)) {
-    questions.push({ type: "MA", prefix, columns: cols });
-  }
-  return questions;
-}
 
 // CSV + レイアウト両方揃ったらUI初期化
 function initAfterBothLoaded(): void {
