@@ -34,6 +34,16 @@ function resolveValueLabel(
   }
 }
 
+/** クロス軸ヘッダーのラベルを解決する。MAカラム名の場合valueLabelsで解決 */
+function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
+  if (!meta) return subLabel;
+  // MAカラム名の場合: valueLabels[colName]["1"] にラベルがある
+  const maLabel = meta.valueLabels[subLabel]?.["1"];
+  if (maLabel) return maLabel;
+  // SA値の場合はそのまま返す
+  return subLabel;
+}
+
 export function renderResults(
   results: AggResult[],
   weightCol: string,
@@ -65,7 +75,7 @@ export function renderResults(
   csvBtn.style.cssText =
     "margin:0;width:auto;padding:0.4rem 1rem;font-size:0.8rem;";
   csvBtn.textContent = "全件CSV出力";
-  csvBtn.addEventListener("click", () => downloadAllCSV(results, weightCol));
+  csvBtn.addEventListener("click", () => downloadAllCSV(results, weightCol, layoutMeta));
   hdr.appendChild(csvBtn);
 
   area.appendChild(hdr);
@@ -213,7 +223,7 @@ function buildCrossTable(
     const th = document.createElement("th");
     th.className = "right cross-val-header";
     const nStr = weightCol ? sub.n.toFixed(1) : sub.n.toLocaleString();
-    th.innerHTML = `${escHtml(sub.label)}<br><span class="cross-n">n=${nStr}</span>`;
+    th.innerHTML = `${escHtml(resolveSubLabel(sub.label, layoutMeta))}<br><span class="cross-n">n=${nStr}</span>`;
     tr2.appendChild(th);
   });
 

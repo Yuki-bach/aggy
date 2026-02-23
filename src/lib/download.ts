@@ -1,9 +1,17 @@
 import type { AggResult } from "./aggregator";
+import type { LayoutMeta } from "./layout";
 import { pivot } from "./pivot";
+
+/** MAカラム名をラベルに解決する */
+function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
+  if (!meta) return subLabel;
+  return meta.valueLabels[subLabel]?.["1"] ?? subLabel;
+}
 
 export function downloadAllCSV(
   results: AggResult[],
-  _weightCol: string
+  _weightCol: string,
+  layoutMeta?: LayoutMeta
 ): void {
   const hasCross = results.some((r) => {
     const { subs } = pivot(r.cells);
@@ -11,7 +19,7 @@ export function downloadAllCSV(
   });
 
   if (hasCross) {
-    downloadCrossCSV(results);
+    downloadCrossCSV(results, layoutMeta);
   } else {
     downloadGtCSV(results);
   }
@@ -41,7 +49,7 @@ function downloadGtCSV(results: AggResult[]): void {
   exportCSV(rows, `gt_result_${today()}.csv`);
 }
 
-function downloadCrossCSV(results: AggResult[]): void {
+function downloadCrossCSV(results: AggResult[], layoutMeta?: LayoutMeta): void {
   // 最初の結果からクロス軸構造を取得
   const firstResult = results.find((r) => {
     const { subs } = pivot(r.cells);
@@ -60,7 +68,7 @@ function downloadCrossCSV(results: AggResult[]): void {
   const headerRow2 = ["", "", "", "", ""];
   crossSubs.forEach((sub) => {
     headerRow1.push("");
-    headerRow2.push(`${sub.label}(n=${sub.n.toFixed(1)})`);
+    headerRow2.push(`${resolveSubLabel(sub.label, layoutMeta)}(n=${sub.n.toFixed(1)})`);
   });
 
   const rows: string[][] = [headerRow1, headerRow2];
