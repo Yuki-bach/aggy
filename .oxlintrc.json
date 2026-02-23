@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "import", "unicorn"],
+  "env": {
+    "browser": true
+  },
+  "ignorePatterns": ["dist/", "node_modules/", "testdata/"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "warn",
+    "eqeqeq": "warn",
+    "no-var": "error",
+    "prefer-const": "warn",
+    "typescript/no-explicit-any": "warn",
+    "import/no-duplicates": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}
