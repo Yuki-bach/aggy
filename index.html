@@ -23,22 +23,24 @@
     <!-- データ読み込み -->
     <div class="section" id="file-section">
       <div class="section-label">01 / データ読み込み</div>
-      <div class="file-row">
-        <label class="file-label" for="file-input">CSV</label>
-        <input type="file" id="file-input" accept=".csv" class="file-input">
-        <span id="file-info" class="file-meta"></span>
+      <div class="load-tabs">
+        <button class="load-tab active" data-tab="file">ファイルから</button>
+        <button class="load-tab" data-tab="saved">保存データから</button>
       </div>
-      <div class="file-row">
-        <label class="file-label" for="layout-file-input">JSON</label>
-        <input type="file" id="layout-file-input" accept=".json" class="file-input">
-        <span id="layout-file-info" class="file-meta"></span>
+      <div class="load-tab-panel" id="tab-file">
+        <div class="file-row">
+          <label class="file-label" for="file-input">CSV</label>
+          <input type="file" id="file-input" accept=".csv" class="file-input">
+        </div>
+        <div class="file-row">
+          <label class="file-label" for="layout-file-input">JSON</label>
+          <input type="file" id="layout-file-input" accept=".json" class="file-input">
+        </div>
       </div>
-    </div>
-
-    <!-- 保存データ -->
-    <div class="section" id="saved-files-section">
-      <div class="section-label">SAVED DATA</div>
-      <div id="saved-files-list"></div>
+      <div class="load-tab-panel hidden" id="tab-saved">
+        <div id="saved-files-list"></div>
+      </div>
+      <div id="loaded-data-info" class="loaded-data-info hidden"></div>
     </div>
 
     <!-- クロス集計軸 -->
