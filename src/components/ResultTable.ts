@@ -64,7 +64,7 @@ export function renderResults(
   const hdr = document.createElement("div");
   hdr.className = "results-header";
   hdr.innerHTML = `
-    <h2>${hasCross ? "クロス集計結果" : "GT集計結果"}</h2>
+    <h2>${hasCross ? "クロス集計結果" : "集計結果"}</h2>
     <span class="results-meta">
       ${results.length} 問  ／  ${weightCol ? "ウェイトバック適用: " + escHtml(weightCol) : "実数集計"}
     </span>
