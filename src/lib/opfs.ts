@@ -5,9 +5,9 @@ export interface SavedEntry {
   timestamp: number;
 }
 
-async function getTallyDir(): Promise<FileSystemDirectoryHandle> {
+async function getTemottoDir(): Promise<FileSystemDirectoryHandle> {
   const root = await navigator.storage.getDirectory();
-  return root.getDirectoryHandle("tally-data", { create: true });
+  return root.getDirectoryHandle("temotto-data", { create: true });
 }
 
 export async function saveData(
@@ -18,7 +18,7 @@ export async function saveData(
 ): Promise<SavedEntry> {
   const ts = Date.now();
   const folderId = String(ts);
-  const dir = await getTallyDir();
+  const dir = await getTemottoDir();
   const folder = await dir.getDirectoryHandle(folderId, { create: true });
 
   const csvHandle = await folder.getFileHandle(csvName, { create: true });
@@ -35,7 +35,7 @@ export async function saveData(
 }
 
 export async function listSaved(): Promise<SavedEntry[]> {
-  const dir = await getTallyDir();
+  const dir = await getTemottoDir();
   const entries: SavedEntry[] = [];
 
   for await (const [name, handle] of dir as any) {
@@ -61,7 +61,7 @@ export async function listSaved(): Promise<SavedEntry[]> {
 export async function loadSaved(
   folderId: string
 ): Promise<{ csvText: string; csvName: string; layoutJson: string; layoutName: string }> {
-  const dir = await getTallyDir();
+  const dir = await getTemottoDir();
   const folder = await dir.getDirectoryHandle(folderId);
 
   let csvName = "";
@@ -81,6 +81,6 @@ export async function loadSaved(
 }
 
 export async function deleteSaved(folderId: string): Promise<void> {
-  const dir = await getTallyDir();
+  const dir = await getTemottoDir();
   await dir.removeEntry(folderId, { recursive: true });
 }
