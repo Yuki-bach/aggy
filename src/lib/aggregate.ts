@@ -6,9 +6,9 @@ import { Aggregator, fetchCrossHeaders } from "./aggregator";
 // --- 集計結果の型定義 ---
 
 export interface Cell {
-  main: string;   // 選択肢ラベル（集計対象の設問値）
-  sub: string;    // "GT" or クロス集計軸の値 ("男", "女", ...) or MAカラム名
-  n: number;      // その sub の母数
+  main: string; // 選択肢ラベル（集計対象の設問値）
+  sub: string; // "GT" or クロス集計軸の値 ("男", "女", ...) or MAカラム名
+  n: number; // その sub の母数
   count: number;
   pct: number;
 }
@@ -25,13 +25,13 @@ export type QuestionDef = SAQuestion | MAQuestion;
 
 interface SAQuestion {
   type: "SA";
-  column: string;       // カラム名 "q1"
+  column: string; // カラム名 "q1"
 }
 
 interface MAQuestion {
   type: "MA";
-  prefix: string;       // グループプレフィックス "Q3"
-  columns: string[];    // ["Q3_1","Q3_2","Q3_3"]
+  prefix: string; // グループプレフィックス "Q3"
+  columns: string[]; // ["Q3_1","Q3_2","Q3_3"]
 }
 
 export function questionKey(q: QuestionDef): string {
@@ -45,10 +45,7 @@ export interface Query {
 }
 
 /** 集計のエントリポイント。db上のsurveyビューに対して全設問を並列集計する */
-export async function aggregate(
-  db: duckdb.AsyncDuckDB,
-  payload: Query
-): Promise<AggResult[]> {
+export async function aggregate(db: duckdb.AsyncDuckDB, payload: Query): Promise<AggResult[]> {
   const weightCol = payload.weight_col;
   const crossCols = payload.cross_cols ?? [];
 
@@ -79,6 +76,6 @@ export async function aggregate(
       } finally {
         await conn.close();
       }
-    })
+    }),
   );
 }

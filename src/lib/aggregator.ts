@@ -11,9 +11,7 @@ function esc(name: string): string {
 }
 
 function weightExpr(weightCol: string): string {
-  return weightCol
-    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
-    : `COUNT(*)::DOUBLE`;
+  return weightCol ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))` : `COUNT(*)::DOUBLE`;
 }
 
 function maWeightedCountExpr(maCol: string, weightCol: string): string {
@@ -53,8 +51,15 @@ export class Aggregator {
 
   async aggregateSA(col: string): Promise<AggResult> {
     // クロス軸を SA / MA に分離（CTE統合は SA×SA のみ）
-    const saCross = this.crossCols.filter((q) => q.type === "SA") as Array<{ type: "SA"; column: string }>;
-    const maCross = this.crossCols.filter((q) => q.type === "MA") as Array<{ type: "MA"; prefix: string; columns: string[] }>;
+    const saCross = this.crossCols.filter((q) => q.type === "SA") as Array<{
+      type: "SA";
+      column: string;
+    }>;
+    const maCross = this.crossCols.filter((q) => q.type === "MA") as Array<{
+      type: "MA";
+      prefix: string;
+      columns: string[];
+    }>;
 
     // CTE: GT + 全SA×SAクロスを1クエリで取得
     const GT_SENTINEL = "__GT__";
@@ -92,7 +97,10 @@ export class Aggregator {
         gtRows.push({ mv, cnt });
       } else {
         let bucket = crossBuckets.get(sv);
-        if (!bucket) { bucket = new Map(); crossBuckets.set(sv, bucket); }
+        if (!bucket) {
+          bucket = new Map();
+          crossBuckets.set(sv, bucket);
+        }
         bucket.set(mv, cnt);
       }
     }
@@ -100,9 +108,7 @@ export class Aggregator {
     // GT セル
     const questionN = gtRows.reduce((sum, r) => sum + r.cnt, 0);
     const mainValues = gtRows.map((r) => r.mv);
-    const cells: Cell[] = gtRows.map((r) =>
-      mkCell(r.mv, "GT", questionN, r.cnt)
-    );
+    const cells: Cell[] = gtRows.map((r) => mkCell(r.mv, "GT", questionN, r.cnt));
 
     // SA×SA クロスセル
     for (const crossQ of saCross) {
@@ -121,7 +127,7 @@ export class Aggregator {
     // SA×MA クロスセル（構造が異なるため個別クエリ維持）
     for (const crossQ of maCross) {
       const cached = this.crossHeaderCache.get(crossQ.prefix)!;
-      cells.push(...await this.buildCrossCellsMA(col, mainValues, crossQ.columns, cached));
+      cells.push(...(await this.buildCrossCellsMA(col, mainValues, crossQ.columns, cached)));
     }
 
     return { question: col, type: "SA", cells };
@@ -154,7 +160,7 @@ export class Aggregator {
 
     const questionN = Number(row.question_n ?? 0);
     const cells: Cell[] = cols.map((col, i) =>
-      mkCell(col, "GT", questionN, Number(row[`c${i}`] ?? 0))
+      mkCell(col, "GT", questionN, Number(row[`c${i}`] ?? 0)),
     );
 
     // 無回答行
@@ -165,9 +171,9 @@ export class Aggregator {
       for (const crossQ of this.crossCols) {
         const cached = this.crossHeaderCache.get(questionKey(crossQ))!;
         if (crossQ.type === "SA") {
-          cells.push(...await this.buildMACrossCellsSA(cols, crossQ.column, cached));
+          cells.push(...(await this.buildMACrossCellsSA(cols, crossQ.column, cached)));
         } else {
-          cells.push(...await this.buildMACrossCellsMA(cols, crossQ.columns, cached));
+          cells.push(...(await this.buildMACrossCellsMA(cols, crossQ.columns, cached)));
         }
       }
     }
@@ -180,12 +186,12 @@ export class Aggregator {
     mainCol: string,
     mainValues: string[],
     maCols: string[],
-    cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] }
+    cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] },
   ): Promise<Cell[]> {
     const { headers } = cached;
 
-    const selectClauses = maCols.map((maCol, i) =>
-      `${maWeightedCountExpr(maCol, this.weightCol)} AS c${i}`
+    const selectClauses = maCols.map(
+      (maCol, i) => `${maWeightedCountExpr(maCol, this.weightCol)} AS c${i}`,
     );
 
     const sql = `
@@ -202,7 +208,9 @@ export class Aggregator {
     const rowMap = new Map<string, Record<string, number>>();
     for (const r of result.toArray()) {
       const counts: Record<string, number> = {};
-      maCols.forEach((_, i) => { counts[`c${i}`] = Number(r[`c${i}`] ?? 0); });
+      maCols.forEach((_, i) => {
+        counts[`c${i}`] = Number(r[`c${i}`] ?? 0);
+      });
       rowMap.set(String(r.mv), counts);
     }
 
@@ -221,12 +229,12 @@ export class Aggregator {
   private async buildMACrossCellsSA(
     maCols: string[],
     crossCol: string,
-    cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] }
+    cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] },
   ): Promise<Cell[]> {
     const { headers, crossValues } = cached;
 
-    const selectClauses = maCols.map((col, i) =>
-      `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`
+    const selectClauses = maCols.map(
+      (col, i) => `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`,
     );
 
     // 無回答カウント: 表示されたが何も選択していない
@@ -275,7 +283,7 @@ export class Aggregator {
   private async buildMACrossCellsMA(
     rowMaCols: string[],
     crossMaCols: string[],
-    cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] }
+    cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] },
   ): Promise<Cell[]> {
     const { headers } = cached;
 
@@ -307,7 +315,9 @@ export class Aggregator {
     const cells: Cell[] = [];
     for (let r = 0; r < rowMaCols.length; r++) {
       for (let c = 0; c < crossMaCols.length; c++) {
-        cells.push(mkCell(rowMaCols[r], crossMaCols[c], headers[c].n, Number(row[`r${r}c${c}`] ?? 0)));
+        cells.push(
+          mkCell(rowMaCols[r], crossMaCols[c], headers[c].n, Number(row[`r${r}c${c}`] ?? 0)),
+        );
       }
     }
 
@@ -325,7 +335,7 @@ export class Aggregator {
 export async function fetchCrossHeaders(
   conn: duckdb.AsyncDuckDBConnection,
   crossCols: QuestionDef[],
-  weightCol: string
+  weightCol: string,
 ): Promise<CrossHeaderCache> {
   const cache: CrossHeaderCache = new Map();
 
@@ -345,13 +355,11 @@ export async function fetchCrossHeaders(
           "${esc(col)}" ASC
       `;
       const result = await conn.query(sql);
-      const headers = result
-        .toArray()
-        .map((r) => ({ label: String(r.cv), n: Number(r.n) }));
+      const headers = result.toArray().map((r) => ({ label: String(r.cv), n: Number(r.n) }));
       cache.set(crossQ.column, { headers, crossValues: headers.map((h) => h.label) });
     } else {
-      const selectClauses = crossQ.columns.map((col, i) =>
-        `${maWeightedCountExpr(col, weightCol)} AS c${i}`
+      const selectClauses = crossQ.columns.map(
+        (col, i) => `${maWeightedCountExpr(col, weightCol)} AS c${i}`,
       );
       const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
       const result = await conn.query(sql);

@@ -51,12 +51,7 @@ function resolveQLabel(col: string, meta?: LayoutMeta): string {
   return meta?.questionLabels[col] ?? col;
 }
 
-function resolveVLabel(
-  type: "SA" | "MA",
-  col: string,
-  code: string,
-  meta?: LayoutMeta,
-): string {
+function resolveVLabel(type: "SA" | "MA", col: string, code: string, meta?: LayoutMeta): string {
   if (!meta) return code;
   if (type === "SA") return meta.valueLabels[col]?.[code] ?? code;
   return meta.valueLabels[code]?.["1"] ?? code;
@@ -92,7 +87,9 @@ function summarizeResults(
   }
 
   lines.push("");
-  lines.push("上記の集計結果の注目すべき傾向を2〜3文で短く述べてください。箇条書き・見出し・提案・注意点は不要です。");
+  lines.push(
+    "上記の集計結果の注目すべき傾向を2〜3文で短く述べてください。箇条書き・見出し・提案・注意点は不要です。",
+  );
   return lines.join("\n");
 }
 
@@ -105,12 +102,7 @@ export function buildPromptPayload(
     const text = summarizeResults(results, weightCol, layoutMeta, topN);
     if (text.length <= MAX_PAYLOAD_CHARS) return text;
   }
-  return summarizeResults(
-    results.slice(0, 20),
-    weightCol,
-    layoutMeta,
-    2,
-  );
+  return summarizeResults(results.slice(0, 20), weightCol, layoutMeta, 2);
 }
 
 // --- Comment Generation ---

@@ -18,7 +18,7 @@ function resolveMainLabel(main: string): string {
 export function downloadAllCSV(
   results: AggResult[],
   _weightCol: string,
-  layoutMeta?: LayoutMeta
+  layoutMeta?: LayoutMeta,
 ): void {
   const hasCross = results.some((r) => {
     const { subs } = pivot(r.cells);
@@ -117,11 +117,7 @@ function exportCSV(rows: string[][], filename: string): void {
   const bom = "\uFEFF";
   const csv =
     bom +
-    rows
-      .map((r) =>
-        r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
-      )
-      .join("\r\n");
+    rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

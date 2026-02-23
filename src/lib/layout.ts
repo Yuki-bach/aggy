@@ -56,7 +56,10 @@ export function parseLayout(jsonText: string): Layout {
 }
 
 /** headers + colTypes から QuestionDef[] を組み立てる */
-export function buildQuestionDefs(headers: string[], colTypes: Record<string, string>): QuestionDef[] {
+export function buildQuestionDefs(
+  headers: string[],
+  colTypes: Record<string, string>,
+): QuestionDef[] {
   const questions: QuestionDef[] = [];
   const maAccum: Record<string, string[]> = {};
   for (const col of headers) {

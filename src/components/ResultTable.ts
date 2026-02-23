@@ -6,10 +6,7 @@ import { downloadAllCSV } from "../lib/download";
 import { isAIAvailable, generateComment } from "../lib/aiComment";
 
 function escHtml(str: string): string {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /** 設問ラベルを解決する。なければ列名をそのまま返す */
@@ -25,7 +22,7 @@ function resolveValueLabel(
   type: "SA" | "MA",
   col: string,
   rowLabel: string,
-  meta?: LayoutMeta
+  meta?: LayoutMeta,
 ): string {
   // 無回答マーカー
   if (rowLabel === NA_VALUE) return "無回答";
@@ -40,11 +37,7 @@ function resolveValueLabel(
 
 /** クロス軸ヘッダーのラベルを解決する。
  *  crossCols があれば SA クロス軸の値ラベルも解決する */
-function resolveSubLabel(
-  subLabel: string,
-  meta?: LayoutMeta,
-  crossCols?: QuestionDef[]
-): string {
+function resolveSubLabel(subLabel: string, meta?: LayoutMeta, crossCols?: QuestionDef[]): string {
   if (subLabel === NA_VALUE) return "無回答";
   if (!meta) return subLabel;
   // MAカラム名の場合: valueLabels[colName]["1"] にラベルがある
@@ -67,7 +60,7 @@ export function renderResults(
   weightCol: string,
   _rawN: number,
   layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[]
+  crossCols?: QuestionDef[],
 ): void {
   document.getElementById("empty-state")!.classList.add("hidden");
   const area = document.getElementById("results-area")!;
@@ -101,9 +94,7 @@ export function renderResults(
   grid.className = hasCross ? "tables-grid cross-mode" : "tables-grid";
   area.appendChild(grid);
 
-  const allGtCells = results.flatMap((r) =>
-    r.cells.filter((c) => c.sub === "GT")
-  );
+  const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 
   results.forEach((res) => {
@@ -164,9 +155,7 @@ async function showAIBubble(
   `;
   document.body.appendChild(bubble);
 
-  bubble
-    .querySelector(".ai-bubble-close")!
-    .addEventListener("click", () => bubble.remove());
+  bubble.querySelector(".ai-bubble-close")!.addEventListener("click", () => bubble.remove());
 
   const comment = await generateComment(results, weightCol, layoutMeta);
   if (comment) {
@@ -183,7 +172,7 @@ function buildGtTable(
   pv: ReturnType<typeof pivot>,
   weightCol: string,
   maxPct: number,
-  layoutMeta?: LayoutMeta
+  layoutMeta?: LayoutMeta,
 ): HTMLTableElement {
   const { mains, lookup } = pv;
 
@@ -208,9 +197,7 @@ function buildGtTable(
         <tr>
           <td>${escHtml(resolveValueLabel(res.type, res.question, main, layoutMeta))}</td>
           <td class="num">${
-            res.type === "SA" && !weightCol
-              ? cell.count.toLocaleString()
-              : cell.count.toFixed(1)
+            res.type === "SA" && !weightCol ? cell.count.toLocaleString() : cell.count.toFixed(1)
           }</td>
           <td class="pct">${cell.pct.toFixed(1)}%</td>
           <td class="bar-cell" aria-hidden="true">
@@ -230,7 +217,7 @@ function buildCrossTable(
   pv: ReturnType<typeof pivot>,
   weightCol: string,
   layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[]
+  crossCols?: QuestionDef[],
 ): HTMLTableElement {
   const { mains, subs, lookup } = pv;
   const gtSub = subs.find((s) => s.label === "GT")!;
@@ -308,9 +295,7 @@ function buildCrossTable(
     const tdCount = document.createElement("td");
     tdCount.className = "num";
     tdCount.textContent =
-      res.type === "SA" && !weightCol
-        ? gtCell.count.toLocaleString()
-        : gtCell.count.toFixed(1);
+      res.type === "SA" && !weightCol ? gtCell.count.toLocaleString() : gtCell.count.toFixed(1);
     tr.appendChild(tdCount);
 
     const tdPct = document.createElement("td");

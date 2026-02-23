@@ -14,7 +14,7 @@ export async function saveData(
   csvName: string,
   csvText: string,
   layoutName: string,
-  layoutJson: string
+  layoutJson: string,
 ): Promise<SavedEntry> {
   const ts = Date.now();
   const folderId = String(ts);
@@ -59,7 +59,7 @@ export async function listSaved(): Promise<SavedEntry[]> {
 }
 
 export async function loadSaved(
-  folderId: string
+  folderId: string,
 ): Promise<{ csvText: string; csvName: string; layoutJson: string; layoutName: string }> {
   const dir = await getTemottoDir();
   const folder = await dir.getDirectoryHandle(folderId);
