@@ -5,8 +5,8 @@
 /* === Design Tokens: Light Mode === */
 :root {
   /* Typography */
-  --font-family-base: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-  --font-family-mono: "Noto Sans Mono", "SF Mono", Consolas, monospace;
+  --font-family-base: system-ui, sans-serif;
+  --font-family-mono: ui-monospace, monospace;
 
   /* Neutral Scale */
   --color-white: #ffffff;
