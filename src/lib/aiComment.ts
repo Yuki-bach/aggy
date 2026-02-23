@@ -6,10 +6,14 @@ import type { LayoutMeta } from "./layout";
 // --- Chrome Prompt API 型宣言 ---
 
 declare global {
+  interface LanguageModelExpectedIO {
+    type: string;
+    languages?: string[];
+  }
   interface LanguageModelCreateOptions {
     systemPrompt?: string;
-    expectedInputLanguages?: string[];
-    expectedOutputLanguages?: string[];
+    expectedInputs?: LanguageModelExpectedIO[];
+    expectedOutputs?: LanguageModelExpectedIO[];
     monitor?: (monitor: EventTarget) => void;
   }
   interface LanguageModelStatic {
@@ -123,8 +127,8 @@ export async function generateComment(
     const payload = buildPromptPayload(results, weightCol, layoutMeta);
     const session = await LanguageModel!.create({
       systemPrompt: SYSTEM_PROMPT,
-      expectedInputLanguages: ["ja"],
-      expectedOutputLanguages: ["ja"],
+      expectedInputs: [{ type: "text", languages: ["ja"] }],
+      expectedOutputs: [{ type: "text", languages: ["ja"] }],
     });
 
     try {
