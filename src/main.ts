@@ -56,6 +56,24 @@ function initAfterBothLoaded(): void {
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
 }
 
+// 読み込み済みデータ情報を表示
+function updateLoadedInfo(): void {
+  const el = document.getElementById("loaded-data-info")!;
+  if (!lastCsvFileName && !lastLayoutFileName) {
+    el.classList.add("hidden");
+    return;
+  }
+  const lines: string[] = [];
+  if (lastCsvFileName) {
+    lines.push(`CSV: ${lastCsvFileName}  —  ${dataRowCount.toLocaleString()} 行 / ${headers.length} 列`);
+  }
+  if (lastLayoutFileName && layoutMeta) {
+    lines.push(`JSON: ${lastLayoutFileName}  —  ${Object.keys(layoutMeta.colTypes).length} 列定義`);
+  }
+  el.textContent = lines.join("\n");
+  el.classList.remove("hidden");
+}
+
 // CSV読み込みハンドラ: DuckDBにロードしてheaders/rowCountを取得
 async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
   try {
@@ -65,9 +83,7 @@ async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
     lastCsvText = csvText;
     lastCsvFileName = fileName;
 
-    document.getElementById("file-info")!.textContent =
-      `${fileName}  /  ${dataRowCount.toLocaleString()} 件  /  ${headers.length} 列`;
-
+    updateLoadedInfo();
     initAfterBothLoaded();
     trySaveToOPFS();
   } catch (e) {
@@ -86,9 +102,7 @@ function onLayoutLoaded(
   lastLayoutJson = rawText;
   lastLayoutFileName = fileName;
 
-  document.getElementById("layout-file-info")!.textContent =
-    `${fileName}  /  ${Object.keys(meta.colTypes).length} 列定義`;
-
+  updateLoadedInfo();
   initAfterBothLoaded();
   trySaveToOPFS();
 }
@@ -169,6 +183,18 @@ async function runAggregation(): Promise<void> {
     showError("集計エラー: " + (e as Error).message);
     console.error(e);
   }
+}
+
+// タブ切り替え
+for (const tab of document.querySelectorAll<HTMLButtonElement>(".load-tab")) {
+  tab.addEventListener("click", () => {
+    for (const t of document.querySelectorAll<HTMLButtonElement>(".load-tab")) {
+      t.classList.toggle("active", t === tab);
+    }
+    const target = tab.dataset.tab!;
+    document.getElementById("tab-file")!.classList.toggle("hidden", target !== "file");
+    document.getElementById("tab-saved")!.classList.toggle("hidden", target !== "saved");
+  });
 }
 
 // イベントバインド
