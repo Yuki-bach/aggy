@@ -1,6 +1,5 @@
 import "./style.css";
-import { initDropzone } from "./components/Dropzone";
-import { initLayoutDropzone } from "./components/LayoutDropzone";
+import { initCsvInput, initLayoutInput } from "./components/FileInput";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
 import type { QuestionDef } from "./lib/aggregator";
@@ -129,8 +128,8 @@ async function runAggregation(): Promise<void> {
 }
 
 // イベントバインド
-initDropzone(onCSVLoaded, (msg) => showError(msg));
-initLayoutDropzone(onLayoutLoaded, (msg) => showError(msg));
+initCsvInput(onCSVLoaded, (msg) => showError(msg));
+initLayoutInput(onLayoutLoaded, (msg) => showError(msg));
 
 document.getElementById("run-btn")!.addEventListener("click", () => {
   runAggregation().catch((e) => showError("集計エラー: " + (e as Error).message));
