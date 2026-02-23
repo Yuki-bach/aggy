@@ -1,4 +1,5 @@
 import type { AggResult } from "../lib/aggregator";
+import type { LayoutMeta } from "../lib/layout";
 import { pivot } from "../lib/pivot";
 import { downloadAllCSV } from "../lib/download";
 
@@ -9,10 +10,35 @@ function escHtml(str: string): string {
     .replace(/>/g, "&gt;");
 }
 
+/** 設問ラベルを解決する。なければ列名をそのまま返す */
+function resolveQuestionLabel(col: string, meta?: LayoutMeta): string {
+  return meta?.questionLabels[col] ?? col;
+}
+
+/** 選択肢ラベルを解決する
+ *  SA: valueLabels[col][code]
+ *  MA: valueLabels[colName]["1"]（colName = row.label）
+ */
+function resolveValueLabel(
+  type: "SA" | "MA",
+  col: string,
+  rowLabel: string,
+  meta?: LayoutMeta
+): string {
+  if (!meta) return rowLabel;
+  if (type === "SA") {
+    return meta.valueLabels[col]?.[rowLabel] ?? rowLabel;
+  } else {
+    // MA: rowLabel は個別列名（例 "q3_1"）。item.labelは "1" キーで保持
+    return meta.valueLabels[rowLabel]?.["1"] ?? rowLabel;
+  }
+}
+
 export function renderResults(
   results: AggResult[],
   weightCol: string,
-  _rawN: number
+  _rawN: number,
+  layoutMeta?: LayoutMeta
 ): void {
   document.getElementById("empty-state")!.classList.add("hidden");
   const area = document.getElementById("results-area")!;
@@ -65,18 +91,24 @@ export function renderResults(
       ? `n=${gtSub.n.toFixed(1)}（ウェイト後）`
       : `n=${gtSub.n.toLocaleString()}`;
 
+    const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
+    const hasLabel = questionLabel !== res.question;
+
     card.innerHTML = `
       <div class="gt-table-head">
-        <span class="q-label">${escHtml(res.question)}</span>
+        <div class="q-header">
+          <span class="q-label">${escHtml(questionLabel)}</span>
+          ${hasLabel ? `<span class="q-key">${escHtml(res.question)}</span>` : ""}
+        </div>
         <span class="q-type">${res.type}</span>
         <span class="q-n">${nLabel}</span>
       </div>
     `;
 
     if (isCross) {
-      card.appendChild(buildCrossTable(res, pv, weightCol));
+      card.appendChild(buildCrossTable(res, pv, weightCol, layoutMeta));
     } else {
-      card.appendChild(buildGtTable(res, pv, weightCol, maxPct));
+      card.appendChild(buildGtTable(res, pv, weightCol, maxPct, layoutMeta));
     }
 
     grid.appendChild(card);
@@ -87,7 +119,8 @@ function buildGtTable(
   res: AggResult,
   pv: ReturnType<typeof pivot>,
   weightCol: string,
-  maxPct: number
+  maxPct: number,
+  layoutMeta?: LayoutMeta
 ): HTMLTableElement {
   const { mains, lookup } = pv;
 
@@ -108,7 +141,7 @@ function buildGtTable(
           const cell = lookup.get(`${main}\0GT`)!;
           return `
         <tr>
-          <td>${escHtml(main)}</td>
+          <td>${escHtml(resolveValueLabel(res.type, res.question, main, layoutMeta))}</td>
           <td class="num">${
             res.type === "SA" && !weightCol
               ? cell.count.toLocaleString()
@@ -130,7 +163,8 @@ function buildGtTable(
 function buildCrossTable(
   res: AggResult,
   pv: ReturnType<typeof pivot>,
-  weightCol: string
+  weightCol: string,
+  layoutMeta?: LayoutMeta
 ): HTMLTableElement {
   const { mains, subs, lookup } = pv;
   const gtSub = subs.find((s) => s.label === "GT")!;
@@ -194,7 +228,7 @@ function buildCrossTable(
     const tr = document.createElement("tr");
 
     const tdLabel = document.createElement("td");
-    tdLabel.textContent = main;
+    tdLabel.textContent = resolveValueLabel(res.type, res.question, main, layoutMeta);
     tr.appendChild(tdLabel);
 
     const gtCell = lookup.get(`${main}\0GT`)!;

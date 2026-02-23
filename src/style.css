@@ -480,6 +480,31 @@ table.gt td.cross-pct {
   opacity: 0.85;
 }
 
+/* 列設定: 設問ラベル */
+.col-question-label {
+  font-size: 0.62rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.15rem;
+  max-width: 160px;
+}
+
+/* 結果カード: 設問ヘッダー */
+.q-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.gt-table-head .q-key {
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
 /* ユーティリティ */
 .hidden { display: none !important; }
 

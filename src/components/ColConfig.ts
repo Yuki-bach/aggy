@@ -1,4 +1,5 @@
 import { detectMAGroups, guessColType } from "../lib/colDetect";
+import type { LayoutMeta } from "../lib/layout";
 
 export interface ColConfigState {
   colTypes: Record<string, string>;
@@ -6,7 +7,8 @@ export interface ColConfigState {
 }
 
 export function initColConfig(
-  headers: string[]
+  headers: string[],
+  layoutMeta?: LayoutMeta
 ): ColConfigState {
   const colTypes: Record<string, string> = {};
   const colSelected: Record<string, boolean> = {};
@@ -22,11 +24,17 @@ export function initColConfig(
   const maGroups = detectMAGroups(headers);
 
   headers.forEach((col) => {
-    const defaultType = guessColType(col, maGroups);
+    // レイアウトの種別指定を優先し、なければ自動推定
+    const defaultType = layoutMeta?.colTypes[col] ?? guessColType(col, maGroups);
     colTypes[col] = defaultType;
-    colSelected[col] = defaultType !== "id" && defaultType !== "weight";
+    colSelected[col] =
+      defaultType !== "id" &&
+      defaultType !== "weight" &&
+      defaultType !== "exclude";
 
-    const maPrefix = maGroups[col];
+    const maPrefix = defaultType.startsWith("ma:")
+      ? defaultType.slice(3)
+      : (maGroups[col] ?? null);
 
     const item = document.createElement("div");
     item.className = "col-item";
@@ -47,6 +55,17 @@ export function initColConfig(
       badge.className = "ma-badge";
       badge.textContent = "MA";
       nameEl.appendChild(badge);
+    }
+
+    // レイアウトから設問ラベルがあれば表示
+    const qLabel = maPrefix
+      ? layoutMeta?.questionLabels[maPrefix]
+      : layoutMeta?.questionLabels[col];
+    if (qLabel) {
+      const labelEl = document.createElement("div");
+      labelEl.className = "col-question-label";
+      labelEl.textContent = qLabel;
+      nameEl.appendChild(labelEl);
     }
 
     const sel = document.createElement("select");

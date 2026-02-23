@@ -1,5 +1,6 @@
 import "./style.css";
 import { initDropzone } from "./components/Dropzone";
+import { initLayoutDropzone } from "./components/LayoutDropzone";
 import { initColConfig, type ColConfigState } from "./components/ColConfig";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
@@ -9,11 +10,13 @@ import {
   runDuckDBAggregation,
 } from "./lib/duckdbBridge";
 import type { ParseResult } from "./lib/csv";
+import type { Layout, LayoutMeta } from "./lib/layout";
 
 // データストア
 let parsedData: Record<string, string>[] = [];
 let headers: string[] = [];
 let colConfig: ColConfigState | null = null;
+let layoutMeta: LayoutMeta | null = null;
 
 // DuckDB Wasm をバックグラウンドで初期化開始
 initDuckDB().catch(() => {
@@ -28,7 +31,7 @@ function onCSVLoaded(result: ParseResult, fileName: string): void {
   document.getElementById("file-info")!.textContent =
     `${fileName}  /  ${parsedData.length.toLocaleString()} 件  /  ${headers.length} 列`;
 
-  colConfig = initColConfig(headers);
+  colConfig = initColConfig(headers, layoutMeta ?? undefined);
 
   // クロス集計軸候補: SA列（MA以外）
   const saColumns = headers.filter((col) => {
@@ -42,6 +45,23 @@ function onCSVLoaded(result: ParseResult, fileName: string): void {
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
+}
+
+// レイアウト読み込みハンドラ
+function onLayoutLoaded(
+  _layout: Layout,
+  meta: LayoutMeta,
+  fileName: string
+): void {
+  layoutMeta = meta;
+
+  document.getElementById("layout-file-info")!.textContent =
+    `${fileName}  /  ${Object.keys(meta.colTypes).length} 列定義`;
+
+  // CSV読込済みの場合は列設定を再適用
+  if (headers.length > 0) {
+    colConfig = initColConfig(headers, layoutMeta);
+  }
 }
 
 function showError(msg: string): void {
@@ -119,7 +139,7 @@ async function runAggregation(): Promise<void> {
     };
 
     const results: AggResult[] = await runDuckDBAggregation(payload);
-    renderResults(results, effectiveWeightCol, parsedData.length);
+    renderResults(results, effectiveWeightCol, parsedData.length, layoutMeta ?? undefined);
   } catch (e) {
     showError("集計エラー: " + (e as Error).message);
     console.error(e);
@@ -128,6 +148,7 @@ async function runAggregation(): Promise<void> {
 
 // イベントバインド
 initDropzone(onCSVLoaded, (msg) => showError(msg));
+initLayoutDropzone(onLayoutLoaded, (msg) => showError(msg));
 
 document.getElementById("run-btn")!.addEventListener("click", () => {
   runAggregation().catch((e) => showError("集計エラー: " + (e as Error).message));

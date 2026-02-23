@@ -34,15 +34,29 @@
       <div id="file-info" style="margin-top:0.75rem;font-size:0.72rem;color:var(--muted);"></div>
     </div>
 
+    <!-- レイアウトアップロード -->
+    <div class="section">
+      <div class="section-label">02 / 設問情報（任意）</div>
+      <div class="dropzone" id="layout-dropzone">
+        <input type="file" id="layout-file-input" accept=".json">
+        <span class="dropzone-icon">📋</span>
+        <div class="dropzone-text">
+          <strong>レイアウトJSONをドロップ or クリック</strong>
+          設問・選択肢ラベルの定義ファイル
+        </div>
+      </div>
+      <div id="layout-file-info" style="margin-top:0.75rem;font-size:0.72rem;color:var(--muted);"></div>
+    </div>
+
     <!-- 列設定 -->
     <div class="section hidden" id="col-config-section">
-      <div class="section-label">02 / 列の種別設定</div>
+      <div class="section-label">03 / 列の種別設定</div>
       <div class="col-list" id="col-list"></div>
     </div>
 
     <!-- ウェイト列 -->
     <div class="section hidden" id="weight-section">
-      <div class="section-label">03 / ウェイトバック</div>
+      <div class="section-label">04 / ウェイトバック</div>
       <div class="weight-select-wrap">
         <label>ウェイト列（任意）</label>
         <select class="weight-col-select" id="weight-col-select">
@@ -53,7 +67,7 @@
 
     <!-- クロス集計軸 -->
     <div class="section hidden" id="cross-config-section">
-      <div class="section-label">04 / クロス集計軸（任意）</div>
+      <div class="section-label">05 / クロス集計軸（任意）</div>
       <div class="cross-col-list" id="cross-col-list"></div>
     </div>
 
