@@ -44,38 +44,29 @@ export interface Query {
   cross_cols: QuestionDef[];
 }
 
-/** 集計のエントリポイント。db上のsurveyビューに対して全設問を並列集計する */
-export async function aggregate(db: duckdb.AsyncDuckDB, payload: Query): Promise<AggResult[]> {
+/** 集計のエントリポイント。conn上のsurveyビューに対して全設問を集計する */
+export async function aggregate(
+  conn: duckdb.AsyncDuckDBConnection,
+  payload: Query,
+): Promise<AggResult[]> {
   const weightCol = payload.weight_col;
   const crossCols = payload.cross_cols ?? [];
 
-  // クロスヘッダーキャッシュを先に構築（1コネクション）
-  let crossHeaderCache: Awaited<ReturnType<typeof fetchCrossHeaders>>;
-  if (crossCols.length > 0) {
-    const conn = await db.connect();
-    try {
-      crossHeaderCache = await fetchCrossHeaders(conn, crossCols, weightCol);
-    } finally {
-      await conn.close();
+  const crossHeaderCache =
+    crossCols.length > 0
+      ? await fetchCrossHeaders(conn, crossCols, weightCol)
+      : (new Map() as Awaited<ReturnType<typeof fetchCrossHeaders>>);
+
+  const ctx = new Aggregator(conn, weightCol, crossCols, crossHeaderCache);
+
+  const results: AggResult[] = [];
+  for (const q of payload.questions) {
+    if (q.type === "SA") {
+      results.push(await ctx.aggregateSA(q.column));
+    } else {
+      results.push(await ctx.aggregateMA(q.prefix, q.columns));
     }
-  } else {
-    crossHeaderCache = new Map();
   }
 
-  // 設問ごとに並列実行（各自コネクション作成・破棄）
-  return Promise.all(
-    payload.questions.map(async (q) => {
-      const conn = await db.connect();
-      try {
-        const ctx = new Aggregator(conn, weightCol, crossCols, crossHeaderCache);
-        if (q.type === "SA") {
-          return ctx.aggregateSA(q.column);
-        } else {
-          return ctx.aggregateMA(q.prefix, q.columns);
-        }
-      } finally {
-        await conn.close();
-      }
-    }),
-  );
+  return results;
 }

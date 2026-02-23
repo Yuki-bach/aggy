@@ -80,6 +80,6 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 
 /** survey ビューに対して集計を実行する */
 export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
-  if (!db || status !== "ready") throw new Error("DuckDB is not ready");
-  return aggregate(db, query);
+  const c = await getConnection();
+  return aggregate(c, query);
 }

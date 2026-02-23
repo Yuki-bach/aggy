@@ -16,8 +16,8 @@ function weightExpr(weightCol: string): string {
 
 function maWeightedCountExpr(maCol: string, weightCol: string): string {
   return weightCol
-    ? `COALESCE(SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE)) FILTER (WHERE "${esc(maCol)}" = '1'), 0)`
-    : `COUNT(*) FILTER (WHERE "${esc(maCol)}" = '1')::DOUBLE`;
+    ? `SUM(CASE WHEN "${esc(maCol)}" = '1' THEN TRY_CAST("${esc(weightCol)}" AS DOUBLE) ELSE 0 END)`
+    : `COUNT(CASE WHEN "${esc(maCol)}" = '1' THEN 1 END)::DOUBLE`;
 }
 
 /** MA設問の「表示された」条件: いずれかのサブカラムが空でない */
@@ -63,15 +63,12 @@ export class Aggregator {
 
     // CTE: GT + 全SA×SAクロスを1クエリで取得
     const GT_SENTINEL = "__GT__";
-    let sql = `WITH base AS (
-      SELECT * FROM survey
-      WHERE "${esc(col)}" IS NOT NULL AND "${esc(col)}" != ''
-    )
+    let inner = `
     SELECT "${esc(col)}" AS mv, '${GT_SENTINEL}' AS sv, ${weightExpr(this.weightCol)} AS cnt
     FROM base GROUP BY "${esc(col)}"`;
 
     for (const crossQ of saCross) {
-      sql += `
+      inner += `
     UNION ALL
     SELECT "${esc(col)}" AS mv, "${esc(crossQ.column)}" AS sv, ${weightExpr(this.weightCol)} AS cnt
     FROM base
@@ -79,7 +76,12 @@ export class Aggregator {
     GROUP BY "${esc(col)}", "${esc(crossQ.column)}"`;
     }
 
-    sql += `
+    const sql = `WITH base AS (
+      SELECT * FROM survey
+      WHERE "${esc(col)}" IS NOT NULL AND "${esc(col)}" != ''
+    )
+    SELECT * FROM (${inner}
+    ) AS combined
     ORDER BY sv, TRY_CAST(mv AS DOUBLE) NULLS LAST, mv ASC`;
 
     const arrowResult = await this.conn.query(sql);
@@ -141,8 +143,8 @@ export class Aggregator {
     // 無回答式: 表示されたが何も選択していない
     const noneSelected = cols.map((c) => `"${esc(c)}" != '1'`).join(" AND ");
     const naExpr = this.weightCol
-      ? `COALESCE(SUM(TRY_CAST("${esc(this.weightCol)}" AS DOUBLE)) FILTER (WHERE ${noneSelected}), 0)`
-      : `COUNT(*) FILTER (WHERE ${noneSelected})::DOUBLE`;
+      ? `SUM(CASE WHEN ${noneSelected} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+      : `COUNT(CASE WHEN ${noneSelected} THEN 1 END)::DOUBLE`;
 
     // questionN 式: 表示された人数
     const nExpr = this.weightCol
@@ -240,8 +242,8 @@ export class Aggregator {
     // 無回答カウント: 表示されたが何も選択していない
     const naCondition = `${maCols.map((c) => `"${esc(c)}" != '1'`).join(" AND ")} AND (${maShownCondition(maCols)})`;
     const naExpr = this.weightCol
-      ? `COALESCE(SUM(TRY_CAST("${esc(this.weightCol)}" AS DOUBLE)) FILTER (WHERE ${naCondition}), 0)`
-      : `COUNT(*) FILTER (WHERE ${naCondition})::DOUBLE`;
+      ? `SUM(CASE WHEN ${naCondition} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+      : `COUNT(CASE WHEN ${naCondition} THEN 1 END)::DOUBLE`;
 
     const sql = `
       SELECT
@@ -292,8 +294,8 @@ export class Aggregator {
       for (let c = 0; c < crossMaCols.length; c++) {
         const cond = `"${esc(rowMaCols[r])}" = '1' AND "${esc(crossMaCols[c])}" = '1'`;
         const expr = this.weightCol
-          ? `COALESCE(SUM(TRY_CAST("${esc(this.weightCol)}" AS DOUBLE)) FILTER (WHERE ${cond}), 0)`
-          : `COUNT(*) FILTER (WHERE ${cond})::DOUBLE`;
+          ? `SUM(CASE WHEN ${cond} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+          : `COUNT(CASE WHEN ${cond} THEN 1 END)::DOUBLE`;
         selectClauses.push(`${expr} AS r${r}c${c}`);
       }
     }
@@ -303,8 +305,8 @@ export class Aggregator {
     for (let c = 0; c < crossMaCols.length; c++) {
       const naCondition = `${naBase} AND "${esc(crossMaCols[c])}" = '1'`;
       const expr = this.weightCol
-        ? `COALESCE(SUM(TRY_CAST("${esc(this.weightCol)}" AS DOUBLE)) FILTER (WHERE ${naCondition}), 0)`
-        : `COUNT(*) FILTER (WHERE ${naCondition})::DOUBLE`;
+        ? `SUM(CASE WHEN ${naCondition} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+        : `COUNT(CASE WHEN ${naCondition} THEN 1 END)::DOUBLE`;
       selectClauses.push(`${expr} AS na_c${c}`);
     }
 
