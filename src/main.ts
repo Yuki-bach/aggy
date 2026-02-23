@@ -4,7 +4,7 @@ import { initLayoutDropzone } from "./components/LayoutDropzone";
 import { initColConfig, type ColConfigState } from "./components/ColConfig";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
-import type { AggResult } from "./lib/aggregator";
+import type { AggResult, QuestionDef } from "./lib/aggregator";
 import {
   initDuckDB,
   runDuckDBAggregation,
@@ -115,25 +115,27 @@ async function runAggregation(): Promise<void> {
   ];
 
   try {
-    const sa_cols: string[] = [];
-    const ma_groups: Record<string, string[]> = {};
+    const questions: QuestionDef[] = [];
+    const maAccum: Record<string, string[]> = {};
     for (const col of selectedColumns) {
       if (crossCols.includes(col)) continue;
       const t = cfg.colTypes[col];
       if (t === "sa") {
-        sa_cols.push(col);
+        questions.push({ key: col, columns: [col], type: "SA" });
       } else if (t?.startsWith("ma:")) {
         const prefix = t.slice(3);
-        (ma_groups[prefix] ??= []).push(col);
+        (maAccum[prefix] ??= []).push(col);
       }
+    }
+    for (const [prefix, cols] of Object.entries(maAccum)) {
+      questions.push({ key: prefix, columns: cols, type: "MA" });
     }
 
     const projectedData = projectRowsForWasm(parsedData, allNeededCols);
 
     const payload = {
       data: projectedData,
-      sa_cols,
-      ma_groups,
+      questions,
       weight_col: effectiveWeightCol,
       cross_cols: crossCols,
     };

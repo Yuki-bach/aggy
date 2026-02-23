@@ -20,9 +20,14 @@ export interface AggResult {
 
 // --- 集計 payload ---
 
+export interface QuestionDef {
+  key: string;          // SA: カラム名 "q1", MA: グループプレフィックス "Q3"
+  columns: string[];    // SA: ["q1"],  MA: ["Q3_1","Q3_2","Q3_3"]
+  type: "SA" | "MA";
+}
+
 export interface Query {
-  sa_cols: string[];
-  ma_groups: Record<string, string[]>;  // { "Q1": ["Q1_1","Q1_2","Q1_3"] }
+  questions: QuestionDef[];
   weight_col: string;
   cross_cols: string[];
 }
@@ -42,16 +47,16 @@ export async function aggregate(
       ? await fetchCrossHeaders(conn, crossCols, payload.weight_col)
       : (new Map() as CrossHeaderCache);
 
-  for (const col of payload.sa_cols) {
-    results.push(
-      await aggregateSA(conn, col, totalN, payload.weight_col, crossCols, crossHeaderCache)
-    );
-  }
-
-  for (const [prefix, cols] of Object.entries(payload.ma_groups)) {
-    results.push(
-      await aggregateMA(conn, prefix, cols, totalN, payload.weight_col)
-    );
+  for (const q of payload.questions) {
+    if (q.type === "SA") {
+      results.push(
+        await aggregateSA(conn, q.columns[0], totalN, payload.weight_col, crossCols, crossHeaderCache)
+      );
+    } else {
+      results.push(
+        await aggregateMA(conn, q.key, q.columns, totalN, payload.weight_col)
+      );
+    }
   }
 
   return results;
