@@ -1,29 +1,64 @@
-/** 集計コンテキストクラス - 1回の集計実行に必要な共有状態を束ねる */
+/** 集計コンテキストクラス - SQL生成・実行の全責務を担う */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import {
-  type Cell,
-  type AggResult,
-  type QuestionDef,
-  type CrossHeaderCache,
-  questionKey,
-  esc,
-  weightExpr,
-  maWeightedCountExpr,
-} from "./aggregator";
+import type { Cell, AggResult, QuestionDef, Query } from "./aggregator";
+import { questionKey } from "./aggregator";
+
+// --- SQL ヘルパー ---
+
+function esc(name: string): string {
+  return name.replace(/"/g, '""');
+}
+
+function weightExpr(weightCol: string): string {
+  return weightCol
+    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
+    : `COUNT(*)::DOUBLE`;
+}
+
+function maWeightedCountExpr(maCol: string, weightCol: string): string {
+  return weightCol
+    ? `SUM(CASE WHEN "${esc(maCol)}" IN ('1','true') THEN TRY_CAST("${esc(weightCol)}" AS DOUBLE) ELSE 0 END)`
+    : `COUNT(CASE WHEN "${esc(maCol)}" IN ('1','true') THEN 1 END)::DOUBLE`;
+}
 
 function mkCell(main: string, sub: string, n: number, count: number): Cell {
   return { main, sub, n, count, pct: n > 0 ? (count / n) * 100 : 0 };
 }
 
+// --- クロスヘッダーキャッシュ ---
+
+type CrossHeaderCache = Map<
+  string,
+  { headers: Array<{ label: string; n: number }>; crossValues: string[] }
+>;
+
+// --- 集計コンテキスト ---
+
 export class AggregationContext {
-  constructor(
+  private constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
     private totalN: number,
     private crossCols: QuestionDef[],
     private crossHeaderCache: CrossHeaderCache,
   ) {}
+
+  /** ファクトリ: conn と payload から前処理済みのコンテキストを生成 */
+  static async create(
+    conn: duckdb.AsyncDuckDBConnection,
+    payload: Query,
+  ): Promise<AggregationContext> {
+    const weightCol = payload.weight_col;
+    const totalN = await computeTotalN(conn, weightCol);
+    const crossCols = payload.cross_cols ?? [];
+    const crossHeaderCache =
+      crossCols.length > 0
+        ? await fetchCrossHeaders(conn, crossCols, weightCol)
+        : (new Map() as CrossHeaderCache);
+
+    return new AggregationContext(conn, weightCol, totalN, crossCols, crossHeaderCache);
+  }
 
   async aggregateSA(col: string): Promise<AggResult> {
     const sql = `
@@ -243,4 +278,61 @@ export class AggregationContext {
 
     return cells;
   }
+}
+
+// --- 前処理（static create から利用） ---
+
+async function computeTotalN(
+  conn: duckdb.AsyncDuckDBConnection,
+  weightCol: string
+): Promise<number> {
+  const sql = weightCol
+    ? `SELECT COALESCE(SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE)), 0) AS n FROM survey`
+    : `SELECT COUNT(*) AS n FROM survey`;
+  const result = await conn.query(sql);
+  return Number(result.toArray()[0].n);
+}
+
+async function fetchCrossHeaders(
+  conn: duckdb.AsyncDuckDBConnection,
+  crossCols: QuestionDef[],
+  weightCol: string
+): Promise<CrossHeaderCache> {
+  const cache: CrossHeaderCache = new Map();
+
+  for (const crossQ of crossCols) {
+    if (crossQ.type === "SA") {
+      const col = crossQ.column;
+      const sql = `
+        SELECT
+          "${esc(col)}" AS cv,
+          ${weightExpr(weightCol)} AS n
+        FROM survey
+        WHERE "${esc(col)}" IS NOT NULL
+          AND "${esc(col)}" != ''
+        GROUP BY "${esc(col)}"
+        ORDER BY
+          TRY_CAST("${esc(col)}" AS DOUBLE) NULLS LAST,
+          "${esc(col)}" ASC
+      `;
+      const result = await conn.query(sql);
+      const headers = result
+        .toArray()
+        .map((r) => ({ label: String(r.cv), n: Number(r.n) }));
+      cache.set(crossQ.column, { headers, crossValues: headers.map((h) => h.label) });
+    } else {
+      const selectClauses = crossQ.columns.map((col, i) =>
+        `${maWeightedCountExpr(col, weightCol)} AS c${i}`
+      );
+      const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
+      const result = await conn.query(sql);
+      const row = result.toArray()[0];
+      const headers = crossQ.columns.map((col, i) => ({
+        label: col,
+        n: Number(row[`c${i}`] ?? 0),
+      }));
+      cache.set(crossQ.prefix, { headers, crossValues: headers.map((h) => h.label) });
+    }
+  }
+  return cache;
 }
