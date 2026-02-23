@@ -99,9 +99,6 @@ async function runAggregation(): Promise<void> {
   const crossCols = getCrossColsSelected();
 
   try {
-    // クロス軸に選ばれたキーを除外セットに
-    const crossKeys = new Set(crossCols.map((q) => q.key));
-
     // layoutMeta.colTypes から全SA/MA列を questions に変換
     const questions: QuestionDef[] = [];
     const maAccum: Record<string, string[]> = {};
@@ -109,11 +106,9 @@ async function runAggregation(): Promise<void> {
       const t = layoutMeta.colTypes[col];
       if (!t) continue;
       if (t === "sa") {
-        if (crossKeys.has(col)) continue;
         questions.push({ key: col, columns: [col], type: "SA" });
       } else if (t.startsWith("ma:")) {
         const prefix = t.slice(3);
-        if (crossKeys.has(prefix)) continue;
         (maAccum[prefix] ??= []).push(col);
       }
     }
