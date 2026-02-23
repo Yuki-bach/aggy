@@ -1,4 +1,3 @@
-import { readFileAsText } from "../lib/csv";
 import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "../lib/layout";
 
 export function initCsvInput(
@@ -14,7 +13,7 @@ export function initCsvInput(
 
   async function handleFile(file: File) {
     try {
-      const csvText = await readFileAsText(file);
+      const csvText = await file.text();
       onLoad(csvText, file.name);
     } catch (err) {
       onError((err as Error).message);
