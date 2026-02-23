@@ -1,7 +1,7 @@
-import { parseCSVFile, type ParseResult } from "../lib/csv";
+import { readFileAsText } from "../lib/csv";
 
 export function initDropzone(
-  onLoad: (result: ParseResult, fileName: string) => void,
+  onLoad: (csvText: string, fileName: string) => void,
   onError: (msg: string) => void
 ): void {
   const fileInput = document.getElementById("file-input") as HTMLInputElement;
@@ -28,8 +28,8 @@ export function initDropzone(
 
   async function handleFile(file: File) {
     try {
-      const result = await parseCSVFile(file);
-      onLoad(result, file.name);
+      const csvText = await readFileAsText(file);
+      onLoad(csvText, file.name);
     } catch (err) {
       onError((err as Error).message);
     }

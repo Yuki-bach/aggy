@@ -1,21 +1,19 @@
 import "./style.css";
 import { initDropzone } from "./components/Dropzone";
 import { initLayoutDropzone } from "./components/LayoutDropzone";
-import { initColConfig, type ColConfigState } from "./components/ColConfig";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
-import type { AggResult } from "./lib/aggregator";
+import type { QuestionDef } from "./lib/aggregator";
 import {
   initDuckDB,
+  loadCSV,
   runDuckDBAggregation,
 } from "./lib/duckdbBridge";
-import type { ParseResult } from "./lib/csv";
 import type { Layout, LayoutMeta } from "./lib/layout";
 
 // データストア
-let parsedData: Record<string, string>[] = [];
 let headers: string[] = [];
-let colConfig: ColConfigState | null = null;
+let dataRowCount = 0;
 let layoutMeta: LayoutMeta | null = null;
 
 // DuckDB Wasm をバックグラウンドで初期化開始
@@ -23,28 +21,33 @@ initDuckDB().catch(() => {
   // エラーはduckdbBridge内でUI表示済み
 });
 
-// CSV読み込みハンドラ
-function onCSVLoaded(result: ParseResult, fileName: string): void {
-  headers = result.headers;
-  parsedData = result.data;
+// CSV + レイアウト両方揃ったらUI初期化
+function initAfterBothLoaded(): void {
+  if (headers.length === 0 || !layoutMeta) return;
 
-  document.getElementById("file-info")!.textContent =
-    `${fileName}  /  ${parsedData.length.toLocaleString()} 件  /  ${headers.length} 列`;
+  // クロス集計軸候補: SA列のみ
+  const saColumns = headers.filter((col) => layoutMeta!.colTypes[col] === "sa");
+  initCrossConfig(saColumns, layoutMeta!.questionLabels);
 
-  colConfig = initColConfig(headers, layoutMeta ?? undefined);
-
-  // クロス集計軸候補: SA列（MA以外）
-  const saColumns = headers.filter((col) => {
-    const t = colConfig!.colTypes[col];
-    return t === "sa";
-  });
-  initCrossConfig(saColumns);
-
-  document.getElementById("col-config-section")!.classList.remove("hidden");
-  document.getElementById("weight-section")!.classList.remove("hidden");
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
+}
+
+// CSV読み込みハンドラ: DuckDBにロードしてheaders/rowCountを取得
+async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
+  try {
+    const result = await loadCSV(csvText);
+    headers = result.headers;
+    dataRowCount = result.rowCount;
+
+    document.getElementById("file-info")!.textContent =
+      `${fileName}  /  ${dataRowCount.toLocaleString()} 件  /  ${headers.length} 列`;
+
+    initAfterBothLoaded();
+  } catch (e) {
+    showError("CSV読み込みエラー: " + (e as Error).message);
+  }
 }
 
 // レイアウト読み込みハンドラ
@@ -58,10 +61,7 @@ function onLayoutLoaded(
   document.getElementById("layout-file-info")!.textContent =
     `${fileName}  /  ${Object.keys(meta.colTypes).length} 列定義`;
 
-  // CSV読込済みの場合は列設定を再適用
-  if (headers.length > 0) {
-    colConfig = initColConfig(headers, layoutMeta);
-  }
+  initAfterBothLoaded();
 }
 
 function showError(msg: string): void {
@@ -74,72 +74,41 @@ function showError(msg: string): void {
   }
 }
 
-function projectRowsForWasm(
-  data: Record<string, string>[],
-  columnNames: string[]
-): Record<string, string>[] {
-  const needed = new Set(columnNames);
-
-  return data.map((row) => {
-    const projected: Record<string, string> = {};
-    needed.forEach((key) => {
-      projected[key] = row[key] ?? "";
-    });
-    return projected;
-  });
-}
-
 // 集計実行
 async function runAggregation(): Promise<void> {
-  if (!colConfig) return;
-  const cfg = colConfig;
+  if (!layoutMeta) return;
   showError("");
 
-  const weightCol = (
-    document.getElementById("weight-col-select") as HTMLSelectElement
-  ).value;
+  // ウェイト列はレイアウトから自動決定
+  const weightCol =
+    Object.entries(layoutMeta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
   const crossCols = getCrossColsSelected();
 
-  const selectedColumns = headers.filter((col) => cfg.colSelected[col]);
-  const selectedSet = new Set(selectedColumns);
-  const effectiveWeightCol =
-    weightCol && selectedSet.has(weightCol) ? weightCol : "";
-
-  // クロス軸列とウェイト列も投影に含める
-  const allNeededCols = [
-    ...new Set([
-      ...selectedColumns,
-      ...crossCols,
-      ...(effectiveWeightCol ? [effectiveWeightCol] : []),
-    ]),
-  ];
-
   try {
-    const sa_cols: string[] = [];
-    const ma_groups: Record<string, string[]> = {};
-    for (const col of selectedColumns) {
+    // layoutMeta.colTypes から全SA/MA列を questions に変換
+    const questions: QuestionDef[] = [];
+    const maAccum: Record<string, string[]> = {};
+    for (const col of headers) {
+      const t = layoutMeta.colTypes[col];
+      if (!t) continue;
       if (crossCols.includes(col)) continue;
-      const t = cfg.colTypes[col];
       if (t === "sa") {
-        sa_cols.push(col);
-      } else if (t?.startsWith("ma:")) {
+        questions.push({ key: col, columns: [col], type: "SA" });
+      } else if (t.startsWith("ma:")) {
         const prefix = t.slice(3);
-        (ma_groups[prefix] ??= []).push(col);
+        (maAccum[prefix] ??= []).push(col);
       }
     }
+    for (const [prefix, cols] of Object.entries(maAccum)) {
+      questions.push({ key: prefix, columns: cols, type: "MA" });
+    }
 
-    const projectedData = projectRowsForWasm(parsedData, allNeededCols);
-
-    const payload = {
-      data: projectedData,
-      sa_cols,
-      ma_groups,
-      weight_col: effectiveWeightCol,
+    const results = await runDuckDBAggregation({
+      questions,
+      weight_col: weightCol,
       cross_cols: crossCols,
-    };
-
-    const results: AggResult[] = await runDuckDBAggregation(payload);
-    renderResults(results, effectiveWeightCol, parsedData.length, layoutMeta ?? undefined);
+    });
+    renderResults(results, weightCol, dataRowCount, layoutMeta);
   } catch (e) {
     showError("集計エラー: " + (e as Error).message);
     console.error(e);

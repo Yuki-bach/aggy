@@ -8,6 +8,7 @@ import { aggregate, type Query, type AggResult } from "./aggregator";
 type DuckStatus = "loading" | "ready" | "error";
 
 let db: duckdb.AsyncDuckDB | null = null;
+let conn: duckdb.AsyncDuckDBConnection | null = null;
 let status: DuckStatus = "loading";
 let initPromise: Promise<void> | null = null;
 
@@ -49,46 +50,36 @@ export async function initDuckDB(): Promise<void> {
   return initPromise;
 }
 
-// CSV値をRFC 4180形式にクォート
-function quoteCSVField(v: string): string {
-  return `"${String(v ?? "").replace(/"/g, '""')}"`;
-}
-
-function serializeToCSV(data: Record<string, string>[], cols: string[]): string {
-  const header = cols.map(quoteCSVField).join(",");
-  const rows = data.map((row) =>
-    cols.map((c) => quoteCSVField(row[c] ?? "")).join(",")
-  );
-  return [header, ...rows].join("\n");
-}
-
-export async function runDuckDBAggregation(payload: {
-  data: Record<string, string>[];
-} & Query): Promise<AggResult[]> {
+async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
   if (!db || status !== "ready") throw new Error("DuckDB is not ready");
+  if (!conn) conn = await db.connect();
+  return conn;
+}
 
-  const allColNames = [
-    ...new Set([
-      ...payload.sa_cols,
-      ...Object.values(payload.ma_groups).flat(),
-      ...payload.cross_cols,
-      ...(payload.weight_col ? [payload.weight_col] : []),
-    ]),
-  ];
+/** CSVテキストをDuckDBに登録し、ヘッダーと行数を返す */
+export async function loadCSV(csvText: string): Promise<{ headers: string[]; rowCount: number }> {
+  await initDuckDB();
+  if (!db) throw new Error("DuckDB is not ready");
 
-  const csvText = serializeToCSV(payload.data, allColNames);
   await db.registerFileText("survey.csv", csvText);
 
-  const conn = await db.connect();
-  try {
-    await conn.query(
-      `CREATE OR REPLACE VIEW survey AS
-       SELECT * FROM read_csv('survey.csv', all_varchar=true)`
-    );
+  const c = await getConnection();
+  await c.query(
+    `CREATE OR REPLACE VIEW survey AS
+     SELECT * FROM read_csv('survey.csv', all_varchar=true)`
+  );
 
-    return await aggregate(conn, payload);
-  } finally {
-    await conn.close();
-    await db.dropFile("survey.csv");
-  }
+  const descResult = await c.query(`DESCRIBE survey`);
+  const headers = descResult.toArray().map((r) => String(r.column_name));
+
+  const countResult = await c.query(`SELECT COUNT(*) AS n FROM survey`);
+  const rowCount = Number(countResult.toArray()[0].n);
+
+  return { headers, rowCount };
+}
+
+/** survey ビューに対して集計を実行する */
+export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
+  const c = await getConnection();
+  return aggregate(c, query);
 }
