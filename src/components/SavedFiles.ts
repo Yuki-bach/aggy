@@ -43,7 +43,7 @@ export async function refreshList(): Promise<void> {
     delBtn.className = "saved-item-del";
     delBtn.type = "button";
     delBtn.textContent = "×";
-    delBtn.title = "削除";
+    delBtn.setAttribute("aria-label", `${entry.csvName} を削除`);
     delBtn.addEventListener("click", async (e) => {
       e.stopPropagation();
       await deleteSaved(entry.folderId);

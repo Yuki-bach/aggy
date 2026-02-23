@@ -187,15 +187,17 @@ function buildGtTable(
 ): HTMLTableElement {
   const { mains, lookup } = pv;
 
+  const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
   const table = document.createElement("table");
   table.className = "gt";
   table.innerHTML = `
+    <caption class="visually-hidden">${escHtml(questionLabel)} の集計結果</caption>
     <thead>
       <tr>
         <th>選択肢</th>
         <th class="right">n</th>
         <th class="right">%</th>
-        <th></th>
+        <th aria-hidden="true"><span class="visually-hidden">グラフ</span></th>
       </tr>
     </thead>
     <tbody>
@@ -211,7 +213,7 @@ function buildGtTable(
               : cell.count.toFixed(1)
           }</td>
           <td class="pct">${cell.pct.toFixed(1)}%</td>
-          <td class="bar-cell">
+          <td class="bar-cell" aria-hidden="true">
             <div class="bar" style="width:${((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1)}px"></div>
           </td>
         </tr>
@@ -234,8 +236,14 @@ function buildCrossTable(
   const gtSub = subs.find((s) => s.label === "GT")!;
   const crossSubs = subs.filter((s) => s.label !== "GT");
 
+  const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
   const table = document.createElement("table");
   table.className = "gt cross-table";
+
+  const caption = document.createElement("caption");
+  caption.className = "visually-hidden";
+  caption.textContent = `${questionLabel} のクロス集計結果`;
+  table.appendChild(caption);
 
   // ヘッダー行1: 選択肢 | 全体 | クロス値...
   const tr1 = document.createElement("tr");

@@ -21,16 +21,19 @@ function initThemeToggle(): void {
   if (saved === "dark") {
     document.documentElement.dataset.theme = "dark";
     toggle.textContent = "☀️";
+    toggle.setAttribute("aria-label", "ライトモードに切り替え");
   }
   toggle.addEventListener("click", () => {
     const isDark = document.documentElement.dataset.theme === "dark";
     if (isDark) {
       delete document.documentElement.dataset.theme;
       toggle.textContent = "🌙";
+      toggle.setAttribute("aria-label", "ダークモードに切り替え");
       localStorage.setItem("temotto-theme", "light");
     } else {
       document.documentElement.dataset.theme = "dark";
       toggle.textContent = "☀️";
+      toggle.setAttribute("aria-label", "ライトモードに切り替え");
       localStorage.setItem("temotto-theme", "dark");
     }
   });
@@ -165,14 +168,43 @@ async function runAggregation(): Promise<void> {
 }
 
 // タブ切り替え
-for (const tab of document.querySelectorAll<HTMLButtonElement>(".load-tab")) {
-  tab.addEventListener("click", () => {
-    for (const t of document.querySelectorAll<HTMLButtonElement>(".load-tab")) {
-      t.classList.toggle("active", t === tab);
+const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".load-tab"));
+
+function activateTab(tab: HTMLButtonElement): void {
+  for (const t of tabs) {
+    const isActive = t === tab;
+    t.classList.toggle("active", isActive);
+    t.setAttribute("aria-selected", String(isActive));
+    t.tabIndex = isActive ? 0 : -1;
+  }
+  const target = tab.dataset.tab!;
+  document.getElementById("tab-file")!.classList.toggle("hidden", target !== "file");
+  document.getElementById("tab-saved")!.classList.toggle("hidden", target !== "saved");
+  tab.focus();
+}
+
+// 初期状態: 非アクティブタブを tabIndex=-1 に設定
+for (const t of tabs) {
+  if (!t.classList.contains("active")) t.tabIndex = -1;
+}
+
+for (const tab of tabs) {
+  tab.addEventListener("click", () => activateTab(tab));
+  tab.addEventListener("keydown", (e: KeyboardEvent) => {
+    const idx = tabs.indexOf(tab);
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      activateTab(tabs[(idx + 1) % tabs.length]);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      activateTab(tabs[(idx - 1 + tabs.length) % tabs.length]);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      activateTab(tabs[0]);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      activateTab(tabs[tabs.length - 1]);
     }
-    const target = tab.dataset.tab!;
-    document.getElementById("tab-file")!.classList.toggle("hidden", target !== "file");
-    document.getElementById("tab-saved")!.classList.toggle("hidden", target !== "saved");
   });
 }
 

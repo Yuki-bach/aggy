@@ -16,26 +16,26 @@
   <h1>Temotto</h1>
   <span>SURVEY AGGREGATOR v0.1</span>
   <div class="header-right">
-    <div class="wasm-status">
-      <div class="status-dot loading" id="wasm-dot"></div>
+    <div class="wasm-status" role="status" aria-live="polite">
+      <div class="status-dot loading" id="wasm-dot" aria-hidden="true"></div>
       <span id="wasm-label">DuckDB 読み込み中...</span>
     </div>
-    <button id="theme-toggle" class="theme-toggle" title="テーマ切り替え">🌙</button>
+    <button id="theme-toggle" class="theme-toggle" aria-label="ダークモードに切り替え">🌙</button>
   </div>
 </header>
 
 <main>
   <!-- LEFT: 設定パネル -->
-  <div class="panel-left">
+  <div class="panel-left" role="region" aria-label="設定">
 
     <!-- データ読み込み -->
-    <div class="section" id="file-section">
-      <div class="section-label">01 / データ読み込み</div>
-      <div class="load-tabs">
-        <button class="load-tab active" data-tab="file">ファイルから</button>
-        <button class="load-tab" data-tab="saved">保存データから</button>
+    <section class="section" id="file-section">
+      <h2 class="section-label">01 / データ読み込み</h2>
+      <div class="load-tabs" role="tablist" aria-label="データ読み込み方法">
+        <button class="load-tab active" role="tab" aria-selected="true" aria-controls="tab-file" id="tab-btn-file" data-tab="file">ファイルから</button>
+        <button class="load-tab" role="tab" aria-selected="false" aria-controls="tab-saved" id="tab-btn-saved" data-tab="saved">保存データから</button>
       </div>
-      <div class="load-tab-panel" id="tab-file">
+      <div class="load-tab-panel" id="tab-file" role="tabpanel" aria-labelledby="tab-btn-file">
         <div class="file-row">
           <label class="file-label" for="file-input">CSV</label>
           <input type="file" id="file-input" accept=".csv" class="file-input">
@@ -45,30 +45,30 @@
           <input type="file" id="layout-file-input" accept=".json" class="file-input">
         </div>
       </div>
-      <div class="load-tab-panel hidden" id="tab-saved">
+      <div class="load-tab-panel hidden" id="tab-saved" role="tabpanel" aria-labelledby="tab-btn-saved">
         <div id="saved-files-list"></div>
       </div>
-      <div id="loaded-data-info" class="loaded-data-info hidden"></div>
-    </div>
+      <div id="loaded-data-info" class="loaded-data-info hidden" aria-live="polite"></div>
+    </section>
 
     <!-- クロス集計軸 -->
-    <div class="section hidden" id="cross-config-section">
-      <div class="section-label">02 / クロス集計軸（任意）</div>
-      <div class="cross-col-list" id="cross-col-list"></div>
-    </div>
+    <section class="section hidden" id="cross-config-section">
+      <h2 class="section-label">02 / クロス集計軸（任意）</h2>
+      <div class="cross-col-list" id="cross-col-list" role="group" aria-label="クロス集計軸の選択"></div>
+    </section>
 
-    <div id="error-msg" class="hidden"></div>
+    <div id="error-msg" class="hidden" role="alert" aria-live="assertive"></div>
 
     <button class="run-btn hidden" id="run-btn" disabled>▶ 集計を実行</button>
   </div>
 
   <!-- RIGHT: 結果パネル -->
-  <div class="panel-right" id="panel-right">
+  <div class="panel-right" id="panel-right" role="region" aria-label="集計結果">
     <div class="empty-state" id="empty-state">
-      <span class="big">⬛</span>
+      <span class="big" aria-hidden="true">⬛</span>
       <p>CSVを読み込んで集計を実行してください</p>
     </div>
-    <div class="hidden" id="results-area"></div>
+    <div class="hidden" id="results-area" aria-live="polite"></div>
   </div>
 </main>
 
