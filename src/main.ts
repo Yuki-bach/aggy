@@ -14,6 +14,30 @@ import { initSavedFiles, refreshList } from "./components/SavedFiles";
 let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null = null;
 let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
 
+// テーマ切り替え
+function initThemeToggle(): void {
+  const toggle = document.getElementById("theme-toggle")!;
+  const saved = localStorage.getItem("temotto-theme");
+  if (saved === "dark") {
+    document.documentElement.dataset.theme = "dark";
+    toggle.textContent = "☀️";
+  }
+  toggle.addEventListener("click", () => {
+    const isDark = document.documentElement.dataset.theme === "dark";
+    if (isDark) {
+      delete document.documentElement.dataset.theme;
+      toggle.textContent = "🌙";
+      localStorage.setItem("temotto-theme", "light");
+    } else {
+      document.documentElement.dataset.theme = "dark";
+      toggle.textContent = "☀️";
+      localStorage.setItem("temotto-theme", "dark");
+    }
+  });
+}
+
+initThemeToggle();
+
 // DuckDB Wasm をバックグラウンドで初期化開始
 initDuckDB().catch(() => {
   // エラーはduckdbBridge内でUI表示済み
@@ -133,7 +157,7 @@ async function runAggregation(): Promise<void> {
       weight_col: weightCol,
       cross_cols: crossCols,
     });
-    renderResults(results, weightCol, currentCsv.rowCount, currentLayout.meta);
+    renderResults(results, weightCol, currentCsv.rowCount, currentLayout.meta, crossCols);
   } catch (e) {
     showError("集計エラー: " + (e as Error).message);
     console.error(e);

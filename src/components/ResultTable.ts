@@ -1,4 +1,4 @@
-import type { AggResult } from "../lib/aggregate";
+import type { AggResult, QuestionDef } from "../lib/aggregate";
 import type { LayoutMeta } from "../lib/layout";
 import { pivot } from "../lib/pivot";
 import { downloadAllCSV } from "../lib/download";
@@ -35,13 +35,26 @@ function resolveValueLabel(
   }
 }
 
-/** クロス軸ヘッダーのラベルを解決する。MAカラム名の場合valueLabelsで解決 */
-function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
+/** クロス軸ヘッダーのラベルを解決する。
+ *  crossCols があれば SA クロス軸の値ラベルも解決する */
+function resolveSubLabel(
+  subLabel: string,
+  meta?: LayoutMeta,
+  crossCols?: QuestionDef[]
+): string {
   if (!meta) return subLabel;
   // MAカラム名の場合: valueLabels[colName]["1"] にラベルがある
   const maLabel = meta.valueLabels[subLabel]?.["1"];
   if (maLabel) return maLabel;
-  // SA値の場合はそのまま返す
+  // SA クロス軸の値ラベルを解決
+  if (crossCols) {
+    for (const q of crossCols) {
+      if (q.type === "SA") {
+        const label = meta.valueLabels[q.column]?.[subLabel];
+        if (label) return label;
+      }
+    }
+  }
   return subLabel;
 }
 
@@ -49,7 +62,8 @@ export function renderResults(
   results: AggResult[],
   weightCol: string,
   _rawN: number,
-  layoutMeta?: LayoutMeta
+  layoutMeta?: LayoutMeta,
+  crossCols?: QuestionDef[]
 ): void {
   document.getElementById("empty-state")!.classList.add("hidden");
   const area = document.getElementById("results-area")!;
@@ -117,7 +131,7 @@ export function renderResults(
     `;
 
     if (isCross) {
-      card.appendChild(buildCrossTable(res, pv, weightCol, layoutMeta));
+      card.appendChild(buildCrossTable(res, pv, weightCol, layoutMeta, crossCols));
     } else {
       card.appendChild(buildGtTable(res, pv, weightCol, maxPct, layoutMeta));
     }
@@ -177,7 +191,7 @@ function buildGtTable(
     <thead>
       <tr>
         <th>選択肢</th>
-        <th class="right">件数</th>
+        <th class="right">n</th>
         <th class="right">%</th>
         <th></th>
       </tr>
@@ -211,7 +225,8 @@ function buildCrossTable(
   res: AggResult,
   pv: ReturnType<typeof pivot>,
   weightCol: string,
-  layoutMeta?: LayoutMeta
+  layoutMeta?: LayoutMeta,
+  crossCols?: QuestionDef[]
 ): HTMLTableElement {
   const { mains, subs, lookup } = pv;
   const gtSub = subs.find((s) => s.label === "GT")!;
@@ -248,7 +263,7 @@ function buildCrossTable(
 
   const thCount = document.createElement("th");
   thCount.className = "right";
-  thCount.textContent = "件数";
+  thCount.textContent = "n";
   tr2.appendChild(thCount);
 
   const thPct = document.createElement("th");
@@ -260,7 +275,7 @@ function buildCrossTable(
     const th = document.createElement("th");
     th.className = "right cross-val-header";
     const nStr = weightCol ? sub.n.toFixed(1) : sub.n.toLocaleString();
-    th.innerHTML = `${escHtml(resolveSubLabel(sub.label, layoutMeta))}<br><span class="cross-n">n=${nStr}</span>`;
+    th.innerHTML = `${escHtml(resolveSubLabel(sub.label, layoutMeta, crossCols))}<br><span class="cross-n">n=${nStr}</span>`;
     tr2.appendChild(th);
   });
 
