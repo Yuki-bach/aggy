@@ -36,7 +36,7 @@
 
     <!-- レイアウトアップロード -->
     <div class="section">
-      <div class="section-label">02 / 設問情報（任意）</div>
+      <div class="section-label">02 / 設問レイアウト</div>
       <div class="dropzone" id="layout-dropzone">
         <input type="file" id="layout-file-input" accept=".json">
         <span class="dropzone-icon">📋</span>
@@ -50,24 +50,13 @@
 
     <!-- 列設定 -->
     <div class="section hidden" id="col-config-section">
-      <div class="section-label">03 / 列の種別設定</div>
+      <div class="section-label">03 / 集計対象の選択</div>
       <div class="col-list" id="col-list"></div>
-    </div>
-
-    <!-- ウェイト列 -->
-    <div class="section hidden" id="weight-section">
-      <div class="section-label">04 / ウェイトバック</div>
-      <div class="weight-select-wrap">
-        <label>ウェイト列（任意）</label>
-        <select class="weight-col-select" id="weight-col-select">
-          <option value="">— ウェイトなし（実数集計）—</option>
-        </select>
-      </div>
     </div>
 
     <!-- クロス集計軸 -->
     <div class="section hidden" id="cross-config-section">
-      <div class="section-label">05 / クロス集計軸（任意）</div>
+      <div class="section-label">04 / クロス集計軸（任意）</div>
       <div class="cross-col-list" id="cross-col-list"></div>
     </div>
 

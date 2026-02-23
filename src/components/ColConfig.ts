@@ -1,4 +1,3 @@
-import { detectMAGroups, guessColType } from "../lib/colDetect";
 import type { LayoutMeta } from "../lib/layout";
 
 export interface ColConfigState {
@@ -8,33 +7,23 @@ export interface ColConfigState {
 
 export function initColConfig(
   headers: string[],
-  layoutMeta?: LayoutMeta
+  layoutMeta: LayoutMeta
 ): ColConfigState {
   const colTypes: Record<string, string> = {};
   const colSelected: Record<string, boolean> = {};
   const list = document.getElementById("col-list")!;
   list.innerHTML = "";
 
-  const weightSel = document.getElementById(
-    "weight-col-select"
-  ) as HTMLSelectElement;
-  weightSel.innerHTML =
-    '<option value="">— ウェイトなし（実数集計）—</option>';
-
-  const maGroups = detectMAGroups(headers);
-
   headers.forEach((col) => {
-    // レイアウトの種別指定を優先し、なければ自動推定
-    const defaultType = layoutMeta?.colTypes[col] ?? guessColType(col, maGroups);
-    colTypes[col] = defaultType;
-    colSelected[col] =
-      defaultType !== "id" &&
-      defaultType !== "weight" &&
-      defaultType !== "exclude";
+    const colType = layoutMeta.colTypes[col] ?? "exclude";
+    colTypes[col] = colType;
+    const isSAorMA = colType === "sa" || colType.startsWith("ma:");
+    colSelected[col] = isSAorMA;
 
-    const maPrefix = defaultType.startsWith("ma:")
-      ? defaultType.slice(3)
-      : (maGroups[col] ?? null);
+    // SA/MA列のみUIに表示
+    if (!isSAorMA) return;
+
+    const maPrefix = colType.startsWith("ma:") ? colType.slice(3) : null;
 
     const item = document.createElement("div");
     item.className = "col-item";
@@ -59,8 +48,8 @@ export function initColConfig(
 
     // レイアウトから設問ラベルがあれば表示
     const qLabel = maPrefix
-      ? layoutMeta?.questionLabels[maPrefix]
-      : layoutMeta?.questionLabels[col];
+      ? layoutMeta.questionLabels[maPrefix]
+      : layoutMeta.questionLabels[col];
     if (qLabel) {
       const labelEl = document.createElement("div");
       labelEl.className = "col-question-label";
@@ -68,42 +57,9 @@ export function initColConfig(
       nameEl.appendChild(labelEl);
     }
 
-    const sel = document.createElement("select");
-    sel.className = "col-type";
-    const options = [
-      { value: `ma:${maPrefix || col}`, label: "MA" },
-      { value: "sa", label: "SA" },
-      { value: "weight", label: "WEIGHT" },
-      { value: "id", label: "ID（除外）" },
-      { value: "exclude", label: "除外" },
-    ];
-    options.forEach((o) => {
-      const opt = document.createElement("option");
-      opt.value = o.value;
-      opt.textContent = o.label;
-      if (o.value === defaultType) opt.selected = true;
-      sel.appendChild(opt);
-    });
-
-    sel.addEventListener("change", () => {
-      colTypes[col] = sel.value;
-      if (sel.value === "id" || sel.value === "weight") {
-        pick.checked = false;
-        colSelected[col] = false;
-      }
-    });
-
     item.appendChild(pick);
     item.appendChild(nameEl);
-    item.appendChild(sel);
     list.appendChild(item);
-
-    // ウェイト列候補
-    const wOpt = document.createElement("option");
-    wOpt.value = col;
-    wOpt.textContent = col;
-    if (defaultType === "weight") wOpt.selected = true;
-    weightSel.appendChild(wOpt);
   });
 
   return { colTypes, colSelected };
