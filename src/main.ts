@@ -25,9 +25,23 @@ initDuckDB().catch(() => {
 function initAfterBothLoaded(): void {
   if (headers.length === 0 || !layoutMeta) return;
 
-  // クロス集計軸候補: SA列のみ
-  const saColumns = headers.filter((col) => layoutMeta!.colTypes[col] === "sa");
-  initCrossConfig(saColumns, layoutMeta!.questionLabels);
+  // クロス集計軸候補: SA列 + MAグループ
+  const crossCandidates: QuestionDef[] = [];
+  const maAccumForCross: Record<string, string[]> = {};
+  for (const col of headers) {
+    const t = layoutMeta!.colTypes[col];
+    if (!t) continue;
+    if (t === "sa") {
+      crossCandidates.push({ key: col, columns: [col], type: "SA" });
+    } else if (t.startsWith("ma:")) {
+      const prefix = t.slice(3);
+      (maAccumForCross[prefix] ??= []).push(col);
+    }
+  }
+  for (const [prefix, cols] of Object.entries(maAccumForCross)) {
+    crossCandidates.push({ key: prefix, columns: cols, type: "MA" });
+  }
+  initCrossConfig(crossCandidates, layoutMeta!.questionLabels);
 
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
@@ -91,7 +105,6 @@ async function runAggregation(): Promise<void> {
     for (const col of headers) {
       const t = layoutMeta.colTypes[col];
       if (!t) continue;
-      if (crossCols.includes(col)) continue;
       if (t === "sa") {
         questions.push({ key: col, columns: [col], type: "SA" });
       } else if (t.startsWith("ma:")) {
