@@ -20,37 +20,24 @@
   <!-- LEFT: 設定パネル -->
   <div class="panel-left">
 
-    <!-- CSVアップロード -->
-    <div class="section">
+    <!-- データ読み込み -->
+    <div class="section" id="file-section">
       <div class="section-label">01 / データ読み込み</div>
-      <div class="dropzone" id="dropzone">
-        <input type="file" id="file-input" accept=".csv">
-        <span class="dropzone-icon">📂</span>
-        <div class="dropzone-text">
-          <strong>CSVをドロップ or クリック</strong>
-          1行目ヘッダー、UTF-8 or Shift-JIS
-        </div>
+      <div class="file-row">
+        <label class="file-label" for="file-input">CSV</label>
+        <input type="file" id="file-input" accept=".csv" class="file-input">
+        <span id="file-info" class="file-meta"></span>
       </div>
-      <div id="file-info" style="margin-top:0.75rem;font-size:0.72rem;color:var(--muted);"></div>
-    </div>
-
-    <!-- レイアウトアップロード -->
-    <div class="section">
-      <div class="section-label">02 / 設問レイアウト</div>
-      <div class="dropzone" id="layout-dropzone">
-        <input type="file" id="layout-file-input" accept=".json">
-        <span class="dropzone-icon">📋</span>
-        <div class="dropzone-text">
-          <strong>レイアウトJSONをドロップ or クリック</strong>
-          設問・選択肢ラベルの定義ファイル
-        </div>
+      <div class="file-row">
+        <label class="file-label" for="layout-file-input">JSON</label>
+        <input type="file" id="layout-file-input" accept=".json" class="file-input">
+        <span id="layout-file-info" class="file-meta"></span>
       </div>
-      <div id="layout-file-info" style="margin-top:0.75rem;font-size:0.72rem;color:var(--muted);"></div>
     </div>
 
     <!-- クロス集計軸 -->
     <div class="section hidden" id="cross-config-section">
-      <div class="section-label">03 / クロス集計軸（任意）</div>
+      <div class="section-label">02 / クロス集計軸（任意）</div>
       <div class="cross-col-list" id="cross-col-list"></div>
     </div>
 
