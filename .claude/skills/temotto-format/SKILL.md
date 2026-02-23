@@ -1,12 +1,12 @@
 ---
-name: tally-format
-description: Tallyアンケート集計ツール用CSVローデータとJSONレイアウトファイルのフォーマット仕様・バリデーション。フォーマット変換、データ検証、ファイル準備に関する質問で自動発動。
+name: temotto-format
+description: Temottoアンケート集計ツール用CSVローデータとJSONレイアウトファイルのフォーマット仕様・バリデーション。フォーマット変換、データ検証、ファイル準備に関する質問で自動発動。
 disable-model-invocation: true
 ---
 
-# Tally フォーマット仕様・バリデーション
+# Temotto フォーマット仕様・バリデーション
 
-Tallyは2つのファイルを必要とする：**CSVローデータ**と**JSONレイアウトファイル**。このスキルはこれらの形式の仕様を説明し、バリデーションを支援する。
+Temottoは2つのファイルを必要とする：**CSVローデータ**と**JSONレイアウトファイル**。このスキルはこれらの形式の仕様を説明し、バリデーションを支援する。
 
 ---
 
@@ -187,7 +187,7 @@ type Layout = LayoutEntry[];
 ### 自動検証スクリプトの実行
 
 ```bash
-npx tsx scripts/validate-tally-files.ts <csv-path> <layout-json-path>
+npx tsx scripts/validate-temotto-files.ts <csv-path> <layout-json-path>
 ```
 
 このスクリプトは以下の4段階の検証を自動実行する。
@@ -243,11 +243,11 @@ CSVヘッダーが `Q3_1` でレイアウトの key が `q3` の場合、`q3_1` 
 
 ### CSVにBOMが含まれている
 
-UTF-8 BOM（`\uFEFF`）はバリデーションスクリプトで自動除去される。Tally本体もDuckDBが処理するため問題ない。
+UTF-8 BOM（`\uFEFF`）はバリデーションスクリプトで自動除去される。Temotto本体もDuckDBが処理するため問題ない。
 
 ### MA列の値が 1/0 以外（例: 2, 3 など度数値）
 
-Tallyは `1` のみを「選択あり」として扱う。度数値が入っている場合は、0 以外を全て `1` に変換する必要がある。
+Temottoは `1` のみを「選択あり」として扱う。度数値が入っている場合は、0 以外を全て `1` に変換する必要がある。
 
 ### SA列に "N/A" がある
 

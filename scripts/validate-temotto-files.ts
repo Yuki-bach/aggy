@@ -1,9 +1,9 @@
 /**
- * Tally フォーマット検証スクリプト
+ * Temotto フォーマット検証スクリプト
  *
- * Usage: npx tsx scripts/validate-tally-files.ts <csv-path> <layout-json-path>
+ * Usage: npx tsx scripts/validate-temotto-files.ts <csv-path> <layout-json-path>
  *
- * CSVローデータとJSONレイアウトファイルがTallyの期待する形式に適合しているか検証する。
+ * CSVローデータとJSONレイアウトファイルがTemottoの期待する形式に適合しているか検証する。
  */
 
 import { readFileSync } from "fs";
@@ -381,7 +381,7 @@ function main(): void {
 
   if (args.length < 2) {
     console.error(
-      "Usage: npx tsx scripts/validate-tally-files.ts <csv-path> <layout-json-path>"
+      "Usage: npx tsx scripts/validate-temotto-files.ts <csv-path> <layout-json-path>"
     );
     process.exit(1);
   }
@@ -406,7 +406,7 @@ function main(): void {
     process.exit(1);
   }
 
-  console.log("=== Tally フォーマット検証結果 ===\n");
+  console.log("=== Temotto フォーマット検証結果 ===\n");
 
   let totalErrors = 0;
   let totalWarnings = 0;
