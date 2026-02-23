@@ -4,7 +4,10 @@ export interface CrossConfigState {
 
 let state: CrossConfigState = { crossSelected: {} };
 
-export function initCrossConfig(saColumns: string[]): void {
+export function initCrossConfig(
+  saColumns: string[],
+  questionLabels: Record<string, string>
+): void {
   state = { crossSelected: {} };
   saColumns.forEach((col) => (state.crossSelected[col] = false));
 
@@ -23,8 +26,12 @@ export function initCrossConfig(saColumns: string[]): void {
       state.crossSelected[col] = cb.checked;
     });
 
+    const displayText = questionLabels[col]
+      ? `${col}: ${questionLabels[col]}`
+      : col;
+
     label.appendChild(cb);
-    label.appendChild(document.createTextNode(" " + col));
+    label.appendChild(document.createTextNode(" " + displayText));
     list.appendChild(label);
   });
 }

@@ -27,7 +27,7 @@ function initAfterBothLoaded(): void {
 
   // クロス集計軸候補: SA列のみ
   const saColumns = headers.filter((col) => layoutMeta!.colTypes[col] === "sa");
-  initCrossConfig(saColumns);
+  initCrossConfig(saColumns, layoutMeta!.questionLabels);
 
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
