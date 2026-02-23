@@ -28,27 +28,31 @@ initDuckDB().catch(() => {
   // エラーはduckdbBridge内でUI表示済み
 });
 
+// headers + colTypes から QuestionDef[] を組み立てる
+function buildQuestionDefs(hdrs: string[], colTypes: Record<string, string>): QuestionDef[] {
+  const questions: QuestionDef[] = [];
+  const maAccum: Record<string, string[]> = {};
+  for (const col of hdrs) {
+    const t = colTypes[col];
+    if (!t) continue;
+    if (t === "sa") {
+      questions.push({ type: "SA", column: col });
+    } else if (t.startsWith("ma:")) {
+      (maAccum[t.slice(3)] ??= []).push(col);
+    }
+  }
+  for (const [prefix, cols] of Object.entries(maAccum)) {
+    questions.push({ type: "MA", prefix, columns: cols });
+  }
+  return questions;
+}
+
 // CSV + レイアウト両方揃ったらUI初期化
 function initAfterBothLoaded(): void {
   if (headers.length === 0 || !layoutMeta) return;
 
-  // クロス集計軸候補: SA列 + MAグループ
-  const crossCandidates: QuestionDef[] = [];
-  const maAccumForCross: Record<string, string[]> = {};
-  for (const col of headers) {
-    const t = layoutMeta!.colTypes[col];
-    if (!t) continue;
-    if (t === "sa") {
-      crossCandidates.push({ type: "SA", column: col });
-    } else if (t.startsWith("ma:")) {
-      const prefix = t.slice(3);
-      (maAccumForCross[prefix] ??= []).push(col);
-    }
-  }
-  for (const [prefix, cols] of Object.entries(maAccumForCross)) {
-    crossCandidates.push({ type: "MA", prefix, columns: cols });
-  }
-  initCrossConfig(crossCandidates, layoutMeta!.questionLabels);
+  const crossCandidates = buildQuestionDefs(headers, layoutMeta.colTypes);
+  initCrossConfig(crossCandidates, layoutMeta.questionLabels);
 
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
@@ -155,23 +159,7 @@ async function runAggregation(): Promise<void> {
   const crossCols = getCrossColsSelected();
 
   try {
-    // layoutMeta.colTypes から全SA/MA列を questions に変換
-    const questions: QuestionDef[] = [];
-    const maAccum: Record<string, string[]> = {};
-    for (const col of headers) {
-      const t = layoutMeta.colTypes[col];
-      if (!t) continue;
-      if (t === "sa") {
-        questions.push({ type: "SA", column: col });
-      } else if (t.startsWith("ma:")) {
-        const prefix = t.slice(3);
-        (maAccum[prefix] ??= []).push(col);
-      }
-    }
-    for (const [prefix, cols] of Object.entries(maAccum)) {
-      questions.push({ type: "MA", prefix, columns: cols });
-    }
-
+    const questions = buildQuestionDefs(headers, layoutMeta.colTypes);
     const results = await runDuckDBAggregation({
       questions,
       weight_col: weightCol,
