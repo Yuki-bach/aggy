@@ -10,9 +10,9 @@ import { parseLayout, buildLayoutMeta, buildQuestionDefs, type Layout, type Layo
 import { saveData, loadSaved } from "./lib/opfs";
 import { initSavedFiles, refreshList } from "./components/SavedFiles";
 
-// 中間状態: CSV / Layout それぞれ到着時にオブジェクトごと差し替え
-let pendingCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null = null;
-let pendingLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
+// 現在読み込み済みの CSV / Layout データ
+let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null = null;
+let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
 
 // DuckDB Wasm をバックグラウンドで初期化開始
 initDuckDB().catch(() => {
@@ -21,10 +21,10 @@ initDuckDB().catch(() => {
 
 // CSV + レイアウト両方揃ったらUI初期化
 function initAfterBothLoaded(): void {
-  if (!pendingCsv || !pendingLayout) return;
+  if (!currentCsv || !currentLayout) return;
 
-  const crossCandidates = buildQuestionDefs(pendingCsv.headers, pendingLayout.meta.colTypes);
-  initCrossConfig(crossCandidates, pendingLayout.meta.questionLabels);
+  const crossCandidates = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
+  initCrossConfig(crossCandidates, currentLayout.meta.questionLabels);
 
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
@@ -34,16 +34,16 @@ function initAfterBothLoaded(): void {
 // 読み込み済みデータ情報を表示
 function updateLoadedInfo(): void {
   const el = document.getElementById("loaded-data-info")!;
-  if (!pendingCsv && !pendingLayout) {
+  if (!currentCsv && !currentLayout) {
     el.classList.add("hidden");
     return;
   }
   const lines: string[] = [];
-  if (pendingCsv) {
-    lines.push(`CSV: ${pendingCsv.fileName}  —  ${pendingCsv.rowCount.toLocaleString()} 行 / ${pendingCsv.headers.length} 列`);
+  if (currentCsv) {
+    lines.push(`CSV: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`);
   }
-  if (pendingLayout) {
-    lines.push(`JSON: ${pendingLayout.fileName}  —  ${Object.keys(pendingLayout.meta.colTypes).length} 列定義`);
+  if (currentLayout) {
+    lines.push(`JSON: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`);
   }
   el.textContent = lines.join("\n");
   el.classList.remove("hidden");
@@ -51,9 +51,9 @@ function updateLoadedInfo(): void {
 
 // OPFS自動保存（CSV+レイアウト両方揃ったとき）
 async function trySaveToOPFS(): Promise<void> {
-  if (!pendingCsv || !pendingLayout) return;
+  if (!currentCsv || !currentLayout) return;
   try {
-    await saveData(pendingCsv.fileName, pendingCsv.text, pendingLayout.fileName, pendingLayout.json);
+    await saveData(currentCsv.fileName, currentCsv.text, currentLayout.fileName, currentLayout.json);
     refreshList();
   } catch (e) {
     console.warn("OPFS save failed:", e);
@@ -64,7 +64,7 @@ async function trySaveToOPFS(): Promise<void> {
 async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
   try {
     const result = await loadCSV(csvText);
-    pendingCsv = { text: csvText, fileName, headers: result.headers, rowCount: result.rowCount };
+    currentCsv = { text: csvText, fileName, headers: result.headers, rowCount: result.rowCount };
 
     updateLoadedInfo();
     initAfterBothLoaded();
@@ -81,7 +81,7 @@ function onLayoutLoaded(
   fileName: string,
   rawText: string
 ): void {
-  pendingLayout = { json: rawText, fileName, meta };
+  currentLayout = { json: rawText, fileName, meta };
 
   updateLoadedInfo();
   initAfterBothLoaded();
@@ -96,8 +96,8 @@ async function loadFromSaved(folderId: string): Promise<void> {
     const meta = buildLayoutMeta(layout);
     const result = await loadCSV(csvText);
 
-    pendingCsv = { text: csvText, fileName: csvName, headers: result.headers, rowCount: result.rowCount };
-    pendingLayout = { json: layoutJson, fileName: layoutName, meta };
+    currentCsv = { text: csvText, fileName: csvName, headers: result.headers, rowCount: result.rowCount };
+    currentLayout = { json: layoutJson, fileName: layoutName, meta };
 
     updateLoadedInfo();
     initAfterBothLoaded();
@@ -118,22 +118,22 @@ function showError(msg: string): void {
 
 // 集計実行
 async function runAggregation(): Promise<void> {
-  if (!pendingCsv || !pendingLayout) return;
+  if (!currentCsv || !currentLayout) return;
   showError("");
 
   // ウェイト列はレイアウトから自動決定
   const weightCol =
-    Object.entries(pendingLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+    Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
   const crossCols = getCrossColsSelected();
 
   try {
-    const questions = buildQuestionDefs(pendingCsv.headers, pendingLayout.meta.colTypes);
+    const questions = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
     const results = await runDuckDBAggregation({
       questions,
       weight_col: weightCol,
       cross_cols: crossCols,
     });
-    renderResults(results, weightCol, pendingCsv.rowCount, pendingLayout.meta);
+    renderResults(results, weightCol, currentCsv.rowCount, currentLayout.meta);
   } catch (e) {
     showError("集計エラー: " + (e as Error).message);
     console.error(e);
