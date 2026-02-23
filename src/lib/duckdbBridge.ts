@@ -49,12 +49,12 @@ export async function initDuckDB(): Promise<void> {
   return initPromise;
 }
 
-export async function runDuckDBAggregation(payload: {
-  csvText: string;
-} & Query): Promise<AggResult[]> {
-  if (!db || status !== "ready") throw new Error("DuckDB is not ready");
+/** CSVテキストをDuckDBに登録し、ヘッダーと行数を返す */
+export async function loadCSV(csvText: string): Promise<{ headers: string[]; rowCount: number }> {
+  await initDuckDB();
+  if (!db) throw new Error("DuckDB is not ready");
 
-  await db.registerFileText("survey.csv", payload.csvText);
+  await db.registerFileText("survey.csv", csvText);
 
   const conn = await db.connect();
   try {
@@ -63,9 +63,26 @@ export async function runDuckDBAggregation(payload: {
        SELECT * FROM read_csv('survey.csv', all_varchar=true)`
     );
 
-    return await aggregate(conn, payload);
+    const descResult = await conn.query(`DESCRIBE survey`);
+    const headers = descResult.toArray().map((r) => String(r.column_name));
+
+    const countResult = await conn.query(`SELECT COUNT(*) AS n FROM survey`);
+    const rowCount = Number(countResult.toArray()[0].n);
+
+    return { headers, rowCount };
   } finally {
     await conn.close();
-    await db.dropFile("survey.csv");
+  }
+}
+
+/** survey ビューに対して集計を実行する */
+export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
+  if (!db || status !== "ready") throw new Error("DuckDB is not ready");
+
+  const conn = await db.connect();
+  try {
+    return await aggregate(conn, query);
+  } finally {
+    await conn.close();
   }
 }

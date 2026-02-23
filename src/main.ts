@@ -3,16 +3,15 @@ import { initDropzone } from "./components/Dropzone";
 import { initLayoutDropzone } from "./components/LayoutDropzone";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
-import type { AggResult, QuestionDef } from "./lib/aggregator";
+import type { QuestionDef } from "./lib/aggregator";
 import {
   initDuckDB,
+  loadCSV,
   runDuckDBAggregation,
 } from "./lib/duckdbBridge";
-import type { ParseResult } from "./lib/csv";
 import type { Layout, LayoutMeta } from "./lib/layout";
 
 // データストア
-let rawCSVText = "";
 let headers: string[] = [];
 let dataRowCount = 0;
 let layoutMeta: LayoutMeta | null = null;
@@ -35,16 +34,20 @@ function initAfterBothLoaded(): void {
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
 }
 
-// CSV読み込みハンドラ
-function onCSVLoaded(result: ParseResult, fileName: string): void {
-  headers = result.headers;
-  dataRowCount = result.data.length;
-  rawCSVText = result.rawText;
+// CSV読み込みハンドラ: DuckDBにロードしてheaders/rowCountを取得
+async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
+  try {
+    const result = await loadCSV(csvText);
+    headers = result.headers;
+    dataRowCount = result.rowCount;
 
-  document.getElementById("file-info")!.textContent =
-    `${fileName}  /  ${dataRowCount.toLocaleString()} 件  /  ${headers.length} 列`;
+    document.getElementById("file-info")!.textContent =
+      `${fileName}  /  ${dataRowCount.toLocaleString()} 件  /  ${headers.length} 列`;
 
-  initAfterBothLoaded();
+    initAfterBothLoaded();
+  } catch (e) {
+    showError("CSV読み込みエラー: " + (e as Error).message);
+  }
 }
 
 // レイアウト読み込みハンドラ
@@ -100,14 +103,11 @@ async function runAggregation(): Promise<void> {
       questions.push({ key: prefix, columns: cols, type: "MA" });
     }
 
-    const payload = {
-      csvText: rawCSVText,
+    const results = await runDuckDBAggregation({
       questions,
       weight_col: weightCol,
       cross_cols: crossCols,
-    };
-
-    const results: AggResult[] = await runDuckDBAggregation(payload);
+    });
     renderResults(results, weightCol, dataRowCount, layoutMeta);
   } catch (e) {
     showError("集計エラー: " + (e as Error).message);
