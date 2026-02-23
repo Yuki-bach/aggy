@@ -32,14 +32,14 @@ function initAfterBothLoaded(): void {
     const t = layoutMeta!.colTypes[col];
     if (!t) continue;
     if (t === "sa") {
-      crossCandidates.push({ key: col, columns: [col], type: "SA" });
+      crossCandidates.push({ type: "SA", column: col });
     } else if (t.startsWith("ma:")) {
       const prefix = t.slice(3);
       (maAccumForCross[prefix] ??= []).push(col);
     }
   }
   for (const [prefix, cols] of Object.entries(maAccumForCross)) {
-    crossCandidates.push({ key: prefix, columns: cols, type: "MA" });
+    crossCandidates.push({ type: "MA", prefix, columns: cols });
   }
   initCrossConfig(crossCandidates, layoutMeta!.questionLabels);
 
@@ -106,14 +106,14 @@ async function runAggregation(): Promise<void> {
       const t = layoutMeta.colTypes[col];
       if (!t) continue;
       if (t === "sa") {
-        questions.push({ key: col, columns: [col], type: "SA" });
+        questions.push({ type: "SA", column: col });
       } else if (t.startsWith("ma:")) {
         const prefix = t.slice(3);
         (maAccum[prefix] ??= []).push(col);
       }
     }
     for (const [prefix, cols] of Object.entries(maAccum)) {
-      questions.push({ key: prefix, columns: cols, type: "MA" });
+      questions.push({ type: "MA", prefix, columns: cols });
     }
 
     const results = await runDuckDBAggregation({

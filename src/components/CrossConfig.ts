@@ -1,4 +1,4 @@
-import type { QuestionDef } from "../lib/aggregator";
+import { questionKey, type QuestionDef } from "../lib/aggregator";
 
 export interface CrossConfigState {
   questions: QuestionDef[];
@@ -12,28 +12,29 @@ export function initCrossConfig(
   questionLabels: Record<string, string>
 ): void {
   state = { questions, crossSelected: {} };
-  questions.forEach((q) => (state.crossSelected[q.key] = false));
+  questions.forEach((q) => (state.crossSelected[questionKey(q)] = false));
 
   const list = document.getElementById("cross-col-list")!;
   list.innerHTML = "";
 
   questions.forEach((q) => {
+    const key = questionKey(q);
     const label = document.createElement("label");
     label.className = "cross-col-item";
 
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.className = "col-pick";
-    cb.dataset.col = q.key;
+    cb.dataset.col = key;
     cb.addEventListener("change", () => {
-      state.crossSelected[q.key] = cb.checked;
+      state.crossSelected[key] = cb.checked;
     });
 
-    const qLabel = questionLabels[q.key];
+    const qLabel = questionLabels[key];
     const typeTag = q.type === "MA" ? " [MA]" : "";
     const displayText = qLabel
-      ? `${q.key}: ${qLabel}${typeTag}`
-      : `${q.key}${typeTag}`;
+      ? `${key}: ${qLabel}${typeTag}`
+      : `${key}${typeTag}`;
 
     label.appendChild(cb);
     label.appendChild(document.createTextNode(" " + displayText));
@@ -42,5 +43,5 @@ export function initCrossConfig(
 }
 
 export function getCrossColsSelected(): QuestionDef[] {
-  return state.questions.filter((q) => state.crossSelected[q.key]);
+  return state.questions.filter((q) => state.crossSelected[questionKey(q)]);
 }
