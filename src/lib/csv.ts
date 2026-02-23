@@ -3,11 +3,13 @@ import Papa from "papaparse";
 export interface ParseResult {
   headers: string[];
   data: Record<string, string>[];
+  rawText: string;
 }
 
-export function parseCSVFile(file: File): Promise<ParseResult> {
+export async function parseCSVFile(file: File): Promise<ParseResult> {
+  const rawText = await file.text();
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse(rawText, {
       header: true,
       skipEmptyLines: true,
       dynamicTyping: false,
@@ -19,6 +21,7 @@ export function parseCSVFile(file: File): Promise<ParseResult> {
         resolve({
           headers: res.meta.fields || [],
           data: res.data as Record<string, string>[],
+          rawText,
         });
       },
       error(err: Error) {

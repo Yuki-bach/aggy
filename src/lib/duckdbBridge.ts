@@ -49,34 +49,12 @@ export async function initDuckDB(): Promise<void> {
   return initPromise;
 }
 
-// CSV値をRFC 4180形式にクォート
-function quoteCSVField(v: string): string {
-  return `"${String(v ?? "").replace(/"/g, '""')}"`;
-}
-
-function serializeToCSV(data: Record<string, string>[], cols: string[]): string {
-  const header = cols.map(quoteCSVField).join(",");
-  const rows = data.map((row) =>
-    cols.map((c) => quoteCSVField(row[c] ?? "")).join(",")
-  );
-  return [header, ...rows].join("\n");
-}
-
 export async function runDuckDBAggregation(payload: {
-  data: Record<string, string>[];
+  csvText: string;
 } & Query): Promise<AggResult[]> {
   if (!db || status !== "ready") throw new Error("DuckDB is not ready");
 
-  const allColNames = [
-    ...new Set([
-      ...payload.questions.flatMap((q) => q.columns),
-      ...payload.cross_cols,
-      ...(payload.weight_col ? [payload.weight_col] : []),
-    ]),
-  ];
-
-  const csvText = serializeToCSV(payload.data, allColNames);
-  await db.registerFileText("survey.csv", csvText);
+  await db.registerFileText("survey.csv", payload.csvText);
 
   const conn = await db.connect();
   try {

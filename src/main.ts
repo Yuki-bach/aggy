@@ -14,6 +14,7 @@ import type { Layout, LayoutMeta } from "./lib/layout";
 
 // データストア
 let parsedData: Record<string, string>[] = [];
+let rawCSVText = "";
 let headers: string[] = [];
 let colConfig: ColConfigState | null = null;
 let layoutMeta: LayoutMeta | null = null;
@@ -27,6 +28,7 @@ initDuckDB().catch(() => {
 function onCSVLoaded(result: ParseResult, fileName: string): void {
   headers = result.headers;
   parsedData = result.data;
+  rawCSVText = result.rawText;
 
   document.getElementById("file-info")!.textContent =
     `${fileName}  /  ${parsedData.length.toLocaleString()} 件  /  ${headers.length} 列`;
@@ -74,21 +76,6 @@ function showError(msg: string): void {
   }
 }
 
-function projectRowsForWasm(
-  data: Record<string, string>[],
-  columnNames: string[]
-): Record<string, string>[] {
-  const needed = new Set(columnNames);
-
-  return data.map((row) => {
-    const projected: Record<string, string> = {};
-    needed.forEach((key) => {
-      projected[key] = row[key] ?? "";
-    });
-    return projected;
-  });
-}
-
 // 集計実行
 async function runAggregation(): Promise<void> {
   if (!colConfig) return;
@@ -104,15 +91,6 @@ async function runAggregation(): Promise<void> {
   const selectedSet = new Set(selectedColumns);
   const effectiveWeightCol =
     weightCol && selectedSet.has(weightCol) ? weightCol : "";
-
-  // クロス軸列とウェイト列も投影に含める
-  const allNeededCols = [
-    ...new Set([
-      ...selectedColumns,
-      ...crossCols,
-      ...(effectiveWeightCol ? [effectiveWeightCol] : []),
-    ]),
-  ];
 
   try {
     const questions: QuestionDef[] = [];
@@ -131,10 +109,8 @@ async function runAggregation(): Promise<void> {
       questions.push({ key: prefix, columns: cols, type: "MA" });
     }
 
-    const projectedData = projectRowsForWasm(parsedData, allNeededCols);
-
     const payload = {
-      data: projectedData,
+      csvText: rawCSVText,
       questions,
       weight_col: effectiveWeightCol,
       cross_cols: crossCols,
