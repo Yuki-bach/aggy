@@ -65,7 +65,7 @@ function updateLoadedInfo(): void {
   }
   const lines: string[] = [];
   if (lastCsvFileName) {
-    lines.push(`CSV: ${lastCsvFileName}  —  ${dataRowCount.toLocaleString()} 件 / ${headers.length} 列`);
+    lines.push(`CSV: ${lastCsvFileName}  —  ${dataRowCount.toLocaleString()} 行 / ${headers.length} 列`);
   }
   if (lastLayoutFileName && layoutMeta) {
     lines.push(`JSON: ${lastLayoutFileName}  —  ${Object.keys(layoutMeta.colTypes).length} 列定義`);
