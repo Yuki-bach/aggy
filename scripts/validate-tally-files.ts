@@ -311,11 +311,12 @@ function validateDataValues(
       case "SA": {
         if (colIdx === undefined || !entry.items) break;
         const validCodes = new Set(entry.items.map((it) => it.code));
+        validCodes.add("N/A"); // 無回答マーカーは有効値
         let unmatchedCount = 0;
         const unmatchedValues = new Set<string>();
         for (const row of sample) {
           const val = row[colIdx]?.trim();
-          if (val === "" || val === undefined) continue;
+          if (val === "" || val === undefined) continue; // 空 = 回答対象外
           if (!validCodes.has(val)) {
             unmatchedCount++;
             if (unmatchedValues.size < 5) unmatchedValues.add(val);
@@ -330,7 +331,7 @@ function validateDataValues(
       }
       case "MA": {
         if (!entry.items) break;
-        const validMA = new Set(["1", "0", "true", "false", ""]);
+        const validMA = new Set(["1", "0", ""]);
         for (const item of entry.items) {
           const maCol = item.column ?? `${entry.key}_${item.code}`;
           const maIdx = headerIndex.get(maCol);
@@ -347,7 +348,7 @@ function validateDataValues(
           }
           if (invalidCount > 0) {
             warnings.push(
-              `MA列 "${maCol}": ${invalidCount}行に不正な値があります（期待: 1/0/true/false/空, 検出: ${[...invalidValues].join(", ")}）`
+              `MA列 "${maCol}": ${invalidCount}行に不正な値があります（期待: 1/0/空, 検出: ${[...invalidValues].join(", ")}）`
             );
           }
         }
