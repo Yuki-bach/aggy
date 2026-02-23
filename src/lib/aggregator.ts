@@ -68,6 +68,12 @@ function esc(name: string): string {
   return name.replace(/"/g, '""');
 }
 
+function weightExpr(weightCol: string): string {
+  return weightCol
+    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
+    : `COUNT(*)::DOUBLE`;
+}
+
 async function computeTotalN(
   conn: duckdb.AsyncDuckDBConnection,
   weightCol: string
@@ -90,15 +96,12 @@ async function fetchCrossHeaders(
   weightCol: string
 ): Promise<CrossHeaderCache> {
   const cache: CrossHeaderCache = new Map();
-  const weightExpr = weightCol
-    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
-    : `COUNT(*)::DOUBLE`;
 
   for (const crossCol of crossCols) {
     const sql = `
       SELECT
         "${esc(crossCol)}" AS cv,
-        ${weightExpr} AS n
+        ${weightExpr(weightCol)} AS n
       FROM survey
       WHERE "${esc(crossCol)}" IS NOT NULL
         AND "${esc(crossCol)}" != ''
@@ -124,14 +127,10 @@ async function aggregateSA(
   crossCols: string[],
   crossHeaderCache: CrossHeaderCache
 ): Promise<AggResult> {
-  const weightExpr = weightCol
-    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
-    : `COUNT(*)::DOUBLE`;
-
   const sql = `
     SELECT
       "${esc(col)}" AS label,
-      ${weightExpr} AS cnt
+      ${weightExpr(weightCol)} AS cnt
     FROM survey
     WHERE "${esc(col)}" IS NOT NULL
       AND "${esc(col)}" != ''
@@ -179,17 +178,13 @@ async function buildCrossCells(
   weightCol: string,
   cached: { headers: Array<{ label: string; n: number }>; crossValues: string[] }
 ): Promise<Cell[]> {
-  const weightExpr = weightCol
-    ? `SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE))`
-    : `COUNT(*)::DOUBLE`;
-
   const { headers, crossValues } = cached;
 
   const cellSQL = `
     SELECT
       "${esc(mainCol)}" AS mv,
       "${esc(crossCol)}" AS sv,
-      ${weightExpr} AS cnt
+      ${weightExpr(weightCol)} AS cnt
     FROM survey
     WHERE "${esc(mainCol)}" IS NOT NULL
       AND "${esc(mainCol)}" != ''
