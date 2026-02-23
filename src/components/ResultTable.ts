@@ -1,5 +1,6 @@
-import type { AggResult } from "../lib/aggregate";
+import type { AggResult } from "../lib/aggregator";
 import type { LayoutMeta } from "../lib/layout";
+import { pivot } from "../lib/pivot";
 import { downloadAllCSV } from "../lib/download";
 
 function escHtml(str: string): string {
@@ -44,7 +45,10 @@ export function renderResults(
   area.classList.remove("hidden");
   area.innerHTML = "";
 
-  const hasCross = results.some((r) => r.cross && r.cross.length > 0);
+  const hasCross = results.some((r) => {
+    const { subs } = pivot(r.cells);
+    return subs.length > 1;
+  });
 
   // ヘッダー
   const hdr = document.createElement("div");
@@ -70,34 +74,41 @@ export function renderResults(
   grid.className = hasCross ? "tables-grid cross-mode" : "tables-grid";
   area.appendChild(grid);
 
-  const maxPct = Math.max(...results.flatMap((r) => r.rows.map((row) => row.pct)));
+  const allGtCells = results.flatMap((r) =>
+    r.cells.filter((c) => c.sub === "GT")
+  );
+  const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 
   results.forEach((res) => {
+    const pv = pivot(res.cells);
+    const isCross = pv.subs.length > 1;
+
     const card = document.createElement("div");
-    card.className = res.cross ? "gt-table-card has-cross" : "gt-table-card";
+    card.className = isCross ? "gt-table-card has-cross" : "gt-table-card";
 
+    const gtSub = pv.subs.find((s) => s.label === "GT")!;
     const nLabel = weightCol
-      ? `n=${res.n.toFixed(1)}（ウェイト後）`
-      : `n=${res.n.toLocaleString()}`;
+      ? `n=${gtSub.n.toFixed(1)}（ウェイト後）`
+      : `n=${gtSub.n.toLocaleString()}`;
 
-    const questionLabel = resolveQuestionLabel(res.col, layoutMeta);
-    const hasLabel = questionLabel !== res.col;
+    const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
+    const hasLabel = questionLabel !== res.question;
 
     card.innerHTML = `
       <div class="gt-table-head">
         <div class="q-header">
           <span class="q-label">${escHtml(questionLabel)}</span>
-          ${hasLabel ? `<span class="q-key">${escHtml(res.col)}</span>` : ""}
+          ${hasLabel ? `<span class="q-key">${escHtml(res.question)}</span>` : ""}
         </div>
         <span class="q-type">${res.type}</span>
         <span class="q-n">${nLabel}</span>
       </div>
     `;
 
-    if (res.cross && res.cross.length > 0) {
-      card.appendChild(buildCrossTable(res, weightCol, maxPct, layoutMeta));
+    if (isCross) {
+      card.appendChild(buildCrossTable(res, pv, weightCol, layoutMeta));
     } else {
-      card.appendChild(buildGtTable(res, weightCol, maxPct, layoutMeta));
+      card.appendChild(buildGtTable(res, pv, weightCol, maxPct, layoutMeta));
     }
 
     grid.appendChild(card);
@@ -106,10 +117,13 @@ export function renderResults(
 
 function buildGtTable(
   res: AggResult,
+  pv: ReturnType<typeof pivot>,
   weightCol: string,
   maxPct: number,
   layoutMeta?: LayoutMeta
 ): HTMLTableElement {
+  const { mains, lookup } = pv;
+
   const table = document.createElement("table");
   table.className = "gt";
   table.innerHTML = `
@@ -122,23 +136,24 @@ function buildGtTable(
       </tr>
     </thead>
     <tbody>
-      ${res.rows
-        .map(
-          (row) => `
+      ${mains
+        .map((main) => {
+          const cell = lookup.get(`${main}\0GT`)!;
+          return `
         <tr>
-          <td>${escHtml(resolveValueLabel(res.type, res.col, row.label, layoutMeta))}</td>
+          <td>${escHtml(resolveValueLabel(res.type, res.question, main, layoutMeta))}</td>
           <td class="num">${
             res.type === "SA" && !weightCol
-              ? row.count.toLocaleString()
-              : row.count.toFixed(1)
+              ? cell.count.toLocaleString()
+              : cell.count.toFixed(1)
           }</td>
-          <td class="pct">${row.pct.toFixed(1)}%</td>
+          <td class="pct">${cell.pct.toFixed(1)}%</td>
           <td class="bar-cell">
-            <div class="bar" style="width:${((row.pct / Math.max(maxPct, 1)) * 72).toFixed(1)}px"></div>
+            <div class="bar" style="width:${((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1)}px"></div>
           </td>
         </tr>
-      `
-        )
+      `;
+        })
         .join("")}
     </tbody>
   `;
@@ -147,15 +162,18 @@ function buildGtTable(
 
 function buildCrossTable(
   res: AggResult,
+  pv: ReturnType<typeof pivot>,
   weightCol: string,
-  _maxPct: number,
   layoutMeta?: LayoutMeta
 ): HTMLTableElement {
-  const cross = res.cross!;
+  const { mains, subs, lookup } = pv;
+  const gtSub = subs.find((s) => s.label === "GT")!;
+  const crossSubs = subs.filter((s) => s.label !== "GT");
+
   const table = document.createElement("table");
   table.className = "gt cross-table";
 
-  // ヘッダー行1: 全体 | クロス軸グループ...
+  // ヘッダー行1: 選択肢 | 全体 | クロス値...
   const tr1 = document.createElement("tr");
 
   const thLabel = document.createElement("th");
@@ -167,17 +185,16 @@ function buildCrossTable(
   const thTotal = document.createElement("th");
   thTotal.colSpan = 2;
   thTotal.className = "cross-group-header gt-group";
-  thTotal.innerHTML = `全体<br><span class="cross-n">n=${weightCol ? res.n.toFixed(1) : res.n.toLocaleString()}</span>`;
+  thTotal.innerHTML = `全体<br><span class="cross-n">n=${weightCol ? gtSub.n.toFixed(1) : gtSub.n.toLocaleString()}</span>`;
   tr1.appendChild(thTotal);
 
-  // クロス軸ごとのグループヘッダー
-  cross.forEach((section) => {
-    const th = document.createElement("th");
-    th.colSpan = section.headers.length;
-    th.className = "cross-group-header";
-    th.textContent = resolveQuestionLabel(section.cross_col, layoutMeta);
-    tr1.appendChild(th);
-  });
+  // クロス値ヘッダー (1行にまとめて表示)
+  const thCross = document.createElement("th");
+  thCross.colSpan = crossSubs.length;
+  thCross.className = "cross-group-header";
+  // 複数のクロス軸がある場合もフラットに並ぶ
+  thCross.textContent = "";
+  tr1.appendChild(thCross);
 
   // ヘッダー行2: 件数 | % | 各クロス値(n=X)...
   const tr2 = document.createElement("tr");
@@ -192,15 +209,12 @@ function buildCrossTable(
   thPct.textContent = "%";
   tr2.appendChild(thPct);
 
-  cross.forEach((section) => {
-    section.headers.forEach((h) => {
-      const th = document.createElement("th");
-      th.className = "right cross-val-header";
-      const nStr = weightCol ? h.n.toFixed(1) : h.n.toLocaleString();
-      const valLabel = resolveValueLabel("SA", section.cross_col, h.label, layoutMeta);
-      th.innerHTML = `${escHtml(valLabel)}<br><span class="cross-n">n=${nStr}</span>`;
-      tr2.appendChild(th);
-    });
+  crossSubs.forEach((sub) => {
+    const th = document.createElement("th");
+    th.className = "right cross-val-header";
+    const nStr = weightCol ? sub.n.toFixed(1) : sub.n.toLocaleString();
+    th.innerHTML = `${escHtml(sub.label)}<br><span class="cross-n">n=${nStr}</span>`;
+    tr2.appendChild(th);
   });
 
   const thead = document.createElement("thead");
@@ -210,35 +224,35 @@ function buildCrossTable(
 
   // ボディ
   const tbody = document.createElement("tbody");
-  res.rows.forEach((row, rowIdx) => {
+  mains.forEach((main) => {
     const tr = document.createElement("tr");
 
     const tdLabel = document.createElement("td");
-    tdLabel.textContent = resolveValueLabel(res.type, res.col, row.label, layoutMeta);
+    tdLabel.textContent = resolveValueLabel(res.type, res.question, main, layoutMeta);
     tr.appendChild(tdLabel);
+
+    const gtCell = lookup.get(`${main}\0GT`)!;
 
     const tdCount = document.createElement("td");
     tdCount.className = "num";
     tdCount.textContent =
       res.type === "SA" && !weightCol
-        ? row.count.toLocaleString()
-        : row.count.toFixed(1);
+        ? gtCell.count.toLocaleString()
+        : gtCell.count.toFixed(1);
     tr.appendChild(tdCount);
 
     const tdPct = document.createElement("td");
     tdPct.className = "pct";
-    tdPct.textContent = row.pct.toFixed(1) + "%";
+    tdPct.textContent = gtCell.pct.toFixed(1) + "%";
     tr.appendChild(tdPct);
 
     // クロスセル
-    cross.forEach((section) => {
-      const crossRow = section.rows[rowIdx];
-      crossRow.cells.forEach((cell) => {
-        const td = document.createElement("td");
-        td.className = "pct cross-pct";
-        td.textContent = cell.pct.toFixed(1) + "%";
-        tr.appendChild(td);
-      });
+    crossSubs.forEach((sub) => {
+      const cell = lookup.get(`${main}\0${sub.label}`);
+      const td = document.createElement("td");
+      td.className = "pct cross-pct";
+      td.textContent = cell ? cell.pct.toFixed(1) + "%" : "-";
+      tr.appendChild(td);
     });
 
     tbody.appendChild(tr);
