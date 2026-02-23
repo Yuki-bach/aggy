@@ -27,15 +27,8 @@ function maShownCondition(cols: string[]): string {
   return cols.map((c) => `("${esc(c)}" IS NOT NULL AND "${esc(c)}" != '')`).join(" OR ");
 }
 
-/** MA設問の「無回答」条件: 表示されたが何も選択していない */
-function maNoAnswerCondition(cols: string[]): string {
-  const shown = maShownCondition(cols);
-  const noneSelected = cols.map((c) => `"${esc(c)}" != '1'`).join(" AND ");
-  return `(${shown}) AND (${noneSelected})`;
-}
-
 /** 無回答マーカー */
-const NA_VALUE = "N/A";
+export const NA_VALUE = "N/A";
 
 function mkCell(main: string, sub: string, n: number, count: number): Cell {
   return { main, sub, n, count, pct: n > 0 ? (count / n) * 100 : 0 };
@@ -74,9 +67,6 @@ export class Aggregator {
   }
 
   async aggregateSA(col: string): Promise<AggResult> {
-    // per-question n: 設問が表示された人数（空でない行 = N/A含む）
-    const questionN = await computeQuestionN_SA(this.conn, col, this.weightCol);
-
     const sql = `
       SELECT
         "${esc(col)}" AS label,
@@ -92,6 +82,9 @@ export class Aggregator {
 
     const arrowResult = await this.conn.query(sql);
     const rowArr = arrowResult.toArray();
+
+    // per-question n: 集計結果のカウント合計 = 表示された人数（N/A含む）
+    const questionN = rowArr.reduce((sum, r) => sum + Number(r.cnt), 0);
 
     // GT セル（n は設問が表示された人数）
     const cells: Cell[] = rowArr.map((r) =>
@@ -115,29 +108,37 @@ export class Aggregator {
   }
 
   async aggregateMA(prefix: string, cols: string[]): Promise<AggResult> {
-    // per-question n: 設問が表示された人数（サブカラムのいずれかが空でない）
-    const questionN = await computeQuestionN_MA(this.conn, cols, this.weightCol);
-
     const selectClauses = cols.map((col, i) => {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });
 
-    // 回答対象外を除外
+    // 無回答式: 表示されたが何も選択していない
+    const noneSelected = cols.map((c) => `"${esc(c)}" != '1'`).join(" AND ");
+    const naExpr = this.weightCol
+      ? `SUM(CASE WHEN ${noneSelected} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+      : `COUNT(CASE WHEN ${noneSelected} THEN 1 END)::DOUBLE`;
+
+    // questionN 式: 表示された人数
+    const nExpr = this.weightCol
+      ? `COALESCE(SUM(TRY_CAST("${esc(this.weightCol)}" AS DOUBLE)), 0)`
+      : `COUNT(*)::DOUBLE`;
+
+    // 回答対象外を除外し、naCount・questionN もまとめて取得
     const sql = `
-      SELECT ${selectClauses.join(", ")}
+      SELECT ${selectClauses.join(", ")}, ${naExpr} AS na_cnt, ${nExpr} AS question_n
       FROM survey
       WHERE ${maShownCondition(cols)}
     `;
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
 
+    const questionN = Number(row.question_n ?? 0);
     const cells: Cell[] = cols.map((col, i) =>
       mkCell(col, "GT", questionN, Number(row[`c${i}`] ?? 0))
     );
 
-    // 無回答行: 表示されたが何も選択していない
-    const naCount = await computeMANoAnswerCount(this.conn, cols, this.weightCol);
-    cells.push(mkCell(NA_VALUE, "GT", questionN, naCount));
+    // 無回答行
+    cells.push(mkCell(NA_VALUE, "GT", questionN, Number(row.na_cnt ?? 0)));
 
     // クロスセル
     if (this.crossCols.length > 0) {
@@ -335,47 +336,6 @@ export class Aggregator {
 }
 
 // --- 前処理（static create から利用） ---
-
-/** SA設問の表示人数: 空でない行（N/A含む） */
-async function computeQuestionN_SA(
-  conn: duckdb.AsyncDuckDBConnection,
-  col: string,
-  weightCol: string
-): Promise<number> {
-  const sql = weightCol
-    ? `SELECT COALESCE(SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE)), 0) AS n FROM survey WHERE "${esc(col)}" IS NOT NULL AND "${esc(col)}" != ''`
-    : `SELECT COUNT(*) AS n FROM survey WHERE "${esc(col)}" IS NOT NULL AND "${esc(col)}" != ''`;
-  const result = await conn.query(sql);
-  return Number(result.toArray()[0].n);
-}
-
-/** MA設問の表示人数: いずれかのサブカラムが空でない */
-async function computeQuestionN_MA(
-  conn: duckdb.AsyncDuckDBConnection,
-  cols: string[],
-  weightCol: string
-): Promise<number> {
-  const where = maShownCondition(cols);
-  const sql = weightCol
-    ? `SELECT COALESCE(SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE)), 0) AS n FROM survey WHERE ${where}`
-    : `SELECT COUNT(*) AS n FROM survey WHERE ${where}`;
-  const result = await conn.query(sql);
-  return Number(result.toArray()[0].n);
-}
-
-/** MA設問の無回答カウント: 表示されたが何も選択していない */
-async function computeMANoAnswerCount(
-  conn: duckdb.AsyncDuckDBConnection,
-  cols: string[],
-  weightCol: string
-): Promise<number> {
-  const where = maNoAnswerCondition(cols);
-  const sql = weightCol
-    ? `SELECT COALESCE(SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE)), 0) AS n FROM survey WHERE ${where}`
-    : `SELECT COUNT(*) AS n FROM survey WHERE ${where}`;
-  const result = await conn.query(sql);
-  return Number(result.toArray()[0].n);
-}
 
 async function fetchCrossHeaders(
   conn: duckdb.AsyncDuckDBConnection,

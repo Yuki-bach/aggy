@@ -50,7 +50,7 @@ interface Cell { main: string; sub: string; n: number; count: number; pct: numbe
 
 - All CSV columns read as `VARCHAR` (`all_varchar=true`); weight uses `TRY_CAST` to float
 - SQL column names escaped via `esc()` helper (double-quote escaping)
-- MA truthy values: `'1'` or `'true'`
+- MA truthy values: `'1'` only
 - Component files: PascalCase (`ResultTable.ts`); lib files: camelCase (`aggregator.ts`)
 - Component initializers: `init*`; DOM renderers: `render*`; sub-element builders: `build*`
 - Module-level variables as app state (no state management library)

@@ -1,5 +1,6 @@
 import type { AggResult, QuestionDef } from "../lib/aggregate";
 import type { LayoutMeta } from "../lib/layout";
+import { NA_VALUE } from "../lib/aggregator";
 import { pivot } from "../lib/pivot";
 import { downloadAllCSV } from "../lib/download";
 import { isAIAvailable, generateComment } from "../lib/aiComment";
@@ -27,7 +28,7 @@ function resolveValueLabel(
   meta?: LayoutMeta
 ): string {
   // 無回答マーカー
-  if (rowLabel === "N/A") return "無回答";
+  if (rowLabel === NA_VALUE) return "無回答";
   if (!meta) return rowLabel;
   if (type === "SA") {
     return meta.valueLabels[col]?.[rowLabel] ?? rowLabel;
@@ -44,7 +45,7 @@ function resolveSubLabel(
   meta?: LayoutMeta,
   crossCols?: QuestionDef[]
 ): string {
-  if (subLabel === "N/A") return "無回答";
+  if (subLabel === NA_VALUE) return "無回答";
   if (!meta) return subLabel;
   // MAカラム名の場合: valueLabels[colName]["1"] にラベルがある
   const maLabel = meta.valueLabels[subLabel]?.["1"];
