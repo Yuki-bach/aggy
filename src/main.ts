@@ -1,4 +1,3 @@
-import "./style.css";
 import { initCsvInput, initLayoutInput } from "./components/FileInput";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
