@@ -9,7 +9,7 @@ let state: CrossConfigState = { questions: [], crossSelected: {} };
 
 export function initCrossConfig(
   questions: QuestionDef[],
-  questionLabels: Record<string, string>
+  questionLabels: Record<string, string>,
 ): void {
   state = { questions, crossSelected: {} };
   questions.forEach((q) => (state.crossSelected[questionKey(q)] = false));
@@ -32,9 +32,7 @@ export function initCrossConfig(
 
     const qLabel = questionLabels[key];
     const typeTag = q.type === "MA" ? " [MA]" : "";
-    const displayText = qLabel
-      ? `${key}: ${qLabel}${typeTag}`
-      : `${key}${typeTag}`;
+    const displayText = qLabel ? `${key}: ${qLabel}${typeTag}` : `${key}${typeTag}`;
 
     label.appendChild(cb);
     label.appendChild(document.createTextNode(" " + displayText));

@@ -1,17 +1,20 @@
 import { initCsvInput, initLayoutInput } from "./components/FileInput";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
+import { initDuckDB, loadCSV, runDuckDBAggregation } from "./lib/duckdbBridge";
 import {
-  initDuckDB,
-  loadCSV,
-  runDuckDBAggregation,
-} from "./lib/duckdbBridge";
-import { parseLayout, buildLayoutMeta, buildQuestionDefs, type Layout, type LayoutMeta } from "./lib/layout";
+  parseLayout,
+  buildLayoutMeta,
+  buildQuestionDefs,
+  type Layout,
+  type LayoutMeta,
+} from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
 import { initSavedFiles, refreshList } from "./components/SavedFiles";
 
 // 現在読み込み済みの CSV / Layout データ
-let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null = null;
+let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null =
+  null;
 let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
 
 // テーマ切り替え
@@ -67,10 +70,14 @@ function updateLoadedInfo(): void {
   }
   const lines: string[] = [];
   if (currentCsv) {
-    lines.push(`CSV: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`);
+    lines.push(
+      `CSV: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`,
+    );
   }
   if (currentLayout) {
-    lines.push(`JSON: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`);
+    lines.push(
+      `JSON: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`,
+    );
   }
   el.textContent = lines.join("\n");
   el.classList.remove("hidden");
@@ -80,7 +87,12 @@ function updateLoadedInfo(): void {
 async function trySaveToOPFS(): Promise<void> {
   if (!currentCsv || !currentLayout) return;
   try {
-    await saveData(currentCsv.fileName, currentCsv.text, currentLayout.fileName, currentLayout.json);
+    await saveData(
+      currentCsv.fileName,
+      currentCsv.text,
+      currentLayout.fileName,
+      currentLayout.json,
+    );
     refreshList();
   } catch (e) {
     console.warn("OPFS save failed:", e);
@@ -106,7 +118,7 @@ function onLayoutLoaded(
   _layout: Layout,
   meta: LayoutMeta,
   fileName: string,
-  rawText: string
+  rawText: string,
 ): void {
   currentLayout = { json: rawText, fileName, meta };
 
@@ -123,7 +135,12 @@ async function loadFromSaved(folderId: string): Promise<void> {
     const meta = buildLayoutMeta(layout);
     const result = await loadCSV(csvText);
 
-    currentCsv = { text: csvText, fileName: csvName, headers: result.headers, rowCount: result.rowCount };
+    currentCsv = {
+      text: csvText,
+      fileName: csvName,
+      headers: result.headers,
+      rowCount: result.rowCount,
+    };
     currentLayout = { json: layoutJson, fileName: layoutName, meta };
 
     updateLoadedInfo();

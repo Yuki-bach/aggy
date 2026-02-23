@@ -2,7 +2,7 @@ import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "../l
 
 export function initCsvInput(
   onLoad: (csvText: string, fileName: string) => void,
-  onError: (msg: string) => void
+  onError: (msg: string) => void,
 ): void {
   const fileInput = document.getElementById("file-input") as HTMLInputElement;
 
@@ -23,7 +23,7 @@ export function initCsvInput(
 
 export function initLayoutInput(
   onLoad: (layout: Layout, meta: LayoutMeta, fileName: string, rawText: string) => void,
-  onError: (msg: string) => void
+  onError: (msg: string) => void,
 ): void {
   const fileInput = document.getElementById("layout-file-input") as HTMLInputElement;
 
