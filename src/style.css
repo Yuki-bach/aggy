@@ -51,6 +51,8 @@ header span {
   gap: 0.5rem;
   font-size: 0.75rem;
   color: var(--muted);
+  min-width: 10rem;
+  justify-content: flex-end;
 }
 
 .status-dot {
