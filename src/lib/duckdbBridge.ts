@@ -8,6 +8,7 @@ import { aggregate, type Query, type AggResult } from "./aggregator";
 type DuckStatus = "loading" | "ready" | "error";
 
 let db: duckdb.AsyncDuckDB | null = null;
+let conn: duckdb.AsyncDuckDBConnection | null = null;
 let status: DuckStatus = "loading";
 let initPromise: Promise<void> | null = null;
 
@@ -49,6 +50,12 @@ export async function initDuckDB(): Promise<void> {
   return initPromise;
 }
 
+async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
+  if (!db || status !== "ready") throw new Error("DuckDB is not ready");
+  if (!conn) conn = await db.connect();
+  return conn;
+}
+
 /** CSVテキストをDuckDBに登録し、ヘッダーと行数を返す */
 export async function loadCSV(csvText: string): Promise<{ headers: string[]; rowCount: number }> {
   await initDuckDB();
@@ -56,33 +63,23 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 
   await db.registerFileText("survey.csv", csvText);
 
-  const conn = await db.connect();
-  try {
-    await conn.query(
-      `CREATE OR REPLACE VIEW survey AS
-       SELECT * FROM read_csv('survey.csv', all_varchar=true)`
-    );
+  const c = await getConnection();
+  await c.query(
+    `CREATE OR REPLACE VIEW survey AS
+     SELECT * FROM read_csv('survey.csv', all_varchar=true)`
+  );
 
-    const descResult = await conn.query(`DESCRIBE survey`);
-    const headers = descResult.toArray().map((r) => String(r.column_name));
+  const descResult = await c.query(`DESCRIBE survey`);
+  const headers = descResult.toArray().map((r) => String(r.column_name));
 
-    const countResult = await conn.query(`SELECT COUNT(*) AS n FROM survey`);
-    const rowCount = Number(countResult.toArray()[0].n);
+  const countResult = await c.query(`SELECT COUNT(*) AS n FROM survey`);
+  const rowCount = Number(countResult.toArray()[0].n);
 
-    return { headers, rowCount };
-  } finally {
-    await conn.close();
-  }
+  return { headers, rowCount };
 }
 
 /** survey ビューに対して集計を実行する */
 export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
-  if (!db || status !== "ready") throw new Error("DuckDB is not ready");
-
-  const conn = await db.connect();
-  try {
-    return await aggregate(conn, query);
-  } finally {
-    await conn.close();
-  }
+  const c = await getConnection();
+  return aggregate(c, query);
 }
