@@ -26,7 +26,7 @@ export function downloadAllCSV(
 }
 
 function downloadGtCSV(results: AggResult[]): void {
-  const rows: string[][] = [["変数名", "種別", "選択肢", "件数", "%"]];
+  const rows: string[][] = [["変数名", "種別", "選択肢", "n", "%"]];
 
   results.forEach((res) => {
     const { mains, lookup } = pivot(res.cells);
@@ -64,7 +64,7 @@ function downloadCrossCSV(results: AggResult[], layoutMeta?: LayoutMeta): void {
   const crossSubs = firstPivot.subs.filter((s) => s.label !== "GT");
 
   // ヘッダー行
-  const headerRow1 = ["変数名", "種別", "選択肢", "全体_件数", "全体_%"];
+  const headerRow1 = ["変数名", "種別", "選択肢", "全体_n", "全体_%"];
   const headerRow2 = ["", "", "", "", ""];
   crossSubs.forEach((sub) => {
     headerRow1.push("");
