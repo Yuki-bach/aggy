@@ -1,7 +1,7 @@
 /** DuckDB SQL集計ロジック */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import { Aggregator } from "./aggregator";
+import { Aggregator, fetchCrossHeaders } from "./aggregator";
 
 // --- 集計結果の型定義 ---
 
@@ -44,21 +44,41 @@ export interface Query {
   cross_cols: QuestionDef[];
 }
 
-/** 集計のエントリポイント。conn上のsurveyビューに対して全設問を集計する */
+/** 集計のエントリポイント。db上のsurveyビューに対して全設問を並列集計する */
 export async function aggregate(
-  conn: duckdb.AsyncDuckDBConnection,
+  db: duckdb.AsyncDuckDB,
   payload: Query
 ): Promise<AggResult[]> {
-  const ctx = await Aggregator.create(conn, payload);
+  const weightCol = payload.weight_col;
+  const crossCols = payload.cross_cols ?? [];
 
-  const results: AggResult[] = [];
-  for (const q of payload.questions) {
-    if (q.type === "SA") {
-      results.push(await ctx.aggregateSA(q.column));
-    } else {
-      results.push(await ctx.aggregateMA(q.prefix, q.columns));
+  // クロスヘッダーキャッシュを先に構築（1コネクション）
+  let crossHeaderCache: Awaited<ReturnType<typeof fetchCrossHeaders>>;
+  if (crossCols.length > 0) {
+    const conn = await db.connect();
+    try {
+      crossHeaderCache = await fetchCrossHeaders(conn, crossCols, weightCol);
+    } finally {
+      await conn.close();
     }
+  } else {
+    crossHeaderCache = new Map();
   }
 
-  return results;
+  // 設問ごとに並列実行（各自コネクション作成・破棄）
+  return Promise.all(
+    payload.questions.map(async (q) => {
+      const conn = await db.connect();
+      try {
+        const ctx = new Aggregator(conn, weightCol, crossCols, crossHeaderCache);
+        if (q.type === "SA") {
+          return ctx.aggregateSA(q.column);
+        } else {
+          return ctx.aggregateMA(q.prefix, q.columns);
+        }
+      } finally {
+        await conn.close();
+      }
+    })
+  );
 }
