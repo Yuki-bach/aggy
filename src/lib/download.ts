@@ -1,11 +1,18 @@
 import type { AggResult } from "./aggregate";
 import type { LayoutMeta } from "./layout";
+import { NA_VALUE } from "./aggregator";
 import { pivot } from "./pivot";
 
 /** MAカラム名をラベルに解決する */
 function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
+  if (subLabel === NA_VALUE) return "無回答";
   if (!meta) return subLabel;
   return meta.valueLabels[subLabel]?.["1"] ?? subLabel;
+}
+
+/** 選択肢ラベルを解決する（CSV出力用） */
+function resolveMainLabel(main: string): string {
+  return main === NA_VALUE ? "無回答" : main;
 }
 
 export function downloadAllCSV(
@@ -37,7 +44,7 @@ function downloadGtCSV(results: AggResult[]): void {
       rows.push([
         res.question,
         res.type,
-        main,
+        resolveMainLabel(main),
         cell.count.toFixed(1),
         cell.pct.toFixed(1),
       ]);
@@ -83,7 +90,7 @@ function downloadCrossCSV(results: AggResult[], layoutMeta?: LayoutMeta): void {
       const dataRow = [
         res.question,
         res.type,
-        main,
+        resolveMainLabel(main),
         gtCell.count.toFixed(1),
         gtCell.pct.toFixed(1),
       ];
