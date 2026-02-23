@@ -1,4 +1,4 @@
-# Tally
+# Temotto
 
 ブラウザだけで動くアンケートローデータ集計ツール。CSVとレイアウトJSONをアップロードするだけで、GT集計・クロス集計（ウェイトバック対応）が実行できる。サーバー不要。
 
@@ -31,6 +31,17 @@ npm run dev
 - **MA**: 複数回答（0/1フラグ列、`key_code` の命名規則）
 - **WEIGHT**: ウェイト列（ウェイトバック集計に使用）
 - **ID / EXCLUDE**: 集計除外列
+
+## AI分析コメント（Chrome Built-in AI）
+
+集計実行後、Chrome の組み込み AI（Gemini Nano）が結果の傾向を自動で要約し、画面右下に吹き出しで表示します。非対応ブラウザでは自動的に非表示になります。
+
+### 有効化手順（Chrome 138+）
+
+1. `chrome://flags/#optimization-guide-on-device-model` → **Enabled BypassPerfRequirement**
+2. `chrome://flags/#prompt-api-for-gemini-nano` → **Enabled**
+3. Chrome を再起動
+4. `chrome://components` → **Optimization Guide On Device Model** の「アップデートを確認」でモデルをダウンロード
 
 ## 技術スタック
 

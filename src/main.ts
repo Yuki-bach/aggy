@@ -1,28 +1,42 @@
-import "./style.css";
 import { initCsvInput, initLayoutInput } from "./components/FileInput";
 import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
 import { renderResults } from "./components/ResultTable";
-import type { QuestionDef } from "./lib/aggregate";
 import {
   initDuckDB,
   loadCSV,
   runDuckDBAggregation,
 } from "./lib/duckdbBridge";
-import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "./lib/layout";
+import { parseLayout, buildLayoutMeta, buildQuestionDefs, type Layout, type LayoutMeta } from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
 import { initSavedFiles, refreshList } from "./components/SavedFiles";
 
-// データストア
-let headers: string[] = [];
-let dataRowCount = 0;
-let layoutMeta: LayoutMeta | null = null;
+// 現在読み込み済みの CSV / Layout データ
+let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null = null;
+let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
 
-// OPFS保存用
-let lastCsvText = "";
-let lastCsvFileName = "";
-let lastLayoutJson = "";
-let lastLayoutFileName = "";
-let skipNextSave = false;
+// テーマ切り替え
+function initThemeToggle(): void {
+  const toggle = document.getElementById("theme-toggle")!;
+  const saved = localStorage.getItem("temotto-theme");
+  if (saved === "dark") {
+    document.documentElement.dataset.theme = "dark";
+    toggle.textContent = "☀️";
+  }
+  toggle.addEventListener("click", () => {
+    const isDark = document.documentElement.dataset.theme === "dark";
+    if (isDark) {
+      delete document.documentElement.dataset.theme;
+      toggle.textContent = "🌙";
+      localStorage.setItem("temotto-theme", "light");
+    } else {
+      document.documentElement.dataset.theme = "dark";
+      toggle.textContent = "☀️";
+      localStorage.setItem("temotto-theme", "dark");
+    }
+  });
+}
+
+initThemeToggle();
 
 // DuckDB Wasm をバックグラウンドで初期化開始
 initDuckDB().catch(() => {
@@ -31,43 +45,52 @@ initDuckDB().catch(() => {
 
 // CSV + レイアウト両方揃ったらUI初期化
 function initAfterBothLoaded(): void {
-  if (headers.length === 0 || !layoutMeta) return;
+  if (!currentCsv || !currentLayout) return;
 
-  // クロス集計軸候補: SA列 + MAグループ
-  const crossCandidates: QuestionDef[] = [];
-  const maAccumForCross: Record<string, string[]> = {};
-  for (const col of headers) {
-    const t = layoutMeta!.colTypes[col];
-    if (!t) continue;
-    if (t === "sa") {
-      crossCandidates.push({ type: "SA", column: col });
-    } else if (t.startsWith("ma:")) {
-      const prefix = t.slice(3);
-      (maAccumForCross[prefix] ??= []).push(col);
-    }
-  }
-  for (const [prefix, cols] of Object.entries(maAccumForCross)) {
-    crossCandidates.push({ type: "MA", prefix, columns: cols });
-  }
-  initCrossConfig(crossCandidates, layoutMeta!.questionLabels);
+  const crossCandidates = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
+  initCrossConfig(crossCandidates, currentLayout.meta.questionLabels);
 
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
 }
 
+// 読み込み済みデータ情報を表示
+function updateLoadedInfo(): void {
+  const el = document.getElementById("loaded-data-info")!;
+  if (!currentCsv && !currentLayout) {
+    el.classList.add("hidden");
+    return;
+  }
+  const lines: string[] = [];
+  if (currentCsv) {
+    lines.push(`CSV: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`);
+  }
+  if (currentLayout) {
+    lines.push(`JSON: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`);
+  }
+  el.textContent = lines.join("\n");
+  el.classList.remove("hidden");
+}
+
+// OPFS自動保存（CSV+レイアウト両方揃ったとき）
+async function trySaveToOPFS(): Promise<void> {
+  if (!currentCsv || !currentLayout) return;
+  try {
+    await saveData(currentCsv.fileName, currentCsv.text, currentLayout.fileName, currentLayout.json);
+    refreshList();
+  } catch (e) {
+    console.warn("OPFS save failed:", e);
+  }
+}
+
 // CSV読み込みハンドラ: DuckDBにロードしてheaders/rowCountを取得
 async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
   try {
     const result = await loadCSV(csvText);
-    headers = result.headers;
-    dataRowCount = result.rowCount;
-    lastCsvText = csvText;
-    lastCsvFileName = fileName;
+    currentCsv = { text: csvText, fileName, headers: result.headers, rowCount: result.rowCount };
 
-    document.getElementById("file-info")!.textContent =
-      `${fileName}  /  ${dataRowCount.toLocaleString()} 件  /  ${headers.length} 列`;
-
+    updateLoadedInfo();
     initAfterBothLoaded();
     trySaveToOPFS();
   } catch (e) {
@@ -82,42 +105,28 @@ function onLayoutLoaded(
   fileName: string,
   rawText: string
 ): void {
-  layoutMeta = meta;
-  lastLayoutJson = rawText;
-  lastLayoutFileName = fileName;
+  currentLayout = { json: rawText, fileName, meta };
 
-  document.getElementById("layout-file-info")!.textContent =
-    `${fileName}  /  ${Object.keys(meta.colTypes).length} 列定義`;
-
+  updateLoadedInfo();
   initAfterBothLoaded();
   trySaveToOPFS();
 }
 
-// OPFS自動保存（CSV+レイアウト両方揃ったとき）
-async function trySaveToOPFS(): Promise<void> {
-  if (skipNextSave) return;
-  if (!lastCsvText || !lastLayoutJson) return;
-  try {
-    await saveData(lastCsvFileName, lastCsvText, lastLayoutFileName, lastLayoutJson);
-    refreshList();
-  } catch (e) {
-    console.warn("OPFS save failed:", e);
-  }
-}
-
-// 保存データから読み込み
+// 保存データから読み込み（OPFS再保存は不要なのでtrySaveToOPFSを呼ばない）
 async function loadFromSaved(folderId: string): Promise<void> {
   try {
-    skipNextSave = true;
     const { csvText, csvName, layoutJson, layoutName } = await loadSaved(folderId);
     const layout = parseLayout(layoutJson);
     const meta = buildLayoutMeta(layout);
-    await onCSVLoaded(csvText, csvName);
-    onLayoutLoaded(layout, meta, layoutName, layoutJson);
+    const result = await loadCSV(csvText);
+
+    currentCsv = { text: csvText, fileName: csvName, headers: result.headers, rowCount: result.rowCount };
+    currentLayout = { json: layoutJson, fileName: layoutName, meta };
+
+    updateLoadedInfo();
+    initAfterBothLoaded();
   } catch (e) {
     showError("保存データの読み込みエラー: " + (e as Error).message);
-  } finally {
-    skipNextSave = false;
   }
 }
 
@@ -133,42 +142,38 @@ function showError(msg: string): void {
 
 // 集計実行
 async function runAggregation(): Promise<void> {
-  if (!layoutMeta) return;
+  if (!currentCsv || !currentLayout) return;
   showError("");
 
   // ウェイト列はレイアウトから自動決定
   const weightCol =
-    Object.entries(layoutMeta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+    Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
   const crossCols = getCrossColsSelected();
 
   try {
-    // layoutMeta.colTypes から全SA/MA列を questions に変換
-    const questions: QuestionDef[] = [];
-    const maAccum: Record<string, string[]> = {};
-    for (const col of headers) {
-      const t = layoutMeta.colTypes[col];
-      if (!t) continue;
-      if (t === "sa") {
-        questions.push({ type: "SA", column: col });
-      } else if (t.startsWith("ma:")) {
-        const prefix = t.slice(3);
-        (maAccum[prefix] ??= []).push(col);
-      }
-    }
-    for (const [prefix, cols] of Object.entries(maAccum)) {
-      questions.push({ type: "MA", prefix, columns: cols });
-    }
-
+    const questions = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
     const results = await runDuckDBAggregation({
       questions,
       weight_col: weightCol,
       cross_cols: crossCols,
     });
-    renderResults(results, weightCol, dataRowCount, layoutMeta);
+    renderResults(results, weightCol, currentCsv.rowCount, currentLayout.meta, crossCols);
   } catch (e) {
     showError("集計エラー: " + (e as Error).message);
     console.error(e);
   }
+}
+
+// タブ切り替え
+for (const tab of document.querySelectorAll<HTMLButtonElement>(".load-tab")) {
+  tab.addEventListener("click", () => {
+    for (const t of document.querySelectorAll<HTMLButtonElement>(".load-tab")) {
+      t.classList.toggle("active", t === tab);
+    }
+    const target = tab.dataset.tab!;
+    document.getElementById("tab-file")!.classList.toggle("hidden", target !== "file");
+    document.getElementById("tab-saved")!.classList.toggle("hidden", target !== "saved");
+  });
 }
 
 // イベントバインド

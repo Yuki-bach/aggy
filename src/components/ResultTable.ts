@@ -1,7 +1,9 @@
-import type { AggResult } from "../lib/aggregate";
+import type { AggResult, QuestionDef } from "../lib/aggregate";
 import type { LayoutMeta } from "../lib/layout";
+import { NA_VALUE } from "../lib/aggregator";
 import { pivot } from "../lib/pivot";
 import { downloadAllCSV } from "../lib/download";
+import { isAIAvailable, generateComment } from "../lib/aiComment";
 
 function escHtml(str: string): string {
   return String(str)
@@ -25,6 +27,8 @@ function resolveValueLabel(
   rowLabel: string,
   meta?: LayoutMeta
 ): string {
+  // 無回答マーカー
+  if (rowLabel === NA_VALUE) return "無回答";
   if (!meta) return rowLabel;
   if (type === "SA") {
     return meta.valueLabels[col]?.[rowLabel] ?? rowLabel;
@@ -34,13 +38,27 @@ function resolveValueLabel(
   }
 }
 
-/** クロス軸ヘッダーのラベルを解決する。MAカラム名の場合valueLabelsで解決 */
-function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
+/** クロス軸ヘッダーのラベルを解決する。
+ *  crossCols があれば SA クロス軸の値ラベルも解決する */
+function resolveSubLabel(
+  subLabel: string,
+  meta?: LayoutMeta,
+  crossCols?: QuestionDef[]
+): string {
+  if (subLabel === NA_VALUE) return "無回答";
   if (!meta) return subLabel;
   // MAカラム名の場合: valueLabels[colName]["1"] にラベルがある
   const maLabel = meta.valueLabels[subLabel]?.["1"];
   if (maLabel) return maLabel;
-  // SA値の場合はそのまま返す
+  // SA クロス軸の値ラベルを解決
+  if (crossCols) {
+    for (const q of crossCols) {
+      if (q.type === "SA") {
+        const label = meta.valueLabels[q.column]?.[subLabel];
+        if (label) return label;
+      }
+    }
+  }
   return subLabel;
 }
 
@@ -48,7 +66,8 @@ export function renderResults(
   results: AggResult[],
   weightCol: string,
   _rawN: number,
-  layoutMeta?: LayoutMeta
+  layoutMeta?: LayoutMeta,
+  crossCols?: QuestionDef[]
 ): void {
   document.getElementById("empty-state")!.classList.add("hidden");
   const area = document.getElementById("results-area")!;
@@ -71,9 +90,7 @@ export function renderResults(
   `;
 
   const csvBtn = document.createElement("button");
-  csvBtn.className = "run-btn";
-  csvBtn.style.cssText =
-    "margin:0;width:auto;padding:0.4rem 1rem;font-size:0.8rem;";
+  csvBtn.className = "csv-export-btn";
   csvBtn.textContent = "全件CSV出力";
   csvBtn.addEventListener("click", () => downloadAllCSV(results, weightCol, layoutMeta));
   hdr.appendChild(csvBtn);
@@ -116,13 +133,49 @@ export function renderResults(
     `;
 
     if (isCross) {
-      card.appendChild(buildCrossTable(res, pv, weightCol, layoutMeta));
+      card.appendChild(buildCrossTable(res, pv, weightCol, layoutMeta, crossCols));
     } else {
       card.appendChild(buildGtTable(res, pv, weightCol, maxPct, layoutMeta));
     }
 
     grid.appendChild(card);
   });
+
+  // AI分析コメントを自動生成（非同期、テーブル描画をブロックしない）
+  showAIBubble(results, weightCol, layoutMeta);
+}
+
+async function showAIBubble(
+  results: AggResult[],
+  weightCol: string,
+  layoutMeta?: LayoutMeta,
+): Promise<void> {
+  if (!(await isAIAvailable())) return;
+
+  // 既存の吹き出しがあれば除去
+  document.querySelector(".ai-bubble")?.remove();
+
+  const bubble = document.createElement("div");
+  bubble.className = "ai-bubble";
+  bubble.innerHTML = `
+    <button class="ai-bubble-close" aria-label="閉じる">\u00d7</button>
+    <div class="ai-bubble-header">\u2728 AI\u5206\u6790</div>
+    <div class="ai-bubble-body ai-bubble-loading">\u5206\u6790\u4e2d...</div>
+  `;
+  document.body.appendChild(bubble);
+
+  bubble
+    .querySelector(".ai-bubble-close")!
+    .addEventListener("click", () => bubble.remove());
+
+  const comment = await generateComment(results, weightCol, layoutMeta);
+  if (comment) {
+    const body = bubble.querySelector(".ai-bubble-body")!;
+    body.textContent = comment;
+    body.classList.remove("ai-bubble-loading");
+  } else {
+    bubble.remove();
+  }
 }
 
 function buildGtTable(
@@ -140,7 +193,7 @@ function buildGtTable(
     <thead>
       <tr>
         <th>選択肢</th>
-        <th class="right">件数</th>
+        <th class="right">n</th>
         <th class="right">%</th>
         <th></th>
       </tr>
@@ -174,7 +227,8 @@ function buildCrossTable(
   res: AggResult,
   pv: ReturnType<typeof pivot>,
   weightCol: string,
-  layoutMeta?: LayoutMeta
+  layoutMeta?: LayoutMeta,
+  crossCols?: QuestionDef[]
 ): HTMLTableElement {
   const { mains, subs, lookup } = pv;
   const gtSub = subs.find((s) => s.label === "GT")!;
@@ -211,7 +265,7 @@ function buildCrossTable(
 
   const thCount = document.createElement("th");
   thCount.className = "right";
-  thCount.textContent = "件数";
+  thCount.textContent = "n";
   tr2.appendChild(thCount);
 
   const thPct = document.createElement("th");
@@ -223,7 +277,7 @@ function buildCrossTable(
     const th = document.createElement("th");
     th.className = "right cross-val-header";
     const nStr = weightCol ? sub.n.toFixed(1) : sub.n.toLocaleString();
-    th.innerHTML = `${escHtml(resolveSubLabel(sub.label, layoutMeta))}<br><span class="cross-n">n=${nStr}</span>`;
+    th.innerHTML = `${escHtml(resolveSubLabel(sub.label, layoutMeta, crossCols))}<br><span class="cross-n">n=${nStr}</span>`;
     tr2.appendChild(th);
   });
 

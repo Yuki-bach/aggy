@@ -18,9 +18,17 @@ function weightExpr(weightCol: string): string {
 
 function maWeightedCountExpr(maCol: string, weightCol: string): string {
   return weightCol
-    ? `SUM(CASE WHEN "${esc(maCol)}" IN ('1','true') THEN TRY_CAST("${esc(weightCol)}" AS DOUBLE) ELSE 0 END)`
-    : `COUNT(CASE WHEN "${esc(maCol)}" IN ('1','true') THEN 1 END)::DOUBLE`;
+    ? `SUM(CASE WHEN "${esc(maCol)}" = '1' THEN TRY_CAST("${esc(weightCol)}" AS DOUBLE) ELSE 0 END)`
+    : `COUNT(CASE WHEN "${esc(maCol)}" = '1' THEN 1 END)::DOUBLE`;
 }
+
+/** MA設問の「表示された」条件: いずれかのサブカラムが空でない */
+function maShownCondition(cols: string[]): string {
+  return cols.map((c) => `("${esc(c)}" IS NOT NULL AND "${esc(c)}" != '')`).join(" OR ");
+}
+
+/** 無回答マーカー */
+export const NA_VALUE = "N/A";
 
 function mkCell(main: string, sub: string, n: number, count: number): Cell {
   return { main, sub, n, count, pct: n > 0 ? (count / n) * 100 : 0 };
@@ -39,7 +47,6 @@ export class Aggregator {
   private constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
-    private totalN: number,
     private crossCols: QuestionDef[],
     private crossHeaderCache: CrossHeaderCache,
   ) {}
@@ -50,14 +57,13 @@ export class Aggregator {
     payload: Query,
   ): Promise<Aggregator> {
     const weightCol = payload.weight_col;
-    const totalN = await computeTotalN(conn, weightCol);
     const crossCols = payload.cross_cols ?? [];
     const crossHeaderCache =
       crossCols.length > 0
         ? await fetchCrossHeaders(conn, crossCols, weightCol)
         : (new Map() as CrossHeaderCache);
 
-    return new Aggregator(conn, weightCol, totalN, crossCols, crossHeaderCache);
+    return new Aggregator(conn, weightCol, crossCols, crossHeaderCache);
   }
 
   async aggregateSA(col: string): Promise<AggResult> {
@@ -77,9 +83,12 @@ export class Aggregator {
     const arrowResult = await this.conn.query(sql);
     const rowArr = arrowResult.toArray();
 
-    // GT セル
+    // per-question n: 集計結果のカウント合計 = 表示された人数（N/A含む）
+    const questionN = rowArr.reduce((sum, r) => sum + Number(r.cnt), 0);
+
+    // GT セル（n は設問が表示された人数）
     const cells: Cell[] = rowArr.map((r) =>
-      mkCell(String(r.label), "GT", this.totalN, Number(r.cnt))
+      mkCell(String(r.label), "GT", questionN, Number(r.cnt))
     );
 
     // クロスセル
@@ -103,13 +112,33 @@ export class Aggregator {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });
 
-    const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
+    // 無回答式: 表示されたが何も選択していない
+    const noneSelected = cols.map((c) => `"${esc(c)}" != '1'`).join(" AND ");
+    const naExpr = this.weightCol
+      ? `SUM(CASE WHEN ${noneSelected} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+      : `COUNT(CASE WHEN ${noneSelected} THEN 1 END)::DOUBLE`;
+
+    // questionN 式: 表示された人数
+    const nExpr = this.weightCol
+      ? `COALESCE(SUM(TRY_CAST("${esc(this.weightCol)}" AS DOUBLE)), 0)`
+      : `COUNT(*)::DOUBLE`;
+
+    // 回答対象外を除外し、naCount・questionN もまとめて取得
+    const sql = `
+      SELECT ${selectClauses.join(", ")}, ${naExpr} AS na_cnt, ${nExpr} AS question_n
+      FROM survey
+      WHERE ${maShownCondition(cols)}
+    `;
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
 
+    const questionN = Number(row.question_n ?? 0);
     const cells: Cell[] = cols.map((col, i) =>
-      mkCell(col, "GT", this.totalN, Number(row[`c${i}`] ?? 0))
+      mkCell(col, "GT", questionN, Number(row[`c${i}`] ?? 0))
     );
+
+    // 無回答行
+    cells.push(mkCell(NA_VALUE, "GT", questionN, Number(row.na_cnt ?? 0)));
 
     // クロスセル
     if (this.crossCols.length > 0) {
@@ -219,10 +248,16 @@ export class Aggregator {
       `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`
     );
 
+    // 無回答カウント: 表示されたが何も選択していない
+    const naExpr = this.weightCol
+      ? `SUM(CASE WHEN ${maCols.map((c) => `"${esc(c)}" != '1'`).join(" AND ")} AND (${maShownCondition(maCols)}) THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+      : `COUNT(CASE WHEN ${maCols.map((c) => `"${esc(c)}" != '1'`).join(" AND ")} AND (${maShownCondition(maCols)}) THEN 1 END)::DOUBLE`;
+
     const sql = `
       SELECT
         "${esc(crossCol)}" AS cv,
-        ${selectClauses.join(", ")}
+        ${selectClauses.join(", ")},
+        ${naExpr} AS na_cnt
       FROM survey
       WHERE "${esc(crossCol)}" IS NOT NULL
         AND "${esc(crossCol)}" != ''
@@ -231,9 +266,11 @@ export class Aggregator {
 
     const result = await this.conn.query(sql);
     const rowMap = new Map<string, number[]>();
+    const naMap = new Map<string, number>();
     for (const r of result.toArray()) {
       const counts = maCols.map((_, i) => Number(r[`c${i}`] ?? 0));
       rowMap.set(String(r.cv), counts);
+      naMap.set(String(r.cv), Number(r.na_cnt ?? 0));
     }
 
     const cells: Cell[] = [];
@@ -242,6 +279,11 @@ export class Aggregator {
         const counts = rowMap.get(crossValues[i]);
         cells.push(mkCell(maCols[maIdx], crossValues[i], headers[i].n, counts?.[maIdx] ?? 0));
       }
+    }
+
+    // 無回答クロスセル
+    for (let i = 0; i < crossValues.length; i++) {
+      cells.push(mkCell(NA_VALUE, crossValues[i], headers[i].n, naMap.get(crossValues[i]) ?? 0));
     }
 
     return cells;
@@ -259,10 +301,18 @@ export class Aggregator {
     for (let r = 0; r < rowMaCols.length; r++) {
       for (let c = 0; c < crossMaCols.length; c++) {
         const expr = this.weightCol
-          ? `SUM(CASE WHEN "${esc(rowMaCols[r])}" IN ('1','true') AND "${esc(crossMaCols[c])}" IN ('1','true') THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
-          : `COUNT(CASE WHEN "${esc(rowMaCols[r])}" IN ('1','true') AND "${esc(crossMaCols[c])}" IN ('1','true') THEN 1 END)::DOUBLE`;
+          ? `SUM(CASE WHEN "${esc(rowMaCols[r])}" = '1' AND "${esc(crossMaCols[c])}" = '1' THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+          : `COUNT(CASE WHEN "${esc(rowMaCols[r])}" = '1' AND "${esc(crossMaCols[c])}" = '1' THEN 1 END)::DOUBLE`;
         selectClauses.push(`${expr} AS r${r}c${c}`);
       }
+    }
+
+    // 無回答 × 各クロスMAカラム
+    for (let c = 0; c < crossMaCols.length; c++) {
+      const expr = this.weightCol
+        ? `SUM(CASE WHEN ${rowMaCols.map((col) => `"${esc(col)}" != '1'`).join(" AND ")} AND (${maShownCondition(rowMaCols)}) AND "${esc(crossMaCols[c])}" = '1' THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
+        : `COUNT(CASE WHEN ${rowMaCols.map((col) => `"${esc(col)}" != '1'`).join(" AND ")} AND (${maShownCondition(rowMaCols)}) AND "${esc(crossMaCols[c])}" = '1' THEN 1 END)::DOUBLE`;
+      selectClauses.push(`${expr} AS na_c${c}`);
     }
 
     const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
@@ -276,22 +326,16 @@ export class Aggregator {
       }
     }
 
+    // 無回答クロスセル
+    for (let c = 0; c < crossMaCols.length; c++) {
+      cells.push(mkCell(NA_VALUE, crossMaCols[c], headers[c].n, Number(row[`na_c${c}`] ?? 0)));
+    }
+
     return cells;
   }
 }
 
 // --- 前処理（static create から利用） ---
-
-async function computeTotalN(
-  conn: duckdb.AsyncDuckDBConnection,
-  weightCol: string
-): Promise<number> {
-  const sql = weightCol
-    ? `SELECT COALESCE(SUM(TRY_CAST("${esc(weightCol)}" AS DOUBLE)), 0) AS n FROM survey`
-    : `SELECT COUNT(*) AS n FROM survey`;
-  const result = await conn.query(sql);
-  return Number(result.toArray()[0].n);
-}
 
 async function fetchCrossHeaders(
   conn: duckdb.AsyncDuckDBConnection,

@@ -1,8 +1,8 @@
-# Tally — アンケートローデータ集計システム 実装プラン
+# Temotto — アンケートローデータ集計システム 実装プラン
 
 ## 概要
 
-**Tally** は、アンケートのローデータCSVをブラウザに読み込むだけで、GT集計・クロス集計・ウェイトバック集計を行えるWebアプリ。サーバー不要、レイアウトファイル不要。集計エンジンはRuby Wasmで実装する。
+**Temotto** は、アンケートのローデータCSVをブラウザに読み込むだけで、GT集計・クロス集計・ウェイトバック集計を行えるWebアプリ。サーバー不要、レイアウトファイル不要。集計エンジンはRuby Wasmで実装する。
 
 ---
 
@@ -176,7 +176,7 @@ end
 
 ```
 ┌─ header ─────────────────────────────┐
-│ Tally                   [Wasm状態]   │
+│ Temotto                 [Wasm状態]   │
 ├─ left panel ─────┬─ right panel ─────┤
 │                  │                   │
 │ 01. CSV読み込み  │  集計結果          │
@@ -238,7 +238,7 @@ end
 ## ファイル・ディレクトリ構成（初期）
 
 ```
-tally/
+temotto/
 ├── index.html
 ├── package.json
 ├── vite.config.ts
@@ -267,8 +267,8 @@ tally/
 
 ```bash
 # プロジェクト作成
-npm create vite@latest tally -- --template vanilla-ts
-cd tally
+npm create vite@latest temotto -- --template vanilla-ts
+cd temotto
 npm install
 
 # 依存ライブラリ

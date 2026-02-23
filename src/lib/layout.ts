@@ -1,3 +1,5 @@
+import type { QuestionDef } from "./aggregate";
+
 export interface LayoutItem {
   code: string;
   label: string;
@@ -51,6 +53,25 @@ export function parseLayout(jsonText: string): Layout {
     }
   }
   return parsed as Layout;
+}
+
+/** headers + colTypes から QuestionDef[] を組み立てる */
+export function buildQuestionDefs(headers: string[], colTypes: Record<string, string>): QuestionDef[] {
+  const questions: QuestionDef[] = [];
+  const maAccum: Record<string, string[]> = {};
+  for (const col of headers) {
+    const t = colTypes[col];
+    if (!t) continue;
+    if (t === "sa") {
+      questions.push({ type: "SA", column: col });
+    } else if (t.startsWith("ma:")) {
+      (maAccum[t.slice(3)] ??= []).push(col);
+    }
+  }
+  for (const [prefix, cols] of Object.entries(maAccum)) {
+    questions.push({ type: "MA", prefix, columns: cols });
+  }
+  return questions;
 }
 
 export function buildLayoutMeta(layout: Layout): LayoutMeta {
