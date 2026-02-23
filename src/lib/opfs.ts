@@ -38,14 +38,14 @@ export async function listSaved(): Promise<SavedEntry[]> {
   const dir = await getTemottoDir();
   const entries: SavedEntry[] = [];
 
-  for await (const [name, handle] of dir as any) {
+  for await (const [name, handle] of dir.entries()) {
     if (handle.kind !== "directory") continue;
     const ts = Number(name);
     if (!Number.isFinite(ts)) continue;
 
     let csvName = "";
     let layoutName = "";
-    for await (const [fileName] of handle as any) {
+    for await (const [fileName] of (handle as FileSystemDirectoryHandle).entries()) {
       if (fileName.endsWith(".csv")) csvName = fileName;
       else if (fileName.endsWith(".json")) layoutName = fileName;
     }
@@ -66,7 +66,7 @@ export async function loadSaved(
 
   let csvName = "";
   let layoutName = "";
-  for await (const [fileName] of folder as any) {
+  for await (const [fileName] of folder.entries()) {
     if (fileName.endsWith(".csv")) csvName = fileName;
     else if (fileName.endsWith(".json")) layoutName = fileName;
   }
