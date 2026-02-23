@@ -23,7 +23,7 @@ export function initCsvInput(
 }
 
 export function initLayoutInput(
-  onLoad: (layout: Layout, meta: LayoutMeta, fileName: string) => void,
+  onLoad: (layout: Layout, meta: LayoutMeta, fileName: string, rawText: string) => void,
   onError: (msg: string) => void
 ): void {
   const fileInput = document.getElementById("layout-file-input") as HTMLInputElement;
@@ -38,7 +38,7 @@ export function initLayoutInput(
       const text = await file.text();
       const layout = parseLayout(text);
       const meta = buildLayoutMeta(layout);
-      onLoad(layout, meta, file.name);
+      onLoad(layout, meta, file.name, text);
     } catch (err) {
       onError("レイアウトファイルの読み込みエラー: " + (err as Error).message);
     }
