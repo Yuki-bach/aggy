@@ -20,10 +20,21 @@ export interface AggResult {
 
 // --- 集計 payload ---
 
-export interface QuestionDef {
-  key: string;          // SA: カラム名 "q1", MA: グループプレフィックス "Q3"
-  columns: string[];    // SA: ["q1"],  MA: ["Q3_1","Q3_2","Q3_3"]
-  type: "SA" | "MA";
+export type QuestionDef = SAQuestion | MAQuestion;
+
+interface SAQuestion {
+  type: "SA";
+  column: string;       // カラム名 "q1"
+}
+
+interface MAQuestion {
+  type: "MA";
+  prefix: string;       // グループプレフィックス "Q3"
+  columns: string[];    // ["Q3_1","Q3_2","Q3_3"]
+}
+
+export function questionKey(q: QuestionDef): string {
+  return q.type === "SA" ? q.column : q.prefix;
 }
 
 export interface Query {
@@ -50,11 +61,11 @@ export async function aggregate(
   for (const q of payload.questions) {
     if (q.type === "SA") {
       results.push(
-        await aggregateSA(conn, q.columns[0], totalN, payload.weight_col, crossCols, crossHeaderCache)
+        await aggregateSA(conn, q.column, totalN, payload.weight_col, crossCols, crossHeaderCache)
       );
     } else {
       results.push(
-        await aggregateMA(conn, q.key, q.columns, totalN, payload.weight_col, crossCols, crossHeaderCache)
+        await aggregateMA(conn, q.prefix, q.columns, totalN, payload.weight_col, crossCols, crossHeaderCache)
       );
     }
   }
@@ -106,7 +117,7 @@ async function fetchCrossHeaders(
 
   for (const crossQ of crossCols) {
     if (crossQ.type === "SA") {
-      const col = crossQ.columns[0];
+      const col = crossQ.column;
       const sql = `
         SELECT
           "${esc(col)}" AS cv,
@@ -123,7 +134,7 @@ async function fetchCrossHeaders(
       const headers = result
         .toArray()
         .map((r) => ({ label: String(r.cv), n: Number(r.n) }));
-      cache.set(crossQ.key, { headers, crossValues: headers.map((h) => h.label) });
+      cache.set(crossQ.column, { headers, crossValues: headers.map((h) => h.label) });
     } else {
       // MA軸: 各itemカラムごとに該当者数を算出
       const selectClauses = crossQ.columns.map((col, i) =>
@@ -136,7 +147,7 @@ async function fetchCrossHeaders(
         label: col,
         n: Number(row[`c${i}`] ?? 0),
       }));
-      cache.set(crossQ.key, { headers, crossValues: headers.map((h) => h.label) });
+      cache.set(crossQ.prefix, { headers, crossValues: headers.map((h) => h.label) });
     }
   }
   return cache;
@@ -182,10 +193,10 @@ async function aggregateSA(
   if (crossCols.length > 0) {
     const mainValues = rowArr.map((r) => String(r.label));
     for (const crossQ of crossCols) {
-      const cached = crossHeaderCache.get(crossQ.key)!;
+      const cached = crossHeaderCache.get(questionKey(crossQ))!;
       if (crossQ.type === "SA") {
         const crossCells = await buildCrossCellsSA(
-          conn, col, mainValues, crossQ.columns[0], weightCol, cached
+          conn, col, mainValues, crossQ.column, weightCol, cached
         );
         cells.push(...crossCells);
       } else {
@@ -336,10 +347,10 @@ async function aggregateMA(
   // クロスセル
   if (crossCols.length > 0) {
     for (const crossQ of crossCols) {
-      const cached = crossHeaderCache.get(crossQ.key)!;
+      const cached = crossHeaderCache.get(questionKey(crossQ))!;
       if (crossQ.type === "SA") {
         const crossCells = await buildMACrossCellsSA(
-          conn, cols, crossQ.columns[0], weightCol, cached
+          conn, cols, crossQ.column, weightCol, cached
         );
         cells.push(...crossCells);
       } else {
