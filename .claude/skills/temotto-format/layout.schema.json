@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "temotto-layout.schema.json",
+  "title": "Temotto Layout",
+  "description": "Temottoアンケート集計ツール用JSONレイアウトファイルのスキーマ",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/LayoutEntry"
+  },
+  "$defs": {
+    "LayoutColType": {
+      "type": "string",
+      "enum": ["SA", "MA", "ID", "WEIGHT", "EXCLUDE"]
+    },
+    "LayoutItem": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "選択肢コード。SA: CSVセルの値。MA: {key}_{code} のcode部分"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "選択肢の表示ラベル"
+        },
+        "column": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MA列名の明示指定（省略時は {key}_{code} で導出）"
+        }
+      },
+      "required": ["code", "label"],
+      "additionalProperties": false
+    },
+    "LayoutEntry": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "SA/ID/WEIGHT/EXCLUDE: CSV列名と一致。MA: 列名プレフィックス"
+        },
+        "label": {
+          "type": "string",
+          "description": "設問の表示ラベル（省略時はkeyが使用される）"
+        },
+        "type": {
+          "$ref": "#/$defs/LayoutColType",
+          "description": "カラム種別"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LayoutItem"
+          },
+          "minItems": 1,
+          "description": "選択肢一覧（SA/MAで必須）"
+        }
+      },
+      "required": ["key", "type"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "SA" } }
+          },
+          "then": {
+            "required": ["key", "type", "items"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "MA" } }
+          },
+          "then": {
+            "required": ["key", "type", "items"]
+          }
+        }
+      ]
+    }
+  }
+}

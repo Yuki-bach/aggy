@@ -7,7 +7,24 @@
  */
 
 import { readFileSync } from "fs";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
+// ── JSON Schemaからの定数読み込み ──
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const schemaPath = resolve(__dirname, "../.claude/skills/temotto-format/layout.schema.json");
+const schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
+
+/** スキーマ定義から有効なtype一覧を取得 */
+const VALID_TYPES: Set<string> = new Set(schema.$defs.LayoutColType.enum);
+
+/** スキーマ定義からitems必須のtype一覧を取得 */
+const TYPES_REQUIRING_ITEMS: Set<string> = new Set(
+  schema.$defs.LayoutEntry.allOf
+    .filter((rule: { if?: { properties?: { type?: { const?: string } } } }) => rule.if?.properties?.type?.const)
+    .map((rule: { if: { properties: { type: { const: string } } } }) => rule.if.properties.type.const)
+);
 
 // ── 型定義（src/lib/layout.ts と同等） ──
 
@@ -143,13 +160,7 @@ function validateLayoutSchema(jsonText: string): {
     return { layout: null, result: { errors, warnings } };
   }
 
-  const validTypes: Set<string> = new Set([
-    "SA",
-    "MA",
-    "ID",
-    "WEIGHT",
-    "EXCLUDE",
-  ]);
+  const validTypes = VALID_TYPES;
   const keys = new Set<string>();
 
   for (let i = 0; i < parsed.length; i++) {
@@ -187,7 +198,7 @@ function validateLayoutSchema(jsonText: string): {
       );
     }
 
-    if (type === "SA" || type === "MA") {
+    if (TYPES_REQUIRING_ITEMS.has(type)) {
       if (!Array.isArray(e["items"]) || e["items"].length === 0) {
         errors.push(`${pos}: type "${type}" には items 配列が必要です`);
       } else {
