@@ -10,14 +10,7 @@ import {
   Legend,
 } from "chart.js";
 
-Chart.register(
-  BarController,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-);
+Chart.register(BarController, CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 export { Chart };
 
