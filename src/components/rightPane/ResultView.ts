@@ -7,11 +7,7 @@ import { buildToolbar, buildChartOpts } from "./Toolbar";
 import { buildGtTable } from "./GtTable";
 import { buildCrossTable } from "./CrossTable";
 import { showAIBubble } from "./AIBubble";
-import {
-  destroyAllCharts,
-  renderChartCard,
-  type GtChartType,
-} from "./ChartRenderer";
+import { destroyAllCharts, renderChartCard, type GtChartType } from "./ChartRenderer";
 
 // --- 表示モード状態 ---
 type ViewMode = "table" | "chart";
