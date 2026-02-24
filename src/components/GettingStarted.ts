@@ -18,6 +18,19 @@ function buildModalHTML(): string {
             専用の <strong>Agent Skill</strong> を用意していますので、
             お使いのAIツールに変換作業を任せることができます。
           </p>
+          <div class="modal-sample-downloads">
+            <p>まずは<strong>サンプルファイル</strong>で試してみましょう：</p>
+            <div class="modal-sample-links">
+              <a href="samples/sample_data.csv" download="sample_data.csv" class="modal-sample-link">
+                <span class="modal-sample-icon">&#128196;</span>
+                サンプルCSV
+              </a>
+              <a href="samples/sample_layout.json" download="sample_layout.json" class="modal-sample-link">
+                <span class="modal-sample-icon">&#128196;</span>
+                サンプルJSON
+              </a>
+            </div>
+          </div>
         </section>
 
         <section class="modal-section">
