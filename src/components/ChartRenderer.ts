@@ -21,12 +21,10 @@ export function destroyAllCharts(): void {
 }
 
 export type GtChartType = "bar-h" | "bar-v" | "pie";
-export type CrossChartType = "obi" | "stacked" | "grouped";
 
 export function renderChartCard(
   res: AggResult,
   gtChartType: GtChartType,
-  crossChartType: CrossChartType,
   layoutMeta?: LayoutMeta,
   crossCols?: QuestionDef[],
 ): HTMLDivElement {
@@ -62,7 +60,7 @@ export function renderChartCard(
 
   let chart: Chart;
   if (isCross) {
-    chart = buildCrossChart(canvas, pv, crossChartType, res, theme, layoutMeta, crossCols);
+    chart = buildCrossChart(canvas, pv, gtChartType, res, theme, layoutMeta, crossCols);
   } else {
     chart = buildGtChart(canvas, pv, gtChartType, res, theme, layoutMeta);
   }
@@ -155,7 +153,7 @@ function buildGtChart(
 function buildCrossChart(
   canvas: HTMLCanvasElement,
   pv: ReturnType<typeof pivot>,
-  chartType: CrossChartType,
+  gtChartType: GtChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
   layoutMeta?: LayoutMeta,
@@ -165,9 +163,10 @@ function buildCrossChart(
   const crossSubs = subs.filter((s) => s.label !== "GT");
   const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
 
-  // 帯グラフ: 横方向100%スタック棒グラフ（各mainの選択肢ごとにクロス値の割合を表示）
-  const isObi = chartType === "obi";
-  const isStacked = chartType === "stacked" || isObi;
+  // GtChartType → クロス集計のチャートスタイルにマッピング
+  // bar-h → 帯グラフ（横方向100%スタック）, bar-v → 積み上げ棒, pie → 帯グラフにフォールバック
+  const isObi = gtChartType === "bar-h" || gtChartType === "pie";
+  const isStacked = true;
 
   const datasets = crossSubs.map((sub, i) => ({
     label: resolveSubLabel(sub.label, layoutMeta, crossCols),

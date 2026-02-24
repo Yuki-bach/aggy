@@ -12,7 +12,6 @@ import {
   destroyAllCharts,
   renderChartCard,
   type GtChartType,
-  type CrossChartType,
 } from "./ChartRenderer";
 
 function escHtml(str: string): string {
@@ -24,7 +23,6 @@ type ViewMode = "table" | "chart";
 let currentViewMode: ViewMode = "table";
 let saChartType: GtChartType = "bar-h";
 let maChartType: GtChartType = "bar-h";
-let crossChartType: CrossChartType = "obi";
 
 // --- 再描画用にデータをキャッシュ ---
 let lastResults: AggResult[] | null = null;
@@ -89,64 +87,6 @@ export function renderResults(
   });
   hdr.appendChild(toggle);
 
-  // チャート種類セレクト
-  const chartOpts = document.createElement("div");
-  chartOpts.className = `chart-opts${currentViewMode === "table" ? " hidden" : ""}`;
-
-  // SA用
-  const saLabel = document.createElement("label");
-  saLabel.textContent = "SA: ";
-  const saSelect = document.createElement("select");
-  saSelect.className = "chart-type-select";
-  saSelect.innerHTML = `
-    <option value="bar-h"${saChartType === "bar-h" ? " selected" : ""}>横棒</option>
-    <option value="bar-v"${saChartType === "bar-v" ? " selected" : ""}>縦棒</option>
-    <option value="pie"${saChartType === "pie" ? " selected" : ""}>円</option>
-  `;
-  saSelect.addEventListener("change", () => {
-    saChartType = saSelect.value as GtChartType;
-    if (currentViewMode === "chart") reRender();
-  });
-  saLabel.appendChild(saSelect);
-  chartOpts.appendChild(saLabel);
-
-  // MA用
-  const maLabel = document.createElement("label");
-  maLabel.textContent = "MA: ";
-  const maSelect = document.createElement("select");
-  maSelect.className = "chart-type-select";
-  maSelect.innerHTML = `
-    <option value="bar-h"${maChartType === "bar-h" ? " selected" : ""}>横棒</option>
-    <option value="bar-v"${maChartType === "bar-v" ? " selected" : ""}>縦棒</option>
-  `;
-  maSelect.addEventListener("change", () => {
-    maChartType = maSelect.value as GtChartType;
-    if (currentViewMode === "chart") reRender();
-  });
-  maLabel.appendChild(maSelect);
-  chartOpts.appendChild(maLabel);
-
-  // クロス集計用
-  if (hasCross) {
-    const crossLabel = document.createElement("label");
-    crossLabel.textContent = "クロス: ";
-    const crossSelect = document.createElement("select");
-    crossSelect.className = "chart-type-select";
-    crossSelect.innerHTML = `
-      <option value="obi"${crossChartType === "obi" ? " selected" : ""}>帯</option>
-      <option value="stacked"${crossChartType === "stacked" ? " selected" : ""}>積み上げ</option>
-      <option value="grouped"${crossChartType === "grouped" ? " selected" : ""}>グループ</option>
-    `;
-    crossSelect.addEventListener("change", () => {
-      crossChartType = crossSelect.value as CrossChartType;
-      if (currentViewMode === "chart") reRender();
-    });
-    crossLabel.appendChild(crossSelect);
-    chartOpts.appendChild(crossLabel);
-  }
-
-  hdr.appendChild(chartOpts);
-
   // CSV出力ボタン
   const csvBtn = document.createElement("button");
   csvBtn.className = "csv-export-btn";
@@ -155,6 +95,47 @@ export function renderResults(
   hdr.appendChild(csvBtn);
 
   area.appendChild(hdr);
+
+  // チャート種類セレクト（2行目）
+  if (currentViewMode === "chart") {
+    const chartOpts = document.createElement("div");
+    chartOpts.className = "chart-opts";
+
+    // SA用
+    const saLabel = document.createElement("label");
+    saLabel.textContent = "SA: ";
+    const saSelect = document.createElement("select");
+    saSelect.className = "chart-type-select";
+    saSelect.innerHTML = `
+      <option value="bar-h"${saChartType === "bar-h" ? " selected" : ""}>横棒</option>
+      <option value="bar-v"${saChartType === "bar-v" ? " selected" : ""}>縦棒</option>
+      <option value="pie"${saChartType === "pie" ? " selected" : ""}>円</option>
+    `;
+    saSelect.addEventListener("change", () => {
+      saChartType = saSelect.value as GtChartType;
+      reRender();
+    });
+    saLabel.appendChild(saSelect);
+    chartOpts.appendChild(saLabel);
+
+    // MA用
+    const maLabel = document.createElement("label");
+    maLabel.textContent = "MA: ";
+    const maSelect = document.createElement("select");
+    maSelect.className = "chart-type-select";
+    maSelect.innerHTML = `
+      <option value="bar-h"${maChartType === "bar-h" ? " selected" : ""}>横棒</option>
+      <option value="bar-v"${maChartType === "bar-v" ? " selected" : ""}>縦棒</option>
+    `;
+    maSelect.addEventListener("change", () => {
+      maChartType = maSelect.value as GtChartType;
+      reRender();
+    });
+    maLabel.appendChild(maSelect);
+    chartOpts.appendChild(maLabel);
+
+    area.appendChild(chartOpts);
+  }
 
   // コンテンツ描画
   const grid = document.createElement("div");
@@ -198,7 +179,7 @@ function renderChartContent(
 
   results.forEach((res) => {
     const gtType = res.type === "SA" ? saChartType : maChartType;
-    const card = renderChartCard(res, gtType, crossChartType, layoutMeta, crossCols);
+    const card = renderChartCard(res, gtType, layoutMeta, crossCols);
     grid.appendChild(card);
   });
 }

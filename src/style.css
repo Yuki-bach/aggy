@@ -623,13 +623,14 @@ select.weight-col-select:focus {
   border-color: var(--accent);
 }
 
-/* Chart Options */
+/* Chart Options (2nd row below header) */
 .chart-opts {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
   font-size: var(--text-sm);
   color: var(--text-secondary);
+  margin-bottom: var(--space-4);
 }
 
 .chart-opts label {
