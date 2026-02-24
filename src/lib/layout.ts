@@ -6,7 +6,7 @@ export interface LayoutItem {
   column?: string; // 列名の明示指定（省略時は `{key}_{code}` で導出）
 }
 
-export type LayoutColType = "SA" | "MA" | "ID" | "WEIGHT" | "EXCLUDE";
+export type LayoutColType = "SA" | "MA" | "FA" | "ID" | "WEIGHT" | "EXCLUDE";
 
 export interface LayoutEntry {
   key: string;
@@ -67,6 +67,8 @@ export function buildQuestionDefs(
     if (!t) continue;
     if (t === "sa") {
       questions.push({ type: "SA", column: col });
+    } else if (t === "fa") {
+      questions.push({ type: "FA", column: col });
     } else if (t.startsWith("ma:")) {
       (maAccum[t.slice(3)] ??= []).push(col);
     }
@@ -108,6 +110,9 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
           }
           valueLabels[key] = map;
         }
+        break;
+      case "FA":
+        colTypes[key] = "fa";
         break;
       case "MA":
         if (items) {

@@ -1,4 +1,4 @@
-import type { AggResult } from "./aggregate";
+import type { AggResult, FAResult, ResultItem } from "./aggregate";
 import type { LayoutMeta } from "./layout";
 import { NA_VALUE } from "./aggregator";
 import { pivot } from "./pivot";
@@ -16,19 +16,26 @@ function resolveMainLabel(main: string): string {
 }
 
 export function downloadAllCSV(
-  results: AggResult[],
+  results: ResultItem[],
   _weightCol: string,
   layoutMeta?: LayoutMeta,
 ): void {
-  const hasCross = results.some((r) => {
+  const aggResults = results.filter((r): r is AggResult => r.type === "SA" || r.type === "MA");
+  const faResults = results.filter((r): r is FAResult => r.type === "FA");
+
+  const hasCross = aggResults.some((r) => {
     const { subs } = pivot(r.cells);
     return subs.length > 1;
   });
 
   if (hasCross) {
-    downloadCrossCSV(results, layoutMeta);
+    downloadCrossCSV(aggResults, layoutMeta);
   } else {
-    downloadGtCSV(results);
+    downloadGtCSV(aggResults);
+  }
+
+  if (faResults.length > 0) {
+    downloadFACSV(faResults);
   }
 }
 
@@ -111,6 +118,17 @@ function downloadCrossCSV(results: AggResult[], layoutMeta?: LayoutMeta): void {
   });
 
   exportCSV(rows, `cross_result_${today()}.csv`);
+}
+
+function downloadFACSV(results: FAResult[]): void {
+  const rows: string[][] = [["変数名", "種別", "単語", "出現回数"]];
+  for (const res of results) {
+    for (const w of res.words) {
+      rows.push([res.question, "FA", w.word, String(w.count)]);
+    }
+    rows.push([]);
+  }
+  exportCSV(rows, `fa_wordfreq_${today()}.csv`);
 }
 
 function exportCSV(rows: string[][], filename: string): void {

@@ -1,7 +1,7 @@
 /** 集計エンジン - SQL生成・実行の全責務を担う */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Cell, AggResult, QuestionDef } from "./aggregate";
+import type { Cell, AggResult, CrossableQuestion } from "./aggregate";
 import { questionKey } from "./aggregate";
 
 // --- SQL ヘルパー ---
@@ -45,7 +45,7 @@ export class Aggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
-    private crossCols: QuestionDef[],
+    private crossCols: CrossableQuestion[],
     private crossHeaderCache: CrossHeaderCache,
   ) {}
 
@@ -336,7 +336,7 @@ export class Aggregator {
 
 export async function fetchCrossHeaders(
   conn: duckdb.AsyncDuckDBConnection,
-  crossCols: QuestionDef[],
+  crossCols: CrossableQuestion[],
   weightCol: string,
 ): Promise<CrossHeaderCache> {
   const cache: CrossHeaderCache = new Map();

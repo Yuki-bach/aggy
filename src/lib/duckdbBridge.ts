@@ -3,7 +3,7 @@ import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
 import mvp_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
 import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
 import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-import { aggregate, type Query, type AggResult } from "./aggregate";
+import { aggregate, type Query, type ResultItem } from "./aggregate";
 
 type DuckStatus = "loading" | "ready" | "error";
 
@@ -79,7 +79,7 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 }
 
 /** survey ビューに対して集計を実行する */
-export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
+export async function runDuckDBAggregation(query: Query): Promise<ResultItem[]> {
   const c = await getConnection();
   return aggregate(c, query);
 }

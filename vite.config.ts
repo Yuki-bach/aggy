@@ -24,6 +24,6 @@ export default defineConfig({
     target: "esnext",
   },
   optimizeDeps: {
-    exclude: ["@duckdb/duckdb-wasm"],
+    exclude: ["@duckdb/duckdb-wasm", "lindera-wasm-ipadic"],
   },
 });

@@ -1,6 +1,6 @@
 /** ラベル解決ユーティリティ（ResultTable / ChartRenderer 共有） */
 
-import type { QuestionDef } from "./aggregate";
+import type { CrossableQuestion } from "./aggregate";
 import type { LayoutMeta } from "./layout";
 import { NA_VALUE } from "./aggregator";
 
@@ -32,7 +32,7 @@ export function resolveValueLabel(
 export function resolveSubLabel(
   subLabel: string,
   meta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  crossCols?: CrossableQuestion[],
 ): string {
   if (subLabel === NA_VALUE) return "無回答";
   if (!meta) return subLabel;
