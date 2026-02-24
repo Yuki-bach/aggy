@@ -1,0 +1,40 @@
+[
+  {
+    "key": "id",
+    "type": "ID"
+  },
+  {
+    "key": "weight",
+    "type": "WEIGHT"
+  },
+  {
+    "key": "q1",
+    "label": "性別",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "男性" },
+      { "code": "2", "label": "女性" },
+      { "code": "3", "label": "その他" }
+    ]
+  },
+  {
+    "key": "q2",
+    "label": "満足度",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "満足" },
+      { "code": "2", "label": "普通" },
+      { "code": "3", "label": "不満" }
+    ]
+  },
+  {
+    "key": "q3",
+    "label": "利用サービス",
+    "type": "MA",
+    "items": [
+      { "code": "1", "label": "サービスA" },
+      { "code": "2", "label": "サービスB" },
+      { "code": "3", "label": "サービスC" }
+    ]
+  }
+]
