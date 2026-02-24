@@ -11,6 +11,8 @@
     "lint:fix": "oxlint --fix src/ scripts/ vite.config.ts",
     "fmt": "oxfmt src/ scripts/ vite.config.ts index.html",
     "fmt:check": "oxfmt --check src/ scripts/ vite.config.ts index.html",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check": "npm run fmt:check && npm run lint && tsc --noEmit"
   },
   "dependencies": {
@@ -23,6 +25,7 @@
     "oxfmt": "^0.35.0",
     "oxlint": "^1.50.0",
     "vite-plugin-top-level-await": "^1.6.0",
-    "vite-plugin-wasm": "^3.5.0"
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "^4.0.18"
   }
 }
