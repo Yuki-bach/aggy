@@ -1,4 +1,4 @@
-import { listSaved, deleteSaved } from "../lib/opfs";
+import { listSaved, deleteSaved } from "../../lib/opfs";
 
 type OnSelectCallback = (folderId: string) => void;
 

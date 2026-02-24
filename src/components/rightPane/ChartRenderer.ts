@@ -1,14 +1,15 @@
 /** チャート描画コンポーネント */
 
-import type { AggResult, QuestionDef } from "../lib/aggregate";
-import type { LayoutMeta } from "../lib/layout";
-import { pivot } from "../lib/pivot";
-import { Chart, getSeriesColor, getThemeColors } from "../lib/chartConfig";
+import type { AggResult, QuestionDef } from "../../lib/aggregate";
+import type { LayoutMeta } from "../../lib/layout";
+import { pivot } from "../../lib/pivot";
+import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
 import {
   resolveQuestionLabel,
   resolveValueLabel,
   resolveSubLabel,
-} from "../lib/labelResolver";
+} from "../../lib/labelResolver";
+import { escHtml } from "../shared/escHtml";
 
 import type { ChartConfiguration } from "chart.js";
 
@@ -67,10 +68,6 @@ export function renderChartCard(
   activeCharts.push(chart);
 
   return wrapper;
-}
-
-function escHtml(str: string): string {
-  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function buildGtChart(
