@@ -11,6 +11,7 @@ import {
 } from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
 import { initSavedFiles, refreshList } from "./components/leftPane/SavedFiles";
+import { initGettingStarted } from "./components/GettingStarted";
 
 // 現在読み込み済みの CSV / Layout データ
 let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null =
@@ -43,6 +44,7 @@ function initThemeToggle(): void {
 }
 
 initThemeToggle();
+initGettingStarted();
 
 // DuckDB Wasm をバックグラウンドで初期化開始
 initDuckDB().catch(() => {
