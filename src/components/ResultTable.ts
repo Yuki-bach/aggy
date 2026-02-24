@@ -109,7 +109,7 @@ export function renderResults(
     saSelect.innerHTML = `
       <option value="bar-h"${saChartType === "bar-h" ? " selected" : ""}>横棒</option>
       <option value="bar-v"${saChartType === "bar-v" ? " selected" : ""}>縦棒</option>
-      <option value="pie"${saChartType === "pie" ? " selected" : ""}>円</option>
+      <option value="obi"${saChartType === "obi" ? " selected" : ""}>帯</option>
     `;
     saSelect.addEventListener("change", () => {
       saChartType = saSelect.value as GtChartType;
@@ -126,6 +126,7 @@ export function renderResults(
     maSelect.innerHTML = `
       <option value="bar-h"${maChartType === "bar-h" ? " selected" : ""}>横棒</option>
       <option value="bar-v"${maChartType === "bar-v" ? " selected" : ""}>縦棒</option>
+      <option value="obi"${maChartType === "obi" ? " selected" : ""}>帯</option>
     `;
     maSelect.addEventListener("change", () => {
       maChartType = maSelect.value as GtChartType;

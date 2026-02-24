@@ -20,7 +20,7 @@ export function destroyAllCharts(): void {
   activeCharts.length = 0;
 }
 
-export type GtChartType = "bar-h" | "bar-v" | "pie";
+export type GtChartType = "bar-h" | "bar-v" | "obi";
 
 export function renderChartCard(
   res: AggResult,
@@ -86,23 +86,38 @@ function buildGtChart(
   const data = mains.map((m) => lookup.get(`${m}\0GT`)?.pct ?? 0);
   const colors = mains.map((_, i) => getSeriesColor(i));
 
-  if (chartType === "pie") {
+  // 帯グラフ: 1本の横棒に各選択肢をセグメントとして表示
+  if (chartType === "obi") {
+    const datasets = mains.map((m, i) => ({
+      label: resolveValueLabel(res.type, res.question, m, layoutMeta),
+      data: [lookup.get(`${m}\0GT`)?.pct ?? 0],
+      backgroundColor: getSeriesColor(i),
+      maxBarThickness: 48,
+    }));
+
     return new Chart(canvas, {
-      type: "pie",
-      data: {
-        labels,
-        datasets: [{ data, backgroundColor: colors, borderWidth: 1, borderColor: theme.surface }],
-      },
+      type: "bar",
+      data: { labels: [""], datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis: "y",
         plugins: {
-          legend: { position: "right", labels: { color: theme.text, font: { size: 12 } } },
+          legend: { position: "bottom", labels: { color: theme.text, font: { size: 12 } } },
           tooltip: {
             callbacks: {
-              label: (ctx) => `${ctx.label}: ${(ctx.parsed as number).toFixed(1)}%`,
+              label: (ctx) => `${ctx.dataset.label}: ${(ctx.parsed.x as number).toFixed(1)}%`,
             },
           },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            max: 100,
+            ticks: { color: theme.muted, callback: (v) => `${v}%` },
+            grid: { color: theme.gridLine },
+          },
+          y: { stacked: true, display: false },
         },
       },
     } as ChartConfiguration);
@@ -161,12 +176,51 @@ function buildCrossChart(
 ): Chart {
   const { mains, subs, lookup } = pv;
   const crossSubs = subs.filter((s) => s.label !== "GT");
-  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
 
-  // GtChartType → クロス集計のチャートスタイルにマッピング
-  // bar-h → 帯グラフ（横方向100%スタック）, bar-v → 積み上げ棒, pie → 帯グラフにフォールバック
-  const isObi = gtChartType === "bar-h" || gtChartType === "pie";
-  const isStacked = true;
+  // 帯グラフ: クロス値ごとに1本ずつ帯を表示
+  if (gtChartType === "obi") {
+    const subLabels = crossSubs.map((s) => resolveSubLabel(s.label, layoutMeta, crossCols));
+    const datasets = mains.map((m, i) => ({
+      label: resolveValueLabel(res.type, res.question, m, layoutMeta),
+      data: crossSubs.map((sub) => {
+        const cell = lookup.get(`${m}\0${sub.label}`);
+        return cell?.pct ?? 0;
+      }),
+      backgroundColor: getSeriesColor(i),
+      maxBarThickness: 48,
+    }));
+
+    return new Chart(canvas, {
+      type: "bar",
+      data: { labels: subLabels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: "y",
+        plugins: {
+          legend: { position: "bottom", labels: { color: theme.text, font: { size: 12 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${(ctx.parsed.x as number).toFixed(1)}%`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            max: 100,
+            ticks: { color: theme.muted, callback: (v) => `${v}%` },
+            grid: { color: theme.gridLine },
+          },
+          y: { stacked: true, ticks: { color: theme.text }, grid: { display: false } },
+        },
+      },
+    } as ChartConfiguration);
+  }
+
+  // 横棒 / 縦棒 → 集合棒グラフ（方向はGT選択に合わせる）
+  const isHorizontal = gtChartType === "bar-h";
+  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
 
   const datasets = crossSubs.map((sub, i) => ({
     label: resolveSubLabel(sub.label, layoutMeta, crossCols),
@@ -175,7 +229,7 @@ function buildCrossChart(
       return cell?.pct ?? 0;
     }),
     backgroundColor: getSeriesColor(i),
-    borderRadius: isStacked ? 0 : 3,
+    borderRadius: 3,
     maxBarThickness: 40,
   }));
 
@@ -185,7 +239,7 @@ function buildCrossChart(
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      indexAxis: isObi ? "y" : "x",
+      indexAxis: isHorizontal ? "y" : "x",
       plugins: {
         legend: {
           position: "top",
@@ -194,24 +248,21 @@ function buildCrossChart(
         tooltip: {
           callbacks: {
             label: (ctx) => {
-              const val = ctx.parsed[isObi ? "x" : "y"] as number;
+              const val = ctx.parsed[isHorizontal ? "x" : "y"] as number;
               return `${ctx.dataset.label}: ${val.toFixed(1)}%`;
             },
           },
         },
       },
       scales: {
-        x: {
-          stacked: isStacked,
+        [isHorizontal ? "x" : "y"]: {
           beginAtZero: true,
-          ...(isObi ? { max: 100 } : {}),
           ticks: { color: theme.muted, callback: (v) => `${v}%` },
           grid: { color: theme.gridLine },
         },
-        y: {
-          stacked: isStacked,
+        [isHorizontal ? "y" : "x"]: {
           ticks: { color: theme.text },
-          grid: { display: isObi },
+          grid: { display: false },
         },
       },
     },

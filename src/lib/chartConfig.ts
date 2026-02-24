@@ -3,22 +3,18 @@
 import {
   Chart,
   BarController,
-  PieController,
   CategoryScale,
   LinearScale,
   BarElement,
-  ArcElement,
   Tooltip,
   Legend,
 } from "chart.js";
 
 Chart.register(
   BarController,
-  PieController,
   CategoryScale,
   LinearScale,
   BarElement,
-  ArcElement,
   Tooltip,
   Legend,
 );
