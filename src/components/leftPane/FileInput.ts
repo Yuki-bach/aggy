@@ -1,4 +1,4 @@
-import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "../lib/layout";
+import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "../../lib/layout";
 
 export function initCsvInput(
   onLoad: (csvText: string, fileName: string) => void,

@@ -1,6 +1,6 @@
-import { initCsvInput, initLayoutInput } from "./components/FileInput";
-import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
-import { renderResults } from "./components/ResultTable";
+import { initCsvInput, initLayoutInput } from "./components/leftPane/FileInput";
+import { initCrossConfig, getCrossColsSelected } from "./components/leftPane/CrossConfig";
+import { renderResults } from "./components/rightPane/ResultView";
 import { initDuckDB, loadCSV, runDuckDBAggregation } from "./lib/duckdbBridge";
 import {
   parseLayout,
@@ -10,7 +10,7 @@ import {
   type LayoutMeta,
 } from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
-import { initSavedFiles, refreshList } from "./components/SavedFiles";
+import { initSavedFiles, refreshList } from "./components/leftPane/SavedFiles";
 
 // 現在読み込み済みの CSV / Layout データ
 let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null =
