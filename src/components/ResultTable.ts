@@ -1,67 +1,50 @@
 import type { AggResult, QuestionDef } from "../lib/aggregate";
 import type { LayoutMeta } from "../lib/layout";
-import { NA_VALUE } from "../lib/aggregator";
 import { pivot } from "../lib/pivot";
 import { downloadAllCSV } from "../lib/download";
 import { isAIAvailable, generateComment } from "../lib/aiComment";
+import {
+  resolveQuestionLabel,
+  resolveValueLabel,
+  resolveSubLabel,
+} from "../lib/labelResolver";
+import {
+  destroyAllCharts,
+  renderChartCard,
+  type GtChartType,
+} from "./ChartRenderer";
 
 function escHtml(str: string): string {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-/** 設問ラベルを解決する。なければ列名をそのまま返す */
-function resolveQuestionLabel(col: string, meta?: LayoutMeta): string {
-  return meta?.questionLabels[col] ?? col;
-}
+// --- 表示モード状態 ---
+type ViewMode = "table" | "chart";
+let currentViewMode: ViewMode = "table";
+let saChartType: GtChartType = "bar-h";
+let maChartType: GtChartType = "bar-h";
 
-/** 選択肢ラベルを解決する
- *  SA: valueLabels[col][code]
- *  MA: valueLabels[colName]["1"]（colName = row.label）
- */
-function resolveValueLabel(
-  type: "SA" | "MA",
-  col: string,
-  rowLabel: string,
-  meta?: LayoutMeta,
-): string {
-  // 無回答マーカー
-  if (rowLabel === NA_VALUE) return "無回答";
-  if (!meta) return rowLabel;
-  if (type === "SA") {
-    return meta.valueLabels[col]?.[rowLabel] ?? rowLabel;
-  } else {
-    // MA: rowLabel は個別列名（例 "q3_1"）。item.labelは "1" キーで保持
-    return meta.valueLabels[rowLabel]?.["1"] ?? rowLabel;
-  }
-}
-
-/** クロス軸ヘッダーのラベルを解決する。
- *  crossCols があれば SA クロス軸の値ラベルも解決する */
-function resolveSubLabel(subLabel: string, meta?: LayoutMeta, crossCols?: QuestionDef[]): string {
-  if (subLabel === NA_VALUE) return "無回答";
-  if (!meta) return subLabel;
-  // MAカラム名の場合: valueLabels[colName]["1"] にラベルがある
-  const maLabel = meta.valueLabels[subLabel]?.["1"];
-  if (maLabel) return maLabel;
-  // SA クロス軸の値ラベルを解決
-  if (crossCols) {
-    for (const q of crossCols) {
-      if (q.type === "SA") {
-        const label = meta.valueLabels[q.column]?.[subLabel];
-        if (label) return label;
-      }
-    }
-  }
-  return subLabel;
-}
+// --- 再描画用にデータをキャッシュ ---
+let lastResults: AggResult[] | null = null;
+let lastWeightCol = "";
+let lastRawN = 0;
+let lastLayoutMeta: LayoutMeta | undefined;
+let lastCrossCols: QuestionDef[] | undefined;
 
 export function renderResults(
   results: AggResult[],
   weightCol: string,
-  _rawN: number,
+  rawN: number,
   layoutMeta?: LayoutMeta,
   crossCols?: QuestionDef[],
 ): void {
+  // キャッシュ
+  lastResults = results;
+  lastWeightCol = weightCol;
+  lastRawN = rawN;
+  lastLayoutMeta = layoutMeta;
+  lastCrossCols = crossCols;
+
   document.getElementById("empty-state")!.classList.add("hidden");
   const area = document.getElementById("results-area")!;
   area.classList.remove("hidden");
@@ -82,6 +65,29 @@ export function renderResults(
     </span>
   `;
 
+  // トグル: テーブル / チャート
+  const toggle = document.createElement("div");
+  toggle.className = "view-toggle";
+  const btnTable = document.createElement("button");
+  btnTable.className = `view-toggle-btn${currentViewMode === "table" ? " active" : ""}`;
+  btnTable.dataset.mode = "table";
+  btnTable.textContent = "テーブル";
+  const btnChart = document.createElement("button");
+  btnChart.className = `view-toggle-btn${currentViewMode === "chart" ? " active" : ""}`;
+  btnChart.dataset.mode = "chart";
+  btnChart.textContent = "チャート";
+  toggle.appendChild(btnTable);
+  toggle.appendChild(btnChart);
+
+  toggle.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".view-toggle-btn");
+    if (!btn || btn.dataset.mode === currentViewMode) return;
+    currentViewMode = btn.dataset.mode as ViewMode;
+    reRender();
+  });
+  hdr.appendChild(toggle);
+
+  // CSV出力ボタン
   const csvBtn = document.createElement("button");
   csvBtn.className = "csv-export-btn";
   csvBtn.textContent = "全件CSV出力";
@@ -90,9 +96,105 @@ export function renderResults(
 
   area.appendChild(hdr);
 
+  // チャート種類セレクト（2行目）
+  if (currentViewMode === "chart") {
+    const chartOpts = document.createElement("div");
+    chartOpts.className = "chart-opts";
+
+    // SA用
+    const saLabel = document.createElement("label");
+    saLabel.textContent = "SA: ";
+    const saSelect = document.createElement("select");
+    saSelect.className = "chart-type-select";
+    saSelect.innerHTML = `
+      <option value="bar-h"${saChartType === "bar-h" ? " selected" : ""}>横棒</option>
+      <option value="bar-v"${saChartType === "bar-v" ? " selected" : ""}>縦棒</option>
+      <option value="obi"${saChartType === "obi" ? " selected" : ""}>帯</option>
+    `;
+    saSelect.addEventListener("change", () => {
+      saChartType = saSelect.value as GtChartType;
+      reRender();
+    });
+    saLabel.appendChild(saSelect);
+    chartOpts.appendChild(saLabel);
+
+    // MA用
+    const maLabel = document.createElement("label");
+    maLabel.textContent = "MA: ";
+    const maSelect = document.createElement("select");
+    maSelect.className = "chart-type-select";
+    maSelect.innerHTML = `
+      <option value="bar-h"${maChartType === "bar-h" ? " selected" : ""}>横棒</option>
+      <option value="bar-v"${maChartType === "bar-v" ? " selected" : ""}>縦棒</option>
+      <option value="obi"${maChartType === "obi" ? " selected" : ""}>帯</option>
+    `;
+    maSelect.addEventListener("change", () => {
+      maChartType = maSelect.value as GtChartType;
+      reRender();
+    });
+    maLabel.appendChild(maSelect);
+    chartOpts.appendChild(maLabel);
+
+    area.appendChild(chartOpts);
+  }
+
+  // コンテンツ描画
   const grid = document.createElement("div");
-  grid.className = hasCross ? "tables-grid cross-mode" : "tables-grid";
   area.appendChild(grid);
+
+  if (currentViewMode === "chart") {
+    renderChartContent(grid, results, hasCross, layoutMeta, crossCols);
+  } else {
+    renderTableContent(grid, results, weightCol, hasCross, layoutMeta, crossCols);
+  }
+
+  // AI分析コメントを自動生成（非同期、テーブル描画をブロックしない）
+  showAIBubble(results, weightCol, layoutMeta);
+}
+
+function reRender(): void {
+  if (!lastResults) return;
+  renderResults(lastResults, lastWeightCol, lastRawN, lastLayoutMeta, lastCrossCols);
+}
+
+// テーマ変更時にチャート再描画
+const observer = new MutationObserver(() => {
+  if (currentViewMode === "chart" && lastResults) {
+    reRender();
+  }
+});
+observer.observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ["data-theme"],
+});
+
+function renderChartContent(
+  grid: HTMLDivElement,
+  results: AggResult[],
+  hasCross: boolean,
+  layoutMeta?: LayoutMeta,
+  crossCols?: QuestionDef[],
+): void {
+  destroyAllCharts();
+  grid.className = hasCross ? "charts-grid cross-mode" : "charts-grid";
+
+  results.forEach((res) => {
+    const gtType = res.type === "SA" ? saChartType : maChartType;
+    const card = renderChartCard(res, gtType, layoutMeta, crossCols);
+    grid.appendChild(card);
+  });
+}
+
+function renderTableContent(
+  grid: HTMLDivElement,
+  results: AggResult[],
+  weightCol: string,
+  hasCross: boolean,
+  layoutMeta?: LayoutMeta,
+  crossCols?: QuestionDef[],
+): void {
+  destroyAllCharts();
+  grid.className = hasCross ? "tables-grid cross-mode" : "tables-grid";
 
   const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
@@ -131,9 +233,6 @@ export function renderResults(
 
     grid.appendChild(card);
   });
-
-  // AI分析コメントを自動生成（非同期、テーブル描画をブロックしない）
-  showAIBubble(results, weightCol, layoutMeta);
 }
 
 async function showAIBubble(
