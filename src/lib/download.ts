@@ -1,11 +1,23 @@
 import type { AggResult } from "./aggregate";
+import { parseCrossSub } from "./aggregate";
 import type { LayoutMeta } from "./layout";
 import { NA_VALUE } from "./aggregator";
 import { pivot } from "./pivot";
 
-/** MAカラム名をラベルに解決する */
+/** クロスsub値をラベルに解決する */
 function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
   if (subLabel === NA_VALUE) return "無回答";
+
+  const parsed = parseCrossSub(subLabel);
+  if (parsed) {
+    const { axisKey, rawValue } = parsed;
+    if (rawValue === NA_VALUE) return "無回答";
+    if (!meta) return rawValue;
+    const maLabel = meta.valueLabels[rawValue]?.["1"];
+    if (maLabel) return maLabel;
+    return meta.valueLabels[axisKey]?.[rawValue] ?? rawValue;
+  }
+
   if (!meta) return subLabel;
   return meta.valueLabels[subLabel]?.["1"] ?? subLabel;
 }

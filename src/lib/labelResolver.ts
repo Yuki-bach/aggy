@@ -1,6 +1,7 @@
 /** ラベル解決ユーティリティ（ResultTable / ChartRenderer 共有） */
 
 import type { QuestionDef } from "./aggregate";
+import { parseCrossSub } from "./aggregate";
 import type { LayoutMeta } from "./layout";
 import { NA_VALUE } from "./aggregator";
 
@@ -28,23 +29,31 @@ export function resolveValueLabel(
   }
 }
 
-/** クロス軸ヘッダーのラベルを解決する */
+/** クロス軸ヘッダーのラベルを解決する
+ *  sub値は "axisKey\x01rawValue" 形式でプレフィックス付き
+ */
 export function resolveSubLabel(
   subLabel: string,
   meta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  _crossCols?: QuestionDef[],
 ): string {
   if (subLabel === NA_VALUE) return "無回答";
+
+  const parsed = parseCrossSub(subLabel);
+  if (parsed) {
+    const { axisKey, rawValue } = parsed;
+    if (rawValue === NA_VALUE) return "無回答";
+    if (!meta) return rawValue;
+    // MA軸: rawValue はカラム名 → valueLabels[rawValue]["1"]
+    const maLabel = meta.valueLabels[rawValue]?.["1"];
+    if (maLabel) return maLabel;
+    // SA軸: rawValue は値コード → valueLabels[axisKey][rawValue]
+    return meta.valueLabels[axisKey]?.[rawValue] ?? rawValue;
+  }
+
+  // プレフィックスなし（後方互換）
   if (!meta) return subLabel;
   const maLabel = meta.valueLabels[subLabel]?.["1"];
   if (maLabel) return maLabel;
-  if (crossCols) {
-    for (const q of crossCols) {
-      if (q.type === "SA") {
-        const label = meta.valueLabels[q.column]?.[subLabel];
-        if (label) return label;
-      }
-    }
-  }
   return subLabel;
 }
