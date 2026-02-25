@@ -104,9 +104,4 @@ export function initGettingStarted(): void {
 
   // ヘッダーの「?」ボタン
   document.getElementById("help-btn")!.addEventListener("click", show);
-
-  // 初回訪問時に自動表示
-  if (!localStorage.getItem(STORAGE_KEY)) {
-    show();
-  }
 }
