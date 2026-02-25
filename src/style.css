@@ -256,7 +256,7 @@ header span {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   padding: var(--space-4);
-  min-width: 240px;
+  width: 300px;
   z-index: 100;
 }
 
