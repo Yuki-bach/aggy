@@ -4,7 +4,7 @@ import type { LayoutMeta } from "./layout";
 import { NA_VALUE } from "./aggregator";
 import { pivot } from "./pivot";
 
-/** クロスsub値をラベルに解決する */
+/** Resolve cross sub value to label */
 function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
   if (subLabel === NA_VALUE) return "無回答";
 
@@ -22,7 +22,7 @@ function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
   return meta.valueLabels[subLabel]?.["1"] ?? subLabel;
 }
 
-/** 選択肢ラベルを解決する（CSV出力用） */
+/** Resolve option label for CSV export */
 function resolveMainLabel(main: string): string {
   return main === NA_VALUE ? "無回答" : main;
 }
@@ -69,7 +69,7 @@ function downloadGtCSV(results: AggResult[]): void {
 }
 
 function downloadCrossCSV(results: AggResult[], layoutMeta?: LayoutMeta): void {
-  // 最初の結果からクロス軸構造を取得
+  // Get cross-axis structure from first result
   const firstResult = results.find((r) => {
     const { subs } = pivot(r.cells);
     return subs.length > 1;
@@ -82,7 +82,7 @@ function downloadCrossCSV(results: AggResult[], layoutMeta?: LayoutMeta): void {
   const firstPivot = pivot(firstResult.cells);
   const crossSubs = firstPivot.subs.filter((s) => s.label !== "GT");
 
-  // ヘッダー行
+  // Header rows
   const headerRow1 = ["変数名", "種別", "選択肢", "全体_n", "全体_%"];
   const headerRow2 = ["", "", "", "", ""];
   crossSubs.forEach((sub) => {
@@ -113,7 +113,7 @@ function downloadCrossCSV(results: AggResult[], layoutMeta?: LayoutMeta): void {
       rows.push(dataRow);
     });
 
-    // n行
+    // n row
     const nRow = [res.question, res.type, "n", gtSub.n.toFixed(1), ""];
     resCrossSubs.forEach((sub) => {
       nRow.push(sub.n.toFixed(1));

@@ -9,13 +9,13 @@ import { buildCrossTable } from "./CrossTable";
 import { showAIBubble } from "./AIBubble";
 import { destroyAllCharts, renderChartCard, type GtChartType } from "./ChartRenderer";
 
-// --- 表示モード状態 ---
+// View mode state
 type ViewMode = "table" | "chart";
 let currentViewMode: ViewMode = "table";
 let saChartType: GtChartType = "bar-h";
 let maChartType: GtChartType = "bar-h";
 
-// --- 再描画用にデータをキャッシュ ---
+// Cached data for re-rendering
 let lastResults: AggResult[] | null = null;
 let lastWeightCol = "";
 let lastRawN = 0;
@@ -29,7 +29,6 @@ export function renderResults(
   layoutMeta?: LayoutMeta,
   crossCols?: QuestionDef[],
 ): void {
-  // キャッシュ
   lastResults = results;
   lastWeightCol = weightCol;
   lastRawN = rawN;
@@ -46,7 +45,6 @@ export function renderResults(
     return subs.length > 1;
   });
 
-  // ヘッダー
   const hdr = buildToolbar(hasCross, results, weightCol, currentViewMode, layoutMeta, {
     onViewModeChange: (mode) => {
       currentViewMode = mode;
@@ -63,7 +61,7 @@ export function renderResults(
   });
   area.appendChild(hdr);
 
-  // チャート種類セレクト（2行目）
+  // Chart type selector (2nd row)
   if (currentViewMode === "chart") {
     const chartOpts = buildChartOpts(saChartType, maChartType, {
       onSaChartTypeChange: (type) => {
@@ -78,7 +76,7 @@ export function renderResults(
     area.appendChild(chartOpts);
   }
 
-  // コンテンツ描画
+  // Render content
   const grid = document.createElement("div");
   area.appendChild(grid);
 
@@ -88,7 +86,7 @@ export function renderResults(
     renderTableContent(grid, results, weightCol, hasCross, layoutMeta, crossCols);
   }
 
-  // AI分析コメントを自動生成（非同期、テーブル描画をブロックしない）
+  // Generate AI analysis comment asynchronously (non-blocking)
   showAIBubble(results, weightCol, layoutMeta);
 }
 
@@ -97,7 +95,7 @@ function reRender(): void {
   renderResults(lastResults, lastWeightCol, lastRawN, lastLayoutMeta, lastCrossCols);
 }
 
-// テーマ変更時にチャート再描画
+// Re-render charts on theme change
 const observer = new MutationObserver(() => {
   if (currentViewMode === "chart" && lastResults) {
     reRender();

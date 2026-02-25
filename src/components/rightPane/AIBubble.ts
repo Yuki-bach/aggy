@@ -9,7 +9,7 @@ export async function showAIBubble(
 ): Promise<void> {
   if (!(await isAIAvailable())) return;
 
-  // 既存の吹き出しがあれば除去
+  // Remove existing bubble if any
   document.querySelector(".ai-bubble")?.remove();
 
   const bubble = document.createElement("div");

@@ -63,7 +63,7 @@ async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
   return conn;
 }
 
-/** CSVテキストをDuckDBに登録し、ヘッダーと行数を返す */
+/** Register CSV text in DuckDB and return headers and row count */
 export async function loadCSV(csvText: string): Promise<{ headers: string[]; rowCount: number }> {
   await initDuckDB();
   if (!db) throw new Error("DuckDB is not ready");
@@ -85,7 +85,7 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
   return { headers, rowCount };
 }
 
-/** survey ビューに対して集計を実行する */
+/** Execute aggregation against the survey view */
 export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
   const c = await getConnection();
   return aggregate(c, query);
