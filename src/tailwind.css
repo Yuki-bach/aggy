@@ -252,23 +252,23 @@
 
   main[data-screen="import"] .panel-left,
   main[data-screen="import"] .panel-right {
-    display: none;
+    display: none !important;
   }
 
   main[data-screen="import"] .import-screen {
-    display: flex;
+    display: flex !important;
   }
 
   main[data-screen="aggregation"] .import-screen {
-    display: none;
+    display: none !important;
   }
 
   main[data-screen="aggregation"] .panel-left {
-    display: flex;
+    display: flex !important;
   }
 
   main[data-screen="aggregation"] .panel-right {
-    display: block;
+    display: block !important;
   }
 
   main[data-screen="import"] ~ * > .back-btn,
