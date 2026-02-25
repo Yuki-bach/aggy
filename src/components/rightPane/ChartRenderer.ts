@@ -1,6 +1,6 @@
 /** Chart rendering component */
 
-import type { AggResult, QuestionDef } from "../../lib/aggregate";
+import type { AggResult, CrossableQuestion } from "../../lib/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/pivot";
 import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
@@ -23,7 +23,7 @@ export function renderChartCard(
   res: AggResult,
   gtChartType: GtChartType,
   layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  crossCols?: CrossableQuestion[],
 ): HTMLDivElement {
   const pv = pivot(res.cells);
   const isCross = pv.subs.length > 1;
@@ -164,7 +164,7 @@ function buildCrossChart(
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
   layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  crossCols?: CrossableQuestion[],
 ): Chart {
   const { mains, subs, lookup } = pv;
   const crossSubs = subs.filter((s) => s.label !== "GT");

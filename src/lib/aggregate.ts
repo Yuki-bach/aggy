@@ -2,6 +2,7 @@
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import { Aggregator, fetchCrossHeaders } from "./aggregator";
+import { aggregateFA } from "./fa/faAggregator";
 
 export interface Cell {
   main: string; // Option label (aggregation target value)
@@ -17,7 +18,26 @@ export interface AggResult {
   cells: Cell[];
 }
 
-export type QuestionDef = SAQuestion | MAQuestion;
+// --- FA result types ---
+
+export interface WordFreq {
+  word: string;
+  count: number;
+}
+
+export interface FAResult {
+  question: string;
+  type: "FA";
+  totalResponses: number;
+  words: WordFreq[];
+}
+
+/** Union type for all result types (SA/MA/FA) */
+export type ResultItem = AggResult | FAResult;
+
+// --- Question definitions ---
+
+export type QuestionDef = SAQuestion | MAQuestion | FAQuestion;
 
 interface SAQuestion {
   type: "SA";
@@ -30,9 +50,24 @@ interface MAQuestion {
   columns: string[];
 }
 
-export function questionKey(q: QuestionDef): string {
-  return q.type === "SA" ? q.column : q.prefix;
+export interface FAQuestion {
+  type: "FA";
+  column: string;
 }
+
+export function questionKey(q: QuestionDef): string {
+  switch (q.type) {
+    case "SA":
+      return q.column;
+    case "MA":
+      return q.prefix;
+    case "FA":
+      return q.column;
+  }
+}
+
+/** Question types eligible for cross-tabulation (FA excluded) */
+export type CrossableQuestion = SAQuestion | MAQuestion;
 
 /** Cross sub value separator (separates axis key from raw value) */
 export const CROSS_SEP = "\x01";
@@ -52,16 +87,20 @@ export function parseCrossSub(sub: string): { axisKey: string; rawValue: string 
 export interface Query {
   questions: QuestionDef[];
   weight_col: string;
-  cross_cols: QuestionDef[];
+  cross_cols: CrossableQuestion[];
 }
 
 /** Aggregation entry point. Aggregates all questions against the survey view. */
 export async function aggregate(
   conn: duckdb.AsyncDuckDBConnection,
   payload: Query,
-): Promise<AggResult[]> {
+): Promise<ResultItem[]> {
   const weightCol = payload.weight_col;
-  const crossCols = payload.cross_cols ?? [];
+  const crossCols: CrossableQuestion[] = payload.cross_cols ?? [];
+
+  // Separate FA questions (not eligible for cross-tabulation)
+  const samaQuestions = payload.questions.filter((q) => q.type !== "FA");
+  const faQuestions = payload.questions.filter((q): q is FAQuestion => q.type === "FA");
 
   const crossHeaderCache =
     crossCols.length > 0
@@ -70,13 +109,17 @@ export async function aggregate(
 
   const ctx = new Aggregator(conn, weightCol, crossCols, crossHeaderCache);
 
-  const results: AggResult[] = [];
-  for (const q of payload.questions) {
+  const results: ResultItem[] = [];
+  for (const q of samaQuestions) {
     if (q.type === "SA") {
       results.push(await ctx.aggregateSA(q.column));
-    } else {
+    } else if (q.type === "MA") {
       results.push(await ctx.aggregateMA(q.prefix, q.columns));
     }
+  }
+
+  for (const q of faQuestions) {
+    results.push(await aggregateFA(conn, q.column));
   }
 
   return results;

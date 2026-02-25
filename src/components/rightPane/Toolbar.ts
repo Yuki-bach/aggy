@@ -1,4 +1,4 @@
-import type { AggResult } from "../../lib/aggregate";
+import type { ResultItem } from "../../lib/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { downloadAllCSV } from "../../lib/download";
 import { escHtml } from "../shared/escHtml";
@@ -14,7 +14,7 @@ interface ToolbarCallbacks {
 
 export function buildToolbar(
   hasCross: boolean,
-  results: AggResult[],
+  results: ResultItem[],
   weightCol: string,
   currentViewMode: ViewMode,
   layoutMeta: LayoutMeta | undefined,

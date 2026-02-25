@@ -1,4 +1,4 @@
-import type { AggResult, QuestionDef } from "../../lib/aggregate";
+import type { AggResult, FAResult, ResultItem, CrossableQuestion } from "../../lib/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/pivot";
 import { resolveQuestionLabel } from "../../lib/labelResolver";
@@ -8,6 +8,7 @@ import { buildGtTable } from "./GtTable";
 import { buildCrossTable } from "./CrossTable";
 import { showAIBubble } from "./AIBubble";
 import { destroyAllCharts, renderChartCard, type GtChartType } from "./ChartRenderer";
+import { buildWordCloudCard } from "./WordCloud";
 
 // View mode state
 type ViewMode = "table" | "chart";
@@ -16,18 +17,18 @@ let saChartType: GtChartType = "bar-h";
 let maChartType: GtChartType = "bar-h";
 
 // Cached data for re-rendering
-let lastResults: AggResult[] | null = null;
+let lastResults: ResultItem[] | null = null;
 let lastWeightCol = "";
 let lastRawN = 0;
 let lastLayoutMeta: LayoutMeta | undefined;
-let lastCrossCols: QuestionDef[] | undefined;
+let lastCrossCols: CrossableQuestion[] | undefined;
 
 export function renderResults(
-  results: AggResult[],
+  results: ResultItem[],
   weightCol: string,
   rawN: number,
   layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  crossCols?: CrossableQuestion[],
 ): void {
   lastResults = results;
   lastWeightCol = weightCol;
@@ -35,12 +36,16 @@ export function renderResults(
   lastLayoutMeta = layoutMeta;
   lastCrossCols = crossCols;
 
+  // Separate SA/MA and FA results
+  const aggResults = results.filter((r): r is AggResult => r.type === "SA" || r.type === "MA");
+  const faResults = results.filter((r): r is FAResult => r.type === "FA");
+
   document.getElementById("empty-state")!.classList.add("hidden");
   const area = document.getElementById("results-area")!;
   area.classList.remove("hidden");
   area.innerHTML = "";
 
-  const hasCross = results.some((r) => {
+  const hasCross = aggResults.some((r) => {
     const { subs } = pivot(r.cells);
     return subs.length > 1;
   });
@@ -81,13 +86,23 @@ export function renderResults(
   area.appendChild(grid);
 
   if (currentViewMode === "chart") {
-    renderChartContent(grid, results, hasCross, layoutMeta, crossCols);
+    renderChartContent(grid, aggResults, hasCross, layoutMeta, crossCols);
   } else {
-    renderTableContent(grid, results, weightCol, hasCross, layoutMeta, crossCols);
+    renderTableContent(grid, aggResults, weightCol, hasCross, layoutMeta, crossCols);
+  }
+
+  // FA word cloud cards (shown in both table and chart modes)
+  if (faResults.length > 0) {
+    const faGrid = document.createElement("div");
+    faGrid.className = "tables-grid";
+    faResults.forEach((res) => {
+      faGrid.appendChild(buildWordCloudCard(res, layoutMeta));
+    });
+    area.appendChild(faGrid);
   }
 
   // Generate AI analysis comment asynchronously (non-blocking)
-  showAIBubble(results, weightCol, layoutMeta);
+  showAIBubble(aggResults, weightCol, layoutMeta);
 }
 
 function reRender(): void {
@@ -111,7 +126,7 @@ function renderChartContent(
   results: AggResult[],
   hasCross: boolean,
   layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  crossCols?: CrossableQuestion[],
 ): void {
   destroyAllCharts();
   grid.className = hasCross ? "charts-grid cross-mode" : "charts-grid";
@@ -129,7 +144,7 @@ function renderTableContent(
   weightCol: string,
   hasCross: boolean,
   layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  crossCols?: CrossableQuestion[],
 ): void {
   destroyAllCharts();
   grid.className = hasCross ? "tables-grid cross-mode" : "tables-grid";

@@ -1,4 +1,4 @@
-import type { AggResult, QuestionDef } from "../../lib/aggregate";
+import type { AggResult, CrossableQuestion } from "../../lib/aggregate";
 import { questionKey, parseCrossSub } from "../../lib/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import type { pivot } from "../../lib/pivot";
@@ -8,9 +8,9 @@ import { escHtml } from "../shared/escHtml";
 /** Group subs by cross axis using prefixed sub values */
 function groupSubsByCrossAxis(
   crossSubs: { label: string; n: number }[],
-  crossCols: QuestionDef[],
+  crossCols: CrossableQuestion[],
   resType: "SA" | "MA",
-): { crossCol: QuestionDef; subs: { label: string; n: number }[] }[] {
+): { crossCol: CrossableQuestion; subs: { label: string; n: number }[] }[] {
   // SA main: SA axes first, then MA. MA main: crossCols order
   const orderedCols =
     resType === "SA"
@@ -41,7 +41,7 @@ export function buildCrossTable(
   pv: ReturnType<typeof pivot>,
   weightCol: string,
   layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  crossCols?: CrossableQuestion[],
 ): HTMLTableElement {
   const { mains, subs, lookup } = pv;
   const gtSub = subs.find((s) => s.label === "GT")!;

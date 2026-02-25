@@ -1,7 +1,7 @@
-import { questionKey, type QuestionDef } from "../../lib/aggregate";
+import { questionKey, type QuestionDef, type CrossableQuestion } from "../../lib/aggregate";
 
 export interface CrossConfigState {
-  questions: QuestionDef[];
+  questions: CrossableQuestion[];
   crossSelected: Record<string, boolean>;
 }
 
@@ -11,13 +11,17 @@ export function initCrossConfig(
   questions: QuestionDef[],
   questionLabels: Record<string, string>,
 ): void {
-  state = { questions, crossSelected: {} };
-  questions.forEach((q) => (state.crossSelected[questionKey(q)] = false));
+  // FA questions are excluded from cross-tabulation
+  const crossCandidates = questions.filter(
+    (q): q is CrossableQuestion => q.type !== "FA",
+  );
+  state = { questions: crossCandidates, crossSelected: {} };
+  crossCandidates.forEach((q) => (state.crossSelected[questionKey(q)] = false));
 
   const list = document.getElementById("cross-col-list")!;
   list.innerHTML = "";
 
-  questions.forEach((q) => {
+  crossCandidates.forEach((q) => {
     const key = questionKey(q);
     const label = document.createElement("label");
     label.className = "cross-col-item";
@@ -40,6 +44,6 @@ export function initCrossConfig(
   });
 }
 
-export function getCrossColsSelected(): QuestionDef[] {
+export function getCrossColsSelected(): CrossableQuestion[] {
   return state.questions.filter((q) => state.crossSelected[questionKey(q)]);
 }

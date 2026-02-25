@@ -1350,6 +1350,46 @@ table.gt td.cross-axis-first {
   }
 }
 
+/* === FA Word Cloud === */
+.fa-card {
+  grid-column: 1 / -1;
+}
+
+.wordcloud-container {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.wordcloud-canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.wordcloud-empty {
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: var(--space-8);
+}
+
+.fa-freq-details {
+  margin-top: var(--space-2);
+}
+
+.fa-freq-details summary {
+  cursor: pointer;
+  color: var(--color-primary-600);
+  font-size: 0.875rem;
+  padding: var(--space-2) 0;
+}
+
+.fa-freq-table {
+  font-size: 0.8125rem;
+}
+
 /* === Scrollbar (Webkit) === */
 .panel-left ::-webkit-scrollbar {
   width: 6px;

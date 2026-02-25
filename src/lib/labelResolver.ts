@@ -1,6 +1,6 @@
 /** Label resolution utility (shared by ResultTable / ChartRenderer) */
 
-import type { QuestionDef } from "./aggregate";
+import type { CrossableQuestion } from "./aggregate";
 import { parseCrossSub } from "./aggregate";
 import type { LayoutMeta } from "./layout";
 import { NA_VALUE } from "./aggregator";
@@ -30,7 +30,7 @@ export function resolveValueLabel(
 export function resolveSubLabel(
   subLabel: string,
   meta?: LayoutMeta,
-  _crossCols?: QuestionDef[],
+  _crossCols?: CrossableQuestion[],
 ): string {
   if (subLabel === NA_VALUE) return "無回答";
 

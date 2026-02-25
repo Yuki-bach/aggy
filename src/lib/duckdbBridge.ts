@@ -1,5 +1,5 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
-import { aggregate, type Query, type AggResult } from "./aggregate";
+import { aggregate, type Query, type ResultItem } from "./aggregate";
 
 const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
 
@@ -86,7 +86,7 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 }
 
 /** Execute aggregation against the survey view */
-export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
+export async function runDuckDBAggregation(query: Query): Promise<ResultItem[]> {
   const c = await getConnection();
   return aggregate(c, query);
 }
