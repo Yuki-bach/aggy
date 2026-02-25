@@ -11,52 +11,61 @@
     <link rel="stylesheet" href="/src/tailwind.css" />
   </head>
   <body>
-    <header>
+    <header class="flex items-center gap-4 border-b border-border bg-surface px-6 py-4">
       <button
         id="back-btn"
-        class="back-btn hidden"
+        class="back-btn hidden shrink-0 cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text-secondary transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
         data-i18n="header.back"
         data-i18n-attr="aria-label"
         aria-label="データ読み込みに戻る"
       >
         ←
       </button>
-      <h1>Aggy</h1>
-      <span data-i18n="header.subtitle">SURVEY AGGREGATOR v0.1</span>
-      <div class="header-right">
-        <div class="wasm-status" role="status" aria-live="polite">
+      <h1 class="text-lg font-bold text-text">Aggy</h1>
+      <span class="text-xs tracking-[0.08em] text-muted" data-i18n="header.subtitle"
+        >SURVEY AGGREGATOR v0.1</span
+      >
+      <div class="ml-auto flex items-center gap-3">
+        <div
+          class="flex min-w-40 items-center justify-end gap-2 text-[0.8125rem] text-muted"
+          role="status"
+          aria-live="polite"
+        >
           <div class="status-dot loading" id="wasm-dot" aria-hidden="true"></div>
           <span id="wasm-label" data-i18n="wasm.loading">DuckDB 読み込み中...</span>
         </div>
-        <div class="settings-wrap">
+        <div class="relative">
           <button
             id="settings-btn"
-            class="settings-btn"
+            class="cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
             data-i18n="header.settings"
             data-i18n-attr="aria-label"
             aria-label="設定を開く"
           >
             ⚙
           </button>
-          <div id="settings-panel" class="settings-panel hidden"></div>
+          <div
+            id="settings-panel"
+            class="hidden absolute top-[calc(100%+8px)] right-0 z-100 w-[300px] rounded-xl border border-border bg-surface p-4 shadow-lg"
+          ></div>
         </div>
       </div>
     </header>
 
-    <main data-screen="import">
+    <main class="grid min-h-0 flex-1 grid-cols-[360px_1fr] grid-rows-[1fr]" data-screen="import">
       <!-- IMPORT SCREEN -->
-      <div id="import-screen" class="import-screen">
-        <div class="import-card">
-          <h2 class="import-card-title" data-i18n="import.title">データ読み込み</h2>
+      <div id="import-screen" class="import-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-[480px] rounded-xl border border-border bg-surface p-8 shadow-md">
+          <h2 class="mb-5 text-xl font-bold text-text" data-i18n="import.title">データ読み込み</h2>
           <div
-            class="load-tabs"
+            class="mb-3 flex"
             role="tablist"
             data-i18n="import.tab.label"
             data-i18n-attr="aria-label"
             aria-label="データ読み込み方法"
           >
             <button
-              class="load-tab active"
+              class="load-tab active flex-1 cursor-pointer border border-border bg-surface px-0 py-2 font-[var(--font-family-base)] text-[0.875rem] font-medium text-text-secondary transition-[background,color,border-color] duration-150 first:rounded-l-sm last:rounded-r-sm last:border-l-0"
               role="tab"
               aria-selected="true"
               aria-controls="tab-file"
@@ -67,7 +76,7 @@
               ファイルから
             </button>
             <button
-              class="load-tab"
+              class="load-tab flex-1 cursor-pointer border border-border bg-surface px-0 py-2 font-[var(--font-family-base)] text-[0.875rem] font-medium text-text-secondary transition-[background,color,border-color] duration-150 first:rounded-l-sm last:rounded-r-sm last:border-l-0"
               role="tab"
               aria-selected="false"
               aria-controls="tab-saved"
@@ -78,60 +87,123 @@
               履歴から
             </button>
           </div>
-          <div class="load-tab-panel" id="tab-file" role="tabpanel" aria-labelledby="tab-btn-file">
-            <div class="dropzone" id="csv-dropzone" data-accept=".csv">
-              <input type="file" id="file-input" accept=".csv" class="dropzone-input" />
-              <div class="dropzone-content">
-                <span class="dropzone-icon" data-i18n="dropzone.csv.icon">ローデータ</span>
-                <span class="dropzone-text" data-i18n="dropzone.csv.text"
+          <div
+            class="h-[250px] overflow-y-auto"
+            id="tab-file"
+            role="tabpanel"
+            aria-labelledby="tab-btn-file"
+          >
+            <div
+              class="relative cursor-pointer rounded-lg border-2 border-dashed border-border-strong px-4 py-5 text-center transition-[border-color,background] duration-150 hover:border-accent hover:bg-accent-bg"
+              id="csv-dropzone"
+              data-accept=".csv"
+            >
+              <input
+                type="file"
+                id="file-input"
+                accept=".csv"
+                class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              />
+              <div class="dropzone-content pointer-events-none flex flex-col items-center gap-1">
+                <span
+                  class="rounded-sm bg-accent-light px-3 py-1 text-[0.8125rem] font-bold tracking-[0.04em] text-accent"
+                  data-i18n="dropzone.csv.icon"
+                  >ローデータ</span
+                >
+                <span
+                  class="text-[0.875rem] font-medium text-text-secondary"
+                  data-i18n="dropzone.csv.text"
                   >ここにローデータファイル(csv)をドロップ</span
                 >
-                <span class="dropzone-hint" data-i18n="dropzone.csv.hint"
+                <span class="text-xs text-muted" data-i18n="dropzone.csv.hint"
                   >またはクリックして選択</span
                 >
               </div>
-              <div class="dropzone-loaded hidden" id="csv-dropzone-loaded"></div>
+              <div
+                class="dropzone-loaded hidden pointer-events-none flex items-center gap-2 text-[0.8125rem] font-medium text-[var(--color-success-700)]"
+                id="csv-dropzone-loaded"
+              ></div>
             </div>
-            <div class="dropzone" id="layout-dropzone" data-accept=".json">
-              <input type="file" id="layout-file-input" accept=".json" class="dropzone-input" />
-              <div class="dropzone-content">
-                <span class="dropzone-icon" data-i18n="dropzone.layout.icon">レイアウト</span>
-                <span class="dropzone-text" data-i18n="dropzone.layout.text"
+            <div
+              class="relative mt-3 cursor-pointer rounded-lg border-2 border-dashed border-border-strong px-4 py-5 text-center transition-[border-color,background] duration-150 hover:border-accent hover:bg-accent-bg"
+              id="layout-dropzone"
+              data-accept=".json"
+            >
+              <input
+                type="file"
+                id="layout-file-input"
+                accept=".json"
+                class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              />
+              <div class="dropzone-content pointer-events-none flex flex-col items-center gap-1">
+                <span
+                  class="rounded-sm bg-accent-light px-3 py-1 text-[0.8125rem] font-bold tracking-[0.04em] text-accent"
+                  data-i18n="dropzone.layout.icon"
+                  >レイアウト</span
+                >
+                <span
+                  class="text-[0.875rem] font-medium text-text-secondary"
+                  data-i18n="dropzone.layout.text"
                   >ここにレイアウトファイル(json)をドロップ</span
                 >
-                <span class="dropzone-hint" data-i18n="dropzone.layout.hint"
+                <span class="text-xs text-muted" data-i18n="dropzone.layout.hint"
                   >またはクリックして選択</span
                 >
               </div>
-              <div class="dropzone-loaded hidden" id="layout-dropzone-loaded"></div>
+              <div
+                class="dropzone-loaded hidden pointer-events-none flex items-center gap-2 text-[0.8125rem] font-medium text-[var(--color-success-700)]"
+                id="layout-dropzone-loaded"
+              ></div>
             </div>
           </div>
           <div
-            class="load-tab-panel hidden"
+            class="hidden h-[250px] overflow-y-auto"
             id="tab-saved"
             role="tabpanel"
             aria-labelledby="tab-btn-saved"
           >
-            <div id="saved-files-list"></div>
+            <div id="saved-files-list" class="flex flex-col gap-2"></div>
           </div>
-          <div id="loaded-data-info" class="loaded-data-info hidden" aria-live="polite"></div>
-          <button class="proceed-btn hidden" id="proceed-btn" data-i18n="import.proceed">
+          <div
+            id="loaded-data-info"
+            class="hidden mt-3 whitespace-pre-line rounded-lg border border-accent-light bg-accent-bg px-4 py-3 text-[0.875rem] leading-normal text-text-secondary"
+            aria-live="polite"
+          ></div>
+          <button
+            class="hidden mt-5 min-h-12 w-full cursor-pointer rounded-lg border-none bg-accent px-4 py-3 font-[var(--font-family-base)] text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
+            id="proceed-btn"
+            data-i18n="import.proceed"
+          >
             集計画面へ進む →
           </button>
         </div>
       </div>
 
       <!-- AGGREGATION SCREEN: LEFT panel -->
-      <div class="panel-left" role="region" aria-label="設定">
-        <section class="section" id="data-summary-section">
-          <h2 class="section-label" data-i18n="section.summary">データ概要</h2>
-          <div id="data-summary" class="data-summary"></div>
+      <div
+        class="panel-left flex flex-col overflow-hidden border-r border-border bg-surface"
+        role="region"
+        aria-label="設定"
+      >
+        <section class="shrink-0 border-b border-border p-4" id="data-summary-section">
+          <h2
+            class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted"
+            data-i18n="section.summary"
+          >
+            データ概要
+          </h2>
+          <div id="data-summary" class="text-[0.875rem] leading-relaxed text-text-secondary"></div>
         </section>
 
-        <section class="section hidden" id="cross-config-section">
-          <h2 class="section-label" data-i18n="section.cross">クロス集計軸（任意）</h2>
+        <section class="hidden shrink-0 border-b border-border p-4" id="cross-config-section">
+          <h2
+            class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted"
+            data-i18n="section.cross"
+          >
+            クロス集計軸（任意）
+          </h2>
           <div
-            class="cross-col-list"
+            class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
             id="cross-col-list"
             role="group"
             data-i18n="section.cross.label"
@@ -140,23 +212,34 @@
           ></div>
         </section>
 
-        <div id="weight-info" class="weight-info hidden">
+        <div
+          id="weight-info"
+          class="hidden flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-[0.875rem] text-text"
+        >
           <span id="weight-label"></span>
-          <div id="weight-toggle" class="view-toggle"></div>
+          <div id="weight-toggle" class="ml-auto flex"></div>
         </div>
 
         <div id="error-msg" class="hidden" role="alert" aria-live="assertive"></div>
 
-        <button class="run-btn hidden" id="run-btn" disabled data-i18n="run.button">
+        <button
+          class="hidden mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent font-[var(--font-family-base)] text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)] disabled:cursor-not-allowed disabled:bg-[var(--color-gray-300)] disabled:text-[var(--color-gray-600)]"
+          id="run-btn"
+          disabled
+          data-i18n="run.button"
+        >
           ▶ 集計を実行
         </button>
       </div>
 
       <!-- AGGREGATION SCREEN: RIGHT panel -->
-      <div class="panel-right" id="panel-right" role="region" aria-label="集計結果">
-        <div class="empty-state" id="empty-state">
-          <span class="big" aria-hidden="true">⬛</span>
-          <p data-i18n="empty.text">クロス集計軸を選んで集計を実行してください</p>
+      <div class="overflow-y-auto bg-bg p-6" id="panel-right" role="region" aria-label="集計結果">
+        <div
+          class="flex h-full flex-col items-center justify-center gap-3 text-muted"
+          id="empty-state"
+        >
+          <span class="text-[2.5rem]" aria-hidden="true">⬛</span>
+          <p class="text-base" data-i18n="empty.text">クロス集計軸を選んで集計を実行してください</p>
         </div>
         <div class="hidden" id="results-area" aria-live="polite"></div>
       </div>
@@ -164,7 +247,7 @@
 
     <button
       id="help-btn"
-      class="help-btn"
+      class="fixed bottom-5 left-5 z-900 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-border-strong bg-surface text-base font-bold text-text-secondary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-[background,color,transform] duration-150 hover:scale-[1.08] hover:border-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)] hover:text-[var(--color-primary-700)]"
       data-i18n="help.label"
       data-i18n-attr="aria-label"
       aria-label="使い方ガイド"

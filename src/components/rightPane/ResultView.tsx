@@ -100,7 +100,11 @@ function ChartContent({
 }) {
   return (
     <div
-      class={hasCross ? "charts-grid cross-mode" : "charts-grid"}
+      class={
+        hasCross
+          ? "grid grid-cols-[1fr] gap-6"
+          : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
+      }
       ref={(el) => {
         if (!el) return;
         destroyAllCharts();
@@ -136,7 +140,13 @@ function TableContent({
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 
   return (
-    <div class={hasCross ? "tables-grid cross-mode" : "tables-grid"}>
+    <div
+      class={
+        hasCross
+          ? "grid grid-cols-[1fr] gap-6"
+          : "grid grid-cols-[repeat(auto-fill,minmax(360px,1fr))] gap-6"
+      }
+    >
       {results.map((res) => {
         const pv = pivot(res.cells);
         const isCross = pv.subs.length > 1;
@@ -148,14 +158,19 @@ function TableContent({
         const hasLabel = questionLabel !== res.question;
 
         return (
-          <div class={isCross ? "gt-table-card has-cross" : "gt-table-card"} key={res.question}>
-            <div class="gt-table-head">
-              <div class="q-header">
-                <span class="q-label">{questionLabel}</span>
-                {hasLabel && <span class="q-key">{res.question}</span>}
+          <div
+            class={`overflow-hidden rounded-xl border border-border bg-surface shadow-sm${isCross ? " overflow-x-auto" : ""}`}
+            key={res.question}
+          >
+            <div class="flex items-baseline gap-3 border-b border-border p-4">
+              <div class="flex min-w-0 flex-col gap-[2px]">
+                <span class="text-[0.875rem] font-bold text-accent">{questionLabel}</span>
+                {hasLabel && (
+                  <span class="text-xs tracking-[0.04em] text-muted">{res.question}</span>
+                )}
               </div>
-              <span class="q-type">{res.type}</span>
-              <span class="q-n">{nLabel}</span>
+              <span class="text-xs tracking-[0.04em] text-muted">{res.type}</span>
+              <span class="ml-auto text-[0.8125rem] text-muted">{nLabel}</span>
             </div>
             {isCross ? (
               <CrossTable

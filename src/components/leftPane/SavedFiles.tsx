@@ -20,7 +20,7 @@ function SavedFilesList({
   onSelectEntry: OnSelectCallback;
 }) {
   if (entries.length === 0) {
-    return <div class="saved-empty">{t("saved.empty")}</div>;
+    return <div class="p-4 text-center text-[0.875rem] text-muted">{t("saved.empty")}</div>;
   }
 
   return (
@@ -30,16 +30,19 @@ function SavedFilesList({
         const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
 
         return (
-          <div key={entry.folderId} class="saved-item">
+          <div
+            key={entry.folderId}
+            class="flex items-center gap-2 rounded-lg border border-transparent bg-surface2 transition-[border-color] duration-150 hover:border-border-strong"
+          >
             <button
-              class="saved-item-load"
+              class="min-h-11 flex-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap border-none bg-transparent px-4 py-3 text-left font-[var(--font-family-base)] text-[0.875rem] text-text hover:text-accent"
               type="button"
               onClick={() => onSelectEntry(entry.folderId)}
             >
               {entry.csvName} ({dateStr})
             </button>
             <button
-              class="saved-item-del"
+              class="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center border-none bg-transparent px-3 py-2 font-[var(--font-family-base)] text-[0.875rem] text-muted transition-[color] duration-150 hover:text-danger"
               type="button"
               aria-label={t("saved.delete", { name: entry.csvName })}
               onClick={async (e) => {

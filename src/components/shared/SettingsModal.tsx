@@ -49,7 +49,7 @@ function SegmentControl({
   onChange: (value: string) => void;
 }) {
   return (
-    <div class="seg-control" data-seg-name={name}>
+    <div class="flex gap-[2px] rounded-lg bg-surface2 p-[2px]" data-seg-name={name}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -72,8 +72,10 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
 
   return (
     <>
-      <div class="settings-group">
-        <span class="settings-label">{t("settings.language")}</span>
+      <div class="mb-4 last:mb-0">
+        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+          {t("settings.language")}
+        </span>
         <SegmentControl
           name="lang"
           options={[
@@ -87,8 +89,10 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
           }}
         />
       </div>
-      <div class="settings-group">
-        <span class="settings-label">{t("settings.theme")}</span>
+      <div class="mb-4 last:mb-0">
+        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+          {t("settings.theme")}
+        </span>
         <SegmentControl
           name="theme"
           options={[
@@ -104,8 +108,10 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
         />
       </div>
       {showAI && (
-        <div class="settings-group">
-          <span class="settings-label">{t("settings.ai")}</span>
+        <div class="mb-4 last:mb-0">
+          <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+            {t("settings.ai")}
+          </span>
           <SegmentControl
             name="ai"
             options={[
@@ -171,7 +177,7 @@ export function initSettings(): void {
 
   document.addEventListener("click", (e) => {
     if (!isOpen()) return;
-    const wrap = document.querySelector(".settings-wrap")!;
+    const wrap = document.getElementById("settings-btn")!.parentElement!;
     if (!wrap.contains(e.target as Node)) hide();
   });
 

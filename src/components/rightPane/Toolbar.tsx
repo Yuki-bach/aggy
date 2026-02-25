@@ -35,14 +35,14 @@ export function Toolbar({
     : t("result.weight.none");
 
   return (
-    <div class="results-header">
-      <h2>{t("result.title.gt")}</h2>
-      <span class="results-meta">
+    <div class="mb-6 flex items-center gap-4">
+      <h2 class="text-xl font-bold">{t("result.title.gt")}</h2>
+      <span class="text-[0.8125rem] text-muted">
         {t("result.meta", { count: results.length, weight: weightText })}
       </span>
 
       {/* View mode toggle: table / chart */}
-      <div class="view-toggle">
+      <div class="ml-auto flex">
         <button
           class={`view-toggle-btn${currentViewMode === "table" ? " active" : ""}`}
           onClick={() => currentViewMode !== "table" && callbacks.onViewModeChange("table")}
@@ -58,7 +58,10 @@ export function Toolbar({
       </div>
 
       {/* CSV export */}
-      <button class="csv-export-btn" onClick={() => downloadAllCSV(results, weightCol, layoutMeta)}>
+      <button
+        class="m-0 min-h-9 w-auto cursor-pointer rounded-lg border border-accent bg-transparent px-4 py-2 font-[var(--font-family-base)] text-[0.875rem] font-medium text-accent transition-[background] duration-150 hover:bg-accent-bg"
+        onClick={() => downloadAllCSV(results, weightCol, layoutMeta)}
+      >
         {t("result.csv.export")}
       </button>
     </div>
@@ -90,7 +93,7 @@ function ChartTypeSelect({
     <label>
       {label}{" "}
       <select
-        class="chart-type-select"
+        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 font-[var(--font-family-base)] text-[0.8125rem] text-text"
         value={value}
         onChange={(e) => onChange((e.target as HTMLSelectElement).value as GtChartType)}
       >
@@ -111,7 +114,7 @@ export function ViewOpts({
   callbacks,
 }: ViewOptsProps) {
   return (
-    <div class="view-opts">
+    <div class="mb-4 flex items-center justify-end gap-4 text-[0.8125rem] text-text-secondary">
       {currentViewMode === "chart" && (
         <>
           <ChartTypeSelect
@@ -127,7 +130,7 @@ export function ViewOpts({
         </>
       )}
       {currentViewMode === "table" && hasCross && (
-        <div class="view-toggle">
+        <div class="ml-auto flex">
           <button
             class={`view-toggle-btn${currentPctDirection === "vertical" ? " active" : ""}`}
             onClick={() =>

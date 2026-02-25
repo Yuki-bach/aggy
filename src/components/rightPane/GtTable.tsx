@@ -19,16 +19,14 @@ export function GtTable({ res, pv, weightCol, maxPct, layoutMeta }: GtTableProps
 
   return (
     <table class="gt">
-      <caption class="visually-hidden">
-        {t("table.caption.gt", { question: questionLabel })}
-      </caption>
+      <caption class="sr-only">{t("table.caption.gt", { question: questionLabel })}</caption>
       <thead>
         <tr>
           <th>{t("table.option")}</th>
           <th class="right">n</th>
           <th class="right">%</th>
           <th aria-hidden="true">
-            <span class="visually-hidden">{t("table.graph")}</span>
+            <span class="sr-only">{t("table.graph")}</span>
           </th>
         </tr>
       </thead>

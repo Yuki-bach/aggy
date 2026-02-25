@@ -10,14 +10,18 @@ function DataSummary({
 }) {
   return (
     <>
-      <div class="data-summary-row indent">
-        <span class="data-summary-value">{csv.fileName}</span>
+      <div class="mb-1 flex items-baseline gap-2 pl-4">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
+          {csv.fileName}
+        </span>
       </div>
-      <div class="data-summary-row indent">
-        <span class="data-summary-value">{layout.fileName}</span>
+      <div class="mb-1 flex items-baseline gap-2 pl-4">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
+          {layout.fileName}
+        </span>
       </div>
-      <div class="data-summary-row indent">
-        <span class="data-summary-value">
+      <div class="mb-1 flex items-baseline gap-2 pl-4">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
           {t("summary.rows", { rows: csv.rowCount.toLocaleString(), cols: csv.headers.length })}
         </span>
       </div>

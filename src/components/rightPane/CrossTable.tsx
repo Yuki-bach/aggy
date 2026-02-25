@@ -84,9 +84,7 @@ function VerticalCrossTable({
 
   return (
     <table class="gt cross-table">
-      <caption class="visually-hidden">
-        {t("table.caption.cross", { question: questionLabel })}
-      </caption>
+      <caption class="sr-only">{t("table.caption.cross", { question: questionLabel })}</caption>
       <thead>
         <tr>
           <th rowSpan={2} class="cross-corner" />
@@ -239,9 +237,7 @@ function TransposedCrossTable({
 
   return (
     <table class="gt cross-table">
-      <caption class="visually-hidden">
-        {t("table.caption.cross", { question: questionLabel })}
-      </caption>
+      <caption class="sr-only">{t("table.caption.cross", { question: questionLabel })}</caption>
       <thead>
         <tr>
           <th />
