@@ -2,7 +2,7 @@ import { render } from "preact";
 import { useRef } from "preact/hooks";
 import { t, onLocaleChange } from "../../lib/i18n";
 
-const STORAGE_KEY = "temotto-getting-started-dismissed";
+const STORAGE_KEY = "aggy-getting-started-dismissed";
 
 function GettingStartedContent({ onClose }: { onClose: () => void }) {
   const checkRef = useRef<HTMLInputElement>(null);
