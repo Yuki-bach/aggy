@@ -34,7 +34,7 @@ const ja: Record<string, string> = {
   "summary.layout": "レイアウト",
   "summary.rows": "{rows} 行 / {cols} 列",
   "summary.colDefs": "{count} 列定義",
-  "weight.label": "⚖ ウェイト列: {col}",
+  "weight.label": "ウェイトバック ({col})",
   "weight.on": "ON",
   "weight.off": "OFF",
 

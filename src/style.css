@@ -503,8 +503,7 @@ main[data-screen="import"] ~ .help-btn {
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   font-size: var(--text-base);
-  color: var(--accent2);
-  background: var(--accent2-light);
+  color: var(--text);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }

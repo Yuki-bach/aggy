@@ -34,7 +34,7 @@ const en: Record<string, string> = {
   "summary.layout": "Layout",
   "summary.rows": "{rows} rows / {cols} cols",
   "summary.colDefs": "{count} column defs",
-  "weight.label": "⚖ Weight column: {col}",
+  "weight.label": "Weight-back ({col})",
   "weight.on": "ON",
   "weight.off": "OFF",
 
