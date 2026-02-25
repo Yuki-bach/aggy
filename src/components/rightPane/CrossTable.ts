@@ -4,6 +4,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import type { pivot } from "../../lib/pivot";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labelResolver";
 import { escHtml } from "../shared/escHtml";
+import { t } from "../../lib/i18n";
 
 /** Group subs by cross axis using prefixed sub values */
 function groupSubsByCrossAxis(
@@ -53,7 +54,7 @@ export function buildCrossTable(
 
   const caption = document.createElement("caption");
   caption.className = "visually-hidden";
-  caption.textContent = `${questionLabel} のクロス集計結果`;
+  caption.textContent = t("table.caption.cross", { question: questionLabel });
   table.appendChild(caption);
 
   // Build cross-axis groups
@@ -66,14 +67,14 @@ export function buildCrossTable(
 
   const thLabel = document.createElement("th");
   thLabel.rowSpan = 2;
-  thLabel.textContent = "選択肢";
+  thLabel.textContent = t("table.option");
   tr1.appendChild(thLabel);
 
   // Total column group
   const thTotal = document.createElement("th");
   thTotal.colSpan = 2;
   thTotal.className = "cross-group-header gt-group";
-  thTotal.innerHTML = `全体<br><span class="cross-n">n=${weightCol ? gtSub.n.toFixed(1) : gtSub.n.toLocaleString()}</span>`;
+  thTotal.innerHTML = `${t("table.total")}<br><span class="cross-n">n=${weightCol ? gtSub.n.toFixed(1) : gtSub.n.toLocaleString()}</span>`;
   tr1.appendChild(thTotal);
 
   if (crossGroups.length > 0) {

@@ -223,7 +223,11 @@ header span {
   justify-content: flex-end;
 }
 
-.theme-toggle {
+.settings-wrap {
+  position: relative;
+}
+
+.settings-btn {
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -237,9 +241,76 @@ header span {
   color: var(--text);
 }
 
-.theme-toggle:hover {
+.settings-btn:hover {
   background: var(--surface2);
   border-color: var(--border-strong);
+}
+
+/* Settings dropdown panel */
+.settings-panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-4);
+  width: 300px;
+  z-index: 100;
+}
+
+.settings-group {
+  margin-bottom: var(--space-4);
+}
+
+.settings-group:last-child {
+  margin-bottom: 0;
+}
+
+.settings-label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-2);
+}
+
+/* Segment control */
+.seg-control {
+  display: flex;
+  background: var(--surface2);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  gap: 2px;
+}
+
+.seg-btn {
+  flex: 1;
+  padding: var(--space-1) var(--space-3);
+  border: none;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.seg-btn:hover {
+  color: var(--text);
+}
+
+.seg-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .status-dot {

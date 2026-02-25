@@ -1,4 +1,5 @@
 import { listSaved, deleteSaved } from "../../lib/opfs";
+import { t } from "../../lib/i18n";
 
 type OnSelectCallback = (folderId: string) => void;
 
@@ -23,7 +24,7 @@ export async function refreshList(): Promise<void> {
   container.innerHTML = "";
 
   if (entries.length === 0) {
-    container.innerHTML = `<div class="saved-empty">履歴なし</div>`;
+    container.innerHTML = `<div class="saved-empty">${t("saved.empty")}</div>`;
     return;
   }
 
@@ -43,7 +44,7 @@ export async function refreshList(): Promise<void> {
     delBtn.className = "saved-item-del";
     delBtn.type = "button";
     delBtn.textContent = "×";
-    delBtn.setAttribute("aria-label", `${entry.csvName} を削除`);
+    delBtn.setAttribute("aria-label", t("saved.delete", { name: entry.csvName }));
     delBtn.addEventListener("click", async (e) => {
       e.stopPropagation();
       await deleteSaved(entry.folderId);

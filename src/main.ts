@@ -12,18 +12,22 @@ import {
 import { saveData, loadSaved } from "./lib/opfs";
 import { initSavedFiles, refreshList } from "./components/leftPane/SavedFiles";
 import { initGettingStarted } from "./components/shared/GettingStarted";
+import { initSettings } from "./components/shared/SettingsModal";
 import { showProceedButton } from "./components/screens/import/ImportScreen";
 import {
   renderDataSummary,
   renderWeightInfo,
 } from "./components/screens/aggregation/AggregationScreen";
+import { initI18n, onLocaleChange, t } from "./lib/i18n";
+
+// Initialize i18n first (before any UI rendering)
+initI18n();
 
 // Currently loaded CSV / Layout data
 let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null =
   null;
 let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
 
-// 画面切り替え
 function switchScreen(screen: "import" | "aggregation"): void {
   const main = document.querySelector("main")!;
   main.dataset.screen = screen;
@@ -32,32 +36,7 @@ function switchScreen(screen: "import" | "aggregation"): void {
   backBtn.classList.toggle("hidden", screen === "import");
 }
 
-// テーマ切り替え
-function initThemeToggle(): void {
-  const toggle = document.getElementById("theme-toggle")!;
-  const saved = localStorage.getItem("temotto-theme");
-  if (saved === "dark") {
-    document.documentElement.dataset.theme = "dark";
-    toggle.textContent = "☀️";
-    toggle.setAttribute("aria-label", "ライトモードに切り替え");
-  }
-  toggle.addEventListener("click", () => {
-    const isDark = document.documentElement.dataset.theme === "dark";
-    if (isDark) {
-      delete document.documentElement.dataset.theme;
-      toggle.textContent = "🌙";
-      toggle.setAttribute("aria-label", "ダークモードに切り替え");
-      localStorage.setItem("temotto-theme", "light");
-    } else {
-      document.documentElement.dataset.theme = "dark";
-      toggle.textContent = "☀️";
-      toggle.setAttribute("aria-label", "ライトモードに切り替え");
-      localStorage.setItem("temotto-theme", "dark");
-    }
-  });
-}
-
-initThemeToggle();
+initSettings();
 initGettingStarted();
 
 // Start DuckDB Wasm initialization in the background
@@ -76,13 +55,10 @@ function initAfterBothLoaded(): void {
   document.getElementById("run-btn")!.classList.remove("hidden");
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
 
-  // インポート画面: 「集計画面へ進む」ボタンを表示
   showProceedButton();
 
-  // 読み込み済みデータ情報を表示（インポート画面用）
   updateLoadedInfo();
 
-  // 集計画面: データ概要・ウェイト情報を描画
   renderDataSummary(
     {
       fileName: currentCsv.fileName,
@@ -100,7 +76,6 @@ function initAfterBothLoaded(): void {
   renderWeightInfo(weightCol);
 }
 
-// 読み込み済みデータ情報を表示（インポート画面用）
 function updateLoadedInfo(): void {
   const el = document.getElementById("loaded-data-info")!;
   if (!currentCsv && !currentLayout) {
@@ -110,17 +85,45 @@ function updateLoadedInfo(): void {
   const lines: string[] = [];
   if (currentCsv) {
     lines.push(
-      `ローデータ: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`,
+      t("loaded.csv", {
+        name: currentCsv.fileName,
+        rows: currentCsv.rowCount.toLocaleString(),
+        cols: currentCsv.headers.length,
+      }),
     );
   }
   if (currentLayout) {
     lines.push(
-      `レイアウト: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`,
+      t("loaded.layout", {
+        name: currentLayout.fileName,
+        count: Object.keys(currentLayout.meta.colTypes).length,
+      }),
     );
   }
   el.textContent = lines.join("\n");
   el.classList.remove("hidden");
 }
+
+// Re-render locale-sensitive parts when language changes
+onLocaleChange(() => {
+  updateLoadedInfo();
+  if (currentCsv && currentLayout) {
+    renderDataSummary(
+      {
+        fileName: currentCsv.fileName,
+        rowCount: currentCsv.rowCount,
+        headers: currentCsv.headers,
+      },
+      {
+        fileName: currentLayout.fileName,
+        colCount: Object.keys(currentLayout.meta.colTypes).length,
+      },
+    );
+    const weightCol =
+      Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+    renderWeightInfo(weightCol);
+  }
+});
 
 // Auto-save to OPFS when both CSV and layout are loaded
 async function trySaveToOPFS(): Promise<void> {
@@ -148,7 +151,7 @@ async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
     initAfterBothLoaded();
     trySaveToOPFS();
   } catch (e) {
-    showError("ローデータファイルの読み込みエラー: " + (e as Error).message);
+    showError(t("error.csv.load", { msg: (e as Error).message }));
   }
 }
 
@@ -185,7 +188,7 @@ async function loadFromSaved(folderId: string): Promise<void> {
     updateLoadedInfo();
     initAfterBothLoaded();
   } catch (e) {
-    showError("履歴データの読み込みエラー: " + (e as Error).message);
+    showError(t("error.saved.load", { msg: (e as Error).message }));
   }
 }
 
@@ -218,7 +221,7 @@ async function runAggregation(): Promise<void> {
     });
     renderResults(results, weightCol, currentCsv.rowCount, currentLayout.meta, crossCols);
   } catch (e) {
-    showError("集計エラー: " + (e as Error).message);
+    showError(t("error.aggregation", { msg: (e as Error).message }));
     console.error(e);
   }
 }
@@ -270,10 +273,9 @@ initLayoutInput(onLayoutLoaded, (msg) => showError(msg));
 initSavedFiles(loadFromSaved);
 
 document.getElementById("run-btn")!.addEventListener("click", () => {
-  runAggregation().catch((e) => showError("集計エラー: " + (e as Error).message));
+  runAggregation().catch((e) => showError(t("error.aggregation", { msg: (e as Error).message })));
 });
 
-// 画面遷移ボタン
 document.getElementById("proceed-btn")!.addEventListener("click", () => {
   switchScreen("aggregation");
 });

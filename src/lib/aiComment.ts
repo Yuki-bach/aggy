@@ -2,6 +2,7 @@
 
 import type { AggResult } from "./aggregate";
 import type { LayoutMeta } from "./layout";
+import { getLocale, t } from "./i18n";
 
 // Chrome Prompt API type declarations
 
@@ -42,9 +43,6 @@ export async function isAIAvailable(): Promise<boolean> {
 
 // --- Prompt Payload ---
 
-const SYSTEM_PROMPT =
-  "あなたはアンケート分析の専門家です。回答は必ず日本語で2〜3文以内にしてください。";
-
 const MAX_PAYLOAD_CHARS = 3500;
 
 function resolveQLabel(col: string, meta?: LayoutMeta): string {
@@ -64,7 +62,9 @@ function summarizeResults(
   topN: number,
 ): string {
   const lines: string[] = [];
-  if (weightCol) lines.push(`※ウェイト列: ${weightCol}`);
+  if (weightCol) {
+    lines.push(t("ai.weight", { col: weightCol }));
+  }
 
   for (const res of results) {
     const gtCells = res.cells.filter((c) => c.sub === "GT");
@@ -82,14 +82,12 @@ function summarizeResults(
     });
 
     const rest = sorted.length - topN;
-    if (rest > 0) items.push(`...他${rest}件`);
+    if (rest > 0) items.push(t("ai.moreItems", { count: rest }));
     lines.push("  " + items.join(", "));
   }
 
   lines.push("");
-  lines.push(
-    "上記の集計結果の注目すべき傾向を2〜3文で短く述べてください。箇条書き・見出し・提案・注意点は不要です。",
-  );
+  lines.push(t("ai.userPrompt"));
   return lines.join("\n");
 }
 
@@ -116,11 +114,12 @@ export async function generateComment(
     if (results.length === 0) return null;
     if (!(await isAIAvailable())) return null;
 
+    const locale = getLocale();
     const payload = buildPromptPayload(results, weightCol, layoutMeta);
     const session = await LanguageModel!.create({
-      systemPrompt: SYSTEM_PROMPT,
-      expectedInputs: [{ type: "text", languages: ["ja"] }],
-      expectedOutputs: [{ type: "text", languages: ["ja"] }],
+      systemPrompt: t("ai.systemPrompt"),
+      expectedInputs: [{ type: "text", languages: [locale] }],
+      expectedOutputs: [{ type: "text", languages: [locale] }],
     });
 
     try {

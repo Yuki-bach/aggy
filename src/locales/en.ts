@@ -1,0 +1,127 @@
+const en: Record<string, string> = {
+  // Header
+  "header.subtitle": "SURVEY AGGREGATOR v0.1",
+  "header.settings": "Open settings",
+  "header.back": "Back to data import",
+
+  // DuckDB status
+  "wasm.loading": "Loading DuckDB...",
+
+  // Import screen
+  "import.title": "Load Data",
+  "import.tab.file": "From File",
+  "import.tab.saved": "From History",
+  "import.tab.label": "Data loading method",
+  "import.proceed": "Proceed to Aggregation →",
+
+  // Dropzone
+  "dropzone.csv.icon": "Raw Data",
+  "dropzone.csv.text": "Drop raw data file (csv) here",
+  "dropzone.csv.hint": "or click to select",
+  "dropzone.layout.icon": "Layout",
+  "dropzone.layout.text": "Drop layout file (json) here",
+  "dropzone.layout.hint": "or click to select",
+
+  // Saved files
+  "saved.empty": "No history",
+  "saved.delete": "Delete {name}",
+
+  // Aggregation screen
+  "section.summary": "Data Summary",
+  "section.cross": "Cross-Tabulation Axes (optional)",
+  "section.cross.label": "Cross-tabulation axis selection",
+  "summary.rawdata": "Raw Data",
+  "summary.layout": "Layout",
+  "summary.rows": "{rows} rows / {cols} cols",
+  "summary.colDefs": "{count} column defs",
+  "weight.label": "⚖ Weight column: {col}",
+
+  // Loaded info (import screen)
+  "loaded.csv": "Raw Data: {name}  —  {rows} rows / {cols} cols",
+  "loaded.layout": "Layout: {name}  —  {count} column defs",
+
+  // Run button
+  "run.button": "▶ Run Aggregation",
+
+  // Empty state
+  "empty.text": "Select cross-tabulation axes and run the aggregation",
+
+  // Results
+  "result.title.gt": "Aggregation Results",
+  "result.title.cross": "Cross-Tabulation Results",
+  "result.meta": "{count} questions  /  {weight}",
+  "result.weight.applied": "Weighted: {col}",
+  "result.weight.none": "Unweighted",
+  "result.view.table": "Table",
+  "result.view.chart": "Chart",
+  "result.csv.export": "Export All CSV",
+
+  // Chart type
+  "chart.barH": "Horizontal Bar",
+  "chart.barV": "Vertical Bar",
+  "chart.obi": "Stacked",
+
+  // Table headers
+  "table.option": "Option",
+  "table.graph": "Graph",
+  "table.total": "Total",
+  "table.caption.gt": "Aggregation results for {question}",
+  "table.caption.cross": "Cross-tabulation results for {question}",
+
+  // Weight suffix
+  "n.weighted": " (weighted)",
+
+  // AI Bubble
+  "ai.close": "Close",
+  "ai.header": "✨ AI Analysis",
+  "ai.loading": "Analyzing...",
+
+  // AI Prompt
+  "ai.systemPrompt":
+    "You are a survey analysis expert. Keep your response to 2-3 sentences in English.",
+  "ai.userPrompt":
+    "Briefly describe notable trends in the aggregation results above in 2-3 sentences. No bullet points, headings, suggestions, or caveats.",
+  "ai.weight": "* Weight column: {col}",
+  "ai.moreItems": "...{count} more",
+
+  // Errors
+  "error.csv.load": "Error loading raw data file: {msg}",
+  "error.layout.load": "Error loading layout file: {msg}",
+  "error.saved.load": "Error loading history data: {msg}",
+  "error.aggregation": "Aggregation error: {msg}",
+
+  // Getting Started modal
+  "gs.close": "Close",
+  "gs.title": "Welcome to Temotto",
+  "gs.section1.title": "Preparing Import Files",
+  "gs.section1.p1":
+    "This tool reads a <strong>raw data file</strong> (CSV) and a <strong>layout file</strong> (JSON) to perform aggregation.",
+  "gs.section1.p2":
+    "Please prepare and format the files yourself.<br>We provide a dedicated <strong>Agent Skill</strong> so you can delegate the conversion to your AI tool.",
+  "gs.section1.sample": "Try it out with <strong>sample files</strong> first:",
+  "gs.section1.sampleCsv": "Sample Raw Data",
+  "gs.section1.sampleLayout": "Sample Layout",
+  "gs.section2.title": "Security",
+  "gs.section2.p1":
+    "Temotto runs <strong>entirely serverless</strong>. All processing happens in your browser, and uploaded data is never sent to any external server.",
+  "gs.section3.title": "Basic Usage",
+  "gs.section3.step1": "Load a raw data file and a layout file",
+  "gs.section3.step2": "Select cross-tabulation axes if needed",
+  "gs.section3.step3": 'Click the "Run Aggregation" button',
+  "gs.dismiss": "Don't show again",
+  "gs.ok": "Get Started",
+
+  // Help button
+  "help.label": "User Guide",
+
+  // Settings modal
+  "settings.title": "Settings",
+  "settings.language": "Language",
+  "settings.theme": "Theme",
+  "settings.theme.light": "Light",
+  "settings.theme.dark": "Dark",
+  "settings.theme.system": "Follow system",
+  "settings.close": "Close",
+};
+
+export default en;

@@ -3,6 +3,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import type { pivot } from "../../lib/pivot";
 import { resolveQuestionLabel, resolveValueLabel } from "../../lib/labelResolver";
 import { escHtml } from "../shared/escHtml";
+import { t } from "../../lib/i18n";
 
 export function buildGtTable(
   res: AggResult,
@@ -17,13 +18,13 @@ export function buildGtTable(
   const table = document.createElement("table");
   table.className = "gt";
   table.innerHTML = `
-    <caption class="visually-hidden">${escHtml(questionLabel)} の集計結果</caption>
+    <caption class="visually-hidden">${t("table.caption.gt", { question: escHtml(questionLabel) })}</caption>
     <thead>
       <tr>
-        <th>選択肢</th>
+        <th>${t("table.option")}</th>
         <th class="right">n</th>
         <th class="right">%</th>
-        <th aria-hidden="true"><span class="visually-hidden">グラフ</span></th>
+        <th aria-hidden="true"><span class="visually-hidden">${t("table.graph")}</span></th>
       </tr>
     </thead>
     <tbody>

@@ -1,53 +1,45 @@
+import { t, onLocaleChange } from "../../lib/i18n";
+import { escHtml } from "./escHtml";
+
 const STORAGE_KEY = "temotto-getting-started-dismissed";
 
 function buildModalHTML(): string {
   return `
     <div class="modal-content" role="document">
-      <button class="modal-close" id="gs-close" aria-label="閉じる">&times;</button>
-      <h2 id="gs-title" class="modal-title">Temottoへようこそ</h2>
+      <button class="modal-close" id="gs-close" aria-label="${escHtml(t("gs.close"))}">&times;</button>
+      <h2 id="gs-title" class="modal-title">${t("gs.title")}</h2>
 
       <div class="modal-body">
         <section class="modal-section">
-          <h3>インポートファイルの準備</h3>
-          <p>
-            本ツールでは、アンケートの<strong>ローデータファイル</strong>（CSV）と
-            <strong>レイアウトファイル</strong>（JSON）の2つを読み込んで集計を行います。
-          </p>
-          <p>
-            ファイルの変換・整形は<strong>ユーザーご自身</strong>で行ってください。<br>
-            専用の <strong>Agent Skill</strong> を用意していますので、
-            お使いのAIツールに変換作業を任せることができます。
-          </p>
+          <h3>${t("gs.section1.title")}</h3>
+          <p>${t("gs.section1.p1")}</p>
+          <p>${t("gs.section1.p2")}</p>
           <div class="modal-sample-downloads">
-            <p>まずは<strong>サンプルファイル</strong>で試してみましょう：</p>
+            <p>${t("gs.section1.sample")}</p>
             <div class="modal-sample-links">
               <a href="samples/sample_data.csv" download="sample_data.csv" class="modal-sample-link">
                 <span class="modal-sample-icon">&#128196;</span>
-                サンプルローデータ
+                ${t("gs.section1.sampleCsv")}
               </a>
               <a href="samples/sample_layout.json" download="sample_layout.json" class="modal-sample-link">
                 <span class="modal-sample-icon">&#128196;</span>
-                サンプルレイアウト
+                ${t("gs.section1.sampleLayout")}
               </a>
             </div>
           </div>
         </section>
 
         <section class="modal-section">
-          <h3>セキュリティについて</h3>
-          <p>
-            Temottoは<strong>完全サーバーレス</strong>で動作します。
-            すべての処理はお使いのブラウザ内で完結し、
-            アップロードしたデータが外部サーバーに送信されることは一切ありません。
-          </p>
+          <h3>${t("gs.section2.title")}</h3>
+          <p>${t("gs.section2.p1")}</p>
         </section>
 
         <section class="modal-section">
-          <h3>基本的な使い方</h3>
+          <h3>${t("gs.section3.title")}</h3>
           <ol>
-            <li>ローデータファイルとレイアウトファイルを読み込む</li>
-            <li>必要に応じてクロス集計軸を選択する</li>
-            <li>「集計を実行」ボタンをクリック</li>
+            <li>${t("gs.section3.step1")}</li>
+            <li>${t("gs.section3.step2")}</li>
+            <li>${t("gs.section3.step3")}</li>
           </ol>
         </section>
       </div>
@@ -55,9 +47,9 @@ function buildModalHTML(): string {
       <div class="modal-footer">
         <label class="modal-dismiss-label">
           <input type="checkbox" id="gs-dismiss-check">
-          今後表示しない
+          ${t("gs.dismiss")}
         </label>
-        <button class="modal-ok-btn" id="gs-ok">はじめる</button>
+        <button class="modal-ok-btn" id="gs-ok">${t("gs.ok")}</button>
       </div>
     </div>
   `;
@@ -81,13 +73,17 @@ function hide(): void {
   }
 }
 
-export function initGettingStarted(): void {
+function rebuildModal(): void {
   const modal = document.getElementById("getting-started-modal")!;
   modal.innerHTML = buildModalHTML();
-
   document.getElementById("gs-close")!.addEventListener("click", hide);
   document.getElementById("gs-ok")!.addEventListener("click", hide);
+}
 
+export function initGettingStarted(): void {
+  rebuildModal();
+
+  const modal = document.getElementById("getting-started-modal")!;
   modal.addEventListener("click", (e) => {
     if (e.target === modal) hide();
   });
@@ -99,4 +95,6 @@ export function initGettingStarted(): void {
   });
 
   document.getElementById("help-btn")!.addEventListener("click", show);
+
+  onLocaleChange(() => rebuildModal());
 }
