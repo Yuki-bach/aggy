@@ -1,14 +1,12 @@
-/** DuckDB SQL集計ロジック */
+/** DuckDB SQL aggregation logic */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import { Aggregator, fetchCrossHeaders } from "./aggregator";
 
-// --- 集計結果の型定義 ---
-
 export interface Cell {
-  main: string; // 選択肢ラベル（集計対象の設問値）
-  sub: string; // "GT" or クロス集計軸の値 ("男", "女", ...) or MAカラム名
-  n: number; // その sub の母数
+  main: string; // Option label (aggregation target value)
+  sub: string; // "GT" or cross-tab axis value or MA column name
+  n: number; // Denominator for this sub
   count: number;
   pct: number;
 }
@@ -19,34 +17,32 @@ export interface AggResult {
   cells: Cell[];
 }
 
-// --- 集計 payload ---
-
 export type QuestionDef = SAQuestion | MAQuestion;
 
 interface SAQuestion {
   type: "SA";
-  column: string; // カラム名 "q1"
+  column: string;
 }
 
 interface MAQuestion {
   type: "MA";
-  prefix: string; // グループプレフィックス "Q3"
-  columns: string[]; // ["Q3_1","Q3_2","Q3_3"]
+  prefix: string;
+  columns: string[];
 }
 
 export function questionKey(q: QuestionDef): string {
   return q.type === "SA" ? q.column : q.prefix;
 }
 
-/** クロスsub値のセパレータ（軸キーと生値を分離） */
+/** Cross sub value separator (separates axis key from raw value) */
 export const CROSS_SEP = "\x01";
 
-/** 軸キー付きクロスsub値を生成する (例: "q1\x011") */
+/** Build prefixed cross sub value (e.g. "q1\x011") */
 export function crossSub(axisKey: string, rawValue: string): string {
   return `${axisKey}${CROSS_SEP}${rawValue}`;
 }
 
-/** クロスsub値を { axisKey, rawValue } にパースする。GT等プレフィックスなしはそのまま返す */
+/** Parse cross sub value into { axisKey, rawValue }. Returns null for unprefixed values like GT. */
 export function parseCrossSub(sub: string): { axisKey: string; rawValue: string } | null {
   const idx = sub.indexOf(CROSS_SEP);
   if (idx < 0) return null;
@@ -59,7 +55,7 @@ export interface Query {
   cross_cols: QuestionDef[];
 }
 
-/** 集計のエントリポイント。conn上のsurveyビューに対して全設問を集計する */
+/** Aggregation entry point. Aggregates all questions against the survey view. */
 export async function aggregate(
   conn: duckdb.AsyncDuckDBConnection,
   payload: Query,

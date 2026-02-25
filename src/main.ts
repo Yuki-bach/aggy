@@ -18,7 +18,7 @@ import {
   renderWeightInfo,
 } from "./components/screens/aggregation/AggregationScreen";
 
-// 現在読み込み済みの CSV / Layout データ
+// Currently loaded CSV / Layout data
 let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null =
   null;
 let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
@@ -60,12 +60,12 @@ function initThemeToggle(): void {
 initThemeToggle();
 initGettingStarted();
 
-// DuckDB Wasm をバックグラウンドで初期化開始
+// Start DuckDB Wasm initialization in the background
 initDuckDB().catch(() => {
-  // エラーはduckdbBridge内でUI表示済み
+  // Error already displayed in UI by duckdbBridge
 });
 
-// CSV + レイアウト両方揃ったらUI初期化
+// Initialize UI when both CSV and layout are loaded
 function initAfterBothLoaded(): void {
   if (!currentCsv || !currentLayout) return;
 
@@ -122,7 +122,7 @@ function updateLoadedInfo(): void {
   el.classList.remove("hidden");
 }
 
-// OPFS自動保存（CSV+レイアウト両方揃ったとき）
+// Auto-save to OPFS when both CSV and layout are loaded
 async function trySaveToOPFS(): Promise<void> {
   if (!currentCsv || !currentLayout) return;
   try {
@@ -138,7 +138,7 @@ async function trySaveToOPFS(): Promise<void> {
   }
 }
 
-// CSV読み込みハンドラ: DuckDBにロードしてheaders/rowCountを取得
+// CSV load handler: load into DuckDB and get headers/rowCount
 async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
   try {
     const result = await loadCSV(csvText);
@@ -152,7 +152,7 @@ async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
   }
 }
 
-// レイアウト読み込みハンドラ
+// Layout load handler
 function onLayoutLoaded(
   _layout: Layout,
   meta: LayoutMeta,
@@ -166,7 +166,7 @@ function onLayoutLoaded(
   trySaveToOPFS();
 }
 
-// 保存データから読み込み（OPFS再保存は不要なのでtrySaveToOPFSを呼ばない）
+// Load from saved data (skip OPFS re-save)
 async function loadFromSaved(folderId: string): Promise<void> {
   try {
     const { csvText, csvName, layoutJson, layoutName } = await loadSaved(folderId);
@@ -199,12 +199,12 @@ function showError(msg: string): void {
   }
 }
 
-// 集計実行
+// Run aggregation
 async function runAggregation(): Promise<void> {
   if (!currentCsv || !currentLayout) return;
   showError("");
 
-  // ウェイト列はレイアウトから自動決定
+  // Weight column auto-determined from layout
   const weightCol =
     Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
   const crossCols = getCrossColsSelected();
@@ -223,7 +223,7 @@ async function runAggregation(): Promise<void> {
   }
 }
 
-// タブ切り替え
+// Tab switching
 const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".load-tab"));
 
 function activateTab(tab: HTMLButtonElement): void {
@@ -239,7 +239,7 @@ function activateTab(tab: HTMLButtonElement): void {
   tab.focus();
 }
 
-// 初期状態: 非アクティブタブを tabIndex=-1 に設定
+// Set inactive tabs to tabIndex=-1
 for (const t of tabs) {
   if (!t.classList.contains("active")) t.tabIndex = -1;
 }
@@ -264,7 +264,7 @@ for (const tab of tabs) {
   });
 }
 
-// イベントバインド
+// Event binding
 initCsvInput(onCSVLoaded, (msg) => showError(msg));
 initLayoutInput(onLayoutLoaded, (msg) => showError(msg));
 initSavedFiles(loadFromSaved);

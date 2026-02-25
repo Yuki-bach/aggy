@@ -1,6 +1,6 @@
 import type { Cell } from "./aggregate";
 
-/** cells をグリッド構造に変換する */
+/** Convert flat cells array into a grid structure */
 export function pivot(cells: Cell[]): {
   mains: string[];
   subs: { label: string; n: number }[];
