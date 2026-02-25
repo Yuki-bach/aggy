@@ -1,7 +1,7 @@
 import ja from "../locales/ja";
 import en from "../locales/en";
 
-const STORAGE_KEY = "temotto-locale";
+const STORAGE_KEY = "aggy-locale";
 const messages: Record<string, Record<string, string>> = { ja, en };
 const supportedLocales = Object.keys(messages);
 

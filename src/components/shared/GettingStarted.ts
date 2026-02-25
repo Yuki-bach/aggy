@@ -1,7 +1,7 @@
 import { t, onLocaleChange } from "../../lib/i18n";
 import { escHtml } from "./escHtml";
 
-const STORAGE_KEY = "temotto-getting-started-dismissed";
+const STORAGE_KEY = "aggy-getting-started-dismissed";
 
 function buildModalHTML(): string {
   return `

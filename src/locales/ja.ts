@@ -92,7 +92,7 @@ const ja: Record<string, string> = {
 
   // Getting Started modal
   "gs.close": "閉じる",
-  "gs.title": "Temottoへようこそ",
+  "gs.title": "Aggyへようこそ",
   "gs.section1.title": "インポートファイルの準備",
   "gs.section1.p1":
     "本ツールでは、アンケートの<strong>ローデータファイル</strong>（CSV）と<strong>レイアウトファイル</strong>（JSON）の2つを読み込んで集計を行います。",
@@ -103,7 +103,7 @@ const ja: Record<string, string> = {
   "gs.section1.sampleLayout": "サンプルレイアウト",
   "gs.section2.title": "セキュリティについて",
   "gs.section2.p1":
-    "Temottoは<strong>完全サーバーレス</strong>で動作します。すべての処理はお使いのブラウザ内で完結し、アップロードしたデータが外部サーバーに送信されることは一切ありません。",
+    "Aggyは<strong>完全サーバーレス</strong>で動作します。すべての処理はお使いのブラウザ内で完結し、アップロードしたデータが外部サーバーに送信されることは一切ありません。",
   "gs.section3.title": "基本的な使い方",
   "gs.section3.step1": "ローデータファイルとレイアウトファイルを読み込む",
   "gs.section3.step2": "必要に応じてクロス集計軸を選択する",

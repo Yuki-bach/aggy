@@ -1,8 +1,8 @@
-# Temotto — アンケートローデータ集計システム 実装プラン
+# Aggy — アンケートローデータ集計システム 実装プラン
 
 ## 概要
 
-**Temotto** は、アンケートのローデータCSVをブラウザに読み込むだけで、GT集計・クロス集計・ウェイトバック集計を行えるWebアプリ。サーバー不要、レイアウトファイル不要。集計エンジンはRuby Wasmで実装する。
+**Aggy** は、アンケートのローデータCSVをブラウザに読み込むだけで、GT集計・クロス集計・ウェイトバック集計を行えるWebアプリ。サーバー不要、レイアウトファイル不要。集計エンジンはRuby Wasmで実装する。
 
 ---
 
@@ -176,7 +176,7 @@ end
 
 ```
 ┌─ header ─────────────────────────────┐
-│ Temotto                 [Wasm状態]   │
+│ Aggy                 [Wasm状態]   │
 ├─ left panel ─────┬─ right panel ─────┤
 │                  │                   │
 │ 01. CSV読み込み  │  集計結果          │
@@ -238,7 +238,7 @@ end
 ## ファイル・ディレクトリ構成（初期）
 
 ```
-temotto/
+aggy/
 ├── index.html
 ├── package.json
 ├── vite.config.ts
@@ -267,8 +267,8 @@ temotto/
 
 ```bash
 # プロジェクト作成
-npm create vite@latest temotto -- --template vanilla-ts
-cd temotto
+npm create vite@latest aggy -- --template vanilla-ts
+cd aggy
 npm install
 
 # 依存ライブラリ
