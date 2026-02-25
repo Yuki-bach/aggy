@@ -10,23 +10,16 @@ function DataSummary({
 }) {
   return (
     <>
-      <div class="data-summary-row">
-        <span class="data-summary-label">{t("summary.rawdata")}</span>
+      <div class="data-summary-row indent">
         <span class="data-summary-value">{csv.fileName}</span>
       </div>
-      <div class="data-summary-row">
-        <span class="data-summary-label" />
+      <div class="data-summary-row indent">
+        <span class="data-summary-value">{layout.fileName}</span>
+      </div>
+      <div class="data-summary-row indent">
         <span class="data-summary-value">
           {t("summary.rows", { rows: csv.rowCount.toLocaleString(), cols: csv.headers.length })}
         </span>
-      </div>
-      <div class="data-summary-row">
-        <span class="data-summary-label">{t("summary.layout")}</span>
-        <span class="data-summary-value">{layout.fileName}</span>
-      </div>
-      <div class="data-summary-row">
-        <span class="data-summary-label" />
-        <span class="data-summary-value">{t("summary.colDefs", { count: layout.colCount })}</span>
       </div>
     </>
   );

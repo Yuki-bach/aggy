@@ -28,12 +28,9 @@ const ja: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "データ概要",
-  "section.cross": "クロス集計軸（任意）",
+  "section.cross": "クロス集計軸",
   "section.cross.label": "クロス集計軸の選択",
-  "summary.rawdata": "ローデータ",
-  "summary.layout": "レイアウト",
-  "summary.rows": "{rows} 行 / {cols} 列",
-  "summary.colDefs": "{count} 列定義",
+  "summary.rows": "{rows} 行 {cols} 列",
   "weight.label": "ウェイトバック ({col})",
   "weight.on": "ON",
   "weight.off": "OFF",

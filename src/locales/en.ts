@@ -28,12 +28,9 @@ const en: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "Data Summary",
-  "section.cross": "Cross-Tabulation Axes (optional)",
+  "section.cross": "Cross-Tabulation Axes",
   "section.cross.label": "Cross-tabulation axis selection",
-  "summary.rawdata": "Raw Data",
-  "summary.layout": "Layout",
-  "summary.rows": "{rows} rows / {cols} cols",
-  "summary.colDefs": "{count} column defs",
+  "summary.rows": "{rows} rows {cols} cols",
   "weight.label": "Weight-back ({col})",
   "weight.on": "ON",
   "weight.off": "OFF",
