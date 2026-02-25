@@ -36,7 +36,7 @@ export class GtAggregator {
     return { cells, mainValues };
   }
 
-  async aggregateMA(prefix: string, cols: string[]): Promise<Cell[]> {
+  async aggregateMA(cols: string[]): Promise<Cell[]> {
     const selectClauses = cols.map((col, i) => {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });

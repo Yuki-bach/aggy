@@ -84,7 +84,7 @@ export async function aggregate(
       );
       results.push({ question: q.column, type: "SA", cells: [...gtCells, ...crossCells.flat()] });
     } else {
-      const gtCells = await gt.aggregateMA(q.prefix, q.columns);
+      const gtCells = await gt.aggregateMA(q.columns);
       const crossCells = await Promise.all(crossAggregators.map((ca) => ca.aggregateMA(q.columns)));
       results.push({ question: q.prefix, type: "MA", cells: [...gtCells, ...crossCells.flat()] });
     }
