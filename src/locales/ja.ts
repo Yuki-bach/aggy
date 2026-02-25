@@ -121,6 +121,9 @@ const ja: Record<string, string> = {
   "settings.theme.light": "ライト",
   "settings.theme.dark": "ダーク",
   "settings.theme.system": "システム設定に従う",
+  "settings.ai": "AI分析コメント",
+  "settings.ai.on": "ON",
+  "settings.ai.off": "OFF",
   "settings.close": "閉じる",
 };
 

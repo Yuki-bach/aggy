@@ -1,8 +1,17 @@
 import { t, getLocale, setLocale, onLocaleChange } from "../../lib/i18n";
 
 const THEME_KEY = "temotto-theme";
+const AI_KEY = "temotto-ai-comment";
 
 type Theme = "light" | "dark" | "system";
+
+export function isAICommentEnabled(): boolean {
+  return localStorage.getItem(AI_KEY) !== "off";
+}
+
+function setAIComment(on: boolean): void {
+  localStorage.setItem(AI_KEY, on ? "on" : "off");
+}
 
 function getStoredTheme(): Theme {
   const v = localStorage.getItem(THEME_KEY);
@@ -41,11 +50,11 @@ function buildSegment(
   return `<div class="seg-control" data-seg-name="${name}">${buttons}</div>`;
 }
 
-function buildPanelHTML(): string {
+async function buildPanelHTML(): Promise<string> {
   const locale = getLocale();
   const theme = getStoredTheme();
 
-  return `
+  let html = `
     <div class="settings-group">
       <span class="settings-label">${t("settings.language")}</span>
       ${buildSegment(
@@ -70,6 +79,25 @@ function buildPanelHTML(): string {
       )}
     </div>
   `;
+
+  if (typeof LanguageModel !== "undefined" && (await LanguageModel.availability()) !== "no") {
+    const aiVal = isAICommentEnabled() ? "on" : "off";
+    html += `
+    <div class="settings-group">
+      <span class="settings-label">${t("settings.ai")}</span>
+      ${buildSegment(
+        "ai",
+        [
+          { value: "on", label: t("settings.ai.on") },
+          { value: "off", label: t("settings.ai.off") },
+        ],
+        aiVal,
+      )}
+    </div>
+    `;
+  }
+
+  return html;
 }
 
 function bindSegmentEvents(panel: HTMLElement): void {
@@ -90,6 +118,8 @@ function bindSegmentEvents(panel: HTMLElement): void {
       setLocale(value);
     } else if (name === "theme") {
       applyTheme(value as Theme);
+    } else if (name === "ai") {
+      setAIComment(value === "on");
     }
   });
 }
@@ -98,9 +128,9 @@ function isOpen(): boolean {
   return !document.getElementById("settings-panel")!.classList.contains("hidden");
 }
 
-function show(): void {
+async function show(): Promise<void> {
   const panel = document.getElementById("settings-panel")!;
-  panel.innerHTML = buildPanelHTML();
+  panel.innerHTML = await buildPanelHTML();
   panel.classList.remove("hidden");
   bindSegmentEvents(panel);
 }

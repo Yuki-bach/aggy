@@ -121,6 +121,9 @@ const en: Record<string, string> = {
   "settings.theme.light": "Light",
   "settings.theme.dark": "Dark",
   "settings.theme.system": "Follow system",
+  "settings.ai": "AI Analysis Comment",
+  "settings.ai.on": "ON",
+  "settings.ai.off": "OFF",
   "settings.close": "Close",
 };
 
