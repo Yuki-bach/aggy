@@ -45,11 +45,16 @@ npm run dev
 
 ## 技術スタック
 
-TypeScript + Vite + DuckDB Wasm（SQL集計エンジン）。UIフレームワークなし。
+TypeScript, Vite, Preact, DuckDB Wasm, Tailwind CSS v4
 
-## ビルド
+## コマンド
 
 ```bash
-npm run build    # 型チェック + ビルド
-npm run preview  # ビルド結果をローカルで確認
+npm run dev        # 開発サーバー
+npm run build      # 型チェック + ビルド
+npm run preview    # ビルド結果をローカルで確認
+npm run check      # フォーマット・lint・型チェック
+npm run test       # テスト (vitest)
+npm run lint       # oxlint
+npm run fmt        # oxfmt
 ```
