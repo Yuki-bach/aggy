@@ -28,19 +28,12 @@ const en: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "Data Summary",
-  "section.cross": "Cross-Tabulation Axes (optional)",
+  "section.cross": "Cross-Tabulation Axes",
   "section.cross.label": "Cross-tabulation axis selection",
-  "summary.rawdata": "Raw Data",
-  "summary.layout": "Layout",
-  "summary.rows": "{rows} rows / {cols} cols",
-  "summary.colDefs": "{count} column defs",
+  "summary.rows": "{rows} rows {cols} cols",
   "weight.label": "Weight-back ({col})",
   "weight.on": "ON",
   "weight.off": "OFF",
-
-  // Loaded info (import screen)
-  "loaded.csv": "Raw Data: {name}  —  {rows} rows / {cols} cols",
-  "loaded.layout": "Layout: {name}  —  {count} column defs",
 
   // Run button
   "run.button": "▶ Run Aggregation",
@@ -50,7 +43,6 @@ const en: Record<string, string> = {
 
   // Results
   "result.title.gt": "Aggregation Results",
-  "result.title.cross": "Cross-Tabulation Results",
   "result.meta": "{count} questions  /  {weight}",
   "result.weight.applied": "Weighted: {col}",
   "result.weight.none": "Unweighted",
@@ -71,9 +63,6 @@ const en: Record<string, string> = {
   "table.total": "Total",
   "table.caption.gt": "Aggregation results for {question}",
   "table.caption.cross": "Cross-tabulation results for {question}",
-
-  // Weight suffix
-  "n.weighted": " (weighted)",
 
   // AI Bubble
   "ai.close": "Close",

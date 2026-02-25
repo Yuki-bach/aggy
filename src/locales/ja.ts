@@ -28,19 +28,12 @@ const ja: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "データ概要",
-  "section.cross": "クロス集計軸（任意）",
+  "section.cross": "クロス集計軸",
   "section.cross.label": "クロス集計軸の選択",
-  "summary.rawdata": "ローデータ",
-  "summary.layout": "レイアウト",
-  "summary.rows": "{rows} 行 / {cols} 列",
-  "summary.colDefs": "{count} 列定義",
+  "summary.rows": "{rows} 行 {cols} 列",
   "weight.label": "ウェイトバック ({col})",
   "weight.on": "ON",
   "weight.off": "OFF",
-
-  // Loaded info (import screen)
-  "loaded.csv": "ローデータ: {name}  —  {rows} 行 / {cols} 列",
-  "loaded.layout": "レイアウト: {name}  —  {count} 列定義",
 
   // Run button
   "run.button": "▶ 集計を実行",
@@ -50,7 +43,6 @@ const ja: Record<string, string> = {
 
   // Results
   "result.title.gt": "集計結果",
-  "result.title.cross": "クロス集計結果",
   "result.meta": "{count} 問  ／  {weight}",
   "result.weight.applied": "ウェイトバック適用: {col}",
   "result.weight.none": "実数集計",
@@ -71,9 +63,6 @@ const ja: Record<string, string> = {
   "table.total": "全体",
   "table.caption.gt": "{question} の集計結果",
   "table.caption.cross": "{question} のクロス集計結果",
-
-  // Weight suffix
-  "n.weighted": "（ウェイト後）",
 
   // AI Bubble
   "ai.close": "閉じる",
