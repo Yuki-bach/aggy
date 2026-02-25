@@ -65,9 +65,6 @@ const ja: Record<string, string> = {
   "table.caption.gt": "{question} の集計結果",
   "table.caption.cross": "{question} のクロス集計結果",
 
-  // Weight suffix
-  "n.weighted": "（ウェイト後）",
-
   // AI Bubble
   "ai.close": "閉じる",
   "ai.header": "✨ AI分析",

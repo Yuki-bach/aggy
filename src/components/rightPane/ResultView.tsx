@@ -4,7 +4,6 @@ import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel } from "../../lib/labelResolver";
-import { t } from "../../lib/i18n";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
@@ -144,7 +143,7 @@ function TableContent({
 
         const gtSub = pv.subs.find((s) => s.label === "GT")!;
         const nLabel = weightCol
-          ? `n=${gtSub.n.toFixed(1)}${t("n.weighted")}`
+          ? `n=${gtSub.n.toFixed(1)}`
           : `n=${gtSub.n.toLocaleString()}`;
 
         const questionLabel = resolveQuestionLabel(res.question, layoutMeta);

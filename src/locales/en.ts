@@ -65,9 +65,6 @@ const en: Record<string, string> = {
   "table.caption.gt": "Aggregation results for {question}",
   "table.caption.cross": "Cross-tabulation results for {question}",
 
-  // Weight suffix
-  "n.weighted": " (weighted)",
-
   // AI Bubble
   "ai.close": "Close",
   "ai.header": "✨ AI Analysis",
