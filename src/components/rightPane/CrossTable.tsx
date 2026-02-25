@@ -89,7 +89,7 @@ function VerticalCrossTable({
       </caption>
       <thead>
         <tr>
-          <th rowSpan={2} />
+          <th rowSpan={2} class="cross-corner" />
           <th colSpan={2} class="cross-group-header gt-group">
             {t("table.total")}
             <br />

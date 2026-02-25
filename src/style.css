@@ -1061,6 +1061,11 @@ table.gt th {
   background: var(--surface2);
 }
 
+table.gt th.cross-corner {
+  background: transparent;
+  border-bottom: none;
+}
+
 table.gt th.right {
   text-align: right;
 }
