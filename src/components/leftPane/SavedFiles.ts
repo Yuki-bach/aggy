@@ -23,7 +23,7 @@ export async function refreshList(): Promise<void> {
   container.innerHTML = "";
 
   if (entries.length === 0) {
-    container.innerHTML = `<div class="saved-empty">保存データなし</div>`;
+    container.innerHTML = `<div class="saved-empty">履歴なし</div>`;
     return;
   }
 

@@ -10,8 +10,8 @@ function buildModalHTML(): string {
         <section class="modal-section">
           <h3>インポートファイルの準備</h3>
           <p>
-            本ツールでは、アンケートの<strong>CSVローデータ</strong>と
-            <strong>JSONレイアウトファイル</strong>の2つを読み込んで集計を行います。
+            本ツールでは、アンケートの<strong>ローデータファイル</strong>（CSV）と
+            <strong>レイアウトファイル</strong>（JSON）の2つを読み込んで集計を行います。
           </p>
           <p>
             ファイルの変換・整形は<strong>ユーザーご自身</strong>で行ってください。<br>
@@ -23,11 +23,11 @@ function buildModalHTML(): string {
             <div class="modal-sample-links">
               <a href="samples/sample_data.csv" download="sample_data.csv" class="modal-sample-link">
                 <span class="modal-sample-icon">&#128196;</span>
-                サンプルCSV
+                サンプルローデータ
               </a>
               <a href="samples/sample_layout.json" download="sample_layout.json" class="modal-sample-link">
                 <span class="modal-sample-icon">&#128196;</span>
-                サンプルJSON
+                サンプルレイアウト
               </a>
             </div>
           </div>
@@ -45,7 +45,7 @@ function buildModalHTML(): string {
         <section class="modal-section">
           <h3>基本的な使い方</h3>
           <ol>
-            <li>左パネルからCSVファイルとJSONレイアウトファイルを読み込む</li>
+            <li>ローデータファイルとレイアウトファイルを読み込む</li>
             <li>必要に応じてクロス集計軸を選択する</li>
             <li>「集計を実行」ボタンをクリック</li>
           </ol>
@@ -99,9 +99,4 @@ export function initGettingStarted(): void {
   });
 
   document.getElementById("help-btn")!.addEventListener("click", show);
-
-  // Auto-show on first visit
-  if (!localStorage.getItem(STORAGE_KEY)) {
-    show();
-  }
 }
