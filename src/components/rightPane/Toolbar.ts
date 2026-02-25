@@ -29,7 +29,7 @@ export function buildToolbar(
     </span>
   `;
 
-  // トグル: テーブル / チャート
+  // Toggle: table / chart
   const toggle = document.createElement("div");
   toggle.className = "view-toggle";
   const btnTable = document.createElement("button");
@@ -50,7 +50,7 @@ export function buildToolbar(
   });
   hdr.appendChild(toggle);
 
-  // CSV出力ボタン
+  // CSV export button
   const csvBtn = document.createElement("button");
   csvBtn.className = "csv-export-btn";
   csvBtn.textContent = "全件CSV出力";
@@ -68,7 +68,7 @@ export function buildChartOpts(
   const chartOpts = document.createElement("div");
   chartOpts.className = "chart-opts";
 
-  // SA用
+  // SA chart type
   const saLabel = document.createElement("label");
   saLabel.textContent = "SA: ";
   const saSelect = document.createElement("select");
@@ -84,7 +84,7 @@ export function buildChartOpts(
   saLabel.appendChild(saSelect);
   chartOpts.appendChild(saLabel);
 
-  // MA用
+  // MA chart type
   const maLabel = document.createElement("label");
   maLabel.textContent = "MA: ";
   const maSelect = document.createElement("select");

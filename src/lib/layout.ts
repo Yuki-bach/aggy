@@ -3,7 +3,7 @@ import type { QuestionDef } from "./aggregate";
 export interface LayoutItem {
   code: string;
   label: string;
-  column?: string; // 列名の明示指定（省略時は `{key}_{code}` で導出）
+  column?: string; // Explicit column name (defaults to `{key}_{code}`)
 }
 
 export type LayoutColType = "SA" | "MA" | "ID" | "WEIGHT" | "EXCLUDE";
@@ -18,15 +18,11 @@ export interface LayoutEntry {
 export type Layout = LayoutEntry[];
 
 export interface LayoutMeta {
-  /** 設問ラベル: CSVの列名（またはMAグループ名） → 表示名 */
+  /** Question labels: CSV column name (or MA group name) → display name */
   questionLabels: Record<string, string>;
-  /**
-   * 選択肢ラベル:
-   *   SA → { colName: { code: label } }
-   *   MA → { colName: { "1": itemLabel } }
-   */
+  /** Value labels: SA → { colName: { code: label } }, MA → { colName: { "1": itemLabel } } */
   valueLabels: Record<string, Record<string, string>>;
-  /** 列種別: { colName → ColConfig互換の種別文字列 } */
+  /** Column types: { colName → type string } */
   colTypes: Record<string, string>;
 }
 
@@ -55,7 +51,7 @@ export function parseLayout(jsonText: string): Layout {
   return parsed as Layout;
 }
 
-/** headers + colTypes から QuestionDef[] を組み立てる */
+/** Build QuestionDef[] from headers and colTypes */
 export function buildQuestionDefs(
   headers: string[],
   colTypes: Record<string, string>,
@@ -114,7 +110,7 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
           for (const item of items) {
             const colName = item.column ?? `${key}_${item.code}`;
             colTypes[colName] = `ma:${key}`;
-            // MA列は 1/0 フラグ。"1" の表示ラベルとしてitem.labelを保持
+            // MA columns are 1/0 flags; store item.label as display label for "1"
             valueLabels[colName] = { "1": item.label };
           }
         }

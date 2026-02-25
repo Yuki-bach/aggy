@@ -5,19 +5,19 @@ import type { pivot } from "../../lib/pivot";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labelResolver";
 import { escHtml } from "../shared/escHtml";
 
-/** クロス軸ごとにsubsをグループ化する（プレフィックス付きsub値を利用） */
+/** Group subs by cross axis using prefixed sub values */
 function groupSubsByCrossAxis(
   crossSubs: { label: string; n: number }[],
   crossCols: QuestionDef[],
   resType: "SA" | "MA",
 ): { crossCol: QuestionDef; subs: { label: string; n: number }[] }[] {
-  // SA主軸: SA軸が先、MA軸が後。MA主軸: crossCols順
+  // SA main: SA axes first, then MA. MA main: crossCols order
   const orderedCols =
     resType === "SA"
       ? [...crossCols.filter((q) => q.type === "SA"), ...crossCols.filter((q) => q.type === "MA")]
       : crossCols;
 
-  // 軸キーごとにsubsを分類
+  // Classify subs by axis key
   const axisMap = new Map<string, { label: string; n: number }[]>();
   for (const sub of crossSubs) {
     const parsed = parseCrossSub(sub.label);
@@ -56,12 +56,12 @@ export function buildCrossTable(
   caption.textContent = `${questionLabel} のクロス集計結果`;
   table.appendChild(caption);
 
-  // クロス軸グループを構築
+  // Build cross-axis groups
   const crossGroups =
     crossCols && crossCols.length > 0 ? groupSubsByCrossAxis(crossSubs, crossCols, res.type) : [];
   const hasMultipleAxes = crossGroups.length > 1;
 
-  // ヘッダー行1: 選択肢 | 全体 | クロス軸グループ...
+  // Header row 1: Option | Total | Cross axis groups...
   const tr1 = document.createElement("tr");
 
   const thLabel = document.createElement("th");
@@ -69,7 +69,7 @@ export function buildCrossTable(
   thLabel.textContent = "選択肢";
   tr1.appendChild(thLabel);
 
-  // 全体列グループ
+  // Total column group
   const thTotal = document.createElement("th");
   thTotal.colSpan = 2;
   thTotal.className = "cross-group-header gt-group";
@@ -93,7 +93,7 @@ export function buildCrossTable(
     tr1.appendChild(thCross);
   }
 
-  // ヘッダー行2: 件数 | % | 各クロス値(n=X)...
+  // Header row 2: count | % | cross values (n=X)...
   const tr2 = document.createElement("tr");
 
   const thCount = document.createElement("th");
@@ -134,10 +134,10 @@ export function buildCrossTable(
   thead.appendChild(tr2);
   table.appendChild(thead);
 
-  // ボディ
+  // Body
   const tbody = document.createElement("tbody");
 
-  // 軸グループ境界のインデックスを事前計算
+  // Precompute axis group boundary indices
   const axisBorderIndices = new Set<number>();
   if (hasMultipleAxes) {
     let offset = 0;
@@ -167,7 +167,7 @@ export function buildCrossTable(
     tdPct.textContent = gtCell.pct.toFixed(1) + "%";
     tr.appendChild(tdPct);
 
-    // クロスセル
+    // Cross cells
     crossSubs.forEach((sub, i) => {
       const cell = lookup.get(`${main}\0${sub.label}`);
       const td = document.createElement("td");

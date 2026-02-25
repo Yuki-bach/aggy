@@ -67,7 +67,6 @@ function show(): void {
   const modal = document.getElementById("getting-started-modal")!;
   modal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
-  // フォーカスをモーダル内に移動
   (document.getElementById("gs-ok") as HTMLButtonElement).focus();
 }
 
@@ -86,26 +85,22 @@ export function initGettingStarted(): void {
   const modal = document.getElementById("getting-started-modal")!;
   modal.innerHTML = buildModalHTML();
 
-  // 閉じるボタン
   document.getElementById("gs-close")!.addEventListener("click", hide);
   document.getElementById("gs-ok")!.addEventListener("click", hide);
 
-  // 背景クリックで閉じる
   modal.addEventListener("click", (e) => {
     if (e.target === modal) hide();
   });
 
-  // ESCキーで閉じる
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !modal.classList.contains("hidden")) {
       hide();
     }
   });
 
-  // ヘッダーの「?」ボタン
   document.getElementById("help-btn")!.addEventListener("click", show);
 
-  // 初回訪問時に自動表示
+  // Auto-show on first visit
   if (!localStorage.getItem(STORAGE_KEY)) {
     show();
   }

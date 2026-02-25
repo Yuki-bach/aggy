@@ -1,10 +1,10 @@
-/** 集計エンジン - SQL生成・実行の全責務を担う */
+/** Aggregation engine — handles all SQL generation and execution */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Cell, AggResult, QuestionDef } from "./aggregate";
 import { questionKey, crossSub } from "./aggregate";
 
-// --- SQL ヘルパー ---
+// SQL helpers
 
 function esc(name: string): string {
   return name.replace(/"/g, '""');
@@ -20,26 +20,26 @@ function maWeightedCountExpr(maCol: string, weightCol: string): string {
     : `COUNT(CASE WHEN "${esc(maCol)}" = '1' THEN 1 END)::DOUBLE`;
 }
 
-/** MA設問の「表示された」条件: いずれかのサブカラムが空でない */
+/** MA "shown" condition: at least one sub-column is non-empty */
 function maShownCondition(cols: string[]): string {
   return cols.map((c) => `("${esc(c)}" IS NOT NULL AND "${esc(c)}" != '')`).join(" OR ");
 }
 
-/** 無回答マーカー */
+/** No-answer marker */
 export const NA_VALUE = "N/A";
 
 function mkCell(main: string, sub: string, n: number, count: number): Cell {
   return { main, sub, n, count, pct: n > 0 ? (count / n) * 100 : 0 };
 }
 
-// --- クロスヘッダーキャッシュ ---
+// Cross-header cache
 
 type CrossHeaderCache = Map<
   string,
   { headers: Array<{ label: string; n: number }>; crossValues: string[] }
 >;
 
-// --- 集計コンテキスト ---
+// Aggregation context
 
 export class Aggregator {
   constructor(
@@ -50,7 +50,7 @@ export class Aggregator {
   ) {}
 
   async aggregateSA(col: string): Promise<AggResult> {
-    // クロス軸を SA / MA に分離（CTE統合は SA×SA のみ）
+    // Separate cross axes into SA/MA (CTE consolidation for SA×SA only)
     const saCross = this.crossCols.filter((q) => q.type === "SA") as Array<{
       type: "SA";
       column: string;
@@ -61,7 +61,7 @@ export class Aggregator {
       columns: string[];
     }>;
 
-    // CTE: GT + 全SA×SAクロスを1クエリで取得
+    // CTE: fetch GT + all SA×SA cross in one query
     const GT_SENTINEL = "__GT__";
     let inner = `
     SELECT "${esc(col)}" AS mv, '${GT_SENTINEL}' AS sv, ${weightExpr(this.weightCol)} AS cnt
@@ -87,7 +87,7 @@ export class Aggregator {
     const arrowResult = await this.conn.query(sql);
     const allRows = arrowResult.toArray();
 
-    // sv ごとに行を仕分け
+    // Partition rows by sv
     const gtRows: Array<{ mv: string; cnt: number }> = [];
     const crossBuckets = new Map<string, Map<string, number>>();
 
@@ -107,12 +107,12 @@ export class Aggregator {
       }
     }
 
-    // GT セル
+    // GT cells
     const questionN = gtRows.reduce((sum, r) => sum + r.cnt, 0);
     const mainValues = gtRows.map((r) => r.mv);
     const cells: Cell[] = gtRows.map((r) => mkCell(r.mv, "GT", questionN, r.cnt));
 
-    // SA×SA クロスセル
+    // SA×SA cross cells
     for (const crossQ of saCross) {
       const cached = this.crossHeaderCache.get(crossQ.column)!;
       const { headers, crossValues } = cached;
@@ -126,7 +126,7 @@ export class Aggregator {
       }
     }
 
-    // SA×MA クロスセル（構造が異なるため個別クエリ維持）
+    // SA×MA cross cells (separate query due to different structure)
     for (const crossQ of maCross) {
       const cached = this.crossHeaderCache.get(crossQ.prefix)!;
       cells.push(
@@ -142,18 +142,18 @@ export class Aggregator {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });
 
-    // 無回答式: 表示されたが何も選択していない
+    // No-answer: shown but nothing selected
     const noneSelected = cols.map((c) => `"${esc(c)}" != '1'`).join(" AND ");
     const naExpr = this.weightCol
       ? `SUM(CASE WHEN ${noneSelected} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
       : `COUNT(CASE WHEN ${noneSelected} THEN 1 END)::DOUBLE`;
 
-    // questionN 式: 表示された人数
+    // questionN: number of respondents shown
     const nExpr = this.weightCol
       ? `COALESCE(SUM(TRY_CAST("${esc(this.weightCol)}" AS DOUBLE)), 0)`
       : `COUNT(*)::DOUBLE`;
 
-    // 回答対象外を除外し、naCount・questionN もまとめて取得
+    // Exclude non-respondents; fetch naCount and questionN together
     const sql = `
       SELECT ${selectClauses.join(", ")}, ${naExpr} AS na_cnt, ${nExpr} AS question_n
       FROM survey
@@ -167,10 +167,10 @@ export class Aggregator {
       mkCell(col, "GT", questionN, Number(row[`c${i}`] ?? 0)),
     );
 
-    // 無回答行
+    // No-answer row
     cells.push(mkCell(NA_VALUE, "GT", questionN, Number(row.na_cnt ?? 0)));
 
-    // クロスセル
+    // Cross cells
     if (this.crossCols.length > 0) {
       for (const crossQ of this.crossCols) {
         const cached = this.crossHeaderCache.get(questionKey(crossQ))!;
@@ -187,7 +187,7 @@ export class Aggregator {
     return { question: prefix, type: "MA", cells };
   }
 
-  /** SA主軸 × MA軸クロスセル生成 */
+  /** SA main × MA cross cell generation */
   private async buildCrossCellsMA(
     mainCol: string,
     mainValues: string[],
@@ -232,7 +232,7 @@ export class Aggregator {
     return cells;
   }
 
-  /** MA主軸 × SA軸クロスセル生成 */
+  /** MA main × SA cross cell generation */
   private async buildMACrossCellsSA(
     maCols: string[],
     crossCol: string,
@@ -244,7 +244,7 @@ export class Aggregator {
       (col, i) => `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`,
     );
 
-    // 無回答カウント: 表示されたが何も選択していない
+    // No-answer count: shown but nothing selected
     const naCondition = `${maCols.map((c) => `"${esc(c)}" != '1'`).join(" AND ")} AND (${maShownCondition(maCols)})`;
     const naExpr = this.weightCol
       ? `SUM(CASE WHEN ${naCondition} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
@@ -285,7 +285,7 @@ export class Aggregator {
       }
     }
 
-    // 無回答クロスセル
+    // No-answer cross cells
     for (let i = 0; i < crossValues.length; i++) {
       cells.push(
         mkCell(
@@ -300,7 +300,7 @@ export class Aggregator {
     return cells;
   }
 
-  /** MA主軸 × MA軸クロスセル生成 */
+  /** MA main × MA cross cell generation */
   private async buildMACrossCellsMA(
     rowMaCols: string[],
     crossMaPrefix: string,
@@ -320,7 +320,7 @@ export class Aggregator {
       }
     }
 
-    // 無回答 × 各クロスMAカラム
+    // No-answer × each cross MA column
     const naBase = `${rowMaCols.map((col) => `"${esc(col)}" != '1'`).join(" AND ")} AND (${maShownCondition(rowMaCols)})`;
     for (let c = 0; c < crossMaCols.length; c++) {
       const naCondition = `${naBase} AND "${esc(crossMaCols[c])}" = '1'`;
@@ -348,7 +348,7 @@ export class Aggregator {
       }
     }
 
-    // 無回答クロスセル
+    // No-answer cross cells
     for (let c = 0; c < crossMaCols.length; c++) {
       cells.push(
         mkCell(
@@ -364,7 +364,7 @@ export class Aggregator {
   }
 }
 
-// --- 前処理（static create から利用） ---
+// Cross-header prefetching
 
 export async function fetchCrossHeaders(
   conn: duckdb.AsyncDuckDBConnection,
