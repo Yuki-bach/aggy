@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* 既存のダークモード切替 [data-theme="dark"] に合わせる */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* 既存スタイルをそのまま読み込み */
+@import "./style.css";
