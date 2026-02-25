@@ -74,6 +74,7 @@ function buildPanelHTML(): string {
 
 function bindSegmentEvents(panel: HTMLElement): void {
   panel.addEventListener("click", (e) => {
+    e.stopPropagation();
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".seg-btn");
     if (!btn) return;
 
