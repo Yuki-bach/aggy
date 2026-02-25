@@ -3,6 +3,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/pivot";
 import { resolveQuestionLabel } from "../../lib/labelResolver";
 import { escHtml } from "../shared/escHtml";
+import { t } from "../../lib/i18n";
 import { buildToolbar, buildChartOpts } from "./Toolbar";
 import { buildGtTable } from "./GtTable";
 import { buildCrossTable } from "./CrossTable";
@@ -146,7 +147,7 @@ function renderTableContent(
 
     const gtSub = pv.subs.find((s) => s.label === "GT")!;
     const nLabel = weightCol
-      ? `n=${gtSub.n.toFixed(1)}（ウェイト後）`
+      ? `n=${gtSub.n.toFixed(1)}${t("n.weighted")}`
       : `n=${gtSub.n.toLocaleString()}`;
 
     const questionLabel = resolveQuestionLabel(res.question, layoutMeta);

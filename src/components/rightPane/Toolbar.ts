@@ -2,6 +2,7 @@ import type { AggResult } from "../../lib/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { downloadAllCSV } from "../../lib/download";
 import { escHtml } from "../shared/escHtml";
+import { t } from "../../lib/i18n";
 import type { GtChartType } from "./ChartRenderer";
 
 type ViewMode = "table" | "chart";
@@ -22,10 +23,13 @@ export function buildToolbar(
 ): HTMLDivElement {
   const hdr = document.createElement("div");
   hdr.className = "results-header";
+  const weightText = weightCol
+    ? t("result.weight.applied", { col: escHtml(weightCol) })
+    : t("result.weight.none");
   hdr.innerHTML = `
-    <h2>${hasCross ? "クロス集計結果" : "集計結果"}</h2>
+    <h2>${hasCross ? t("result.title.cross") : t("result.title.gt")}</h2>
     <span class="results-meta">
-      ${results.length} 問  ／  ${weightCol ? "ウェイトバック適用: " + escHtml(weightCol) : "実数集計"}
+      ${t("result.meta", { count: results.length, weight: weightText })}
     </span>
   `;
 
@@ -35,11 +39,11 @@ export function buildToolbar(
   const btnTable = document.createElement("button");
   btnTable.className = `view-toggle-btn${currentViewMode === "table" ? " active" : ""}`;
   btnTable.dataset.mode = "table";
-  btnTable.textContent = "テーブル";
+  btnTable.textContent = t("result.view.table");
   const btnChart = document.createElement("button");
   btnChart.className = `view-toggle-btn${currentViewMode === "chart" ? " active" : ""}`;
   btnChart.dataset.mode = "chart";
-  btnChart.textContent = "チャート";
+  btnChart.textContent = t("result.view.chart");
   toggle.appendChild(btnTable);
   toggle.appendChild(btnChart);
 
@@ -53,7 +57,7 @@ export function buildToolbar(
   // CSV export button
   const csvBtn = document.createElement("button");
   csvBtn.className = "csv-export-btn";
-  csvBtn.textContent = "全件CSV出力";
+  csvBtn.textContent = t("result.csv.export");
   csvBtn.addEventListener("click", () => downloadAllCSV(results, weightCol, layoutMeta));
   hdr.appendChild(csvBtn);
 
@@ -74,9 +78,9 @@ export function buildChartOpts(
   const saSelect = document.createElement("select");
   saSelect.className = "chart-type-select";
   saSelect.innerHTML = `
-    <option value="bar-h"${saChartType === "bar-h" ? " selected" : ""}>横棒</option>
-    <option value="bar-v"${saChartType === "bar-v" ? " selected" : ""}>縦棒</option>
-    <option value="obi"${saChartType === "obi" ? " selected" : ""}>帯</option>
+    <option value="bar-h"${saChartType === "bar-h" ? " selected" : ""}>${t("chart.barH")}</option>
+    <option value="bar-v"${saChartType === "bar-v" ? " selected" : ""}>${t("chart.barV")}</option>
+    <option value="obi"${saChartType === "obi" ? " selected" : ""}>${t("chart.obi")}</option>
   `;
   saSelect.addEventListener("change", () => {
     callbacks.onSaChartTypeChange(saSelect.value as GtChartType);
@@ -90,9 +94,9 @@ export function buildChartOpts(
   const maSelect = document.createElement("select");
   maSelect.className = "chart-type-select";
   maSelect.innerHTML = `
-    <option value="bar-h"${maChartType === "bar-h" ? " selected" : ""}>横棒</option>
-    <option value="bar-v"${maChartType === "bar-v" ? " selected" : ""}>縦棒</option>
-    <option value="obi"${maChartType === "obi" ? " selected" : ""}>帯</option>
+    <option value="bar-h"${maChartType === "bar-h" ? " selected" : ""}>${t("chart.barH")}</option>
+    <option value="bar-v"${maChartType === "bar-v" ? " selected" : ""}>${t("chart.barV")}</option>
+    <option value="obi"${maChartType === "obi" ? " selected" : ""}>${t("chart.obi")}</option>
   `;
   maSelect.addEventListener("change", () => {
     callbacks.onMaChartTypeChange(maSelect.value as GtChartType);

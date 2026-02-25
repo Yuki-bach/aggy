@@ -223,7 +223,7 @@ header span {
   justify-content: flex-end;
 }
 
-.theme-toggle {
+.settings-btn {
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -237,9 +237,51 @@ header span {
   color: var(--text);
 }
 
-.theme-toggle:hover {
+.settings-btn:hover {
   background: var(--surface2);
   border-color: var(--border-strong);
+}
+
+/* Settings modal */
+.settings-modal-content {
+  max-width: 400px;
+}
+
+.settings-group {
+  margin-bottom: var(--space-5);
+}
+
+.settings-group:last-child {
+  margin-bottom: 0;
+}
+
+.settings-label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-3);
+}
+
+.settings-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.settings-radio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--text);
+}
+
+.settings-radio input[type="radio"] {
+  accent-color: var(--accent);
 }
 
 .status-dot {

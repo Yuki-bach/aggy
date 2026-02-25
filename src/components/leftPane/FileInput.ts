@@ -1,4 +1,5 @@
 import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "../../lib/layout";
+import { t } from "../../lib/i18n";
 
 /** ドロップゾーンのdrag&dropイベントをセットアップ */
 function initDropzone(
@@ -94,7 +95,7 @@ export function initLayoutInput(
       markLoaded("layout-dropzone", "layout-dropzone-loaded", file.name);
       onLoad(layout, meta, file.name, text);
     } catch (err) {
-      onError("レイアウトファイルの読み込みエラー: " + (err as Error).message);
+      onError(t("error.layout.load", { msg: (err as Error).message }));
     }
   }
 }
