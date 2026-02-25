@@ -48,76 +48,50 @@
       <div id="import-screen" class="import-screen">
         <div class="import-card">
           <h2 class="import-card-title" data-i18n="import.title">データ読み込み</h2>
-          <div
-            class="load-tabs"
-            role="tablist"
-            data-i18n="import.tab.label"
-            data-i18n-attr="aria-label"
-            aria-label="データ読み込み方法"
-          >
-            <button
-              class="load-tab active"
-              role="tab"
-              aria-selected="true"
-              aria-controls="tab-file"
-              id="tab-btn-file"
-              data-tab="file"
-              data-i18n="import.tab.file"
-            >
-              ファイルから
-            </button>
-            <button
-              class="load-tab"
-              role="tab"
-              aria-selected="false"
-              aria-controls="tab-saved"
-              id="tab-btn-saved"
-              data-tab="saved"
-              data-i18n="import.tab.saved"
-            >
-              履歴から
-            </button>
-          </div>
-          <div class="load-tab-panel" id="tab-file" role="tabpanel" aria-labelledby="tab-btn-file">
-            <div class="dropzone" id="csv-dropzone" data-accept=".csv">
-              <input type="file" id="file-input" accept=".csv" class="dropzone-input" />
-              <div class="dropzone-content">
-                <span class="dropzone-icon" data-i18n="dropzone.csv.icon">ローデータ</span>
-                <span class="dropzone-text" data-i18n="dropzone.csv.text"
-                  >ここにローデータファイル(csv)をドロップ</span
-                >
-                <span class="dropzone-hint" data-i18n="dropzone.csv.hint"
-                  >またはクリックして選択</span
-                >
+          <div class="import-layout">
+            <!-- 左パネル: 入力エリア -->
+            <div class="import-input">
+              <div class="dropzone-row">
+                <div class="dropzone" id="csv-dropzone" data-accept=".csv">
+                  <input type="file" id="file-input" accept=".csv" class="dropzone-input" />
+                  <div class="dropzone-content">
+                    <span class="dropzone-icon" data-i18n="dropzone.csv.icon">ローデータ</span>
+                    <span class="dropzone-text" data-i18n="dropzone.csv.text"
+                      >ここにローデータファイル(csv)をドロップ</span
+                    >
+                    <span class="dropzone-hint" data-i18n="dropzone.csv.hint"
+                      >またはクリックして選択</span
+                    >
+                  </div>
+                  <div class="dropzone-loaded hidden" id="csv-dropzone-loaded"></div>
+                </div>
+                <div class="dropzone" id="layout-dropzone" data-accept=".json">
+                  <input type="file" id="layout-file-input" accept=".json" class="dropzone-input" />
+                  <div class="dropzone-content">
+                    <span class="dropzone-icon" data-i18n="dropzone.layout.icon">レイアウト</span>
+                    <span class="dropzone-text" data-i18n="dropzone.layout.text"
+                      >ここにレイアウトファイル(json)をドロップ</span
+                    >
+                    <span class="dropzone-hint" data-i18n="dropzone.layout.hint"
+                      >またはクリックして選択</span
+                    >
+                  </div>
+                  <div class="dropzone-loaded hidden" id="layout-dropzone-loaded"></div>
+                </div>
               </div>
-              <div class="dropzone-loaded hidden" id="csv-dropzone-loaded"></div>
+              <div class="import-history">
+                <h3 class="import-history-title" data-i18n="import.history">履歴</h3>
+                <div class="import-history-list" id="saved-files-list"></div>
+              </div>
             </div>
-            <div class="dropzone" id="layout-dropzone" data-accept=".json">
-              <input type="file" id="layout-file-input" accept=".json" class="dropzone-input" />
-              <div class="dropzone-content">
-                <span class="dropzone-icon" data-i18n="dropzone.layout.icon">レイアウト</span>
-                <span class="dropzone-text" data-i18n="dropzone.layout.text"
-                  >ここにレイアウトファイル(json)をドロップ</span
-                >
-                <span class="dropzone-hint" data-i18n="dropzone.layout.hint"
-                  >またはクリックして選択</span
-                >
-              </div>
-              <div class="dropzone-loaded hidden" id="layout-dropzone-loaded"></div>
+            <!-- 右パネル: プレビュー -->
+            <div class="import-preview">
+              <div id="loaded-data-info" class="loaded-data-info hidden" aria-live="polite"></div>
+              <button class="proceed-btn hidden" id="proceed-btn" data-i18n="import.proceed">
+                集計画面へ進む →
+              </button>
             </div>
           </div>
-          <div
-            class="load-tab-panel hidden"
-            id="tab-saved"
-            role="tabpanel"
-            aria-labelledby="tab-btn-saved"
-          >
-            <div id="saved-files-list"></div>
-          </div>
-          <div id="loaded-data-info" class="loaded-data-info hidden" aria-live="polite"></div>
-          <button class="proceed-btn hidden" id="proceed-btn" data-i18n="import.proceed">
-            集計画面へ進む →
-          </button>
         </div>
       </div>
 

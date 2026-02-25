@@ -410,7 +410,7 @@ main[data-screen="import"] ~ .help-btn {
   box-shadow: var(--shadow-md);
   padding: var(--space-8);
   width: 100%;
-  max-width: 480px;
+  max-width: 720px;
 }
 
 .import-card-title {
@@ -418,6 +418,63 @@ main[data-screen="import"] ~ .help-btn {
   font-weight: 700;
   color: var(--text);
   margin-bottom: var(--space-5);
+}
+
+.import-layout {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.import-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.dropzone-row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.dropzone-row .dropzone {
+  flex: 1;
+  margin-top: 0;
+}
+
+.import-history {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.import-history-title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: var(--space-3);
+}
+
+.import-history-list {
+  max-height: 160px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.import-preview {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.import-preview .loaded-data-info {
+  margin-top: 0;
+}
+
+.import-preview .proceed-btn {
+  margin-top: auto;
 }
 
 .proceed-btn {
@@ -520,6 +577,15 @@ main[data-screen="import"] ~ .help-btn {
   .import-card {
     max-width: 100%;
   }
+  .import-layout {
+    flex-direction: column;
+  }
+  .import-preview {
+    width: 100%;
+  }
+  .dropzone-row {
+    flex-direction: column;
+  }
 }
 
 /* === Left Panel === */
@@ -545,48 +611,6 @@ main[data-screen="import"] ~ .help-btn {
   margin-bottom: var(--space-3);
 }
 
-/* Load Tabs */
-.load-tabs {
-  display: flex;
-  gap: 0;
-  margin-bottom: var(--space-3);
-}
-
-.load-tab {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-family: var(--font-family-base);
-  font-size: var(--text-base);
-  font-weight: 500;
-  padding: var(--space-2) 0;
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s,
-    border-color 0.15s;
-}
-
-.load-tab:first-child {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-}
-.load-tab:last-child {
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  border-left: none;
-}
-
-.load-tab.active {
-  background: var(--accent);
-  color: var(--accent-contrast);
-  border-color: var(--accent);
-}
-
-.load-tab-panel {
-  height: 250px;
-  overflow-y: auto;
-}
-
 /* Dropzone */
 .dropzone {
   position: relative;
@@ -599,10 +623,6 @@ main[data-screen="import"] ~ .help-btn {
     border-color 0.15s,
     background 0.15s;
   margin-top: var(--space-3);
-}
-
-.dropzone:first-child {
-  margin-top: 0;
 }
 
 .dropzone:hover {

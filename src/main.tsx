@@ -225,47 +225,6 @@ async function runAggregation(): Promise<void> {
   }
 }
 
-// Tab switching
-const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".load-tab"));
-
-function activateTab(tab: HTMLButtonElement): void {
-  for (const t of tabs) {
-    const isActive = t === tab;
-    t.classList.toggle("active", isActive);
-    t.setAttribute("aria-selected", String(isActive));
-    t.tabIndex = isActive ? 0 : -1;
-  }
-  const target = tab.dataset.tab!;
-  document.getElementById("tab-file")!.classList.toggle("hidden", target !== "file");
-  document.getElementById("tab-saved")!.classList.toggle("hidden", target !== "saved");
-  tab.focus();
-}
-
-// Set inactive tabs to tabIndex=-1
-for (const t of tabs) {
-  if (!t.classList.contains("active")) t.tabIndex = -1;
-}
-
-for (const tab of tabs) {
-  tab.addEventListener("click", () => activateTab(tab));
-  tab.addEventListener("keydown", (e: KeyboardEvent) => {
-    const idx = tabs.indexOf(tab);
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-      e.preventDefault();
-      activateTab(tabs[(idx + 1) % tabs.length]);
-    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-      e.preventDefault();
-      activateTab(tabs[(idx - 1 + tabs.length) % tabs.length]);
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      activateTab(tabs[0]);
-    } else if (e.key === "End") {
-      e.preventDefault();
-      activateTab(tabs[tabs.length - 1]);
-    }
-  });
-}
-
 // Event binding
 initCsvInput(onCSVLoaded, (msg) => showError(msg));
 initLayoutInput(onLayoutLoaded, (msg) => showError(msg));
