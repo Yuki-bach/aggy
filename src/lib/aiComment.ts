@@ -1,6 +1,6 @@
 /** AI analysis comment generation via Chrome Built-in AI (Prompt API) */
 
-import type { AggResult } from "./aggregate";
+import type { AggResult } from "./agg/aggregate";
 import type { LayoutMeta } from "./layout";
 import { getLocale, t } from "./i18n";
 

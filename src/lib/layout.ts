@@ -1,4 +1,4 @@
-import type { QuestionDef } from "./aggregate";
+import type { QuestionDef } from "./agg/aggregate";
 
 export interface LayoutItem {
   code: string;

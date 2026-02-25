@@ -1,4 +1,4 @@
-import { questionKey, type QuestionDef } from "../../lib/aggregate";
+import { questionKey, type QuestionDef } from "../../lib/agg/aggregate";
 
 export interface CrossConfigState {
   questions: QuestionDef[];

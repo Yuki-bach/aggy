@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { aggregate, type Query, type Cell, crossSub } from "../src/lib/aggregate";
+import { aggregate, type Query, type Cell, crossSub } from "../src/lib/agg/aggregate";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
