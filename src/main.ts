@@ -11,12 +11,26 @@ import {
 } from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
 import { initSavedFiles, refreshList } from "./components/leftPane/SavedFiles";
-import { initGettingStarted } from "./components/GettingStarted";
+import { initGettingStarted } from "./components/shared/GettingStarted";
+import { showProceedButton } from "./components/screens/import/ImportScreen";
+import {
+  renderDataSummary,
+  renderWeightInfo,
+} from "./components/screens/aggregation/AggregationScreen";
 
 // 現在読み込み済みの CSV / Layout データ
 let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null =
   null;
 let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
+
+// 画面切り替え
+function switchScreen(screen: "import" | "aggregation"): void {
+  const main = document.querySelector("main")!;
+  main.dataset.screen = screen;
+
+  const backBtn = document.getElementById("back-btn")!;
+  backBtn.classList.toggle("hidden", screen === "import");
+}
 
 // テーマ切り替え
 function initThemeToggle(): void {
@@ -61,9 +75,32 @@ function initAfterBothLoaded(): void {
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
+
+  // インポート画面: 「集計画面へ進む」ボタンを表示
+  showProceedButton();
+
+  // 読み込み済みデータ情報を表示（インポート画面用）
+  updateLoadedInfo();
+
+  // 集計画面: データ概要・ウェイト情報を描画
+  renderDataSummary(
+    {
+      fileName: currentCsv.fileName,
+      rowCount: currentCsv.rowCount,
+      headers: currentCsv.headers,
+    },
+    {
+      fileName: currentLayout.fileName,
+      colCount: Object.keys(currentLayout.meta.colTypes).length,
+    },
+  );
+
+  const weightCol =
+    Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+  renderWeightInfo(weightCol);
 }
 
-// 読み込み済みデータ情報を表示
+// 読み込み済みデータ情報を表示（インポート画面用）
 function updateLoadedInfo(): void {
   const el = document.getElementById("loaded-data-info")!;
   if (!currentCsv && !currentLayout) {
@@ -234,4 +271,13 @@ initSavedFiles(loadFromSaved);
 
 document.getElementById("run-btn")!.addEventListener("click", () => {
   runAggregation().catch((e) => showError("集計エラー: " + (e as Error).message));
+});
+
+// 画面遷移ボタン
+document.getElementById("proceed-btn")!.addEventListener("click", () => {
+  switchScreen("aggregation");
+});
+
+document.getElementById("back-btn")!.addEventListener("click", () => {
+  switchScreen("import");
 });

@@ -279,6 +279,160 @@ main {
   grid-template-rows: 1fr;
 }
 
+/* --- Screen Switching --- */
+main[data-screen="import"] {
+  grid-template-columns: 1fr;
+}
+
+main[data-screen="import"] .panel-left,
+main[data-screen="import"] .panel-right {
+  display: none;
+}
+
+main[data-screen="import"] .import-screen {
+  display: flex;
+}
+
+main[data-screen="aggregation"] .import-screen {
+  display: none;
+}
+
+main[data-screen="aggregation"] .panel-left {
+  display: flex;
+}
+
+main[data-screen="aggregation"] .panel-right {
+  display: block;
+}
+
+/* Back button: hidden on import screen, visible on aggregation */
+main[data-screen="import"] ~ * > .back-btn,
+.back-btn.hidden {
+  display: none;
+}
+
+[data-screen="aggregation"] ~ * {
+  /* help-btn hidden on aggregation */
+}
+
+/* Help button visibility per screen */
+main[data-screen="aggregation"] ~ .help-btn {
+  display: none;
+}
+
+main[data-screen="import"] ~ .help-btn {
+  display: flex;
+}
+
+/* --- Import Screen --- */
+.import-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.import-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-8);
+  width: 100%;
+  max-width: 480px;
+}
+
+.import-card-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: var(--space-5);
+}
+
+.proceed-btn {
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  min-height: 48px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  font-family: var(--font-family-base);
+  font-weight: 700;
+  font-size: var(--text-md);
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.proceed-btn:hover {
+  background: var(--accent-hover);
+}
+.proceed-btn:active {
+  background: var(--color-primary-900);
+}
+
+/* --- Back Button --- */
+.back-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  font-size: var(--text-md);
+  line-height: 1;
+  color: var(--text-secondary);
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.back-btn:hover {
+  background: var(--surface2);
+  border-color: var(--border-strong);
+}
+
+/* --- Data Summary (aggregation left pane) --- */
+.data-summary {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.data-summary-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.data-summary-label {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  min-width: 3rem;
+  flex-shrink: 0;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.data-summary-value {
+  font-size: var(--text-base);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Weight Info --- */
+.weight-info {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  color: var(--accent2);
+  background: var(--accent2-light);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
   main {
     grid-template-columns: 1fr;
@@ -288,6 +442,9 @@ main {
     border-right: none !important;
     border-bottom: 1px solid var(--border);
     max-height: 50vh;
+  }
+  .import-card {
+    max-width: 100%;
   }
 }
 
