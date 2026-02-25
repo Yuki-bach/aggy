@@ -35,10 +35,6 @@ const en: Record<string, string> = {
   "weight.on": "ON",
   "weight.off": "OFF",
 
-  // Loaded info (import screen)
-  "loaded.csv": "Raw Data: {name}  —  {rows} rows / {cols} cols",
-  "loaded.layout": "Layout: {name}  —  {count} column defs",
-
   // Run button
   "run.button": "▶ Run Aggregation",
 

@@ -35,10 +35,6 @@ const ja: Record<string, string> = {
   "weight.on": "ON",
   "weight.off": "OFF",
 
-  // Loaded info (import screen)
-  "loaded.csv": "ローデータ: {name}  —  {rows} 行 / {cols} 列",
-  "loaded.layout": "レイアウト: {name}  —  {count} 列定義",
-
   // Run button
   "run.button": "▶ 集計を実行",
 

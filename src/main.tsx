@@ -85,19 +85,16 @@ function updateLoadedInfo(): void {
   }
   const lines: string[] = [];
   if (currentCsv) {
-    lines.push(
-      t("loaded.csv", {
-        name: currentCsv.fileName,
-        rows: currentCsv.rowCount.toLocaleString(),
-        cols: currentCsv.headers.length,
-      }),
-    );
+    lines.push(currentCsv.fileName);
   }
   if (currentLayout) {
+    lines.push(currentLayout.fileName);
+  }
+  if (currentCsv) {
     lines.push(
-      t("loaded.layout", {
-        name: currentLayout.fileName,
-        count: Object.keys(currentLayout.meta.colTypes).length,
+      t("summary.rows", {
+        rows: currentCsv.rowCount.toLocaleString(),
+        cols: currentCsv.headers.length,
       }),
     );
   }
