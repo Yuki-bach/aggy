@@ -29,18 +29,6 @@ declare global {
   var LanguageModel: LanguageModelStatic | undefined;
 }
 
-// --- Feature Detection ---
-
-export async function isAIAvailable(): Promise<boolean> {
-  try {
-    if (typeof LanguageModel === "undefined") return false;
-    const status = await LanguageModel.availability();
-    return status !== "no";
-  } catch {
-    return false;
-  }
-}
-
 // --- Prompt Payload ---
 
 const MAX_PAYLOAD_CHARS = 3500;
@@ -112,7 +100,6 @@ export async function generateComment(
 ): Promise<string | null> {
   try {
     if (results.length === 0) return null;
-    if (!(await isAIAvailable())) return null;
 
     const locale = getLocale();
     const payload = buildPromptPayload(results, weightCol, layoutMeta);

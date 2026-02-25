@@ -1,15 +1,16 @@
 import type { AggResult } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
-import { isAIAvailable, generateComment } from "../../lib/aiComment";
+import { generateComment } from "../../lib/aiComment";
 import { t } from "../../lib/i18n";
 import { escHtml } from "../shared/escHtml";
+import { isAICommentEnabled } from "../shared/SettingsModal";
 
 export async function showAIBubble(
   results: AggResult[],
   weightCol: string,
   layoutMeta?: LayoutMeta,
 ): Promise<void> {
-  if (!(await isAIAvailable())) return;
+  if (!isAICommentEnabled()) return;
 
   // Remove existing bubble if any
   document.querySelector(".ai-bubble")?.remove();
