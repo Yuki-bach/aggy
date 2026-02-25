@@ -4,7 +4,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel } from "../../lib/labelResolver";
 import { t } from "../../lib/i18n";
-import { buildToolbar, buildChartOpts, type PctDirection } from "./Toolbar";
+import { buildToolbar, buildViewOpts, type PctDirection } from "./Toolbar";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
 import { showAIBubble } from "./AIBubble";
@@ -47,47 +47,40 @@ export function renderResults(
     return subs.length > 1;
   });
 
-  const hdr = buildToolbar(
-    hasCross,
-    results,
-    weightCol,
-    currentViewMode,
-    pctDirection,
-    layoutMeta,
-    {
-      onViewModeChange: (mode) => {
-        currentViewMode = mode;
-        reRender();
-      },
-      onSaChartTypeChange: (type) => {
-        saChartType = type;
-        reRender();
-      },
-      onMaChartTypeChange: (type) => {
-        maChartType = type;
-        reRender();
-      },
-      onPctDirectionChange: (dir) => {
-        pctDirection = dir;
-        reRender();
-      },
+  const callbacks = {
+    onViewModeChange: (mode: typeof currentViewMode) => {
+      currentViewMode = mode;
+      reRender();
     },
-  );
+    onSaChartTypeChange: (type: typeof saChartType) => {
+      saChartType = type;
+      reRender();
+    },
+    onMaChartTypeChange: (type: typeof maChartType) => {
+      maChartType = type;
+      reRender();
+    },
+    onPctDirectionChange: (dir: PctDirection) => {
+      pctDirection = dir;
+      reRender();
+    },
+  };
+
+  const hdr = buildToolbar(hasCross, results, weightCol, currentViewMode, layoutMeta, callbacks);
   area.appendChild(hdr);
 
-  // Chart type selector (2nd row)
-  if (currentViewMode === "chart") {
-    const chartOpts = buildChartOpts(saChartType, maChartType, {
-      onSaChartTypeChange: (type) => {
-        saChartType = type;
-        reRender();
-      },
-      onMaChartTypeChange: (type) => {
-        maChartType = type;
-        reRender();
-      },
-    });
-    area.appendChild(chartOpts);
+  // 2nd row: chart type selects (chart mode) or pct direction toggle (table + cross mode)
+  const showViewOpts = currentViewMode === "chart" || (currentViewMode === "table" && hasCross);
+  if (showViewOpts) {
+    const viewOpts = buildViewOpts(
+      currentViewMode,
+      hasCross,
+      pctDirection,
+      saChartType,
+      maChartType,
+      callbacks,
+    );
+    area.appendChild(viewOpts);
   }
 
   // Render content

@@ -925,21 +925,28 @@ select.weight-col-select:focus {
   border-color: var(--accent);
 }
 
-/* Chart Options (2nd row below header) */
-.chart-opts {
+/* View Options (2nd row below header: chart type / pct direction) */
+.view-opts {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-4);
   font-size: var(--text-sm);
   color: var(--text-secondary);
   margin-bottom: var(--space-4);
 }
 
-.chart-opts label {
+.view-opts label {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   white-space: nowrap;
+}
+
+.view-opts .view-toggle-btn {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
+  min-height: 28px;
 }
 
 .chart-type-select {

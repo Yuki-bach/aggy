@@ -20,7 +20,6 @@ interface ToolbarProps {
   results: AggResult[];
   weightCol: string;
   currentViewMode: ViewMode;
-  currentPctDirection: PctDirection;
   layoutMeta: LayoutMeta | undefined;
   callbacks: ToolbarCallbacks;
 }
@@ -30,7 +29,6 @@ function Toolbar({
   results,
   weightCol,
   currentViewMode,
-  currentPctDirection,
   layoutMeta,
   callbacks,
 }: ToolbarProps) {
@@ -61,28 +59,6 @@ function Toolbar({
         </button>
       </div>
 
-      {/* Pct direction toggle (cross-tab table mode only) */}
-      {hasCross && currentViewMode === "table" && (
-        <div class="view-toggle">
-          <button
-            class={`view-toggle-btn${currentPctDirection === "vertical" ? " active" : ""}`}
-            onClick={() =>
-              currentPctDirection !== "vertical" && callbacks.onPctDirectionChange("vertical")
-            }
-          >
-            {t("result.pct.vertical")}
-          </button>
-          <button
-            class={`view-toggle-btn${currentPctDirection === "horizontal" ? " active" : ""}`}
-            onClick={() =>
-              currentPctDirection !== "horizontal" && callbacks.onPctDirectionChange("horizontal")
-            }
-          >
-            {t("result.pct.horizontal")}
-          </button>
-        </div>
-      )}
-
       {/* CSV export */}
       <button class="csv-export-btn" onClick={() => downloadAllCSV(results, weightCol, layoutMeta)}>
         {t("result.csv.export")}
@@ -91,10 +67,16 @@ function Toolbar({
   );
 }
 
-interface ChartOptsProps {
+interface ViewOptsProps {
+  currentViewMode: ViewMode;
+  hasCross: boolean;
+  currentPctDirection: PctDirection;
   saChartType: GtChartType;
   maChartType: GtChartType;
-  callbacks: Pick<ToolbarCallbacks, "onSaChartTypeChange" | "onMaChartTypeChange">;
+  callbacks: Pick<
+    ToolbarCallbacks,
+    "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange"
+  >;
 }
 
 function ChartTypeSelect({
@@ -122,11 +104,50 @@ function ChartTypeSelect({
   );
 }
 
-function ChartOpts({ saChartType, maChartType, callbacks }: ChartOptsProps) {
+function ViewOpts({
+  currentViewMode,
+  hasCross,
+  currentPctDirection,
+  saChartType,
+  maChartType,
+  callbacks,
+}: ViewOptsProps) {
   return (
-    <div class="chart-opts">
-      <ChartTypeSelect label="SA:" value={saChartType} onChange={callbacks.onSaChartTypeChange} />
-      <ChartTypeSelect label="MA:" value={maChartType} onChange={callbacks.onMaChartTypeChange} />
+    <div class="view-opts">
+      {currentViewMode === "chart" && (
+        <>
+          <ChartTypeSelect
+            label="SA:"
+            value={saChartType}
+            onChange={callbacks.onSaChartTypeChange}
+          />
+          <ChartTypeSelect
+            label="MA:"
+            value={maChartType}
+            onChange={callbacks.onMaChartTypeChange}
+          />
+        </>
+      )}
+      {currentViewMode === "table" && hasCross && (
+        <div class="view-toggle">
+          <button
+            class={`view-toggle-btn${currentPctDirection === "vertical" ? " active" : ""}`}
+            onClick={() =>
+              currentPctDirection !== "vertical" && callbacks.onPctDirectionChange("vertical")
+            }
+          >
+            {t("result.pct.vertical")}
+          </button>
+          <button
+            class={`view-toggle-btn${currentPctDirection === "horizontal" ? " active" : ""}`}
+            onClick={() =>
+              currentPctDirection !== "horizontal" && callbacks.onPctDirectionChange("horizontal")
+            }
+          >
+            {t("result.pct.horizontal")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -137,7 +158,6 @@ export function buildToolbar(
   results: AggResult[],
   weightCol: string,
   currentViewMode: ViewMode,
-  currentPctDirection: PctDirection,
   layoutMeta: LayoutMeta | undefined,
   callbacks: ToolbarCallbacks,
 ): HTMLDivElement {
@@ -148,7 +168,6 @@ export function buildToolbar(
       results={results}
       weightCol={weightCol}
       currentViewMode={currentViewMode}
-      currentPctDirection={currentPctDirection}
       layoutMeta={layoutMeta}
       callbacks={callbacks}
     />,
@@ -157,15 +176,28 @@ export function buildToolbar(
   return container;
 }
 
-/** Bridge: render ChartOpts into a container div for vanilla DOM callers */
-export function buildChartOpts(
+/** Bridge: render ViewOpts into a container div for vanilla DOM callers */
+export function buildViewOpts(
+  currentViewMode: ViewMode,
+  hasCross: boolean,
+  currentPctDirection: PctDirection,
   saChartType: GtChartType,
   maChartType: GtChartType,
-  callbacks: Pick<ToolbarCallbacks, "onSaChartTypeChange" | "onMaChartTypeChange">,
+  callbacks: Pick<
+    ToolbarCallbacks,
+    "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange"
+  >,
 ): HTMLDivElement {
   const container = document.createElement("div");
   render(
-    <ChartOpts saChartType={saChartType} maChartType={maChartType} callbacks={callbacks} />,
+    <ViewOpts
+      currentViewMode={currentViewMode}
+      hasCross={hasCross}
+      currentPctDirection={currentPctDirection}
+      saChartType={saChartType}
+      maChartType={maChartType}
+      callbacks={callbacks}
+    />,
     container,
   );
   return container;
