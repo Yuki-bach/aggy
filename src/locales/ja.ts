@@ -76,6 +76,13 @@ const ja: Record<string, string> = {
   "ai.header": "✨ AI分析",
   "ai.loading": "分析中...",
 
+  // AI Prompt
+  "ai.systemPrompt": "あなたはアンケート分析の専門家です。回答は必ず日本語で2〜3文以内にしてください。",
+  "ai.userPrompt":
+    "上記の集計結果の注目すべき傾向を2〜3文で短く述べてください。箇条書き・見出し・提案・注意点は不要です。",
+  "ai.weight": "※ウェイト列: {col}",
+  "ai.moreItems": "...他{count}件",
+
   // Errors
   "error.csv.load": "ローデータファイルの読み込みエラー: {msg}",
   "error.layout.load": "レイアウトファイルの読み込みエラー: {msg}",

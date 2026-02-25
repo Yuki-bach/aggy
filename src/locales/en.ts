@@ -76,6 +76,13 @@ const en: Record<string, string> = {
   "ai.header": "✨ AI Analysis",
   "ai.loading": "Analyzing...",
 
+  // AI Prompt
+  "ai.systemPrompt": "You are a survey analysis expert. Keep your response to 2-3 sentences in English.",
+  "ai.userPrompt":
+    "Briefly describe notable trends in the aggregation results above in 2-3 sentences. No bullet points, headings, suggestions, or caveats.",
+  "ai.weight": "* Weight column: {col}",
+  "ai.moreItems": "...{count} more",
+
   // Errors
   "error.csv.load": "Error loading raw data file: {msg}",
   "error.layout.load": "Error loading layout file: {msg}",

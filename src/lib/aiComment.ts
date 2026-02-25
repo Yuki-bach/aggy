@@ -2,7 +2,7 @@
 
 import type { AggResult } from "./aggregate";
 import type { LayoutMeta } from "./layout";
-import { getLocale } from "./i18n";
+import { getLocale, t } from "./i18n";
 
 // Chrome Prompt API type declarations
 
@@ -43,15 +43,6 @@ export async function isAIAvailable(): Promise<boolean> {
 
 // --- Prompt Payload ---
 
-const SYSTEM_PROMPTS: Record<string, string> = {
-  ja: "あなたはアンケート分析の専門家です。回答は必ず日本語で2〜3文以内にしてください。",
-  en: "You are a survey analysis expert. Keep your response to 2-3 sentences in English.",
-};
-
-const USER_PROMPTS: Record<string, string> = {
-  ja: "上記の集計結果の注目すべき傾向を2〜3文で短く述べてください。箇条書き・見出し・提案・注意点は不要です。",
-  en: "Briefly describe notable trends in the aggregation results above in 2-3 sentences. No bullet points, headings, suggestions, or caveats.",
-};
 
 const MAX_PAYLOAD_CHARS = 3500;
 
@@ -70,11 +61,10 @@ function summarizeResults(
   weightCol: string,
   layoutMeta: LayoutMeta | undefined,
   topN: number,
-  locale: string,
 ): string {
   const lines: string[] = [];
   if (weightCol) {
-    lines.push(locale === "ja" ? `※ウェイト列: ${weightCol}` : `* Weight column: ${weightCol}`);
+    lines.push(t("ai.weight", { col: weightCol }));
   }
 
   for (const res of results) {
@@ -93,12 +83,12 @@ function summarizeResults(
     });
 
     const rest = sorted.length - topN;
-    if (rest > 0) items.push(locale === "ja" ? `...他${rest}件` : `...${rest} more`);
+    if (rest > 0) items.push(t("ai.moreItems", { count: rest }));
     lines.push("  " + items.join(", "));
   }
 
   lines.push("");
-  lines.push(USER_PROMPTS[locale] ?? USER_PROMPTS["en"]);
+  lines.push(t("ai.userPrompt"));
   return lines.join("\n");
 }
 
@@ -107,12 +97,11 @@ export function buildPromptPayload(
   weightCol: string,
   layoutMeta?: LayoutMeta,
 ): string {
-  const locale = getLocale();
   for (const topN of [5, 3, 2]) {
-    const text = summarizeResults(results, weightCol, layoutMeta, topN, locale);
+    const text = summarizeResults(results, weightCol, layoutMeta, topN);
     if (text.length <= MAX_PAYLOAD_CHARS) return text;
   }
-  return summarizeResults(results.slice(0, 20), weightCol, layoutMeta, 2, locale);
+  return summarizeResults(results.slice(0, 20), weightCol, layoutMeta, 2);
 }
 
 // --- Comment Generation ---
@@ -129,7 +118,7 @@ export async function generateComment(
     const locale = getLocale();
     const payload = buildPromptPayload(results, weightCol, layoutMeta);
     const session = await LanguageModel!.create({
-      systemPrompt: SYSTEM_PROMPTS[locale] ?? SYSTEM_PROMPTS["en"],
+      systemPrompt: t("ai.systemPrompt"),
       expectedInputs: [{ type: "text", languages: [locale] }],
       expectedOutputs: [{ type: "text", languages: [locale] }],
     });
