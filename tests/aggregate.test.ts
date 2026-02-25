@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { aggregate, type Query, type Cell } from "../src/lib/aggregate";
+import { aggregate, type Query, type Cell, crossSub } from "../src/lib/aggregate";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -147,7 +147,7 @@ describe("aggregate - 重みなし", () => {
       // クロスヘッダーのn: q1=1かつq2有効 の行数
       // q1=1 かつ q2有効: 行1,3,5,7,10 (行12はq2空で除外) = 5行
       // q1=1 でq2=1: 行7,10 = 2件
-      const crossCell = findCell(r.cells, "1", "1"); // q2=1, q1=1
+      const crossCell = findCell(r.cells, "1", crossSub("q1", "1")); // q2=1, q1=1
       expect(crossCell).toBeDefined();
       expect(crossCell!.count).toBe(2);
     });
@@ -171,7 +171,7 @@ describe("aggregate - 重みなし", () => {
       // q1有効: 行1-13 (行14=空除外) = 13行
       // q1=1 の行: 行1,3,5,7,10,12
       // q1=1 かつ q3_1='1': 行1,3 = 2件
-      const cell = findCell(r.cells, "1", "q3_1");
+      const cell = findCell(r.cells, "1", crossSub("q3", "q3_1"));
       expect(cell).toBeDefined();
       expect(cell!.count).toBe(2);
     });
@@ -192,12 +192,12 @@ describe("aggregate - 重みなし", () => {
       // クロスヘッダー: q1の各値ごとのn（全survey行でq1有効な行のweight集計）
       // q1=1の行: 行1,3,5,7,10,12
       // q3_1='1' かつ q1=1: 行1,3 = 2件
-      const cell = findCell(r.cells, "q3_1", "1");
+      const cell = findCell(r.cells, "q3_1", crossSub("q1", "1"));
       expect(cell).toBeDefined();
       expect(cell!.count).toBe(2);
 
       // q3_2='1' かつ q1=1: 行3(q3_2=1,q1=1), 行5(q3_2=1,q1=1), 行7(q3_2=1,q1=1) = 3件
-      const cell2 = findCell(r.cells, "q3_2", "1");
+      const cell2 = findCell(r.cells, "q3_2", crossSub("q1", "1"));
       expect(cell2).toBeDefined();
       expect(cell2!.count).toBe(3);
     });
@@ -216,12 +216,12 @@ describe("aggregate - 重みなし", () => {
 
       const r = results[0];
       // q3_1='1' かつ q3_1='1': 行1,3,4,6,8,9,14 = 7件
-      const cell = findCell(r.cells, "q3_1", "q3_1");
+      const cell = findCell(r.cells, "q3_1", crossSub("q3", "q3_1"));
       expect(cell).toBeDefined();
       expect(cell!.count).toBe(7);
 
       // q3_1='1' かつ q3_2='1': 行3,9 = 2件
-      const cell12 = findCell(r.cells, "q3_1", "q3_2");
+      const cell12 = findCell(r.cells, "q3_1", crossSub("q3", "q3_2"));
       expect(cell12).toBeDefined();
       expect(cell12!.count).toBe(2);
     });

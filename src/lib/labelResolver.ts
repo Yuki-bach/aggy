@@ -1,18 +1,16 @@
-/** ラベル解決ユーティリティ（ResultTable / ChartRenderer 共有） */
+/** Label resolution utility (shared by ResultTable / ChartRenderer) */
 
 import type { CrossableQuestion } from "./aggregate";
+import { parseCrossSub } from "./aggregate";
 import type { LayoutMeta } from "./layout";
 import { NA_VALUE } from "./aggregator";
 
-/** 設問ラベルを解決する。なければ列名をそのまま返す */
+/** Resolve question label; falls back to column name */
 export function resolveQuestionLabel(col: string, meta?: LayoutMeta): string {
   return meta?.questionLabels[col] ?? col;
 }
 
-/** 選択肢ラベルを解決する
- *  SA: valueLabels[col][code]
- *  MA: valueLabels[colName]["1"]（colName = row.label）
- */
+/** Resolve option label (SA: valueLabels[col][code], MA: valueLabels[colName]["1"]) */
 export function resolveValueLabel(
   type: "SA" | "MA",
   col: string,
@@ -28,23 +26,29 @@ export function resolveValueLabel(
   }
 }
 
-/** クロス軸ヘッダーのラベルを解決する */
+/** Resolve cross-axis header label (sub values are prefixed as "axisKey\x01rawValue") */
 export function resolveSubLabel(
   subLabel: string,
   meta?: LayoutMeta,
-  crossCols?: CrossableQuestion[],
+  _crossCols?: CrossableQuestion[],
 ): string {
   if (subLabel === NA_VALUE) return "無回答";
+
+  const parsed = parseCrossSub(subLabel);
+  if (parsed) {
+    const { axisKey, rawValue } = parsed;
+    if (rawValue === NA_VALUE) return "無回答";
+    if (!meta) return rawValue;
+    // MA axis: rawValue is column name → valueLabels[rawValue]["1"]
+    const maLabel = meta.valueLabels[rawValue]?.["1"];
+    if (maLabel) return maLabel;
+    // SA axis: rawValue is value code → valueLabels[axisKey][rawValue]
+    return meta.valueLabels[axisKey]?.[rawValue] ?? rawValue;
+  }
+
+  // No prefix (backwards compatibility)
   if (!meta) return subLabel;
   const maLabel = meta.valueLabels[subLabel]?.["1"];
   if (maLabel) return maLabel;
-  if (crossCols) {
-    for (const q of crossCols) {
-      if (q.type === "SA") {
-        const label = meta.valueLabels[q.column]?.[subLabel];
-        if (label) return label;
-      }
-    }
-  }
   return subLabel;
 }

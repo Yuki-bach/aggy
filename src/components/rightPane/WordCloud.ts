@@ -1,18 +1,12 @@
-/** FA ワードクラウド カード描画 */
+/** FA word cloud card rendering */
 
-import type { FAResult } from "../lib/aggregate";
-import type { LayoutMeta } from "../lib/layout";
+import type { FAResult } from "../../lib/aggregate";
+import type { LayoutMeta } from "../../lib/layout";
+import { resolveQuestionLabel } from "../../lib/labelResolver";
+import { escHtml } from "../shared/escHtml";
 import WordCloud from "wordcloud2/src/wordcloud2.js";
 
-function escHtml(str: string): string {
-  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function resolveQuestionLabel(col: string, meta?: LayoutMeta): string {
-  return meta?.questionLabels[col] ?? col;
-}
-
-/** CSS変数からワードクラウド用の色パレットを解決する */
+/** Resolve word cloud color palette from CSS variables */
 function resolveColors(): string[] {
   const vars = [
     "--color-primary-700",
@@ -49,7 +43,7 @@ export function buildWordCloudCard(
     </div>
   `;
 
-  // ワードクラウド Canvas
+  // Word cloud canvas
   const canvasWrap = document.createElement("div");
   canvasWrap.className = "wordcloud-container";
 
@@ -66,7 +60,7 @@ export function buildWordCloudCard(
   canvasWrap.appendChild(canvas);
   card.appendChild(canvasWrap);
 
-  // DOM に追加された後に描画（Canvas が可視状態でないと wordcloud2 が動かない）
+  // Render after DOM insertion (wordcloud2 requires visible canvas)
   requestAnimationFrame(() => {
     const colors = resolveColors();
     const maxCount = result.words[0].count;
@@ -86,7 +80,7 @@ export function buildWordCloudCard(
     });
   });
 
-  // 折りたたみ頻度テーブル
+  // Collapsible frequency table
   const details = document.createElement("details");
   details.className = "fa-freq-details";
   const summary = document.createElement("summary");

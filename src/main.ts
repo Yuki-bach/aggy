@@ -1,6 +1,6 @@
-import { initCsvInput, initLayoutInput } from "./components/FileInput";
-import { initCrossConfig, getCrossColsSelected } from "./components/CrossConfig";
-import { renderResults } from "./components/ResultTable";
+import { initCsvInput, initLayoutInput } from "./components/leftPane/FileInput";
+import { initCrossConfig, getCrossColsSelected } from "./components/leftPane/CrossConfig";
+import { renderResults } from "./components/rightPane/ResultView";
 import { initDuckDB, loadCSV, runDuckDBAggregation } from "./lib/duckdbBridge";
 import {
   parseLayout,
@@ -10,12 +10,27 @@ import {
   type LayoutMeta,
 } from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
-import { initSavedFiles, refreshList } from "./components/SavedFiles";
+import { initSavedFiles, refreshList } from "./components/leftPane/SavedFiles";
+import { initGettingStarted } from "./components/shared/GettingStarted";
+import { showProceedButton } from "./components/screens/import/ImportScreen";
+import {
+  renderDataSummary,
+  renderWeightInfo,
+} from "./components/screens/aggregation/AggregationScreen";
 
-// 現在読み込み済みの CSV / Layout データ
+// Currently loaded CSV / Layout data
 let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null =
   null;
 let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
+
+// 画面切り替え
+function switchScreen(screen: "import" | "aggregation"): void {
+  const main = document.querySelector("main")!;
+  main.dataset.screen = screen;
+
+  const backBtn = document.getElementById("back-btn")!;
+  backBtn.classList.toggle("hidden", screen === "import");
+}
 
 // テーマ切り替え
 function initThemeToggle(): void {
@@ -43,13 +58,14 @@ function initThemeToggle(): void {
 }
 
 initThemeToggle();
+initGettingStarted();
 
-// DuckDB Wasm をバックグラウンドで初期化開始
+// Start DuckDB Wasm initialization in the background
 initDuckDB().catch(() => {
-  // エラーはduckdbBridge内でUI表示済み
+  // Error already displayed in UI by duckdbBridge
 });
 
-// CSV + レイアウト両方揃ったらUI初期化
+// Initialize UI when both CSV and layout are loaded
 function initAfterBothLoaded(): void {
   if (!currentCsv || !currentLayout) return;
 
@@ -59,9 +75,32 @@ function initAfterBothLoaded(): void {
   document.getElementById("cross-config-section")!.classList.remove("hidden");
   document.getElementById("run-btn")!.classList.remove("hidden");
   (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
+
+  // インポート画面: 「集計画面へ進む」ボタンを表示
+  showProceedButton();
+
+  // 読み込み済みデータ情報を表示（インポート画面用）
+  updateLoadedInfo();
+
+  // 集計画面: データ概要・ウェイト情報を描画
+  renderDataSummary(
+    {
+      fileName: currentCsv.fileName,
+      rowCount: currentCsv.rowCount,
+      headers: currentCsv.headers,
+    },
+    {
+      fileName: currentLayout.fileName,
+      colCount: Object.keys(currentLayout.meta.colTypes).length,
+    },
+  );
+
+  const weightCol =
+    Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+  renderWeightInfo(weightCol);
 }
 
-// 読み込み済みデータ情報を表示
+// 読み込み済みデータ情報を表示（インポート画面用）
 function updateLoadedInfo(): void {
   const el = document.getElementById("loaded-data-info")!;
   if (!currentCsv && !currentLayout) {
@@ -71,19 +110,19 @@ function updateLoadedInfo(): void {
   const lines: string[] = [];
   if (currentCsv) {
     lines.push(
-      `CSV: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`,
+      `ローデータ: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`,
     );
   }
   if (currentLayout) {
     lines.push(
-      `JSON: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`,
+      `レイアウト: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`,
     );
   }
   el.textContent = lines.join("\n");
   el.classList.remove("hidden");
 }
 
-// OPFS自動保存（CSV+レイアウト両方揃ったとき）
+// Auto-save to OPFS when both CSV and layout are loaded
 async function trySaveToOPFS(): Promise<void> {
   if (!currentCsv || !currentLayout) return;
   try {
@@ -99,7 +138,7 @@ async function trySaveToOPFS(): Promise<void> {
   }
 }
 
-// CSV読み込みハンドラ: DuckDBにロードしてheaders/rowCountを取得
+// CSV load handler: load into DuckDB and get headers/rowCount
 async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
   try {
     const result = await loadCSV(csvText);
@@ -109,11 +148,11 @@ async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
     initAfterBothLoaded();
     trySaveToOPFS();
   } catch (e) {
-    showError("CSV読み込みエラー: " + (e as Error).message);
+    showError("ローデータファイルの読み込みエラー: " + (e as Error).message);
   }
 }
 
-// レイアウト読み込みハンドラ
+// Layout load handler
 function onLayoutLoaded(
   _layout: Layout,
   meta: LayoutMeta,
@@ -127,7 +166,7 @@ function onLayoutLoaded(
   trySaveToOPFS();
 }
 
-// 保存データから読み込み（OPFS再保存は不要なのでtrySaveToOPFSを呼ばない）
+// Load from saved data (skip OPFS re-save)
 async function loadFromSaved(folderId: string): Promise<void> {
   try {
     const { csvText, csvName, layoutJson, layoutName } = await loadSaved(folderId);
@@ -146,7 +185,7 @@ async function loadFromSaved(folderId: string): Promise<void> {
     updateLoadedInfo();
     initAfterBothLoaded();
   } catch (e) {
-    showError("保存データの読み込みエラー: " + (e as Error).message);
+    showError("履歴データの読み込みエラー: " + (e as Error).message);
   }
 }
 
@@ -160,12 +199,12 @@ function showError(msg: string): void {
   }
 }
 
-// 集計実行
+// Run aggregation
 async function runAggregation(): Promise<void> {
   if (!currentCsv || !currentLayout) return;
   showError("");
 
-  // ウェイト列はレイアウトから自動決定
+  // Weight column auto-determined from layout
   const weightCol =
     Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
   const crossCols = getCrossColsSelected();
@@ -184,7 +223,7 @@ async function runAggregation(): Promise<void> {
   }
 }
 
-// タブ切り替え
+// Tab switching
 const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".load-tab"));
 
 function activateTab(tab: HTMLButtonElement): void {
@@ -200,7 +239,7 @@ function activateTab(tab: HTMLButtonElement): void {
   tab.focus();
 }
 
-// 初期状態: 非アクティブタブを tabIndex=-1 に設定
+// Set inactive tabs to tabIndex=-1
 for (const t of tabs) {
   if (!t.classList.contains("active")) t.tabIndex = -1;
 }
@@ -225,11 +264,20 @@ for (const tab of tabs) {
   });
 }
 
-// イベントバインド
+// Event binding
 initCsvInput(onCSVLoaded, (msg) => showError(msg));
 initLayoutInput(onLayoutLoaded, (msg) => showError(msg));
 initSavedFiles(loadFromSaved);
 
 document.getElementById("run-btn")!.addEventListener("click", () => {
   runAggregation().catch((e) => showError("集計エラー: " + (e as Error).message));
+});
+
+// 画面遷移ボタン
+document.getElementById("proceed-btn")!.addEventListener("click", () => {
+  switchScreen("aggregation");
+});
+
+document.getElementById("back-btn")!.addEventListener("click", () => {
+  switchScreen("import");
 });

@@ -1,9 +1,9 @@
-/** Chrome Built-in AI (Prompt API) によるAI分析コメント生成 */
+/** AI analysis comment generation via Chrome Built-in AI (Prompt API) */
 
 import type { AggResult } from "./aggregate";
 import type { LayoutMeta } from "./layout";
 
-// --- Chrome Prompt API 型宣言 ---
+// Chrome Prompt API type declarations
 
 declare global {
   interface LanguageModelExpectedIO {

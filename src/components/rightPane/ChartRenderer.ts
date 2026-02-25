@@ -1,18 +1,15 @@
-/** チャート描画コンポーネント */
+/** Chart rendering component */
 
-import type { AggResult, CrossableQuestion } from "../lib/aggregate";
-import type { LayoutMeta } from "../lib/layout";
-import { pivot } from "../lib/pivot";
-import { Chart, getSeriesColor, getThemeColors } from "../lib/chartConfig";
-import {
-  resolveQuestionLabel,
-  resolveValueLabel,
-  resolveSubLabel,
-} from "../lib/labelResolver";
+import type { AggResult, CrossableQuestion } from "../../lib/aggregate";
+import type { LayoutMeta } from "../../lib/layout";
+import { pivot } from "../../lib/pivot";
+import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
+import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labelResolver";
+import { escHtml } from "../shared/escHtml";
 
 import type { ChartConfiguration } from "chart.js";
 
-/** アクティブなChart.jsインスタンスを追跡（メモリリーク防止） */
+/** Track active Chart.js instances to prevent memory leaks */
 const activeCharts: Chart[] = [];
 
 export function destroyAllCharts(): void {
@@ -34,7 +31,6 @@ export function renderChartCard(
   const wrapper = document.createElement("div");
   wrapper.className = "chart-card";
 
-  // ヘッダー
   const head = document.createElement("div");
   head.className = "gt-table-head";
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
@@ -69,10 +65,6 @@ export function renderChartCard(
   return wrapper;
 }
 
-function escHtml(str: string): string {
-  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
 function buildGtChart(
   canvas: HTMLCanvasElement,
   pv: ReturnType<typeof pivot>,
@@ -86,7 +78,7 @@ function buildGtChart(
   const data = mains.map((m) => lookup.get(`${m}\0GT`)?.pct ?? 0);
   const colors = mains.map((_, i) => getSeriesColor(i));
 
-  // 帯グラフ: 1本の横棒に各選択肢をセグメントとして表示
+  // Stacked bar: each option as a segment in one horizontal bar
   if (chartType === "obi") {
     const datasets = mains.map((m, i) => ({
       label: resolveValueLabel(res.type, res.question, m, layoutMeta),
@@ -177,7 +169,7 @@ function buildCrossChart(
   const { mains, subs, lookup } = pv;
   const crossSubs = subs.filter((s) => s.label !== "GT");
 
-  // 帯グラフ: クロス値ごとに1本ずつ帯を表示
+  // Stacked bar: one bar per cross value
   if (gtChartType === "obi") {
     const subLabels = crossSubs.map((s) => resolveSubLabel(s.label, layoutMeta, crossCols));
     const datasets = mains.map((m, i) => ({
@@ -218,7 +210,7 @@ function buildCrossChart(
     } as ChartConfiguration);
   }
 
-  // 横棒 / 縦棒 → 集合棒グラフ（方向はGT選択に合わせる）
+  // Clustered bar chart (direction matches GT selection)
   const isHorizontal = gtChartType === "bar-h";
   const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
 

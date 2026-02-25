@@ -1,15 +1,13 @@
-/** DuckDB SQL集計ロジック */
+/** DuckDB SQL aggregation logic */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import { Aggregator, fetchCrossHeaders } from "./aggregator";
 import { aggregateFA } from "./fa/faAggregator";
 
-// --- 集計結果の型定義 ---
-
 export interface Cell {
-  main: string; // 選択肢ラベル（集計対象の設問値）
-  sub: string; // "GT" or クロス集計軸の値 ("男", "女", ...) or MAカラム名
-  n: number; // その sub の母数
+  main: string; // Option label (aggregation target value)
+  sub: string; // "GT" or cross-tab axis value or MA column name
+  n: number; // Denominator for this sub
   count: number;
   pct: number;
 }
@@ -20,7 +18,7 @@ export interface AggResult {
   cells: Cell[];
 }
 
-// --- FA集計結果の型定義 ---
+// --- FA result types ---
 
 export interface WordFreq {
   word: string;
@@ -34,22 +32,22 @@ export interface FAResult {
   words: WordFreq[];
 }
 
-/** SA/MA/FA すべての集計結果を含む union 型 */
+/** Union type for all result types (SA/MA/FA) */
 export type ResultItem = AggResult | FAResult;
 
-// --- 集計 payload ---
+// --- Question definitions ---
 
 export type QuestionDef = SAQuestion | MAQuestion | FAQuestion;
 
 interface SAQuestion {
   type: "SA";
-  column: string; // カラム名 "q1"
+  column: string;
 }
 
 interface MAQuestion {
   type: "MA";
-  prefix: string; // グループプレフィックス "Q3"
-  columns: string[]; // ["Q3_1","Q3_2","Q3_3"]
+  prefix: string;
+  columns: string[];
 }
 
 export interface FAQuestion {
@@ -68,8 +66,23 @@ export function questionKey(q: QuestionDef): string {
   }
 }
 
-/** クロス集計に使用可能な設問型（FAは除外） */
+/** Question types eligible for cross-tabulation (FA excluded) */
 export type CrossableQuestion = SAQuestion | MAQuestion;
+
+/** Cross sub value separator (separates axis key from raw value) */
+export const CROSS_SEP = "\x01";
+
+/** Build prefixed cross sub value (e.g. "q1\x011") */
+export function crossSub(axisKey: string, rawValue: string): string {
+  return `${axisKey}${CROSS_SEP}${rawValue}`;
+}
+
+/** Parse cross sub value into { axisKey, rawValue }. Returns null for unprefixed values like GT. */
+export function parseCrossSub(sub: string): { axisKey: string; rawValue: string } | null {
+  const idx = sub.indexOf(CROSS_SEP);
+  if (idx < 0) return null;
+  return { axisKey: sub.slice(0, idx), rawValue: sub.slice(idx + 1) };
+}
 
 export interface Query {
   questions: QuestionDef[];
@@ -77,7 +90,7 @@ export interface Query {
   cross_cols: CrossableQuestion[];
 }
 
-/** 集計のエントリポイント。conn上のsurveyビューに対して全設問を集計する */
+/** Aggregation entry point. Aggregates all questions against the survey view. */
 export async function aggregate(
   conn: duckdb.AsyncDuckDBConnection,
   payload: Query,
@@ -85,7 +98,7 @@ export async function aggregate(
   const weightCol = payload.weight_col;
   const crossCols: CrossableQuestion[] = payload.cross_cols ?? [];
 
-  // FA設問はクロス集計対象外なので分離
+  // Separate FA questions (not eligible for cross-tabulation)
   const samaQuestions = payload.questions.filter((q) => q.type !== "FA");
   const faQuestions = payload.questions.filter((q): q is FAQuestion => q.type === "FA");
 

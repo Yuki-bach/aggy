@@ -1,4 +1,4 @@
-import { questionKey, type QuestionDef, type CrossableQuestion } from "../lib/aggregate";
+import { questionKey, type QuestionDef, type CrossableQuestion } from "../../lib/aggregate";
 
 export interface CrossConfigState {
   questions: CrossableQuestion[];
@@ -11,7 +11,7 @@ export function initCrossConfig(
   questions: QuestionDef[],
   questionLabels: Record<string, string>,
 ): void {
-  // FA設問はクロス集計対象外
+  // FA questions are excluded from cross-tabulation
   const crossCandidates = questions.filter(
     (q): q is CrossableQuestion => q.type !== "FA",
   );
