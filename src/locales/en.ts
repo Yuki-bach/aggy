@@ -34,7 +34,9 @@ const en: Record<string, string> = {
   "summary.layout": "Layout",
   "summary.rows": "{rows} rows / {cols} cols",
   "summary.colDefs": "{count} column defs",
-  "weight.label": "⚖ Weight column: {col}",
+  "weight.label": "Weight-back ({col})",
+  "weight.on": "ON",
+  "weight.off": "OFF",
 
   // Loaded info (import screen)
   "loaded.csv": "Raw Data: {name}  —  {rows} rows / {cols} cols",
@@ -54,6 +56,8 @@ const en: Record<string, string> = {
   "result.weight.none": "Unweighted",
   "result.view.table": "Table",
   "result.view.chart": "Chart",
+  "result.pct.vertical": "Col %",
+  "result.pct.horizontal": "Row %",
   "result.csv.export": "Export All CSV",
 
   // Chart type

@@ -1,6 +1,6 @@
 import { initCsvInput, initLayoutInput } from "./components/leftPane/FileInput";
 import { initCrossConfig, getCrossColsSelected } from "./components/leftPane/CrossConfig";
-import { renderResults } from "./components/rightPane/ResultView";
+import { renderResultView } from "./components/rightPane/ResultView";
 import { initDuckDB, loadCSV, runDuckDBAggregation } from "./lib/duckdbBridge";
 import {
   parseLayout,
@@ -17,6 +17,7 @@ import { showProceedButton } from "./components/screens/import/ImportScreen";
 import {
   renderDataSummary,
   renderWeightInfo,
+  getWeightEnabled,
 } from "./components/screens/aggregation/AggregationScreen";
 import { initI18n, onLocaleChange, t } from "./lib/i18n";
 
@@ -207,9 +208,10 @@ async function runAggregation(): Promise<void> {
   if (!currentCsv || !currentLayout) return;
   showError("");
 
-  // Weight column auto-determined from layout
-  const weightCol =
+  // Weight column from layout, gated by toggle
+  const actualWeightCol =
     Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+  const weightCol = getWeightEnabled() ? actualWeightCol : "";
   const crossCols = getCrossColsSelected();
 
   try {
@@ -219,7 +221,7 @@ async function runAggregation(): Promise<void> {
       weight_col: weightCol,
       cross_cols: crossCols,
     });
-    renderResults(results, weightCol, currentCsv.rowCount, currentLayout.meta, crossCols);
+    renderResultView(results, weightCol, currentCsv.rowCount, currentLayout.meta, crossCols);
   } catch (e) {
     showError(t("error.aggregation", { msg: (e as Error).message }));
     console.error(e);

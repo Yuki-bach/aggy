@@ -498,12 +498,18 @@ main[data-screen="import"] ~ .help-btn {
 
 /* --- Weight Info --- */
 .weight-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   font-size: var(--text-base);
-  color: var(--accent2);
-  background: var(--accent2-light);
+  color: var(--text);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.weight-info #weight-toggle {
+  margin-left: auto;
 }
 
 @media (max-width: 768px) {
@@ -919,21 +925,28 @@ select.weight-col-select:focus {
   border-color: var(--accent);
 }
 
-/* Chart Options (2nd row below header) */
-.chart-opts {
+/* View Options (2nd row below header: chart type / pct direction) */
+.view-opts {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-4);
   font-size: var(--text-sm);
   color: var(--text-secondary);
   margin-bottom: var(--space-4);
 }
 
-.chart-opts label {
+.view-opts label {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   white-space: nowrap;
+}
+
+.view-opts .view-toggle-btn {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
+  min-height: 28px;
 }
 
 .chart-type-select {
@@ -1046,6 +1059,11 @@ table.gt th {
   color: var(--text-secondary);
   border-bottom: 2px solid var(--border-strong);
   background: var(--surface2);
+}
+
+table.gt th.cross-corner {
+  background: transparent;
+  border-bottom: none;
 }
 
 table.gt th.right {
@@ -1217,6 +1235,46 @@ table.gt td.cross-pct {
   font-family: var(--font-family-mono);
   color: var(--accent2);
   border-left: 1px solid var(--row-border);
+}
+
+/* Transposed (横%) table */
+table.gt td.transposed-row-label {
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  border-right: 2px solid var(--border-strong);
+}
+
+table.gt td.transposed-gt-label {
+  background: var(--gt-bg);
+  color: var(--accent);
+}
+
+table.gt td.transposed-cross-label {
+  color: var(--accent2);
+}
+
+table.gt td.gt-col {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-family-mono);
+  color: var(--accent);
+  background: var(--gt-bg);
+}
+
+table.gt .transposed-gt-row td {
+  border-bottom: 2px solid var(--border-strong);
+}
+
+table.gt td.transposed-group-header {
+  background: var(--cross-bg);
+  color: var(--accent2);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--border-strong);
+  border-top: 2px solid var(--border-strong);
 }
 
 /* 複数クロス軸のグループ境界線 */

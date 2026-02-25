@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
+    "@preact/preset-vite": "^2.10.3",
     "chart.js": "^4.5.1",
+    "preact": "^10.28.4",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },
