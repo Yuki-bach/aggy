@@ -6,17 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Aggy is a browser-based survey raw-data aggregation tool (アンケートローデータ集計システム). Users upload a CSV of survey responses and a JSON layout file, then run GT (Grand Total) and cross-tabulation — all client-side using DuckDB Wasm for SQL-based aggregation.
 
-Tech: TypeScript (strict), Vite, Preact (JSX), DuckDB Wasm, plain CSS.
+Tech: TypeScript (strict), Vite, Preact (JSX), DuckDB Wasm, Tailwind CSS v4.
 
 ## Commands
 
 ```bash
-npm run dev        # Start Vite dev server (sets COOP/COEP headers for SharedArrayBuffer)
-npm run build      # Type-check (tsc --noEmit) + vite build
-npm run preview    # Serve dist/ locally
+npm run dev        # Vite dev server (COOP/COEP headers for SharedArrayBuffer)
+npm run build      # tsc + vite build
+npm run check      # fmt:check + lint + tsc --noEmit (CI validation)
+npm run test       # vitest run
+npm run lint       # oxlint
+npm run lint:fix   # oxlint --fix
+npm run fmt        # oxfmt (format)
+npm run fmt:check  # oxfmt --check
 ```
-
-No test framework is configured. Type checking via `tsc --noEmit` is the only validation step.
 
 ## Architecture
 
@@ -56,9 +59,10 @@ interface Cell { main: string; sub: string; n: number; count: number; pct: numbe
 - Component initializers: `init*`; DOM renderers: `render*`; Preact components: PascalCase functions
 - Module-level variables as app state (no state management library); migrating toward hooks
 - UI language is Japanese
+- Formatting: oxfmt; Linting: oxlint; Testing: vitest
 
 ## Vite Config Notes
 
 DuckDB Wasm requires `SharedArrayBuffer`, so COOP/COEP headers are set in both `server.headers` and `preview.headers`. DuckDB Wasm is excluded from Vite's dependency pre-bundling (`optimizeDeps.exclude`).
 
-`@preact/preset-vite` handles JSX transform; `tsconfig.json` has `jsxImportSource: "preact"`.
+`@preact/preset-vite` handles JSX transform; `tsconfig.json` has `jsxImportSource: "preact"`. Tailwind CSS v4 runs as a Vite plugin.
