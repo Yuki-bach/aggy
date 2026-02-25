@@ -1,6 +1,6 @@
 import { initCsvInput, initLayoutInput } from "./components/leftPane/FileInput";
 import { initCrossConfig, getCrossColsSelected } from "./components/leftPane/CrossConfig";
-import { renderResults } from "./components/rightPane/ResultView";
+import { renderResultView } from "./components/rightPane/ResultView";
 import { initDuckDB, loadCSV, runDuckDBAggregation } from "./lib/duckdbBridge";
 import {
   parseLayout,
@@ -221,7 +221,7 @@ async function runAggregation(): Promise<void> {
       weight_col: weightCol,
       cross_cols: crossCols,
     });
-    renderResults(results, weightCol, currentCsv.rowCount, currentLayout.meta, crossCols);
+    renderResultView(results, weightCol, currentCsv.rowCount, currentLayout.meta, crossCols);
   } catch (e) {
     showError(t("error.aggregation", { msg: (e as Error).message }));
     console.error(e);

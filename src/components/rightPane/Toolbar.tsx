@@ -1,14 +1,13 @@
-import { render } from "preact";
 import type { AggResult } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
 import type { GtChartType } from "./ChartRenderer";
 
-type ViewMode = "table" | "chart";
+export type ViewMode = "table" | "chart";
 export type PctDirection = "vertical" | "horizontal";
 
-interface ToolbarCallbacks {
+export interface ToolbarCallbacks {
   onViewModeChange: (mode: ViewMode) => void;
   onSaChartTypeChange: (type: GtChartType) => void;
   onMaChartTypeChange: (type: GtChartType) => void;
@@ -24,7 +23,7 @@ interface ToolbarProps {
   callbacks: ToolbarCallbacks;
 }
 
-function Toolbar({
+export function Toolbar({
   hasCross,
   results,
   weightCol,
@@ -104,7 +103,7 @@ function ChartTypeSelect({
   );
 }
 
-function ViewOpts({
+export function ViewOpts({
   currentViewMode,
   hasCross,
   currentPctDirection,
@@ -150,55 +149,4 @@ function ViewOpts({
       )}
     </div>
   );
-}
-
-/** Bridge: render Toolbar into a container div for vanilla DOM callers */
-export function buildToolbar(
-  hasCross: boolean,
-  results: AggResult[],
-  weightCol: string,
-  currentViewMode: ViewMode,
-  layoutMeta: LayoutMeta | undefined,
-  callbacks: ToolbarCallbacks,
-): HTMLDivElement {
-  const container = document.createElement("div");
-  render(
-    <Toolbar
-      hasCross={hasCross}
-      results={results}
-      weightCol={weightCol}
-      currentViewMode={currentViewMode}
-      layoutMeta={layoutMeta}
-      callbacks={callbacks}
-    />,
-    container,
-  );
-  return container;
-}
-
-/** Bridge: render ViewOpts into a container div for vanilla DOM callers */
-export function buildViewOpts(
-  currentViewMode: ViewMode,
-  hasCross: boolean,
-  currentPctDirection: PctDirection,
-  saChartType: GtChartType,
-  maChartType: GtChartType,
-  callbacks: Pick<
-    ToolbarCallbacks,
-    "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange"
-  >,
-): HTMLDivElement {
-  const container = document.createElement("div");
-  render(
-    <ViewOpts
-      currentViewMode={currentViewMode}
-      hasCross={hasCross}
-      currentPctDirection={currentPctDirection}
-      saChartType={saChartType}
-      maChartType={maChartType}
-      callbacks={callbacks}
-    />,
-    container,
-  );
-  return container;
 }

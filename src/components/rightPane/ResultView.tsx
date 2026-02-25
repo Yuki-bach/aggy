@@ -1,46 +1,29 @@
 import { render } from "preact";
+import { useState } from "preact/hooks";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel } from "../../lib/labelResolver";
 import { t } from "../../lib/i18n";
-import { buildToolbar, buildViewOpts, type PctDirection } from "./Toolbar";
+import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
 import { showAIBubble } from "./AIBubble";
 import { destroyAllCharts, renderChartCard, type GtChartType } from "./ChartRenderer";
 
-// View mode state
-type ViewMode = "table" | "chart";
-let currentViewMode: ViewMode = "table";
-let saChartType: GtChartType = "bar-h";
-let maChartType: GtChartType = "bar-h";
-let pctDirection: PctDirection = "vertical";
+interface ResultViewProps {
+  results: AggResult[];
+  weightCol: string;
+  rawN: number;
+  layoutMeta?: LayoutMeta;
+  crossCols?: QuestionDef[];
+}
 
-// Cached data for re-rendering
-let lastResults: AggResult[] | null = null;
-let lastWeightCol = "";
-let lastRawN = 0;
-let lastLayoutMeta: LayoutMeta | undefined;
-let lastCrossCols: QuestionDef[] | undefined;
-
-export function renderResults(
-  results: AggResult[],
-  weightCol: string,
-  rawN: number,
-  layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
-): void {
-  lastResults = results;
-  lastWeightCol = weightCol;
-  lastRawN = rawN;
-  lastLayoutMeta = layoutMeta;
-  lastCrossCols = crossCols;
-
-  document.getElementById("empty-state")!.classList.add("hidden");
-  const area = document.getElementById("results-area")!;
-  area.classList.remove("hidden");
-  area.innerHTML = "";
+function ResultView({ results, weightCol, layoutMeta, crossCols }: ResultViewProps) {
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [saChartType, setSaChartType] = useState<GtChartType>("bar-h");
+  const [maChartType, setMaChartType] = useState<GtChartType>("bar-h");
+  const [pctDirection, setPctDirection] = useState<PctDirection>("vertical");
 
   const hasCross = results.some((r) => {
     const { subs } = pivot(r.cells);
@@ -48,154 +31,197 @@ export function renderResults(
   });
 
   const callbacks = {
-    onViewModeChange: (mode: typeof currentViewMode) => {
-      currentViewMode = mode;
-      reRender();
-    },
-    onSaChartTypeChange: (type: typeof saChartType) => {
-      saChartType = type;
-      reRender();
-    },
-    onMaChartTypeChange: (type: typeof maChartType) => {
-      maChartType = type;
-      reRender();
-    },
-    onPctDirectionChange: (dir: PctDirection) => {
-      pctDirection = dir;
-      reRender();
-    },
+    onViewModeChange: setViewMode,
+    onSaChartTypeChange: setSaChartType,
+    onMaChartTypeChange: setMaChartType,
+    onPctDirectionChange: setPctDirection,
   };
 
-  const hdr = buildToolbar(hasCross, results, weightCol, currentViewMode, layoutMeta, callbacks);
-  area.appendChild(hdr);
+  const showViewOpts = viewMode === "chart" || (viewMode === "table" && hasCross);
 
-  // 2nd row: chart type selects (chart mode) or pct direction toggle (table + cross mode)
-  const showViewOpts = currentViewMode === "chart" || (currentViewMode === "table" && hasCross);
-  if (showViewOpts) {
-    const viewOpts = buildViewOpts(
-      currentViewMode,
-      hasCross,
-      pctDirection,
-      saChartType,
-      maChartType,
-      callbacks,
-    );
-    area.appendChild(viewOpts);
-  }
-
-  // Render content
-  const grid = document.createElement("div");
-  area.appendChild(grid);
-
-  if (currentViewMode === "chart") {
-    renderChartContent(grid, results, hasCross, layoutMeta, crossCols);
-  } else {
-    renderTableContent(grid, results, weightCol, hasCross, layoutMeta, crossCols);
-  }
-
-  // Generate AI analysis comment asynchronously (non-blocking)
-  showAIBubble(results, weightCol, layoutMeta);
+  return (
+    <>
+      <Toolbar
+        hasCross={hasCross}
+        results={results}
+        weightCol={weightCol}
+        currentViewMode={viewMode}
+        layoutMeta={layoutMeta}
+        callbacks={callbacks}
+      />
+      {showViewOpts && (
+        <ViewOpts
+          currentViewMode={viewMode}
+          hasCross={hasCross}
+          currentPctDirection={pctDirection}
+          saChartType={saChartType}
+          maChartType={maChartType}
+          callbacks={callbacks}
+        />
+      )}
+      {viewMode === "chart" ? (
+        <ChartContent
+          results={results}
+          hasCross={hasCross}
+          saChartType={saChartType}
+          maChartType={maChartType}
+          layoutMeta={layoutMeta}
+          crossCols={crossCols}
+        />
+      ) : (
+        <TableContent
+          results={results}
+          weightCol={weightCol}
+          hasCross={hasCross}
+          pctDirection={pctDirection}
+          layoutMeta={layoutMeta}
+          crossCols={crossCols}
+        />
+      )}
+    </>
+  );
 }
 
-function reRender(): void {
-  if (!lastResults) return;
-  renderResults(lastResults, lastWeightCol, lastRawN, lastLayoutMeta, lastCrossCols);
+// --- Sub-components ---
+
+function ChartContent({
+  results,
+  hasCross,
+  saChartType,
+  maChartType,
+  layoutMeta,
+  crossCols,
+}: {
+  results: AggResult[];
+  hasCross: boolean;
+  saChartType: GtChartType;
+  maChartType: GtChartType;
+  layoutMeta?: LayoutMeta;
+  crossCols?: QuestionDef[];
+}) {
+  return (
+    <div
+      class={hasCross ? "charts-grid cross-mode" : "charts-grid"}
+      ref={(el) => {
+        if (!el) return;
+        destroyAllCharts();
+        el.innerHTML = "";
+        for (const res of results) {
+          const gtType = res.type === "SA" ? saChartType : maChartType;
+          const card = renderChartCard(res, gtType, layoutMeta, crossCols);
+          el.appendChild(card);
+        }
+      }}
+    />
+  );
 }
 
-// Re-render charts on theme change
+function TableContent({
+  results,
+  weightCol,
+  hasCross,
+  pctDirection,
+  layoutMeta,
+  crossCols,
+}: {
+  results: AggResult[];
+  weightCol: string;
+  hasCross: boolean;
+  pctDirection: PctDirection;
+  layoutMeta?: LayoutMeta;
+  crossCols?: QuestionDef[];
+}) {
+  destroyAllCharts();
+
+  const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
+  const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
+
+  return (
+    <div class={hasCross ? "tables-grid cross-mode" : "tables-grid"}>
+      {results.map((res) => {
+        const pv = pivot(res.cells);
+        const isCross = pv.subs.length > 1;
+
+        const gtSub = pv.subs.find((s) => s.label === "GT")!;
+        const nLabel = weightCol
+          ? `n=${gtSub.n.toFixed(1)}${t("n.weighted")}`
+          : `n=${gtSub.n.toLocaleString()}`;
+
+        const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
+        const hasLabel = questionLabel !== res.question;
+
+        return (
+          <div class={isCross ? "gt-table-card has-cross" : "gt-table-card"} key={res.question}>
+            <div class="gt-table-head">
+              <div class="q-header">
+                <span class="q-label">{questionLabel}</span>
+                {hasLabel && <span class="q-key">{res.question}</span>}
+              </div>
+              <span class="q-type">{res.type}</span>
+              <span class="q-n">{nLabel}</span>
+            </div>
+            {isCross ? (
+              <CrossTable
+                res={res}
+                pv={pv}
+                weightCol={weightCol}
+                pctDir={pctDirection}
+                layoutMeta={layoutMeta}
+                crossCols={crossCols}
+              />
+            ) : (
+              <GtTable
+                res={res}
+                pv={pv}
+                weightCol={weightCol}
+                maxPct={maxPct}
+                layoutMeta={layoutMeta}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// --- Theme change re-render ---
+
+let reRenderRef: (() => void) | null = null;
+
 const observer = new MutationObserver(() => {
-  if (currentViewMode === "chart" && lastResults) {
-    reRender();
-  }
+  reRenderRef?.();
 });
 observer.observe(document.documentElement, {
   attributes: true,
   attributeFilter: ["data-theme"],
 });
 
-function renderChartContent(
-  grid: HTMLDivElement,
-  results: AggResult[],
-  hasCross: boolean,
-  layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
-): void {
-  destroyAllCharts();
-  grid.className = hasCross ? "charts-grid cross-mode" : "charts-grid";
+// --- Bridge for imperative callers ---
 
-  results.forEach((res) => {
-    const gtType = res.type === "SA" ? saChartType : maChartType;
-    const card = renderChartCard(res, gtType, layoutMeta, crossCols);
-    grid.appendChild(card);
-  });
-}
-
-function renderTableContent(
-  grid: HTMLDivElement,
+export function renderResultView(
   results: AggResult[],
   weightCol: string,
-  hasCross: boolean,
+  rawN: number,
   layoutMeta?: LayoutMeta,
   crossCols?: QuestionDef[],
 ): void {
-  destroyAllCharts();
-  grid.className = hasCross ? "tables-grid cross-mode" : "tables-grid";
+  document.getElementById("empty-state")!.classList.add("hidden");
+  const area = document.getElementById("results-area")!;
+  area.classList.remove("hidden");
 
-  const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
-  const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
+  reRenderRef = () => renderResultView(results, weightCol, rawN, layoutMeta, crossCols);
 
-  results.forEach((res) => {
-    const pv = pivot(res.cells);
-    const isCross = pv.subs.length > 1;
+  render(
+    <ResultView
+      results={results}
+      weightCol={weightCol}
+      rawN={rawN}
+      layoutMeta={layoutMeta}
+      crossCols={crossCols}
+    />,
+    area,
+  );
 
-    const gtSub = pv.subs.find((s) => s.label === "GT")!;
-    const nLabel = weightCol
-      ? `n=${gtSub.n.toFixed(1)}${t("n.weighted")}`
-      : `n=${gtSub.n.toLocaleString()}`;
-
-    const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
-    const hasLabel = questionLabel !== res.question;
-
-    // Render card with Preact
-    const card = document.createElement("div");
-    card.className = isCross ? "gt-table-card has-cross" : "gt-table-card";
-
-    const headContainer = document.createElement("div");
-    render(
-      <div class="gt-table-head">
-        <div class="q-header">
-          <span class="q-label">{questionLabel}</span>
-          {hasLabel && <span class="q-key">{res.question}</span>}
-        </div>
-        <span class="q-type">{res.type}</span>
-        <span class="q-n">{nLabel}</span>
-      </div>,
-      headContainer,
-    );
-    card.appendChild(headContainer);
-
-    // Table
-    const tableContainer = document.createElement("div");
-    if (isCross) {
-      render(
-        <CrossTable
-          res={res}
-          pv={pv}
-          weightCol={weightCol}
-          pctDir={pctDirection}
-          layoutMeta={layoutMeta}
-          crossCols={crossCols}
-        />,
-        tableContainer,
-      );
-    } else {
-      render(
-        <GtTable res={res} pv={pv} weightCol={weightCol} maxPct={maxPct} layoutMeta={layoutMeta} />,
-        tableContainer,
-      );
-    }
-    card.appendChild(tableContainer);
-
-    grid.appendChild(card);
-  });
+  showAIBubble(results, weightCol, layoutMeta);
 }
