@@ -43,7 +43,13 @@ export function buildCrossTable(
   const thCross = document.createElement("th");
   thCross.colSpan = crossSubs.length;
   thCross.className = "cross-group-header";
-  thCross.textContent = "";
+  if (crossCols && crossCols.length > 0) {
+    const crossLabels = crossCols.map((q) => {
+      const col = q.type === "SA" ? q.column : q.prefix;
+      return resolveQuestionLabel(col, layoutMeta);
+    });
+    thCross.textContent = crossLabels.join(" × ");
+  }
   tr1.appendChild(thCross);
 
   // ヘッダー行2: 件数 | % | 各クロス値(n=X)...
