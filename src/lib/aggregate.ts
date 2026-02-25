@@ -1,7 +1,8 @@
 /** DuckDB SQL aggregation logic */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import { Aggregator, fetchCrossHeaders } from "./aggregator";
+import { GtAggregator } from "./gtAggregator";
+import { CrossAggregator, fetchCrossHeaders } from "./crossAggregator";
 
 export interface Cell {
   main: string; // Option label (aggregation target value)
@@ -63,19 +64,29 @@ export async function aggregate(
   const weightCol = payload.weight_col;
   const crossCols = payload.cross_cols ?? [];
 
+  // Prefetch cross-header info
   const crossHeaderCache =
-    crossCols.length > 0
-      ? await fetchCrossHeaders(conn, crossCols, weightCol)
-      : (new Map() as Awaited<ReturnType<typeof fetchCrossHeaders>>);
+    crossCols.length > 0 ? await fetchCrossHeaders(conn, crossCols, weightCol) : new Map();
 
-  const ctx = new Aggregator(conn, weightCol, crossCols, crossHeaderCache);
+  // Build aggregators
+  const gt = new GtAggregator(conn, weightCol);
+  const crossAggregators = crossCols.map((crossQ) => {
+    const header = crossHeaderCache.get(questionKey(crossQ))!;
+    return new CrossAggregator(conn, weightCol, crossQ, header);
+  });
 
   const results: AggResult[] = [];
   for (const q of payload.questions) {
     if (q.type === "SA") {
-      results.push(await ctx.aggregateSA(q.column));
+      const { cells: gtCells, mainValues } = await gt.aggregateSA(q.column);
+      const crossCells = await Promise.all(
+        crossAggregators.map((ca) => ca.aggregateSA(q.column, mainValues)),
+      );
+      results.push({ question: q.column, type: "SA", cells: [...gtCells, ...crossCells.flat()] });
     } else {
-      results.push(await ctx.aggregateMA(q.prefix, q.columns));
+      const gtCells = await gt.aggregateMA(q.prefix, q.columns);
+      const crossCells = await Promise.all(crossAggregators.map((ca) => ca.aggregateMA(q.columns)));
+      results.push({ question: q.prefix, type: "MA", cells: [...gtCells, ...crossCells.flat()] });
     }
   }
 

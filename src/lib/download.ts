@@ -1,7 +1,7 @@
 import type { AggResult } from "./aggregate";
 import { parseCrossSub } from "./aggregate";
 import type { LayoutMeta } from "./layout";
-import { NA_VALUE } from "./aggregator";
+import { NA_VALUE } from "./gtAggregator";
 import { pivot } from "./pivot";
 
 /** Resolve cross sub value to label */
