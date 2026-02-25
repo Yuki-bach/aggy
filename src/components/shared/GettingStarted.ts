@@ -1,11 +1,12 @@
 import { t, onLocaleChange } from "../../lib/i18n";
+import { escHtml } from "./escHtml";
 
 const STORAGE_KEY = "temotto-getting-started-dismissed";
 
 function buildModalHTML(): string {
   return `
     <div class="modal-content" role="document">
-      <button class="modal-close" id="gs-close" aria-label="${t("gs.close")}">&times;</button>
+      <button class="modal-close" id="gs-close" aria-label="${escHtml(t("gs.close"))}">&times;</button>
       <h2 id="gs-title" class="modal-title">${t("gs.title")}</h2>
 
       <div class="modal-body">

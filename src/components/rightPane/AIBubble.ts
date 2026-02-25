@@ -2,6 +2,7 @@ import type { AggResult } from "../../lib/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { isAIAvailable, generateComment } from "../../lib/aiComment";
 import { t } from "../../lib/i18n";
+import { escHtml } from "../shared/escHtml";
 
 export async function showAIBubble(
   results: AggResult[],
@@ -16,7 +17,7 @@ export async function showAIBubble(
   const bubble = document.createElement("div");
   bubble.className = "ai-bubble";
   bubble.innerHTML = `
-    <button class="ai-bubble-close" aria-label="${t("ai.close")}">\u00d7</button>
+    <button class="ai-bubble-close" aria-label="${escHtml(t("ai.close"))}">\u00d7</button>
     <div class="ai-bubble-header">${t("ai.header")}</div>
     <div class="ai-bubble-body ai-bubble-loading">${t("ai.loading")}</div>
   `;
