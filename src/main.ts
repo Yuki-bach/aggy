@@ -185,7 +185,7 @@ async function loadFromSaved(folderId: string): Promise<void> {
     updateLoadedInfo();
     initAfterBothLoaded();
   } catch (e) {
-    showError("保存データの読み込みエラー: " + (e as Error).message);
+    showError("履歴データの読み込みエラー: " + (e as Error).message);
   }
 }
 
