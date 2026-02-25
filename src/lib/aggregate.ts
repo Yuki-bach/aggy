@@ -38,6 +38,21 @@ export function questionKey(q: QuestionDef): string {
   return q.type === "SA" ? q.column : q.prefix;
 }
 
+/** クロスsub値のセパレータ（軸キーと生値を分離） */
+export const CROSS_SEP = "\x01";
+
+/** 軸キー付きクロスsub値を生成する (例: "q1\x011") */
+export function crossSub(axisKey: string, rawValue: string): string {
+  return `${axisKey}${CROSS_SEP}${rawValue}`;
+}
+
+/** クロスsub値を { axisKey, rawValue } にパースする。GT等プレフィックスなしはそのまま返す */
+export function parseCrossSub(sub: string): { axisKey: string; rawValue: string } | null {
+  const idx = sub.indexOf(CROSS_SEP);
+  if (idx < 0) return null;
+  return { axisKey: sub.slice(0, idx), rawValue: sub.slice(idx + 1) };
+}
+
 export interface Query {
   questions: QuestionDef[];
   weight_col: string;

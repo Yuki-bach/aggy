@@ -923,6 +923,19 @@ table.gt td.cross-pct {
   border-left: 1px solid var(--row-border);
 }
 
+/* 複数クロス軸のグループ境界線 */
+table.gt th.cross-axis-border {
+  border-left: 2px solid var(--border-strong);
+}
+
+table.gt th.cross-axis-first {
+  border-left: 2px solid var(--border-strong);
+}
+
+table.gt td.cross-axis-first {
+  border-left: 2px solid var(--border-strong);
+}
+
 /* Column Question Label */
 .col-question-label {
   font-size: var(--text-xs);
