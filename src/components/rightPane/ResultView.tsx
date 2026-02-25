@@ -1,12 +1,12 @@
+import { render } from "preact";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel } from "../../lib/labelResolver";
-import { escHtml } from "../shared/escHtml";
 import { t } from "../../lib/i18n";
 import { buildToolbar, buildChartOpts, type PctDirection } from "./Toolbar";
-import { buildGtTable } from "./GtTable";
-import { buildCrossTable } from "./CrossTable";
+import { GtTable } from "./GtTable";
+import { CrossTable } from "./CrossTable";
 import { showAIBubble } from "./AIBubble";
 import { destroyAllCharts, renderChartCard, type GtChartType } from "./ChartRenderer";
 
@@ -155,9 +155,6 @@ function renderTableContent(
     const pv = pivot(res.cells);
     const isCross = pv.subs.length > 1;
 
-    const card = document.createElement("div");
-    card.className = isCross ? "gt-table-card has-cross" : "gt-table-card";
-
     const gtSub = pv.subs.find((s) => s.label === "GT")!;
     const nLabel = weightCol
       ? `n=${gtSub.n.toFixed(1)}${t("n.weighted")}`
@@ -166,22 +163,45 @@ function renderTableContent(
     const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
     const hasLabel = questionLabel !== res.question;
 
-    card.innerHTML = `
+    // Render card with Preact
+    const card = document.createElement("div");
+    card.className = isCross ? "gt-table-card has-cross" : "gt-table-card";
+
+    const headContainer = document.createElement("div");
+    render(
       <div class="gt-table-head">
         <div class="q-header">
-          <span class="q-label">${escHtml(questionLabel)}</span>
-          ${hasLabel ? `<span class="q-key">${escHtml(res.question)}</span>` : ""}
+          <span class="q-label">{questionLabel}</span>
+          {hasLabel && <span class="q-key">{res.question}</span>}
         </div>
-        <span class="q-type">${res.type}</span>
-        <span class="q-n">${nLabel}</span>
-      </div>
-    `;
+        <span class="q-type">{res.type}</span>
+        <span class="q-n">{nLabel}</span>
+      </div>,
+      headContainer,
+    );
+    card.appendChild(headContainer);
 
+    // Table
+    const tableContainer = document.createElement("div");
     if (isCross) {
-      card.appendChild(buildCrossTable(res, pv, weightCol, pctDirection, layoutMeta, crossCols));
+      render(
+        <CrossTable
+          res={res}
+          pv={pv}
+          weightCol={weightCol}
+          pctDir={pctDirection}
+          layoutMeta={layoutMeta}
+          crossCols={crossCols}
+        />,
+        tableContainer,
+      );
     } else {
-      card.appendChild(buildGtTable(res, pv, weightCol, maxPct, layoutMeta));
+      render(
+        <GtTable res={res} pv={pv} weightCol={weightCol} maxPct={maxPct} layoutMeta={layoutMeta} />,
+        tableContainer,
+      );
     }
+    card.appendChild(tableContainer);
 
     grid.appendChild(card);
   });

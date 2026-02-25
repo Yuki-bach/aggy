@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Temotto is a browser-based survey raw-data aggregation tool (アンケートローデータ集計システム). Users upload a CSV of survey responses and a JSON layout file, then run GT (Grand Total) and cross-tabulation — all client-side using DuckDB Wasm for SQL-based aggregation.
 
-Tech: TypeScript (strict), Vite, DuckDB Wasm, vanilla DOM (no UI framework), plain CSS.
+Tech: TypeScript (strict), Vite, Preact (JSX), DuckDB Wasm, plain CSS.
 
 ## Commands
 
@@ -24,7 +24,7 @@ No test framework is configured. Type checking via `tsc --noEmit` is the only va
 
 1. User uploads CSV → `Dropzone.ts` → `duckdbBridge.loadCSV()` (registers as DuckDB view)
 2. User uploads JSON layout → `LayoutDropzone.ts` → `layout.parseLayout()` + `buildLayoutMeta()`
-3. Both loaded → `main.ts:initAfterBothLoaded()` builds `QuestionDef[]`, shows CrossConfig UI
+3. Both loaded → `main.tsx:initAfterBothLoaded()` builds `QuestionDef[]`, shows CrossConfig UI
 4. User clicks run → `aggregator.aggregate()` executes SQL queries → returns `AggResult[]` (flat `Cell[]` arrays)
 5. `ResultTable.renderResults()` calls `pivot()` to convert `Cell[]` → grid, then renders HTML tables
 6. CSV download: `download.downloadAllCSV()` re-pivots and outputs BOM-prefixed UTF-8 CSV
@@ -51,11 +51,14 @@ interface Cell { main: string; sub: string; n: number; count: number; pct: numbe
 - All CSV columns read as `VARCHAR` (`all_varchar=true`); weight uses `TRY_CAST` to float
 - SQL column names escaped via `esc()` helper (double-quote escaping)
 - MA truthy values: `'1'` only
-- Component files: PascalCase (`ResultTable.ts`); lib files: camelCase (`aggregator.ts`)
-- Component initializers: `init*`; DOM renderers: `render*`; sub-element builders: `build*`
-- Module-level variables as app state (no state management library)
+- Component files: PascalCase `.tsx` (`GtTable.tsx`); lib files: camelCase `.ts` (`aggregator.ts`)
+- Components export Preact function components; bridge functions (`build*`) wrap them for legacy vanilla DOM callers
+- Component initializers: `init*`; DOM renderers: `render*`; Preact components: PascalCase functions
+- Module-level variables as app state (no state management library); migrating toward hooks
 - UI language is Japanese
 
 ## Vite Config Notes
 
 DuckDB Wasm requires `SharedArrayBuffer`, so COOP/COEP headers are set in both `server.headers` and `preview.headers`. DuckDB Wasm is excluded from Vite's dependency pre-bundling (`optimizeDeps.exclude`).
+
+`@preact/preset-vite` handles JSX transform; `tsconfig.json` has `jsxImportSource: "preact"`.
