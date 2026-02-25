@@ -17,6 +17,7 @@ import { showProceedButton } from "./components/screens/import/ImportScreen";
 import {
   renderDataSummary,
   renderWeightInfo,
+  getWeightEnabled,
 } from "./components/screens/aggregation/AggregationScreen";
 import { initI18n, onLocaleChange, t } from "./lib/i18n";
 
@@ -207,9 +208,10 @@ async function runAggregation(): Promise<void> {
   if (!currentCsv || !currentLayout) return;
   showError("");
 
-  // Weight column auto-determined from layout
-  const weightCol =
+  // Weight column from layout, gated by toggle
+  const actualWeightCol =
     Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+  const weightCol = getWeightEnabled() ? actualWeightCol : "";
   const crossCols = getCrossColsSelected();
 
   try {

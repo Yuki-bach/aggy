@@ -498,12 +498,19 @@ main[data-screen="import"] ~ .help-btn {
 
 /* --- Weight Info --- */
 .weight-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   font-size: var(--text-base);
   color: var(--accent2);
   background: var(--accent2-light);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.weight-info #weight-toggle {
+  margin-left: auto;
 }
 
 @media (max-width: 768px) {

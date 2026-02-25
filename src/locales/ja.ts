@@ -35,6 +35,8 @@ const ja: Record<string, string> = {
   "summary.rows": "{rows} 行 / {cols} 列",
   "summary.colDefs": "{count} 列定義",
   "weight.label": "⚖ ウェイト列: {col}",
+  "weight.on": "ON",
+  "weight.off": "OFF",
 
   // Loaded info (import screen)
   "loaded.csv": "ローデータ: {name}  —  {rows} 行 / {cols} 列",
@@ -54,6 +56,8 @@ const ja: Record<string, string> = {
   "result.weight.none": "実数集計",
   "result.view.table": "テーブル",
   "result.view.chart": "チャート",
+  "result.pct.vertical": "縦%",
+  "result.pct.horizontal": "横%",
   "result.csv.export": "全件CSV出力",
 
   // Chart type

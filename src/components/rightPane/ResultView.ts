@@ -4,7 +4,7 @@ import { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel } from "../../lib/labelResolver";
 import { escHtml } from "../shared/escHtml";
 import { t } from "../../lib/i18n";
-import { buildToolbar, buildChartOpts } from "./Toolbar";
+import { buildToolbar, buildChartOpts, type PctDirection } from "./Toolbar";
 import { buildGtTable } from "./GtTable";
 import { buildCrossTable } from "./CrossTable";
 import { showAIBubble } from "./AIBubble";
@@ -15,6 +15,7 @@ type ViewMode = "table" | "chart";
 let currentViewMode: ViewMode = "table";
 let saChartType: GtChartType = "bar-h";
 let maChartType: GtChartType = "bar-h";
+let pctDirection: PctDirection = "vertical";
 
 // Cached data for re-rendering
 let lastResults: AggResult[] | null = null;
@@ -46,20 +47,32 @@ export function renderResults(
     return subs.length > 1;
   });
 
-  const hdr = buildToolbar(hasCross, results, weightCol, currentViewMode, layoutMeta, {
-    onViewModeChange: (mode) => {
-      currentViewMode = mode;
-      reRender();
+  const hdr = buildToolbar(
+    hasCross,
+    results,
+    weightCol,
+    currentViewMode,
+    pctDirection,
+    layoutMeta,
+    {
+      onViewModeChange: (mode) => {
+        currentViewMode = mode;
+        reRender();
+      },
+      onSaChartTypeChange: (type) => {
+        saChartType = type;
+        reRender();
+      },
+      onMaChartTypeChange: (type) => {
+        maChartType = type;
+        reRender();
+      },
+      onPctDirectionChange: (dir) => {
+        pctDirection = dir;
+        reRender();
+      },
     },
-    onSaChartTypeChange: (type) => {
-      saChartType = type;
-      reRender();
-    },
-    onMaChartTypeChange: (type) => {
-      maChartType = type;
-      reRender();
-    },
-  });
+  );
   area.appendChild(hdr);
 
   // Chart type selector (2nd row)
@@ -165,7 +178,7 @@ function renderTableContent(
     `;
 
     if (isCross) {
-      card.appendChild(buildCrossTable(res, pv, weightCol, layoutMeta, crossCols));
+      card.appendChild(buildCrossTable(res, pv, weightCol, pctDirection, layoutMeta, crossCols));
     } else {
       card.appendChild(buildGtTable(res, pv, weightCol, maxPct, layoutMeta));
     }

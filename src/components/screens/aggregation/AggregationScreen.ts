@@ -27,13 +27,50 @@ export function renderDataSummary(
   `;
 }
 
-/** ウェイト列情報を表示 */
+// Weight toggle state
+let weightEnabled = true;
+
+/** Get current weight toggle state */
+export function getWeightEnabled(): boolean {
+  return weightEnabled;
+}
+
+/** ウェイト列情報とON/OFFトグルを表示 */
 export function renderWeightInfo(weightCol: string): void {
   const el = document.getElementById("weight-info")!;
   if (weightCol) {
-    el.textContent = t("weight.label", { col: weightCol });
+    const label = document.getElementById("weight-label")!;
+    label.textContent = t("weight.label", { col: weightCol });
+
+    const toggle = document.getElementById("weight-toggle")!;
+    toggle.innerHTML = "";
+
+    const btnOn = document.createElement("button");
+    btnOn.className = `view-toggle-btn${weightEnabled ? " active" : ""}`;
+    btnOn.dataset.value = "on";
+    btnOn.textContent = t("weight.on");
+
+    const btnOff = document.createElement("button");
+    btnOff.className = `view-toggle-btn${!weightEnabled ? " active" : ""}`;
+    btnOff.dataset.value = "off";
+    btnOff.textContent = t("weight.off");
+
+    toggle.appendChild(btnOn);
+    toggle.appendChild(btnOff);
+
+    toggle.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".view-toggle-btn");
+      if (!btn) return;
+      const newEnabled = btn.dataset.value === "on";
+      if (newEnabled === weightEnabled) return;
+      weightEnabled = newEnabled;
+      btnOn.classList.toggle("active", weightEnabled);
+      btnOff.classList.toggle("active", !weightEnabled);
+    });
+
     el.classList.remove("hidden");
   } else {
+    weightEnabled = true;
     el.classList.add("hidden");
   }
 }

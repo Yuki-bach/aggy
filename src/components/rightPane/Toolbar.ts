@@ -6,11 +6,13 @@ import { t } from "../../lib/i18n";
 import type { GtChartType } from "./ChartRenderer";
 
 type ViewMode = "table" | "chart";
+export type PctDirection = "vertical" | "horizontal";
 
 interface ToolbarCallbacks {
   onViewModeChange: (mode: ViewMode) => void;
   onSaChartTypeChange: (type: GtChartType) => void;
   onMaChartTypeChange: (type: GtChartType) => void;
+  onPctDirectionChange: (dir: PctDirection) => void;
 }
 
 export function buildToolbar(
@@ -18,6 +20,7 @@ export function buildToolbar(
   results: AggResult[],
   weightCol: string,
   currentViewMode: ViewMode,
+  currentPctDirection: PctDirection,
   layoutMeta: LayoutMeta | undefined,
   callbacks: ToolbarCallbacks,
 ): HTMLDivElement {
@@ -53,6 +56,29 @@ export function buildToolbar(
     callbacks.onViewModeChange(btn.dataset.mode as ViewMode);
   });
   hdr.appendChild(toggle);
+
+  // Toggle: pct direction (only for cross-tab table mode)
+  if (hasCross && currentViewMode === "table") {
+    const pctToggle = document.createElement("div");
+    pctToggle.className = "view-toggle";
+    const btnVertical = document.createElement("button");
+    btnVertical.className = `view-toggle-btn${currentPctDirection === "vertical" ? " active" : ""}`;
+    btnVertical.dataset.dir = "vertical";
+    btnVertical.textContent = t("result.pct.vertical");
+    const btnHorizontal = document.createElement("button");
+    btnHorizontal.className = `view-toggle-btn${currentPctDirection === "horizontal" ? " active" : ""}`;
+    btnHorizontal.dataset.dir = "horizontal";
+    btnHorizontal.textContent = t("result.pct.horizontal");
+    pctToggle.appendChild(btnVertical);
+    pctToggle.appendChild(btnHorizontal);
+
+    pctToggle.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".view-toggle-btn");
+      if (!btn || btn.dataset.dir === currentPctDirection) return;
+      callbacks.onPctDirectionChange(btn.dataset.dir as PctDirection);
+    });
+    hdr.appendChild(pctToggle);
+  }
 
   // CSV export button
   const csvBtn = document.createElement("button");
