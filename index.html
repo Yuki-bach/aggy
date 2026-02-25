@@ -54,13 +54,23 @@
             </button>
           </div>
           <div class="load-tab-panel" id="tab-file" role="tabpanel" aria-labelledby="tab-btn-file">
-            <div class="file-row">
-              <label class="file-label" for="file-input">CSV</label>
-              <input type="file" id="file-input" accept=".csv" class="file-input" />
+            <div class="dropzone" id="csv-dropzone" data-accept=".csv">
+              <input type="file" id="file-input" accept=".csv" class="dropzone-input" />
+              <div class="dropzone-content">
+                <span class="dropzone-icon">CSV</span>
+                <span class="dropzone-text">ここにCSVファイルをドロップ</span>
+                <span class="dropzone-hint">またはクリックして選択</span>
+              </div>
+              <div class="dropzone-loaded hidden" id="csv-dropzone-loaded"></div>
             </div>
-            <div class="file-row">
-              <label class="file-label" for="layout-file-input">JSON</label>
-              <input type="file" id="layout-file-input" accept=".json" class="file-input" />
+            <div class="dropzone" id="layout-dropzone" data-accept=".json">
+              <input type="file" id="layout-file-input" accept=".json" class="dropzone-input" />
+              <div class="dropzone-content">
+                <span class="dropzone-icon">JSON</span>
+                <span class="dropzone-text">ここにレイアウトJSONをドロップ</span>
+                <span class="dropzone-hint">またはクリックして選択</span>
+              </div>
+              <div class="dropzone-loaded hidden" id="layout-dropzone-loaded"></div>
             </div>
           </div>
           <div
