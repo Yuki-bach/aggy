@@ -255,8 +255,9 @@ function buildTransposedCrossTable(
 
   // GT row
   const gtRow = document.createElement("tr");
+  gtRow.className = "transposed-gt-row";
   const gtLabel = document.createElement("td");
-  gtLabel.className = "transposed-row-label";
+  gtLabel.className = "transposed-row-label transposed-gt-label";
   const gtNStr = weightCol ? gtSub.n.toFixed(1) : gtSub.n.toLocaleString();
   gtLabel.innerHTML = `${t("table.total")}<br><span class="cross-n">n=${gtNStr}</span>`;
   gtRow.appendChild(gtLabel);
@@ -266,8 +267,6 @@ function buildTransposedCrossTable(
     const td = document.createElement("td");
     td.className = "pct gt-col";
     if (cell) {
-      // In transposed view, % = count / GT count for this option * 100
-      // GT row: count equals GT count, so pct = 100%
       td.textContent = cell.pct.toFixed(1) + "%";
     } else {
       td.textContent = "-";
@@ -276,53 +275,77 @@ function buildTransposedCrossTable(
   }
   tbody.appendChild(gtRow);
 
-  // Cross sub rows
-  // Build cross-axis groups for border rendering
+  // Cross sub rows — always show group header + value rows (2-tier breakdown)
   const crossGroups =
     crossCols && crossCols.length > 0 ? groupSubsByCrossAxis(crossSubs, crossCols, res.type) : [];
 
-  // Flatten groups back with axis-first markers
-  const subsWithBorders: { sub: { label: string; n: number }; isAxisFirst: boolean }[] = [];
-  if (crossGroups.length > 1) {
-    crossGroups.forEach((group, gi) => {
-      group.subs.forEach((sub, si) => {
-        subsWithBorders.push({ sub, isAxisFirst: gi > 0 && si === 0 });
-      });
-    });
-  } else {
-    for (const sub of crossSubs) {
-      subsWithBorders.push({ sub, isAxisFirst: false });
+  for (const group of crossGroups) {
+    // Group header row (cross axis name)
+    const groupHeaderRow = document.createElement("tr");
+    groupHeaderRow.className = "transposed-group-header-row";
+    const groupHeaderTd = document.createElement("td");
+    groupHeaderTd.colSpan = mains.length + 1;
+    groupHeaderTd.className = "transposed-group-header";
+    const col = group.crossCol.type === "SA" ? group.crossCol.column : group.crossCol.prefix;
+    groupHeaderTd.textContent = resolveQuestionLabel(col, layoutMeta);
+    groupHeaderRow.appendChild(groupHeaderTd);
+    tbody.appendChild(groupHeaderRow);
+
+    // Value rows under this group
+    for (const sub of group.subs) {
+      const tr = document.createElement("tr");
+
+      const tdLabel = document.createElement("td");
+      tdLabel.className = "transposed-row-label transposed-cross-label";
+      const nStr = weightCol ? sub.n.toFixed(1) : sub.n.toLocaleString();
+      tdLabel.innerHTML = `${escHtml(resolveSubLabel(sub.label, layoutMeta, crossCols))}<br><span class="cross-n">n=${nStr}</span>`;
+      tr.appendChild(tdLabel);
+
+      for (const main of mains) {
+        const cell = lookup.get(`${main}\0${sub.label}`);
+        const td = document.createElement("td");
+        td.className = "pct cross-pct";
+        if (cell) {
+          const denom = mainGtCounts.get(main) ?? 0;
+          const pct = denom > 0 ? (cell.count / denom) * 100 : 0;
+          td.textContent = pct.toFixed(1) + "%";
+        } else {
+          td.textContent = "-";
+        }
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
     }
   }
 
-  for (const { sub, isAxisFirst } of subsWithBorders) {
-    const tr = document.createElement("tr");
-    if (isAxisFirst) {
-      tr.classList.add("cross-axis-first-row");
-    }
+  // Fallback: if no crossGroups (no crossCols provided), render flat
+  if (crossGroups.length === 0) {
+    for (const sub of crossSubs) {
+      const tr = document.createElement("tr");
 
-    const tdLabel = document.createElement("td");
-    tdLabel.className = "transposed-row-label";
-    const nStr = weightCol ? sub.n.toFixed(1) : sub.n.toLocaleString();
-    tdLabel.innerHTML = `${escHtml(resolveSubLabel(sub.label, layoutMeta, crossCols))}<br><span class="cross-n">n=${nStr}</span>`;
-    tr.appendChild(tdLabel);
+      const tdLabel = document.createElement("td");
+      tdLabel.className = "transposed-row-label transposed-cross-label";
+      const nStr = weightCol ? sub.n.toFixed(1) : sub.n.toLocaleString();
+      tdLabel.innerHTML = `${escHtml(resolveSubLabel(sub.label, layoutMeta, crossCols))}<br><span class="cross-n">n=${nStr}</span>`;
+      tr.appendChild(tdLabel);
 
-    for (const main of mains) {
-      const cell = lookup.get(`${main}\0${sub.label}`);
-      const td = document.createElement("td");
-      td.className = "pct cross-pct";
-      if (cell) {
-        // % = count / GT count for this main option
-        const denom = mainGtCounts.get(main) ?? 0;
-        const pct = denom > 0 ? (cell.count / denom) * 100 : 0;
-        td.textContent = pct.toFixed(1) + "%";
-      } else {
-        td.textContent = "-";
+      for (const main of mains) {
+        const cell = lookup.get(`${main}\0${sub.label}`);
+        const td = document.createElement("td");
+        td.className = "pct cross-pct";
+        if (cell) {
+          const denom = mainGtCounts.get(main) ?? 0;
+          const pct = denom > 0 ? (cell.count / denom) * 100 : 0;
+          td.textContent = pct.toFixed(1) + "%";
+        } else {
+          td.textContent = "-";
+        }
+        tr.appendChild(td);
       }
-      tr.appendChild(td);
-    }
 
-    tbody.appendChild(tr);
+      tbody.appendChild(tr);
+    }
   }
 
   table.appendChild(tbody);

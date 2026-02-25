@@ -1225,6 +1225,46 @@ table.gt td.cross-pct {
   border-left: 1px solid var(--row-border);
 }
 
+/* Transposed (横%) table */
+table.gt td.transposed-row-label {
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  border-right: 2px solid var(--border-strong);
+}
+
+table.gt td.transposed-gt-label {
+  background: var(--gt-bg);
+  color: var(--accent);
+}
+
+table.gt td.transposed-cross-label {
+  color: var(--accent2);
+}
+
+table.gt td.gt-col {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-family-mono);
+  color: var(--accent);
+  background: var(--gt-bg);
+}
+
+table.gt .transposed-gt-row td {
+  border-bottom: 2px solid var(--border-strong);
+}
+
+table.gt td.transposed-group-header {
+  background: var(--cross-bg);
+  color: var(--accent2);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--border-strong);
+  border-top: 2px solid var(--border-strong);
+}
+
 /* 複数クロス軸のグループ境界線 */
 table.gt th.cross-axis-border {
   border-left: 2px solid var(--border-strong);
