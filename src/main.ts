@@ -110,12 +110,12 @@ function updateLoadedInfo(): void {
   const lines: string[] = [];
   if (currentCsv) {
     lines.push(
-      `CSV: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`,
+      `ローデータ: ${currentCsv.fileName}  —  ${currentCsv.rowCount.toLocaleString()} 行 / ${currentCsv.headers.length} 列`,
     );
   }
   if (currentLayout) {
     lines.push(
-      `JSON: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`,
+      `レイアウト: ${currentLayout.fileName}  —  ${Object.keys(currentLayout.meta.colTypes).length} 列定義`,
     );
   }
   el.textContent = lines.join("\n");
@@ -148,7 +148,7 @@ async function onCSVLoaded(csvText: string, fileName: string): Promise<void> {
     initAfterBothLoaded();
     trySaveToOPFS();
   } catch (e) {
-    showError("CSV読み込みエラー: " + (e as Error).message);
+    showError("ローデータファイルの読み込みエラー: " + (e as Error).message);
   }
 }
 

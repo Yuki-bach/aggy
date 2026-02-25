@@ -8,7 +8,7 @@ export function renderDataSummary(
   const el = document.getElementById("data-summary")!;
   el.innerHTML = `
     <div class="data-summary-row">
-      <span class="data-summary-label">CSV</span>
+      <span class="data-summary-label">ローデータ</span>
       <span class="data-summary-value">${escHtml(csv.fileName)}</span>
     </div>
     <div class="data-summary-row">
@@ -16,7 +16,7 @@ export function renderDataSummary(
       <span class="data-summary-value">${csv.rowCount.toLocaleString()} 行 / ${csv.headers.length} 列</span>
     </div>
     <div class="data-summary-row">
-      <span class="data-summary-label">JSON</span>
+      <span class="data-summary-label">レイアウト</span>
       <span class="data-summary-value">${escHtml(layout.fileName)}</span>
     </div>
     <div class="data-summary-row">

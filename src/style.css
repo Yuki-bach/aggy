@@ -411,7 +411,7 @@ main[data-screen="import"] ~ .help-btn {
 .data-summary-label {
   font-size: var(--text-xs);
   color: var(--muted);
-  min-width: 3rem;
+  min-width: 5rem;
   flex-shrink: 0;
   font-weight: 700;
   letter-spacing: 0.04em;
