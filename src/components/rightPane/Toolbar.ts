@@ -1,6 +1,6 @@
-import type { AggResult } from "../../lib/aggregate";
+import type { AggResult } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
-import { downloadAllCSV } from "../../lib/download";
+import { downloadAllCSV } from "../../lib/agg/download";
 import { escHtml } from "../shared/escHtml";
 import { t } from "../../lib/i18n";
 import type { GtChartType } from "./ChartRenderer";

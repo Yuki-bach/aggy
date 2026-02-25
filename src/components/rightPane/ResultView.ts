@@ -1,6 +1,6 @@
-import type { AggResult, QuestionDef } from "../../lib/aggregate";
+import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
-import { pivot } from "../../lib/pivot";
+import { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel } from "../../lib/labelResolver";
 import { escHtml } from "../shared/escHtml";
 import { t } from "../../lib/i18n";

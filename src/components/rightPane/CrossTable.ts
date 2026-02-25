@@ -1,7 +1,7 @@
-import type { AggResult, QuestionDef } from "../../lib/aggregate";
-import { questionKey, parseCrossSub } from "../../lib/aggregate";
+import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
+import { questionKey, parseCrossSub } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
-import type { pivot } from "../../lib/pivot";
+import type { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labelResolver";
 import { escHtml } from "../shared/escHtml";
 import { t } from "../../lib/i18n";

@@ -1,9 +1,9 @@
 /** Label resolution utility (shared by ResultTable / ChartRenderer) */
 
-import type { QuestionDef } from "./aggregate";
-import { parseCrossSub } from "./aggregate";
+import type { QuestionDef } from "./agg/aggregate";
+import { parseCrossSub } from "./agg/aggregate";
 import type { LayoutMeta } from "./layout";
-import { NA_VALUE } from "./aggregator";
+import { NA_VALUE } from "./agg/sqlHelpers";
 
 /** Resolve question label; falls back to column name */
 export function resolveQuestionLabel(col: string, meta?: LayoutMeta): string {

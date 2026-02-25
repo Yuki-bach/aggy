@@ -1,5 +1,5 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
-import { aggregate, type Query, type AggResult } from "./aggregate";
+import { aggregate, type Query, type AggResult } from "./agg/aggregate";
 
 const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
 
