@@ -43,7 +43,6 @@ export async function isAIAvailable(): Promise<boolean> {
 
 // --- Prompt Payload ---
 
-
 const MAX_PAYLOAD_CHARS = 3500;
 
 function resolveQLabel(col: string, meta?: LayoutMeta): string {

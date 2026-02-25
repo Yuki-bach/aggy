@@ -77,7 +77,8 @@ const en: Record<string, string> = {
   "ai.loading": "Analyzing...",
 
   // AI Prompt
-  "ai.systemPrompt": "You are a survey analysis expert. Keep your response to 2-3 sentences in English.",
+  "ai.systemPrompt":
+    "You are a survey analysis expert. Keep your response to 2-3 sentences in English.",
   "ai.userPrompt":
     "Briefly describe notable trends in the aggregation results above in 2-3 sentences. No bullet points, headings, suggestions, or caveats.",
   "ai.weight": "* Weight column: {col}",
