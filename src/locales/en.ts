@@ -92,7 +92,7 @@ const en: Record<string, string> = {
 
   // Getting Started modal
   "gs.close": "Close",
-  "gs.title": "Welcome to Temotto",
+  "gs.title": "Welcome to Aggy",
   "gs.section1.title": "Preparing Import Files",
   "gs.section1.p1":
     "This tool reads a <strong>raw data file</strong> (CSV) and a <strong>layout file</strong> (JSON) to perform aggregation.",
@@ -103,7 +103,7 @@ const en: Record<string, string> = {
   "gs.section1.sampleLayout": "Sample Layout",
   "gs.section2.title": "Security",
   "gs.section2.p1":
-    "Temotto runs <strong>entirely serverless</strong>. All processing happens in your browser, and uploaded data is never sent to any external server.",
+    "Aggy runs <strong>entirely serverless</strong>. All processing happens in your browser, and uploaded data is never sent to any external server.",
   "gs.section3.title": "Basic Usage",
   "gs.section3.step1": "Load a raw data file and a layout file",
   "gs.section3.step2": "Select cross-tabulation axes if needed",

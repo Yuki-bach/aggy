@@ -1,7 +1,7 @@
 import { t, getLocale, setLocale, onLocaleChange } from "../../lib/i18n";
 
-const THEME_KEY = "temotto-theme";
-const AI_KEY = "temotto-ai-comment";
+const THEME_KEY = "aggy-theme";
+const AI_KEY = "aggy-ai-comment";
 
 type Theme = "light" | "dark" | "system";
 
