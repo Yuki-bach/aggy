@@ -3,7 +3,7 @@
 import type { QuestionDef } from "./aggregate";
 import { parseCrossSub } from "./aggregate";
 import type { LayoutMeta } from "./layout";
-import { NA_VALUE } from "./gtAggregator";
+import { NA_VALUE } from "./sqlHelpers";
 
 /** Resolve question label; falls back to column name */
 export function resolveQuestionLabel(col: string, meta?: LayoutMeta): string {

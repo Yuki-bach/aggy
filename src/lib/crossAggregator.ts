@@ -10,7 +10,7 @@ import {
   maShownCondition,
   mkCell,
   NA_VALUE,
-} from "./gtAggregator";
+} from "./sqlHelpers";
 
 export interface CrossHeader {
   headers: Array<{ label: string; n: number }>;
