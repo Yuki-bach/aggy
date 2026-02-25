@@ -43,7 +43,6 @@ const en: Record<string, string> = {
 
   // Results
   "result.title.gt": "Aggregation Results",
-  "result.title.cross": "Cross-Tabulation Results",
   "result.meta": "{count} questions  /  {weight}",
   "result.weight.applied": "Weighted: {col}",
   "result.weight.none": "Unweighted",

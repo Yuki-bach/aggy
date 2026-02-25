@@ -43,7 +43,6 @@ const ja: Record<string, string> = {
 
   // Results
   "result.title.gt": "集計結果",
-  "result.title.cross": "クロス集計結果",
   "result.meta": "{count} 問  ／  {weight}",
   "result.weight.applied": "ウェイトバック適用: {col}",
   "result.weight.none": "実数集計",

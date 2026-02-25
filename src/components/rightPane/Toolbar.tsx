@@ -24,7 +24,6 @@ interface ToolbarProps {
 }
 
 export function Toolbar({
-  hasCross,
   results,
   weightCol,
   currentViewMode,
@@ -37,7 +36,7 @@ export function Toolbar({
 
   return (
     <div class="results-header">
-      <h2>{hasCross ? t("result.title.cross") : t("result.title.gt")}</h2>
+      <h2>{t("result.title.gt")}</h2>
       <span class="results-meta">
         {t("result.meta", { count: results.length, weight: weightText })}
       </span>
