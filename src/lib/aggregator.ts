@@ -129,7 +129,9 @@ export class Aggregator {
     // SA×MA クロスセル（構造が異なるため個別クエリ維持）
     for (const crossQ of maCross) {
       const cached = this.crossHeaderCache.get(crossQ.prefix)!;
-      cells.push(...(await this.buildCrossCellsMA(col, mainValues, crossQ.prefix, crossQ.columns, cached)));
+      cells.push(
+        ...(await this.buildCrossCellsMA(col, mainValues, crossQ.prefix, crossQ.columns, cached)),
+      );
     }
 
     return { question: col, type: "SA", cells };
@@ -175,7 +177,9 @@ export class Aggregator {
         if (crossQ.type === "SA") {
           cells.push(...(await this.buildMACrossCellsSA(cols, crossQ.column, cached)));
         } else {
-          cells.push(...(await this.buildMACrossCellsMA(cols, crossQ.prefix, crossQ.columns, cached)));
+          cells.push(
+            ...(await this.buildMACrossCellsMA(cols, crossQ.prefix, crossQ.columns, cached)),
+          );
         }
       }
     }
@@ -270,13 +274,27 @@ export class Aggregator {
     for (let maIdx = 0; maIdx < maCols.length; maIdx++) {
       for (let i = 0; i < crossValues.length; i++) {
         const counts = rowMap.get(crossValues[i]);
-        cells.push(mkCell(maCols[maIdx], crossSub(crossCol, crossValues[i]), headers[i].n, counts?.[maIdx] ?? 0));
+        cells.push(
+          mkCell(
+            maCols[maIdx],
+            crossSub(crossCol, crossValues[i]),
+            headers[i].n,
+            counts?.[maIdx] ?? 0,
+          ),
+        );
       }
     }
 
     // 無回答クロスセル
     for (let i = 0; i < crossValues.length; i++) {
-      cells.push(mkCell(NA_VALUE, crossSub(crossCol, crossValues[i]), headers[i].n, naMap.get(crossValues[i]) ?? 0));
+      cells.push(
+        mkCell(
+          NA_VALUE,
+          crossSub(crossCol, crossValues[i]),
+          headers[i].n,
+          naMap.get(crossValues[i]) ?? 0,
+        ),
+      );
     }
 
     return cells;
@@ -320,14 +338,26 @@ export class Aggregator {
     for (let r = 0; r < rowMaCols.length; r++) {
       for (let c = 0; c < crossMaCols.length; c++) {
         cells.push(
-          mkCell(rowMaCols[r], crossSub(crossMaPrefix, crossMaCols[c]), headers[c].n, Number(row[`r${r}c${c}`] ?? 0)),
+          mkCell(
+            rowMaCols[r],
+            crossSub(crossMaPrefix, crossMaCols[c]),
+            headers[c].n,
+            Number(row[`r${r}c${c}`] ?? 0),
+          ),
         );
       }
     }
 
     // 無回答クロスセル
     for (let c = 0; c < crossMaCols.length; c++) {
-      cells.push(mkCell(NA_VALUE, crossSub(crossMaPrefix, crossMaCols[c]), headers[c].n, Number(row[`na_c${c}`] ?? 0)));
+      cells.push(
+        mkCell(
+          NA_VALUE,
+          crossSub(crossMaPrefix, crossMaCols[c]),
+          headers[c].n,
+          Number(row[`na_c${c}`] ?? 0),
+        ),
+      );
     }
 
     return cells;

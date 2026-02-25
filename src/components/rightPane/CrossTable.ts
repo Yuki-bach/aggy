@@ -58,9 +58,7 @@ export function buildCrossTable(
 
   // クロス軸グループを構築
   const crossGroups =
-    crossCols && crossCols.length > 0
-      ? groupSubsByCrossAxis(crossSubs, crossCols, res.type)
-      : [];
+    crossCols && crossCols.length > 0 ? groupSubsByCrossAxis(crossSubs, crossCols, res.type) : [];
   const hasMultipleAxes = crossGroups.length > 1;
 
   // ヘッダー行1: 選択肢 | 全体 | クロス軸グループ...
