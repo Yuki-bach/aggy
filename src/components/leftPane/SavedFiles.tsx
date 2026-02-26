@@ -1,23 +1,61 @@
-import { render } from "preact";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { listSaved, deleteSaved } from "../../lib/opfs";
 import { t } from "../../lib/i18n";
 
-type OnSelectCallback = (folderId: string) => void;
-
-let onSelect: OnSelectCallback = () => {};
-
-interface SavedEntry {
+export interface SavedEntry {
   folderId: string;
   csvName: string;
   timestamp: number;
 }
 
-function SavedFilesList({
+// Global refresh trigger for imperative callers (e.g. after OPFS save)
+type Listener = () => void;
+const listeners = new Set<Listener>();
+
+/** Trigger refresh from outside Preact (e.g. after saving to OPFS) */
+export function triggerSavedFilesRefresh(): void {
+  for (const fn of listeners) fn();
+}
+
+/** Hook that manages saved-files list state */
+export function useSavedFiles() {
+  const [entries, setEntries] = useState<SavedEntry[]>([]);
+
+  const refresh = useCallback(async () => {
+    try {
+      setEntries(await listSaved());
+    } catch {
+      setEntries([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    refresh();
+    listeners.add(refresh);
+    return () => {
+      listeners.delete(refresh);
+    };
+  }, [refresh]);
+
+  const deleteEntry = useCallback(
+    async (folderId: string) => {
+      await deleteSaved(folderId);
+      refresh();
+    },
+    [refresh],
+  );
+
+  return { entries, deleteEntry };
+}
+
+export function SavedFilesList({
   entries,
   onSelectEntry,
+  onDeleteEntry,
 }: {
   entries: SavedEntry[];
-  onSelectEntry: OnSelectCallback;
+  onSelectEntry: (folderId: string) => void;
+  onDeleteEntry: (folderId: string) => void;
 }) {
   if (entries.length === 0) {
     return <div class="p-4 text-center text-[0.875rem] text-muted">{t("saved.empty")}</div>;
@@ -47,8 +85,7 @@ function SavedFilesList({
               aria-label={t("saved.delete", { name: entry.csvName })}
               onClick={async (e) => {
                 e.stopPropagation();
-                await deleteSaved(entry.folderId);
-                refreshList();
+                onDeleteEntry(entry.folderId);
               }}
             >
               ×
@@ -58,23 +95,4 @@ function SavedFilesList({
       })}
     </>
   );
-}
-
-export function initSavedFiles(onSelectCb: OnSelectCallback): void {
-  onSelect = onSelectCb;
-  refreshList();
-}
-
-export async function refreshList(): Promise<void> {
-  const container = document.getElementById("saved-files-list")!;
-
-  let entries: SavedEntry[];
-  try {
-    entries = await listSaved();
-  } catch {
-    render(<></>, container);
-    return;
-  }
-
-  render(<SavedFilesList entries={entries} onSelectEntry={onSelect} />, container);
 }
