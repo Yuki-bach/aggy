@@ -7,7 +7,7 @@ import { resolveQuestionLabel } from "../../lib/labelResolver";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
-import { showAIBubble } from "./AIBubble";
+import { AIBubble } from "./AIBubble";
 import { ChartCard, type GtChartType } from "./ChartRenderer";
 
 interface ResultViewProps {
@@ -77,6 +77,7 @@ function ResultView({ results, weightCol, layoutMeta, crossCols }: ResultViewPro
           crossCols={crossCols}
         />
       )}
+      <AIBubble results={results} weightCol={weightCol} layoutMeta={layoutMeta} />
     </>
   );
 }
@@ -232,6 +233,4 @@ export function renderResultView(
     />,
     area,
   );
-
-  showAIBubble(results, weightCol, layoutMeta);
 }

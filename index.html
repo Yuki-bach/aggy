@@ -31,7 +31,7 @@
           role="status"
           aria-live="polite"
         >
-          <div class="status-dot loading" id="wasm-dot" aria-hidden="true"></div>
+          <div id="wasm-dot"></div>
           <span id="wasm-label" data-i18n="wasm.loading">DuckDB 読み込み中...</span>
         </div>
         <div class="relative">
@@ -65,23 +65,25 @@
             aria-label="データ読み込み方法"
           >
             <button
-              class="load-tab active flex-1 cursor-pointer border border-border bg-surface px-0 py-2 text-[0.875rem] font-medium text-text-secondary transition-[background,color,border-color] duration-150 first:rounded-l-sm last:rounded-r-sm last:border-l-0"
+              class="load-tab flex-1 cursor-pointer border border-border bg-surface px-0 py-2 text-[0.875rem] font-medium text-text-secondary transition-[background,color,border-color] duration-150 first:rounded-l-sm last:rounded-r-sm last:border-l-0 data-[active=true]:border-accent data-[active=true]:bg-accent data-[active=true]:text-accent-contrast"
               role="tab"
               aria-selected="true"
               aria-controls="tab-file"
               id="tab-btn-file"
               data-tab="file"
+              data-active="true"
               data-i18n="import.tab.file"
             >
               ファイルから
             </button>
             <button
-              class="load-tab flex-1 cursor-pointer border border-border bg-surface px-0 py-2 text-[0.875rem] font-medium text-text-secondary transition-[background,color,border-color] duration-150 first:rounded-l-sm last:rounded-r-sm last:border-l-0"
+              class="load-tab flex-1 cursor-pointer border border-border bg-surface px-0 py-2 text-[0.875rem] font-medium text-text-secondary transition-[background,color,border-color] duration-150 first:rounded-l-sm last:rounded-r-sm last:border-l-0 data-[active=true]:border-accent data-[active=true]:bg-accent data-[active=true]:text-accent-contrast"
               role="tab"
               aria-selected="false"
               aria-controls="tab-saved"
               id="tab-btn-saved"
               data-tab="saved"
+              data-active="false"
               data-i18n="import.tab.saved"
             >
               履歴から

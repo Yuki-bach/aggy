@@ -280,114 +280,6 @@
     display: flex;
   }
 
-  /* --- Status Dot (imperative classList) --- */
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--muted);
-    transition: background 0.3s;
-  }
-  .status-dot.loading {
-    background: var(--color-warning-700);
-    animation: pulse 1s infinite;
-  }
-  .status-dot.ready {
-    background: var(--color-success-700);
-  }
-  .status-dot.error {
-    background: var(--danger);
-  }
-
-  /* --- Dropzone States (imperative classList) --- */
-  .drag-over {
-    border-color: var(--accent) !important;
-    background: var(--accent-light) !important;
-    border-style: solid !important;
-  }
-
-  .loaded {
-    border-color: var(--color-success-700) !important;
-    border-style: solid !important;
-    background: var(--color-success-100) !important;
-  }
-
-  /* --- Load Tab Active (imperative classList) --- */
-  .load-tab.active {
-    background: var(--accent);
-    color: var(--accent-contrast);
-    border-color: var(--accent);
-  }
-
-  /* --- AI Analysis Bubble --- */
-  .ai-bubble {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    max-width: 380px;
-    min-width: 280px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 20px;
-    box-shadow: var(--shadow-lg);
-    z-index: 100;
-    animation: bubbleIn 0.3s ease-out;
-  }
-
-  .ai-bubble::after {
-    content: "";
-    position: absolute;
-    bottom: -8px;
-    right: 24px;
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid var(--surface);
-  }
-
-  .ai-bubble-close {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 1.125rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px;
-    min-width: 44px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .ai-bubble-close:hover {
-    color: var(--text);
-  }
-
-  .ai-bubble-header {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--accent2);
-    margin-bottom: 12px;
-  }
-
-  .ai-bubble-body {
-    font-size: 0.875rem;
-    line-height: 1.75;
-    color: var(--text);
-    white-space: pre-wrap;
-  }
-
-  .ai-bubble-loading {
-    color: var(--muted);
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-
   /* --- Responsive --- */
   @media (max-width: 768px) {
     main {
@@ -407,4 +299,17 @@
   .hidden {
     display: none !important;
   }
+}
+
+/* === Dropzone State Utilities (imperative classList) === */
+@utility drag-over {
+  border-color: var(--accent) !important;
+  background: var(--accent-light) !important;
+  border-style: solid !important;
+}
+
+@utility loaded {
+  border-color: var(--color-success-700) !important;
+  border-style: solid !important;
+  background: var(--color-success-100) !important;
 }

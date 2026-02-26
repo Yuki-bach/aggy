@@ -20,9 +20,13 @@ import {
   getWeightEnabled,
 } from "./components/screens/aggregation/AggregationScreen";
 import { initI18n, onLocaleChange, t } from "./lib/i18n";
+import { mountStatusDot } from "./components/shared/StatusDot";
 
 // Initialize i18n first (before any UI rendering)
 initI18n();
+
+// Mount StatusDot Preact component (before initDuckDB)
+mountStatusDot(document.getElementById("wasm-dot")!);
 
 // Currently loaded CSV / Layout data
 let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: number } | null =
@@ -231,7 +235,7 @@ const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".load-tab"
 function activateTab(tab: HTMLButtonElement): void {
   for (const t of tabs) {
     const isActive = t === tab;
-    t.classList.toggle("active", isActive);
+    t.dataset.active = String(isActive);
     t.setAttribute("aria-selected", String(isActive));
     t.tabIndex = isActive ? 0 : -1;
   }
@@ -243,7 +247,7 @@ function activateTab(tab: HTMLButtonElement): void {
 
 // Set inactive tabs to tabIndex=-1
 for (const t of tabs) {
-  if (!t.classList.contains("active")) t.tabIndex = -1;
+  if (t.dataset.active !== "true") t.tabIndex = -1;
 }
 
 for (const tab of tabs) {
