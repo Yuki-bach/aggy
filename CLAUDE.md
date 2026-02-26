@@ -11,14 +11,14 @@ Tech: TypeScript (strict), Vite, Preact (JSX), DuckDB Wasm, Tailwind CSS v4.
 ## Commands
 
 ```bash
-npm run dev        # Vite dev server (COOP/COEP headers for SharedArrayBuffer)
-npm run build      # tsc + vite build
-npm run check      # fmt:check + lint + tsc --noEmit (CI validation)
-npm run test       # vitest run
-npm run lint       # oxlint
-npm run lint:fix   # oxlint --fix
-npm run fmt        # oxfmt (format)
-npm run fmt:check  # oxfmt --check
+pnpm dev           # Vite dev server (COOP/COEP headers for SharedArrayBuffer)
+pnpm build         # tsc + vite build
+pnpm check         # fmt:check + lint + tsc --noEmit (CI validation)
+pnpm test          # vitest run
+pnpm lint          # oxlint
+pnpm lint:fix      # oxlint --fix
+pnpm fmt           # oxfmt (format)
+pnpm fmt:check     # oxfmt --check
 ```
 
 ## Architecture

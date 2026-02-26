@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
+  "packageManager": "pnpm@10.22.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -13,7 +14,7 @@
     "fmt:check": "oxfmt --check src/ scripts/ vite.config.ts index.html",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run fmt:check && npm run lint && tsc --noEmit"
+    "check": "pnpm run fmt:check && pnpm run lint && tsc --noEmit"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
@@ -31,5 +32,11 @@
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
     "vitest": "^4.0.18"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "esbuild"
+    ]
   }
 }

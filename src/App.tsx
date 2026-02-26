@@ -1,29 +1,17 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { initDuckDB, loadCSV } from "./lib/duckdbBridge";
-import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "./lib/layout";
-import { saveData, loadSaved } from "./lib/opfs";
-import { triggerSavedFilesRefresh } from "./components/import/SavedFiles";
+import { initDuckDB } from "./lib/duckdbBridge";
 import { initGettingStarted } from "./components/import/GettingStarted";
 import { initSettings } from "./components/header/SettingsModal";
 import ImportScreen from "./components/import/ImportScreen";
 import AggregationScreen from "./components/aggregation/AggregationScreen";
 import { onLocaleChange, t } from "./lib/i18n";
 import { mountStatusDot } from "./components/shared/StatusDot";
-
-type CsvData = { text: string; fileName: string; headers: string[]; rowCount: number };
-type LayoutData = { json: string; fileName: string; meta: LayoutMeta };
-
-// Module-level state (will be converted to useState in later phases)
-let currentCsv: CsvData | null = null;
-let currentLayout: LayoutData | null = null;
+import type { CsvData, LayoutData } from "./lib/types";
 
 export default function App() {
   const [screen, setScreen] = useState<"import" | "aggregation">("import");
   const [, setTick] = useState(0);
-  const [csvFileName, setCsvFileName] = useState<string | null>(null);
-  const [layoutFileName, setLayoutFileName] = useState<string | null>(null);
-  const [showProceed, setShowProceed] = useState(false);
-  const [loadedInfo, setLoadedInfo] = useState<string | null>(null);
+  const [loadedData, setLoadedData] = useState<{ csv: CsvData; layout: LayoutData } | null>(null);
   const isImport = screen === "import";
 
   // Re-render on locale change
@@ -31,97 +19,9 @@ export default function App() {
     onLocaleChange(() => setTick((n) => n + 1));
   }, []);
 
-  function updateLoadedInfo(): void {
-    if (!currentCsv && !currentLayout) {
-      setLoadedInfo(null);
-      return;
-    }
-    const lines: string[] = [];
-    if (currentCsv) lines.push(currentCsv.fileName);
-    if (currentLayout) lines.push(currentLayout.fileName);
-    if (currentCsv) {
-      lines.push(
-        t("summary.rows", {
-          rows: currentCsv.rowCount.toLocaleString(),
-          cols: currentCsv.headers.length,
-        }),
-      );
-    }
-    setLoadedInfo(lines.join("\n"));
-  }
-
-  function checkBothLoaded(): void {
-    if (!currentCsv || !currentLayout) return;
-    setShowProceed(true);
-    updateLoadedInfo();
-  }
-
-  async function trySaveToOPFS(): Promise<void> {
-    if (!currentCsv || !currentLayout) return;
-    try {
-      await saveData(
-        currentCsv.fileName,
-        currentCsv.text,
-        currentLayout.fileName,
-        currentLayout.json,
-      );
-      triggerSavedFilesRefresh();
-    } catch (e) {
-      console.warn("OPFS save failed:", e);
-    }
-  }
-
-  const onCsvFile = useCallback(async (csvText: string, fileName: string) => {
-    try {
-      const result = await loadCSV(csvText);
-      currentCsv = {
-        text: csvText,
-        fileName,
-        headers: result.headers,
-        rowCount: result.rowCount,
-      };
-      setCsvFileName(fileName);
-      updateLoadedInfo();
-      checkBothLoaded();
-      trySaveToOPFS();
-    } catch (e) {
-      console.error("CSV load failed:", e);
-    }
-  }, []);
-
-  const onLayoutFile = useCallback(
-    (_layout: Layout, meta: LayoutMeta, fileName: string, rawText: string) => {
-      currentLayout = { json: rawText, fileName, meta };
-      setLayoutFileName(fileName);
-      updateLoadedInfo();
-      checkBothLoaded();
-      trySaveToOPFS();
-    },
-    [],
-  );
-
-  const onLoadFromSaved = useCallback(async (folderId: string) => {
-    try {
-      const { csvText, csvName, layoutJson, layoutName } = await loadSaved(folderId);
-      const layout = parseLayout(layoutJson);
-      const meta = buildLayoutMeta(layout);
-      const result = await loadCSV(csvText);
-
-      currentCsv = {
-        text: csvText,
-        fileName: csvName,
-        headers: result.headers,
-        rowCount: result.rowCount,
-      };
-      currentLayout = { json: layoutJson, fileName: layoutName, meta };
-
-      setCsvFileName(csvName);
-      setLayoutFileName(layoutName);
-      updateLoadedInfo();
-      checkBothLoaded();
-    } catch (e) {
-      console.error("Saved data load failed:", e);
-    }
+  const handleComplete = useCallback((csv: CsvData, layout: LayoutData) => {
+    setLoadedData({ csv, layout });
+    setScreen("aggregation");
   }, []);
 
   // Imperative initialization (runs once after mount)
@@ -168,19 +68,9 @@ export default function App() {
         style={{ gridTemplateColumns: isImport ? "1fr" : "360px 1fr" }}
       >
         {isImport ? (
-          <ImportScreen
-            csvFileName={csvFileName}
-            layoutFileName={layoutFileName}
-            showProceed={showProceed}
-            loadedInfo={loadedInfo}
-            onCsvFile={onCsvFile}
-            onLayoutFile={onLayoutFile}
-            onLoadFromSaved={onLoadFromSaved}
-            onProceed={() => setScreen("aggregation")}
-          />
+          <ImportScreen onComplete={handleComplete} />
         ) : (
-          currentCsv &&
-          currentLayout && <AggregationScreen csv={currentCsv} layout={currentLayout} />
+          loadedData && <AggregationScreen csv={loadedData.csv} layout={loadedData.layout} />
         )}
       </main>
 
