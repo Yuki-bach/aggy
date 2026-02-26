@@ -1,11 +1,12 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 import preact from "@preact/preset-vite";
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 
 export default defineConfig({
-  plugins: [preact(), wasm(), topLevelAwait()],
+  plugins: [tailwindcss(), preact(), wasm(), topLevelAwait()],
   test: {
     pool: "forks",
   },

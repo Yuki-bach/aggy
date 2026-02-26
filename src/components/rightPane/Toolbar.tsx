@@ -3,6 +3,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
 import type { GtChartType } from "./ChartRenderer";
+import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 
 export type ViewMode = "table" | "chart";
 export type PctDirection = "vertical" | "horizontal";
@@ -35,30 +36,33 @@ export function Toolbar({
     : t("result.weight.none");
 
   return (
-    <div class="results-header">
-      <h2>{t("result.title.gt")}</h2>
-      <span class="results-meta">
+    <div class="mb-6 flex items-center gap-4">
+      <h2 class="text-xl font-bold">{t("result.title.gt")}</h2>
+      <span class="text-[0.8125rem] text-muted">
         {t("result.meta", { count: results.length, weight: weightText })}
       </span>
 
       {/* View mode toggle: table / chart */}
-      <div class="view-toggle">
-        <button
-          class={`view-toggle-btn${currentViewMode === "table" ? " active" : ""}`}
+      <ToggleGroup class="ml-auto">
+        <ToggleButton
+          active={currentViewMode === "table"}
           onClick={() => currentViewMode !== "table" && callbacks.onViewModeChange("table")}
         >
           {t("result.view.table")}
-        </button>
-        <button
-          class={`view-toggle-btn${currentViewMode === "chart" ? " active" : ""}`}
+        </ToggleButton>
+        <ToggleButton
+          active={currentViewMode === "chart"}
           onClick={() => currentViewMode !== "chart" && callbacks.onViewModeChange("chart")}
         >
           {t("result.view.chart")}
-        </button>
-      </div>
+        </ToggleButton>
+      </ToggleGroup>
 
       {/* CSV export */}
-      <button class="csv-export-btn" onClick={() => downloadAllCSV(results, weightCol, layoutMeta)}>
+      <button
+        class="m-0 min-h-9 w-auto cursor-pointer rounded-lg border border-accent bg-transparent px-4 py-2 text-[0.875rem] font-medium text-accent transition-[background] duration-150 hover:bg-accent-bg"
+        onClick={() => downloadAllCSV(results, weightCol, layoutMeta)}
+      >
         {t("result.csv.export")}
       </button>
     </div>
@@ -90,7 +94,7 @@ function ChartTypeSelect({
     <label>
       {label}{" "}
       <select
-        class="chart-type-select"
+        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-[0.8125rem] text-text"
         value={value}
         onChange={(e) => onChange((e.target as HTMLSelectElement).value as GtChartType)}
       >
@@ -111,7 +115,7 @@ export function ViewOpts({
   callbacks,
 }: ViewOptsProps) {
   return (
-    <div class="view-opts">
+    <div class="mb-4 flex items-center justify-end gap-4 text-[0.8125rem] text-text-secondary">
       {currentViewMode === "chart" && (
         <>
           <ChartTypeSelect
@@ -127,24 +131,24 @@ export function ViewOpts({
         </>
       )}
       {currentViewMode === "table" && hasCross && (
-        <div class="view-toggle">
-          <button
-            class={`view-toggle-btn${currentPctDirection === "vertical" ? " active" : ""}`}
+        <ToggleGroup class="ml-auto">
+          <ToggleButton
+            active={currentPctDirection === "vertical"}
             onClick={() =>
               currentPctDirection !== "vertical" && callbacks.onPctDirectionChange("vertical")
             }
           >
             {t("result.pct.vertical")}
-          </button>
-          <button
-            class={`view-toggle-btn${currentPctDirection === "horizontal" ? " active" : ""}`}
+          </ToggleButton>
+          <ToggleButton
+            active={currentPctDirection === "horizontal"}
             onClick={() =>
               currentPctDirection !== "horizontal" && callbacks.onPctDirectionChange("horizontal")
             }
           >
             {t("result.pct.horizontal")}
-          </button>
-        </div>
+          </ToggleButton>
+        </ToggleGroup>
       )}
     </div>
   );

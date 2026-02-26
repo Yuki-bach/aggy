@@ -1,4 +1,5 @@
 import { render } from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { t, getLocale, setLocale, onLocaleChange } from "../../lib/i18n";
 
 const THEME_KEY = "aggy-theme";
@@ -20,7 +21,7 @@ function getStoredTheme(): Theme {
   return "system";
 }
 
-function applyTheme(theme: Theme): void {
+export function applyTheme(theme: Theme): void {
   localStorage.setItem(THEME_KEY, theme);
 
   if (theme === "system") {
@@ -49,11 +50,11 @@ function SegmentControl({
   onChange: (value: string) => void;
 }) {
   return (
-    <div class="seg-control" data-seg-name={name}>
+    <div class="flex gap-[2px] rounded-lg bg-surface2 p-[2px]" data-seg-name={name}>
       {options.map((o) => (
         <button
           key={o.value}
-          class={`seg-btn${o.value === current ? " active" : ""}`}
+          class={`flex-1 cursor-pointer whitespace-nowrap rounded-[6px] border-none px-3 py-1 text-xs transition-[background,color,box-shadow] duration-150 hover:text-text ${o.value === current ? "bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "bg-transparent text-muted"}`}
           onClick={(e) => {
             e.stopPropagation();
             onChange(o.value);
@@ -72,8 +73,10 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
 
   return (
     <>
-      <div class="settings-group">
-        <span class="settings-label">{t("settings.language")}</span>
+      <div class="mb-4 last:mb-0">
+        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+          {t("settings.language")}
+        </span>
         <SegmentControl
           name="lang"
           options={[
@@ -87,8 +90,10 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
           }}
         />
       </div>
-      <div class="settings-group">
-        <span class="settings-label">{t("settings.theme")}</span>
+      <div class="mb-4 last:mb-0">
+        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+          {t("settings.theme")}
+        </span>
         <SegmentControl
           name="theme"
           options={[
@@ -104,8 +109,10 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
         />
       </div>
       {showAI && (
-        <div class="settings-group">
-          <span class="settings-label">{t("settings.ai")}</span>
+        <div class="mb-4 last:mb-0">
+          <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+            {t("settings.ai")}
+          </span>
           <SegmentControl
             name="ai"
             options={[
@@ -124,62 +131,86 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
   );
 }
 
-let aiAvailable = false;
+function SettingsRoot() {
+  const [open, setOpen] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState(false);
+  const [, setTick] = useState(0);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
-function isOpen(): boolean {
-  return !document.getElementById("settings-panel")!.classList.contains("hidden");
-}
+  // System theme change listener
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => {
+      if (getStoredTheme() === "system") applyTheme("system");
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
-function renderPanel(): void {
-  const panel = document.getElementById("settings-panel")!;
-  render(<SettingsPanel showAI={aiAvailable} onRerender={renderPanel} />, panel);
-}
+  // Re-render on locale change
+  useEffect(() => {
+    onLocaleChange(() => setTick((n) => n + 1));
+  }, []);
 
-async function show(): Promise<void> {
-  // Check AI availability once
-  if (typeof LanguageModel !== "undefined" && (await LanguageModel.availability()) !== "no") {
-    aiAvailable = true;
-  }
-  const panel = document.getElementById("settings-panel")!;
-  renderPanel();
-  panel.classList.remove("hidden");
-}
+  // Close on outside click or Escape
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("click", onClickOutside);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", onClickOutside);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
-function hide(): void {
-  document.getElementById("settings-panel")!.classList.add("hidden");
-}
+  const handleToggle = async (e: MouseEvent) => {
+    e.stopPropagation();
+    if (open) {
+      setOpen(false);
+    } else {
+      // Check AI availability once
+      if (typeof LanguageModel !== "undefined" && (await LanguageModel.availability()) !== "no") {
+        setAiAvailable(true);
+      }
+      setOpen(true);
+    }
+  };
 
-function toggle(): void {
-  if (isOpen()) {
-    hide();
-  } else {
-    show();
-  }
+  const rerender = () => setTick((n) => n + 1);
+
+  return (
+    <div class="relative" ref={wrapRef}>
+      <button
+        id="settings-btn"
+        class="cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
+        data-i18n="header.settings"
+        data-i18n-attr="aria-label"
+        aria-label={t("header.settings")}
+        onClick={handleToggle}
+      >
+        ⚙
+      </button>
+      {open && (
+        <div class="absolute top-[calc(100%+8px)] right-0 z-100 w-[300px] rounded-xl border border-border bg-surface p-4 shadow-lg">
+          <SettingsPanel showAI={aiAvailable} onRerender={rerender} />
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function initSettings(): void {
   applyTheme(getStoredTheme());
 
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    if (getStoredTheme() === "system") applyTheme("system");
-  });
-
-  document.getElementById("settings-btn")!.addEventListener("click", (e) => {
-    e.stopPropagation();
-    toggle();
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!isOpen()) return;
-    const wrap = document.querySelector(".settings-wrap")!;
-    if (!wrap.contains(e.target as Node)) hide();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && isOpen()) hide();
-  });
-
-  onLocaleChange(() => {
-    if (isOpen()) renderPanel();
-  });
+  // Mount into the settings wrapper in the header
+  const container = document.getElementById("settings-wrapper")!;
+  render(<SettingsRoot />, container);
 }
