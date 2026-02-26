@@ -5,7 +5,7 @@ import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
-import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labelResolver";
+import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labels";
 
 import type { ChartConfiguration } from "chart.js";
 

@@ -2,7 +2,7 @@ import { render } from "preact";
 import type { AggResult } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import type { pivot } from "../../lib/agg/pivot";
-import { resolveQuestionLabel, resolveValueLabel } from "../../lib/labelResolver";
+import { resolveQuestionLabel, resolveValueLabel } from "../../lib/labels";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 

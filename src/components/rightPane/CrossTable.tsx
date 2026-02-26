@@ -3,7 +3,7 @@ import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import { questionKey, parseCrossSub } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import type { pivot } from "../../lib/agg/pivot";
-import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labelResolver";
+import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labels";
 import { t } from "../../lib/i18n";
 import type { PctDirection } from "./Toolbar";
 import { Th, Td } from "./TableCells";
