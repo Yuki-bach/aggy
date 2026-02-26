@@ -2,11 +2,11 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { initDuckDB, loadCSV } from "./lib/duckdbBridge";
 import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
-import { triggerSavedFilesRefresh } from "./components/leftPane/SavedFiles";
-import { initGettingStarted } from "./components/shared/GettingStarted";
-import { initSettings } from "./components/shared/SettingsModal";
-import ImportScreen from "./components/screens/import/ImportScreen";
-import AggregationScreen from "./components/screens/aggregation/AggregationScreen";
+import { triggerSavedFilesRefresh } from "./components/import/SavedFiles";
+import { initGettingStarted } from "./components/import/GettingStarted";
+import { initSettings } from "./components/header/SettingsModal";
+import ImportScreen from "./components/import/ImportScreen";
+import AggregationScreen from "./components/aggregation/AggregationScreen";
 import { onLocaleChange, t } from "./lib/i18n";
 import { mountStatusDot } from "./components/shared/StatusDot";
 

@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from "preact/hooks";
 import type { JSX } from "preact";
-import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "../../../lib/layout";
-import { t } from "../../../lib/i18n";
+import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "../../lib/layout";
+import { t } from "../../lib/i18n";
 import { Dropzone } from "./Dropzone";
-import { SavedFilesList, useSavedFiles } from "../../leftPane/SavedFiles";
+import { SavedFilesList, useSavedFiles } from "./SavedFiles";
 
 type Tab = "file" | "saved";
 

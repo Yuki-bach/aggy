@@ -3,7 +3,7 @@ import type { AggResult } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { generateComment } from "../../lib/aiComment";
 import { t } from "../../lib/i18n";
-import { isAICommentEnabled } from "../shared/SettingsModal";
+import { isAICommentEnabled } from "../header/SettingsModal";
 
 interface AIBubbleProps {
   results: AggResult[];
