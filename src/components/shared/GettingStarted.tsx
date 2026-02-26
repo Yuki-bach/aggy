@@ -1,5 +1,5 @@
 import { render } from "preact";
-import { useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { t, onLocaleChange } from "../../lib/i18n";
 
 const STORAGE_KEY = "aggy-getting-started-dismissed";
@@ -90,42 +90,66 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
   );
 }
 
-function show(): void {
-  const modal = document.getElementById("getting-started-modal")!;
-  modal.classList.remove("hidden");
-  document.body.style.overflow = "hidden";
-  // Focus OK button after render
-  requestAnimationFrame(() => {
-    modal.querySelector<HTMLButtonElement>("[data-autofocus]")?.focus();
-  });
+// Expose show function for help button
+let showFn: (() => void) | null = null;
+
+function GettingStartedRoot() {
+  const [open, setOpen] = useState(() => !localStorage.getItem(STORAGE_KEY));
+  const [, setTick] = useState(0);
+
+  showFn = () => setOpen(true);
+
+  // Re-render on locale change
+  useEffect(() => {
+    onLocaleChange(() => setTick((n) => n + 1));
+  }, []);
+
+  // Escape key to close
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  // Lock body scroll
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4 animate-[fadeIn_0.2s_ease]"
+      role="dialog"
+      aria-modal={true}
+      aria-labelledby="gs-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) setOpen(false);
+      }}
+    >
+      <GettingStartedContent onClose={() => setOpen(false)} />
+    </div>
+  );
 }
 
-function hide(): void {
-  const modal = document.getElementById("getting-started-modal")!;
-  modal.classList.add("hidden");
-  document.body.style.overflow = "";
-}
-
-function renderModal(): void {
-  const modal = document.getElementById("getting-started-modal")!;
-  render(<GettingStartedContent onClose={hide} />, modal);
+export function showGettingStarted(): void {
+  showFn?.();
 }
 
 export function initGettingStarted(): void {
-  renderModal();
+  const container = document.getElementById("getting-started-modal")!;
+  render(<GettingStartedRoot />, container);
 
-  const modal = document.getElementById("getting-started-modal")!;
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) hide();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-      hide();
-    }
-  });
-
-  document.getElementById("help-btn")!.addEventListener("click", show);
-
-  onLocaleChange(() => renderModal());
+  document.getElementById("help-btn")!.addEventListener("click", () => showFn?.());
 }

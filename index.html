@@ -34,21 +34,7 @@
           <div id="wasm-dot"></div>
           <span id="wasm-label" data-i18n="wasm.loading">DuckDB 読み込み中...</span>
         </div>
-        <div class="relative">
-          <button
-            id="settings-btn"
-            class="cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
-            data-i18n="header.settings"
-            data-i18n-attr="aria-label"
-            aria-label="設定を開く"
-          >
-            ⚙
-          </button>
-          <div
-            id="settings-panel"
-            class="hidden absolute top-[calc(100%+8px)] right-0 z-100 w-[300px] rounded-xl border border-border bg-surface p-4 shadow-lg"
-          ></div>
-        </div>
+        <div id="settings-wrapper"></div>
       </div>
     </header>
 
@@ -270,13 +256,7 @@
       ?
     </button>
 
-    <div
-      id="getting-started-modal"
-      class="hidden fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4 animate-[fadeIn_0.2s_ease]"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="gs-title"
-    ></div>
+    <div id="getting-started-modal"></div>
 
     <script type="module" src="/src/main.tsx"></script>
   </body>
