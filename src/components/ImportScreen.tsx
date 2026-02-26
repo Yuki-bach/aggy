@@ -6,7 +6,7 @@ import { saveData, loadSaved } from "../lib/opfs";
 import { t } from "../lib/i18n";
 import { Dropzone } from "./import/Dropzone";
 import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./import/SavedFiles";
-import { GettingStartedModal, shouldShowGettingStarted } from "./import/GettingStarted";
+import { GettingStartedModal } from "./import/GettingStarted";
 import type { CsvData, LayoutData } from "../lib/types";
 
 type Tab = "file" | "saved";
@@ -26,7 +26,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const [layoutFileName, setLayoutFileName] = useState<string | null>(null);
   const [showProceed, setShowProceed] = useState(false);
   const [loadedInfo, setLoadedInfo] = useState<string | null>(null);
-  const [gsOpen, setGsOpen] = useState(shouldShowGettingStarted);
+  const [gsOpen, setGsOpen] = useState(false);
 
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const csvRef = useRef<CsvData | null>(null);

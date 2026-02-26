@@ -1,18 +1,7 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { t, onLocaleChange } from "../../lib/i18n";
 
-const STORAGE_KEY = "aggy-getting-started-dismissed";
-
 function GettingStartedContent({ onClose }: { onClose: () => void }) {
-  const checkRef = useRef<HTMLInputElement>(null);
-
-  const handleClose = () => {
-    if (checkRef.current?.checked) {
-      localStorage.setItem(STORAGE_KEY, "1");
-    }
-    onClose();
-  };
-
   return (
     <div
       class="relative w-full max-w-[600px] max-h-[85vh] overflow-y-auto rounded-lg border border-border bg-surface p-8 shadow-[0_8px_32px_rgba(0,0,0,0.18)] animate-[slideUp_0.25s_ease] max-md:max-h-[90vh] max-md:p-5"
@@ -21,7 +10,7 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
       <button
         class="absolute top-3 right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded border-none bg-transparent text-2xl leading-none text-text-secondary hover:bg-surface2 hover:text-text"
         aria-label={t("gs.close")}
-        onClick={handleClose}
+        onClick={onClose}
       >
         &times;
       </button>
@@ -72,15 +61,11 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
         </section>
       </div>
 
-      <div class="mt-6 flex items-center justify-between border-t border-border pt-4">
-        <label class="flex cursor-pointer items-center gap-2 text-[0.8125rem] text-text-secondary">
-          <input type="checkbox" ref={checkRef} />
-          {t("gs.dismiss")}
-        </label>
+      <div class="mt-6 flex items-center justify-end border-t border-border pt-4">
         <button
           class="cursor-pointer rounded border-none bg-[var(--color-primary-600)] px-6 py-2 text-[0.9375rem] font-semibold text-[var(--color-white)] transition-[background] duration-150 hover:bg-accent"
           data-autofocus
-          onClick={handleClose}
+          onClick={onClose}
         >
           {t("gs.ok")}
         </button>
@@ -134,8 +119,4 @@ export function GettingStartedModal({ open, onClose }: { open: boolean; onClose:
       <GettingStartedContent onClose={onClose} />
     </div>
   );
-}
-
-export function shouldShowGettingStarted(): boolean {
-  return !localStorage.getItem(STORAGE_KEY);
 }
