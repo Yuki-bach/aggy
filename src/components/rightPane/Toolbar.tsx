@@ -60,7 +60,7 @@ export function Toolbar({
 
       {/* CSV export */}
       <button
-        class="m-0 min-h-9 w-auto cursor-pointer rounded-lg border border-accent bg-transparent px-4 py-2 font-[var(--font-family-base)] text-[0.875rem] font-medium text-accent transition-[background] duration-150 hover:bg-accent-bg"
+        class="m-0 min-h-9 w-auto cursor-pointer rounded-lg border border-accent bg-transparent px-4 py-2 text-[0.875rem] font-medium text-accent transition-[background] duration-150 hover:bg-accent-bg"
         onClick={() => downloadAllCSV(results, weightCol, layoutMeta)}
       >
         {t("result.csv.export")}
@@ -94,7 +94,7 @@ function ChartTypeSelect({
     <label>
       {label}{" "}
       <select
-        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 font-[var(--font-family-base)] text-[0.8125rem] text-text"
+        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-[0.8125rem] text-text"
         value={value}
         onChange={(e) => onChange((e.target as HTMLSelectElement).value as GtChartType)}
       >

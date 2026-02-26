@@ -5,10 +5,6 @@
 
 /* === Design Tokens === */
 @theme {
-  /* Font Families */
-  --font-sans: var(--font-family-base);
-  --font-mono: var(--font-family-mono);
-
   /* Semantic Colors (reference CSS vars so dark mode overrides work) */
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -44,9 +40,6 @@
 @layer base {
   /* Light Mode Tokens */
   :root {
-    --font-family-base: system-ui, sans-serif;
-    --font-family-mono: ui-monospace, monospace;
-
     /* Neutral Scale */
     --color-white: #ffffff;
     --color-gray-50: #f8f8fb;
@@ -157,7 +150,6 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--font-family-base);
     font-size: 1rem;
     line-height: 1.5;
     font-weight: 400;
