@@ -247,7 +247,7 @@
 @layer components {
   /* --- Screen Switching --- */
   main[data-screen="import"] {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   main[data-screen="import"] .panel-left,
