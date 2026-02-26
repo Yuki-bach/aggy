@@ -1,69 +1,79 @@
 /** Chart rendering component */
 
+import { useRef, useEffect } from "preact/hooks";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labelResolver";
-import { escHtml } from "../shared/escHtml";
 
 import type { ChartConfiguration } from "chart.js";
 
-/** Track active Chart.js instances to prevent memory leaks */
-const activeCharts: Chart[] = [];
-
-export function destroyAllCharts(): void {
-  for (const c of activeCharts) c.destroy();
-  activeCharts.length = 0;
-}
-
 export type GtChartType = "bar-h" | "bar-v" | "obi";
 
-export function renderChartCard(
-  res: AggResult,
-  gtChartType: GtChartType,
-  layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
-): HTMLDivElement {
+interface ChartCardProps {
+  res: AggResult;
+  gtChartType: GtChartType;
+  layoutMeta?: LayoutMeta;
+  crossCols?: QuestionDef[];
+}
+
+export function ChartCard({ res, gtChartType, layoutMeta, crossCols }: ChartCardProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const chartRef = useRef<Chart | null>(null);
+
   const pv = pivot(res.cells);
   const isCross = pv.subs.length > 1;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "chart-card";
-
-  const head = document.createElement("div");
-  head.className = "flex items-baseline gap-3 p-4 border-b border-border";
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
   const hasLabel = questionLabel !== res.question;
   const gtSub = pv.subs.find((s) => s.label === "GT")!;
-  head.innerHTML = `
-    <div class="flex flex-col gap-0.5 min-w-0">
-      <span class="font-bold text-sm text-accent">${escHtml(questionLabel)}</span>
-      ${hasLabel ? `<span class="text-xs text-muted tracking-[0.04em]">${escHtml(res.question)}</span>` : ""}
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Destroy previous chart if any
+    chartRef.current?.destroy();
+
+    const theme = getThemeColors();
+    if (isCross) {
+      chartRef.current = buildCrossChart(
+        canvas,
+        pv,
+        gtChartType,
+        res,
+        theme,
+        layoutMeta,
+        crossCols,
+      );
+    } else {
+      chartRef.current = buildGtChart(canvas, pv, gtChartType, res, theme, layoutMeta);
+    }
+
+    return () => {
+      chartRef.current?.destroy();
+      chartRef.current = null;
+    };
+  }, [res, gtChartType, layoutMeta, crossCols]);
+
+  return (
+    <div class="chart-card">
+      <div class="flex items-baseline gap-3 p-4 border-b border-border">
+        <div class="flex flex-col gap-0.5 min-w-0">
+          <span class="font-bold text-sm text-accent">{questionLabel}</span>
+          {hasLabel && <span class="text-xs text-muted tracking-[0.04em]">{res.question}</span>}
+        </div>
+        <span class="text-xs text-muted tracking-[0.04em]">{res.type}</span>
+        <span class="ml-auto text-[0.8125rem] text-muted">n={gtSub.n.toLocaleString()}</span>
+      </div>
+      <div class="chart-canvas-wrap">
+        <canvas ref={canvasRef} />
+      </div>
     </div>
-    <span class="text-xs text-muted tracking-[0.04em]">${res.type}</span>
-    <span class="ml-auto text-[0.8125rem] text-muted">n=${gtSub.n.toLocaleString()}</span>
-  `;
-  wrapper.appendChild(head);
-
-  const canvasWrap = document.createElement("div");
-  canvasWrap.className = "chart-canvas-wrap";
-  const canvas = document.createElement("canvas");
-  canvasWrap.appendChild(canvas);
-  wrapper.appendChild(canvasWrap);
-
-  const theme = getThemeColors();
-
-  let chart: Chart;
-  if (isCross) {
-    chart = buildCrossChart(canvas, pv, gtChartType, res, theme, layoutMeta, crossCols);
-  } else {
-    chart = buildGtChart(canvas, pv, gtChartType, res, theme, layoutMeta);
-  }
-  activeCharts.push(chart);
-
-  return wrapper;
+  );
 }
+
+// ─── Chart builders (pure logic, unchanged) ─────────────────
 
 function buildGtChart(
   canvas: HTMLCanvasElement,

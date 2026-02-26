@@ -8,7 +8,7 @@ import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
 import { showAIBubble } from "./AIBubble";
-import { destroyAllCharts, renderChartCard, type GtChartType } from "./ChartRenderer";
+import { ChartCard, type GtChartType } from "./ChartRenderer";
 
 interface ResultViewProps {
   results: AggResult[];
@@ -105,17 +105,17 @@ function ChartContent({
           ? "grid grid-cols-[1fr] gap-6"
           : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
       }
-      ref={(el) => {
-        if (!el) return;
-        destroyAllCharts();
-        el.innerHTML = "";
-        for (const res of results) {
-          const gtType = res.type === "SA" ? saChartType : maChartType;
-          const card = renderChartCard(res, gtType, layoutMeta, crossCols);
-          el.appendChild(card);
-        }
-      }}
-    />
+    >
+      {results.map((res) => (
+        <ChartCard
+          key={res.question}
+          res={res}
+          gtChartType={res.type === "SA" ? saChartType : maChartType}
+          layoutMeta={layoutMeta}
+          crossCols={crossCols}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -134,8 +134,6 @@ function TableContent({
   layoutMeta?: LayoutMeta;
   crossCols?: QuestionDef[];
 }) {
-  destroyAllCharts();
-
   const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 
