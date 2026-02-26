@@ -1,4 +1,3 @@
-import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { t, getLocale, setLocale, onLocaleChange } from "../../lib/i18n";
 
@@ -131,7 +130,7 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
   );
 }
 
-function SettingsRoot() {
+export function SettingsRoot() {
   const [open, setOpen] = useState(false);
   const [aiAvailable, setAiAvailable] = useState(false);
   const [, setTick] = useState(0);
@@ -207,10 +206,7 @@ function SettingsRoot() {
   );
 }
 
-export function initSettings(): void {
+/** Apply stored theme on app startup (call once in App useEffect) */
+export function initTheme(): void {
   applyTheme(getStoredTheme());
-
-  // Mount into the settings wrapper in the header
-  const container = document.getElementById("settings-wrapper")!;
-  render(<SettingsRoot />, container);
 }
