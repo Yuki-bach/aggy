@@ -34,12 +34,33 @@ let currentCsv: { text: string; fileName: string; headers: string[]; rowCount: n
 let currentLayout: { json: string; fileName: string; meta: LayoutMeta } | null = null;
 
 function switchScreen(screen: "import" | "aggregation"): void {
-  const main = document.querySelector("main")!;
-  main.dataset.screen = screen;
+  const isImport = screen === "import";
 
+  // Import screen
+  const importScreen = document.getElementById("import-screen")!;
+  importScreen.classList.toggle("hidden", !isImport);
+
+  // Aggregation panels
+  const panelLeft = document.querySelector<HTMLElement>(".panel-left")!;
+  const panelRight = document.querySelector<HTMLElement>(".panel-right")!;
+  panelLeft.classList.toggle("hidden", isImport);
+  panelRight.classList.toggle("hidden", isImport);
+
+  // Main grid columns
+  const main = document.querySelector("main")!;
+  main.style.gridTemplateColumns = isImport ? "1fr" : "360px 1fr";
+
+  // Back button
   const backBtn = document.getElementById("back-btn")!;
-  backBtn.classList.toggle("hidden", screen === "import");
+  backBtn.classList.toggle("hidden", isImport);
+
+  // Help button
+  const helpBtn = document.getElementById("help-btn")!;
+  helpBtn.classList.toggle("hidden", !isImport);
 }
+
+// Set initial screen state (import screen visible, panels hidden)
+switchScreen("import");
 
 initSettings();
 initGettingStarted();

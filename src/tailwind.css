@@ -239,61 +239,6 @@
   }
 }
 
-/* === Components === */
-@layer components {
-  /* --- Screen Switching --- */
-  main[data-screen="import"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  main[data-screen="import"] .panel-left,
-  main[data-screen="import"] .panel-right {
-    display: none !important;
-  }
-
-  main[data-screen="import"] .import-screen {
-    display: flex !important;
-  }
-
-  main[data-screen="aggregation"] .import-screen {
-    display: none !important;
-  }
-
-  main[data-screen="aggregation"] .panel-left {
-    display: flex !important;
-  }
-
-  main[data-screen="aggregation"] .panel-right {
-    display: block !important;
-  }
-
-  main[data-screen="import"] ~ * > .back-btn,
-  .back-btn.hidden {
-    display: none;
-  }
-
-  main[data-screen="aggregation"] ~ .help-btn {
-    display: none;
-  }
-
-  main[data-screen="import"] ~ .help-btn {
-    display: flex;
-  }
-
-  /* --- Responsive --- */
-  @media (max-width: 768px) {
-    main {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr;
-    }
-    .panel-left {
-      border-right: none !important;
-      border-bottom: 1px solid var(--border);
-      max-height: 50vh;
-    }
-  }
-}
-
 /* === Utilities === */
 @layer utilities {
   .hidden {

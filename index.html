@@ -52,7 +52,7 @@
       </div>
     </header>
 
-    <main class="grid min-h-0 flex-1 grid-cols-[360px_1fr] grid-rows-[1fr]" data-screen="import">
+    <main class="grid min-h-0 flex-1 grid-cols-[1fr] grid-rows-[1fr]">
       <!-- IMPORT SCREEN -->
       <div id="import-screen" class="import-screen flex items-center justify-center p-6">
         <div class="w-full max-w-[480px] rounded-xl border border-border bg-surface p-8 shadow-md">
@@ -183,7 +183,7 @@
 
       <!-- AGGREGATION SCREEN: LEFT panel -->
       <div
-        class="panel-left flex flex-col overflow-hidden border-r border-border bg-surface"
+        class="panel-left hidden flex flex-col overflow-hidden border-r border-border bg-surface max-md:max-h-[50vh] max-md:border-b max-md:border-r-0"
         role="region"
         aria-label="設定"
       >
@@ -197,7 +197,10 @@
           <div id="data-summary" class="text-[0.875rem] leading-relaxed text-text-secondary"></div>
         </section>
 
-        <section class="hidden flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4" id="cross-config-section">
+        <section
+          class="hidden flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4"
+          id="cross-config-section"
+        >
           <h2
             class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted"
             data-i18n="section.cross"
@@ -222,7 +225,12 @@
           <div id="weight-toggle" class="ml-auto flex"></div>
         </div>
 
-        <div id="error-msg" class="hidden mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm leading-normal text-danger" role="alert" aria-live="assertive"></div>
+        <div
+          id="error-msg"
+          class="hidden mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm leading-normal text-danger"
+          role="alert"
+          aria-live="assertive"
+        ></div>
 
         <button
           class="hidden mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)] disabled:cursor-not-allowed disabled:bg-[var(--color-gray-300)] disabled:text-[var(--color-gray-600)]"
@@ -235,7 +243,12 @@
       </div>
 
       <!-- AGGREGATION SCREEN: RIGHT panel -->
-      <div class="panel-right overflow-y-auto bg-bg p-6" id="panel-right" role="region" aria-label="集計結果">
+      <div
+        class="panel-right hidden overflow-y-auto bg-bg p-6"
+        id="panel-right"
+        role="region"
+        aria-label="集計結果"
+      >
         <div
           class="flex h-full flex-col items-center justify-center gap-3 text-muted"
           id="empty-state"
