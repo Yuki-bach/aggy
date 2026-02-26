@@ -32,17 +32,17 @@ export function renderChartCard(
   wrapper.className = "chart-card";
 
   const head = document.createElement("div");
-  head.className = "gt-table-head";
+  head.className = "flex items-baseline gap-3 p-4 border-b border-border";
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
   const hasLabel = questionLabel !== res.question;
   const gtSub = pv.subs.find((s) => s.label === "GT")!;
   head.innerHTML = `
-    <div class="q-header">
-      <span class="q-label">${escHtml(questionLabel)}</span>
-      ${hasLabel ? `<span class="q-key">${escHtml(res.question)}</span>` : ""}
+    <div class="flex flex-col gap-0.5 min-w-0">
+      <span class="font-bold text-sm text-accent">${escHtml(questionLabel)}</span>
+      ${hasLabel ? `<span class="text-xs text-muted tracking-[0.04em]">${escHtml(res.question)}</span>` : ""}
     </div>
-    <span class="q-type">${res.type}</span>
-    <span class="q-n">n=${gtSub.n.toLocaleString()}</span>
+    <span class="text-xs text-muted tracking-[0.04em]">${res.type}</span>
+    <span class="ml-auto text-[0.8125rem] text-muted">n=${gtSub.n.toLocaleString()}</span>
   `;
   wrapper.appendChild(head);
 

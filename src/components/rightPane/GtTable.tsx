@@ -4,6 +4,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import type { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel, resolveValueLabel } from "../../lib/labelResolver";
 import { t } from "../../lib/i18n";
+import { Th, Td } from "./TableCells";
 
 interface GtTableProps {
   res: AggResult;
@@ -18,19 +19,19 @@ export function GtTable({ res, pv, weightCol, maxPct, layoutMeta }: GtTableProps
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
 
   return (
-    <table class="gt">
+    <table class="w-full border-collapse text-sm tabular-nums">
       <caption class="sr-only">{t("table.caption.gt", { question: questionLabel })}</caption>
       <thead>
         <tr>
-          <th>{t("table.option")}</th>
-          <th class="right">n</th>
-          <th class="right">%</th>
-          <th aria-hidden="true">
+          <Th>{t("table.option")}</Th>
+          <Th right>n</Th>
+          <Th right>%</Th>
+          <Th aria-hidden="true">
             <span class="sr-only">{t("table.graph")}</span>
-          </th>
+          </Th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
         {mains.map((main) => {
           const cell = lookup.get(`${main}\0GT`)!;
           const label = resolveValueLabel(res.type, res.question, main, layoutMeta);
@@ -40,11 +41,18 @@ export function GtTable({ res, pv, weightCol, maxPct, layoutMeta }: GtTableProps
 
           return (
             <tr key={main}>
-              <td>{label}</td>
-              <td class="num">{countStr}</td>
-              <td class="pct">{cell.pct.toFixed(1)}%</td>
-              <td class="bar-cell" aria-hidden="true">
-                <div class="bar" style={{ width: `${barWidth}px` }} />
+              <Td>{label}</Td>
+              <Td right mono>
+                {countStr}
+              </Td>
+              <Td right mono class="text-muted">
+                {cell.pct.toFixed(1)}%
+              </Td>
+              <td class="py-3 pr-4 pl-0 border-b border-row-border w-20" aria-hidden="true">
+                <div
+                  class="h-1.5 bg-accent rounded transition-[width] duration-[400ms] opacity-80"
+                  style={{ width: `${barWidth}px` }}
+                />
               </td>
             </tr>
           );

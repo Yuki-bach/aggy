@@ -6,6 +6,7 @@ import type { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labelResolver";
 import { t } from "../../lib/i18n";
 import type { PctDirection } from "./Toolbar";
+import { Th, Td } from "./TableCells";
 
 type SubInfo = { label: string; n: number };
 
@@ -46,6 +47,11 @@ function crossColKey(col: QuestionDef): string {
   return col.type === "SA" ? col.column : col.prefix;
 }
 
+const TH_BASE =
+  "py-3 px-4 text-[0.8125rem] font-bold tracking-[0.04em] border-b-2 border-border-strong";
+const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
+const MONO = "text-right tabular-nums font-mono";
+
 // ─── Vertical % Table ───────────────────────────────────────
 
 interface VerticalCrossTableProps {
@@ -83,76 +89,83 @@ function VerticalCrossTable({
   }
 
   return (
-    <table class="gt cross-table">
+    <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
       <caption class="sr-only">{t("table.caption.cross", { question: questionLabel })}</caption>
       <thead>
         <tr>
-          <th rowSpan={2} class="cross-corner" />
-          <th colSpan={2} class="cross-group-header gt-group">
+          <th rowSpan={2} class="py-3 px-4" />
+          <th colSpan={2} class={`${TH_BASE} text-center bg-gt-bg text-accent`}>
             {t("table.total")}
             <br />
-            <span class="cross-n">n={formatN(gtSub.n, weightCol)}</span>
+            <span class="text-muted text-xs font-normal">n={formatN(gtSub.n, weightCol)}</span>
           </th>
           {crossGroups.length > 0 ? (
             crossGroups.map((group) => (
               <th
                 key={crossColKey(group.crossCol)}
                 colSpan={group.subs.length}
-                class={"cross-group-header" + (hasMultipleAxes ? " cross-axis-border" : "")}
+                class={`${TH_BASE} text-center bg-cross-bg border-l border-border text-accent2 ${hasMultipleAxes ? "border-l-2 border-l-border-strong" : ""}`}
               >
                 {resolveQuestionLabel(crossColKey(group.crossCol), layoutMeta)}
               </th>
             ))
           ) : (
-            <th colSpan={crossSubs.length} class="cross-group-header" />
+            <th
+              colSpan={crossSubs.length}
+              class={`${TH_BASE} text-center bg-cross-bg border-l border-border text-accent2`}
+            />
           )}
         </tr>
         <tr>
-          <th class="right">n</th>
-          <th class="right">%</th>
+          <Th right>n</Th>
+          <Th right>%</Th>
           {crossGroups.length > 0
             ? crossGroups.map((group, gi) =>
                 group.subs.map((sub, si) => (
                   <th
                     key={sub.label}
-                    class={
-                      "right cross-val-header" +
-                      (hasMultipleAxes && si === 0 && gi > 0 ? " cross-axis-first" : "")
-                    }
+                    class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2 ${hasMultipleAxes && si === 0 && gi > 0 ? "border-l-2 border-l-border-strong" : ""}`}
                   >
                     {resolveSubLabel(sub.label, layoutMeta, crossCols)}
                     <br />
-                    <span class="cross-n">n={formatN(sub.n, weightCol)}</span>
+                    <span class="text-muted text-xs font-normal">
+                      n={formatN(sub.n, weightCol)}
+                    </span>
                   </th>
                 )),
               )
             : crossSubs.map((sub) => (
-                <th key={sub.label} class="right cross-val-header">
+                <th
+                  key={sub.label}
+                  class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2`}
+                >
                   {resolveSubLabel(sub.label, layoutMeta, crossCols)}
                   <br />
-                  <span class="cross-n">n={formatN(sub.n, weightCol)}</span>
+                  <span class="text-muted text-xs font-normal">n={formatN(sub.n, weightCol)}</span>
                 </th>
               ))}
         </tr>
       </thead>
-      <tbody>
+      <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
         {mains.map((main) => {
           const gtCell = lookup.get(`${main}\0GT`)!;
           return (
             <tr key={main}>
-              <td>{resolveValueLabel(res.type, res.question, main, layoutMeta)}</td>
-              <td class="num">
+              <Td>{resolveValueLabel(res.type, res.question, main, layoutMeta)}</Td>
+              <Td right mono>
                 {res.type === "SA" && !weightCol
                   ? gtCell.count.toLocaleString()
                   : gtCell.count.toFixed(1)}
-              </td>
-              <td class="pct">{gtCell.pct.toFixed(1)}%</td>
+              </Td>
+              <Td right mono class="text-muted">
+                {gtCell.pct.toFixed(1)}%
+              </Td>
               {crossSubs.map((sub, i) => {
                 const cell = lookup.get(`${main}\0${sub.label}`);
                 return (
                   <td
                     key={sub.label}
-                    class={"pct cross-pct" + (axisBorderIndices.has(i) ? " cross-axis-first" : "")}
+                    class={`${TD_BASE} ${MONO} text-accent2 border-l border-l-row-border ${axisBorderIndices.has(i) ? "border-l-2 border-l-border-strong" : ""}`}
                   >
                     {cell ? cell.pct.toFixed(1) + "%" : "-"}
                   </td>
@@ -195,17 +208,19 @@ function TransposedSubRow({
 }) {
   return (
     <tr>
-      <td class="transposed-row-label transposed-cross-label">
+      <td
+        class={`${TD_BASE} text-left text-[0.8125rem] font-bold whitespace-nowrap border-r-2 border-r-border-strong text-accent2`}
+      >
         {resolveSubLabel(sub.label, layoutMeta, crossCols)}
         <br />
-        <span class="cross-n">n={formatN(sub.n, weightCol)}</span>
+        <span class="text-muted text-xs font-normal">n={formatN(sub.n, weightCol)}</span>
       </td>
       {mains.map((main) => {
         const cell = lookup.get(`${main}\0${sub.label}`);
         const denom = mainGtCounts.get(main) ?? 0;
         const pct = cell && denom > 0 ? (cell.count / denom) * 100 : 0;
         return (
-          <td key={main} class="pct cross-pct">
+          <td key={main} class={`${TD_BASE} ${MONO} text-accent2 border-l border-l-row-border`}>
             {cell ? pct.toFixed(1) + "%" : "-"}
           </td>
         );
@@ -236,19 +251,22 @@ function TransposedCrossTable({
     crossCols && crossCols.length > 0 ? groupSubsByCrossAxis(crossSubs, crossCols, res.type) : [];
 
   return (
-    <table class="gt cross-table">
+    <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
       <caption class="sr-only">{t("table.caption.cross", { question: questionLabel })}</caption>
       <thead>
         <tr>
-          <th />
+          <th class="py-3 px-4" />
           {mains.map((main) => {
             const label = resolveValueLabel(res.type, res.question, main, layoutMeta);
             const gtCount = mainGtCounts.get(main) ?? 0;
             return (
-              <th key={main} class="right cross-val-header">
+              <th
+                key={main}
+                class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2`}
+              >
                 {label}
                 <br />
-                <span class="cross-n">n={formatN(gtCount, weightCol)}</span>
+                <span class="text-muted text-xs font-normal">n={formatN(gtCount, weightCol)}</span>
               </th>
             );
           })}
@@ -256,16 +274,18 @@ function TransposedCrossTable({
       </thead>
       <tbody>
         {/* GT row */}
-        <tr class="transposed-gt-row">
-          <td class="transposed-row-label transposed-gt-label">
+        <tr class="[&_td]:border-b-2 [&_td]:border-border-strong">
+          <td
+            class={`${TD_BASE} text-left text-[0.8125rem] font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-gt-bg text-accent`}
+          >
             {t("table.total")}
             <br />
-            <span class="cross-n">n={formatN(gtSub.n, weightCol)}</span>
+            <span class="text-muted text-xs font-normal">n={formatN(gtSub.n, weightCol)}</span>
           </td>
           {mains.map((main) => {
             const cell = lookup.get(`${main}\0GT`);
             return (
-              <td key={main} class="pct gt-col">
+              <td key={main} class={`${TD_BASE} ${MONO} text-accent bg-gt-bg`}>
                 {cell ? cell.pct.toFixed(1) + "%" : "-"}
               </td>
             );
@@ -276,8 +296,11 @@ function TransposedCrossTable({
         {crossGroups.length > 0
           ? crossGroups.map((group) => (
               <>
-                <tr key={`hdr-${crossColKey(group.crossCol)}`} class="transposed-group-header-row">
-                  <td colSpan={mains.length + 1} class="transposed-group-header">
+                <tr key={`hdr-${crossColKey(group.crossCol)}`}>
+                  <td
+                    colSpan={mains.length + 1}
+                    class="py-3 px-4 bg-cross-bg text-accent2 font-bold text-[0.8125rem] tracking-[0.04em] border-b-2 border-border-strong border-t-2 border-t-border-strong"
+                  >
                     {resolveQuestionLabel(crossColKey(group.crossCol), layoutMeta)}
                   </td>
                 </tr>
