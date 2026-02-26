@@ -195,7 +195,7 @@
           <div id="data-summary" class="text-[0.875rem] leading-relaxed text-text-secondary"></div>
         </section>
 
-        <section class="hidden shrink-0 border-b border-border p-4" id="cross-config-section">
+        <section class="hidden flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4" id="cross-config-section">
           <h2
             class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted"
             data-i18n="section.cross"
@@ -220,7 +220,7 @@
           <div id="weight-toggle" class="ml-auto flex"></div>
         </div>
 
-        <div id="error-msg" class="hidden" role="alert" aria-live="assertive"></div>
+        <div id="error-msg" class="hidden mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm leading-normal text-danger" role="alert" aria-live="assertive"></div>
 
         <button
           class="hidden mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent font-[var(--font-family-base)] text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)] disabled:cursor-not-allowed disabled:bg-[var(--color-gray-300)] disabled:text-[var(--color-gray-600)]"
@@ -257,7 +257,7 @@
 
     <div
       id="getting-started-modal"
-      class="modal-overlay hidden"
+      class="hidden fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4 animate-[fadeIn_0.2s_ease]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="gs-title"

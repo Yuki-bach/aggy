@@ -3,6 +3,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
 import type { GtChartType } from "./ChartRenderer";
+import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 
 export type ViewMode = "table" | "chart";
 export type PctDirection = "vertical" | "horizontal";
@@ -42,20 +43,20 @@ export function Toolbar({
       </span>
 
       {/* View mode toggle: table / chart */}
-      <div class="ml-auto flex">
-        <button
-          class={`view-toggle-btn${currentViewMode === "table" ? " active" : ""}`}
+      <ToggleGroup class="ml-auto">
+        <ToggleButton
+          active={currentViewMode === "table"}
           onClick={() => currentViewMode !== "table" && callbacks.onViewModeChange("table")}
         >
           {t("result.view.table")}
-        </button>
-        <button
-          class={`view-toggle-btn${currentViewMode === "chart" ? " active" : ""}`}
+        </ToggleButton>
+        <ToggleButton
+          active={currentViewMode === "chart"}
           onClick={() => currentViewMode !== "chart" && callbacks.onViewModeChange("chart")}
         >
           {t("result.view.chart")}
-        </button>
-      </div>
+        </ToggleButton>
+      </ToggleGroup>
 
       {/* CSV export */}
       <button
@@ -130,24 +131,24 @@ export function ViewOpts({
         </>
       )}
       {currentViewMode === "table" && hasCross && (
-        <div class="ml-auto flex">
-          <button
-            class={`view-toggle-btn${currentPctDirection === "vertical" ? " active" : ""}`}
+        <ToggleGroup class="ml-auto">
+          <ToggleButton
+            active={currentPctDirection === "vertical"}
             onClick={() =>
               currentPctDirection !== "vertical" && callbacks.onPctDirectionChange("vertical")
             }
           >
             {t("result.pct.vertical")}
-          </button>
-          <button
-            class={`view-toggle-btn${currentPctDirection === "horizontal" ? " active" : ""}`}
+          </ToggleButton>
+          <ToggleButton
+            active={currentPctDirection === "horizontal"}
             onClick={() =>
               currentPctDirection !== "horizontal" && callbacks.onPctDirectionChange("horizontal")
             }
           >
             {t("result.pct.horizontal")}
-          </button>
-        </div>
+          </ToggleButton>
+        </ToggleGroup>
       )}
     </div>
   );

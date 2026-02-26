@@ -53,7 +53,7 @@ function SegmentControl({
       {options.map((o) => (
         <button
           key={o.value}
-          class={`seg-btn${o.value === current ? " active" : ""}`}
+          class={`flex-1 cursor-pointer whitespace-nowrap rounded-[6px] border-none px-3 py-1 text-xs transition-[background,color,box-shadow] duration-150 hover:text-text ${o.value === current ? "bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "bg-transparent text-muted"}`}
           onClick={(e) => {
             e.stopPropagation();
             onChange(o.value);

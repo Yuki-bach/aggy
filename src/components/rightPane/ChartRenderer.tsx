@@ -57,7 +57,7 @@ export function ChartCard({ res, gtChartType, layoutMeta, crossCols }: ChartCard
   }, [res, gtChartType, layoutMeta, crossCols]);
 
   return (
-    <div class="chart-card">
+    <div class="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
       <div class="flex items-baseline gap-3 p-4 border-b border-border">
         <div class="flex flex-col gap-0.5 min-w-0">
           <span class="font-bold text-sm text-accent">{questionLabel}</span>
@@ -66,7 +66,7 @@ export function ChartCard({ res, gtChartType, layoutMeta, crossCols }: ChartCard
         <span class="text-xs text-muted tracking-[0.04em]">{res.type}</span>
         <span class="ml-auto text-[0.8125rem] text-muted">n={gtSub.n.toLocaleString()}</span>
       </div>
-      <div class="chart-canvas-wrap">
+      <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
         <canvas ref={canvasRef} />
       </div>
     </div>

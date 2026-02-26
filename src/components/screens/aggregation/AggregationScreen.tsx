@@ -1,5 +1,6 @@
 import { render } from "preact";
 import { t } from "../../../lib/i18n";
+import { ToggleButton, ToggleGroup } from "../../shared/ToggleButton";
 
 function DataSummary({
   csv,
@@ -54,20 +55,14 @@ function WeightToggle({
   onToggle: (on: boolean) => void;
 }) {
   return (
-    <>
-      <button
-        class={`view-toggle-btn${enabled ? " active" : ""}`}
-        onClick={() => !enabled || onToggle(true)}
-      >
+    <ToggleGroup>
+      <ToggleButton active={enabled} onClick={() => !enabled || onToggle(true)}>
         {t("weight.on")}
-      </button>
-      <button
-        class={`view-toggle-btn${!enabled ? " active" : ""}`}
-        onClick={() => enabled && onToggle(false)}
-      >
+      </ToggleButton>
+      <ToggleButton active={!enabled} onClick={() => enabled && onToggle(false)}>
         {t("weight.off")}
-      </button>
-    </>
+      </ToggleButton>
+    </ToggleGroup>
   );
 }
 
