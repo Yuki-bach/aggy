@@ -19,14 +19,12 @@
   --color-accent-light: var(--accent-light);
   --color-accent-bg: var(--accent-bg);
   --color-accent2: var(--accent2);
-  --color-accent2-light: var(--accent2-light);
   --color-accent-contrast: var(--accent-contrast);
   --color-danger: var(--danger);
   --color-row-border: var(--row-border);
   --color-row-hover: var(--row-hover);
   --color-cross-bg: var(--cross-bg);
   --color-gt-bg: var(--gt-bg);
-  --color-ma-badge-bg: var(--ma-badge-bg);
   --color-error-bg: var(--error-bg);
   --color-error-border: var(--error-border);
 
@@ -86,7 +84,6 @@
     --accent-light: var(--color-primary-100);
     --accent-bg: var(--color-primary-50);
     --accent2: var(--color-secondary-700);
-    --accent2-light: var(--color-secondary-100);
     --accent-contrast: var(--color-white);
     --danger: var(--color-error-700);
 
@@ -100,7 +97,6 @@
     --row-hover: var(--color-primary-50);
     --cross-bg: var(--color-secondary-100);
     --gt-bg: var(--color-primary-50);
-    --ma-badge-bg: var(--color-secondary-100);
     --error-bg: var(--color-error-50);
     --error-border: var(--color-error-100);
   }
@@ -221,21 +217,6 @@
       opacity: 1;
       transform: translateY(0);
     }
-  }
-
-  /* Scrollbar (Webkit) */
-  .panel-left ::-webkit-scrollbar {
-    width: 6px;
-  }
-  .panel-left ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .panel-left ::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 4px;
-  }
-  .panel-left ::-webkit-scrollbar-thumb:hover {
-    background: var(--border-strong);
   }
 }
 
