@@ -1,21 +1,12 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
-import CrossConfig from "./components/leftPane/CrossConfig";
-import ResultView from "./components/rightPane/ResultView";
-import { initDuckDB, loadCSV, runDuckDBAggregation } from "./lib/duckdbBridge";
-import {
-  parseLayout,
-  buildLayoutMeta,
-  buildQuestionDefs,
-  type Layout,
-  type LayoutMeta,
-} from "./lib/layout";
-import { questionKey, type AggResult, type QuestionDef } from "./lib/agg/aggregate";
+import { initDuckDB, loadCSV } from "./lib/duckdbBridge";
+import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "./lib/layout";
 import { saveData, loadSaved } from "./lib/opfs";
 import { triggerSavedFilesRefresh } from "./components/leftPane/SavedFiles";
 import { initGettingStarted } from "./components/shared/GettingStarted";
 import { initSettings } from "./components/shared/SettingsModal";
 import ImportScreen from "./components/screens/import/ImportScreen";
-import { DataSummary, WeightInfo } from "./components/screens/aggregation/AggregationScreen";
+import AggregationScreen from "./components/screens/aggregation/AggregationScreen";
 import { onLocaleChange, t } from "./lib/i18n";
 import { mountStatusDot } from "./components/shared/StatusDot";
 
@@ -33,23 +24,6 @@ export default function App() {
   const [layoutFileName, setLayoutFileName] = useState<string | null>(null);
   const [showProceed, setShowProceed] = useState(false);
   const [loadedInfo, setLoadedInfo] = useState<string | null>(null);
-
-  // Aggregation left panel state
-  const [crossQuestions, setCrossQuestions] = useState<QuestionDef[]>([]);
-  const [crossLabels, setCrossLabels] = useState<Record<string, string>>({});
-  const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
-  const [weightCol, setWeightCol] = useState("");
-  const [weightEnabled, setWeightEnabled] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [dataReady, setDataReady] = useState(false);
-  const [aggResults, setAggResults] = useState<{
-    results: AggResult[];
-    weightCol: string;
-    rawN: number;
-    layoutMeta: LayoutMeta;
-    crossCols: QuestionDef[];
-  } | null>(null);
-
   const isImport = screen === "import";
 
   // Re-render on locale change
@@ -76,22 +50,8 @@ export default function App() {
     setLoadedInfo(lines.join("\n"));
   }
 
-  function initAfterBothLoaded(): void {
+  function checkBothLoaded(): void {
     if (!currentCsv || !currentLayout) return;
-
-    const questions = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
-    setCrossQuestions(questions);
-    setCrossLabels(currentLayout.meta.questionLabels);
-    const selected: Record<string, boolean> = {};
-    questions.forEach((q) => (selected[questionKey(q)] = false));
-    setCrossSelected(selected);
-
-    const wCol =
-      Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
-    setWeightCol(wCol);
-    if (!wCol) setWeightEnabled(true);
-
-    setDataReady(true);
     setShowProceed(true);
     updateLoadedInfo();
   }
@@ -111,35 +71,6 @@ export default function App() {
     }
   }
 
-  async function runAggregation(): Promise<void> {
-    if (!currentCsv || !currentLayout) return;
-    setErrorMsg("");
-
-    const actualWeightCol =
-      Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
-    const wCol = weightEnabled ? actualWeightCol : "";
-    const crossCols = crossQuestions.filter((q) => crossSelected[questionKey(q)]);
-
-    try {
-      const questions = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
-      const results = await runDuckDBAggregation({
-        questions,
-        weight_col: wCol,
-        cross_cols: crossCols,
-      });
-      setAggResults({
-        results,
-        weightCol: wCol,
-        rawN: currentCsv.rowCount,
-        layoutMeta: currentLayout.meta,
-        crossCols,
-      });
-    } catch (e) {
-      setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
-      console.error(e);
-    }
-  }
-
   const onCsvFile = useCallback(async (csvText: string, fileName: string) => {
     try {
       const result = await loadCSV(csvText);
@@ -151,10 +82,10 @@ export default function App() {
       };
       setCsvFileName(fileName);
       updateLoadedInfo();
-      initAfterBothLoaded();
+      checkBothLoaded();
       trySaveToOPFS();
     } catch (e) {
-      setErrorMsg(t("error.csv.load", { msg: (e as Error).message }));
+      console.error("CSV load failed:", e);
     }
   }, []);
 
@@ -163,7 +94,7 @@ export default function App() {
       currentLayout = { json: rawText, fileName, meta };
       setLayoutFileName(fileName);
       updateLoadedInfo();
-      initAfterBothLoaded();
+      checkBothLoaded();
       trySaveToOPFS();
     },
     [],
@@ -187,9 +118,9 @@ export default function App() {
       setCsvFileName(csvName);
       setLayoutFileName(layoutName);
       updateLoadedInfo();
-      initAfterBothLoaded();
+      checkBothLoaded();
     } catch (e) {
-      setErrorMsg(t("error.saved.load", { msg: (e as Error).message }));
+      console.error("Saved data load failed:", e);
     }
   }, []);
 
@@ -236,7 +167,6 @@ export default function App() {
         class="grid min-h-0 flex-1 grid-rows-[1fr]"
         style={{ gridTemplateColumns: isImport ? "1fr" : "360px 1fr" }}
       >
-        {/* Import Screen */}
         {isImport ? (
           <ImportScreen
             csvFileName={csvFileName}
@@ -249,111 +179,8 @@ export default function App() {
             onProceed={() => setScreen("aggregation")}
           />
         ) : (
-          <>
-            {/* Aggregation: Left Panel */}
-            <div
-              class="flex flex-col overflow-hidden border-r border-border bg-surface max-md:max-h-[50vh] max-md:border-b max-md:border-r-0"
-              role="region"
-              aria-label={t("section.settings")}
-            >
-              {/* Data Summary */}
-              {currentCsv && currentLayout && (
-                <section class="shrink-0 border-b border-border p-4">
-                  <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
-                    {t("section.summary")}
-                  </h2>
-                  <div class="text-[0.875rem] leading-relaxed text-text-secondary">
-                    <DataSummary
-                      csv={{
-                        fileName: currentCsv.fileName,
-                        rowCount: currentCsv.rowCount,
-                        headers: currentCsv.headers,
-                      }}
-                      layout={{
-                        fileName: currentLayout.fileName,
-                        colCount: Object.keys(currentLayout.meta.colTypes).length,
-                      }}
-                    />
-                  </div>
-                </section>
-              )}
-
-              {/* Cross Config */}
-              {dataReady && (
-                <section class="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4">
-                  <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
-                    {t("section.cross")}
-                  </h2>
-                  <div
-                    class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
-                    role="group"
-                    aria-label={t("section.cross.label")}
-                  >
-                    <CrossConfig
-                      questions={crossQuestions}
-                      questionLabels={crossLabels}
-                      crossSelected={crossSelected}
-                      onToggle={(key, checked) =>
-                        setCrossSelected((prev) => ({ ...prev, [key]: checked }))
-                      }
-                    />
-                  </div>
-                </section>
-              )}
-
-              {/* Weight Info */}
-              {weightCol && (
-                <WeightInfo
-                  weightCol={weightCol}
-                  enabled={weightEnabled}
-                  onToggle={setWeightEnabled}
-                />
-              )}
-
-              {/* Error Message */}
-              {errorMsg && (
-                <div
-                  class="mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm leading-normal text-danger"
-                  role="alert"
-                  aria-live="assertive"
-                >
-                  {errorMsg}
-                </div>
-              )}
-
-              {/* Run Button */}
-              {dataReady && (
-                <button
-                  class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
-                  onClick={() => runAggregation()}
-                >
-                  {t("run.button")}
-                </button>
-              )}
-            </div>
-
-            {/* Aggregation: Right Panel */}
-            <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
-              {aggResults ? (
-                <div aria-live="polite">
-                  <ResultView
-                    results={aggResults.results}
-                    weightCol={aggResults.weightCol}
-                    rawN={aggResults.rawN}
-                    layoutMeta={aggResults.layoutMeta}
-                    crossCols={aggResults.crossCols}
-                  />
-                </div>
-              ) : (
-                <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
-                  <span class="text-[2.5rem]" aria-hidden="true">
-                    ⬛
-                  </span>
-                  <p class="text-base">{t("empty.text")}</p>
-                </div>
-              )}
-            </div>
-          </>
+          currentCsv &&
+          currentLayout && <AggregationScreen csv={currentCsv} layout={currentLayout} />
         )}
       </main>
 
