@@ -1,5 +1,4 @@
-import { render } from "preact";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
@@ -10,7 +9,7 @@ import { CrossTable } from "./CrossTable";
 import { AIBubble } from "./AIBubble";
 import { ChartCard, type GtChartType } from "./ChartRenderer";
 
-interface ResultViewProps {
+export interface ResultViewProps {
   results: AggResult[];
   weightCol: string;
   rawN: number;
@@ -18,11 +17,24 @@ interface ResultViewProps {
   crossCols?: QuestionDef[];
 }
 
-function ResultView({ results, weightCol, layoutMeta, crossCols }: ResultViewProps) {
+export default function ResultView({ results, weightCol, layoutMeta, crossCols }: ResultViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<GtChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<GtChartType>("bar-h");
   const [pctDirection, setPctDirection] = useState<PctDirection>("vertical");
+  const [, setThemeTick] = useState(0);
+
+  // Re-render on theme change (needed for canvas-based charts)
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setThemeTick((n) => n + 1);
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const hasCross = results.some((r) => {
     const { subs } = pivot(r.cells);
@@ -193,44 +205,5 @@ function TableContent({
         );
       })}
     </div>
-  );
-}
-
-// --- Theme change re-render ---
-
-let reRenderRef: (() => void) | null = null;
-
-const observer = new MutationObserver(() => {
-  reRenderRef?.();
-});
-observer.observe(document.documentElement, {
-  attributes: true,
-  attributeFilter: ["data-theme"],
-});
-
-// --- Bridge for imperative callers ---
-
-export function renderResultView(
-  results: AggResult[],
-  weightCol: string,
-  rawN: number,
-  layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
-): void {
-  document.getElementById("empty-state")!.classList.add("hidden");
-  const area = document.getElementById("results-area")!;
-  area.classList.remove("hidden");
-
-  reRenderRef = () => renderResultView(results, weightCol, rawN, layoutMeta, crossCols);
-
-  render(
-    <ResultView
-      results={results}
-      weightCol={weightCol}
-      rawN={rawN}
-      layoutMeta={layoutMeta}
-      crossCols={crossCols}
-    />,
-    area,
   );
 }

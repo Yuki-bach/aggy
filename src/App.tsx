@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
 import CrossConfig from "./components/leftPane/CrossConfig";
-import { renderResultView } from "./components/rightPane/ResultView";
+import ResultView from "./components/rightPane/ResultView";
 import { initDuckDB, loadCSV, runDuckDBAggregation } from "./lib/duckdbBridge";
 import {
   parseLayout,
@@ -9,7 +9,7 @@ import {
   type Layout,
   type LayoutMeta,
 } from "./lib/layout";
-import { questionKey, type QuestionDef } from "./lib/agg/aggregate";
+import { questionKey, type AggResult, type QuestionDef } from "./lib/agg/aggregate";
 import { saveData, loadSaved } from "./lib/opfs";
 import { triggerSavedFilesRefresh } from "./components/leftPane/SavedFiles";
 import { initGettingStarted } from "./components/shared/GettingStarted";
@@ -42,6 +42,13 @@ export default function App() {
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [dataReady, setDataReady] = useState(false);
+  const [aggResults, setAggResults] = useState<{
+    results: AggResult[];
+    weightCol: string;
+    rawN: number;
+    layoutMeta: LayoutMeta;
+    crossCols: QuestionDef[];
+  } | null>(null);
 
   const isImport = screen === "import";
 
@@ -120,7 +127,13 @@ export default function App() {
         weight_col: wCol,
         cross_cols: crossCols,
       });
-      renderResultView(results, wCol, currentCsv.rowCount, currentLayout.meta, crossCols);
+      setAggResults({
+        results,
+        weightCol: wCol,
+        rawN: currentCsv.rowCount,
+        layoutMeta: currentLayout.meta,
+        crossCols,
+      });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
       console.error(e);
@@ -320,22 +333,25 @@ export default function App() {
             </div>
 
             {/* Aggregation: Right Panel */}
-            <div
-              class="overflow-y-auto bg-bg p-6"
-              id="panel-right"
-              role="region"
-              aria-label={t("section.results")}
-            >
-              <div
-                class="flex h-full flex-col items-center justify-center gap-3 text-muted"
-                id="empty-state"
-              >
-                <span class="text-[2.5rem]" aria-hidden="true">
-                  ⬛
-                </span>
-                <p class="text-base">{t("empty.text")}</p>
-              </div>
-              <div class="hidden" id="results-area" aria-live="polite"></div>
+            <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
+              {aggResults ? (
+                <div aria-live="polite">
+                  <ResultView
+                    results={aggResults.results}
+                    weightCol={aggResults.weightCol}
+                    rawN={aggResults.rawN}
+                    layoutMeta={aggResults.layoutMeta}
+                    crossCols={aggResults.crossCols}
+                  />
+                </div>
+              ) : (
+                <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
+                  <span class="text-[2.5rem]" aria-hidden="true">
+                    ⬛
+                  </span>
+                  <p class="text-base">{t("empty.text")}</p>
+                </div>
+              )}
             </div>
           </>
         )}
