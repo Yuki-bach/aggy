@@ -1,21 +1,17 @@
 import { useCallback, useRef, useState } from "preact/hooks";
 import type { JSX } from "preact";
-import { parseLayout, buildLayoutMeta, type Layout, type LayoutMeta } from "../../../lib/layout";
+import { parseLayout, buildLayoutMeta } from "../../../lib/layout";
+import { loadCSV } from "../../../lib/duckdbBridge";
+import { saveData, loadSaved } from "../../../lib/opfs";
 import { t } from "../../../lib/i18n";
 import { Dropzone } from "./Dropzone";
-import { SavedFilesList, useSavedFiles } from "../../leftPane/SavedFiles";
+import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "../../leftPane/SavedFiles";
+import type { CsvData, LayoutData } from "../../../lib/types";
 
 type Tab = "file" | "saved";
 
 interface ImportScreenProps {
-  csvFileName: string | null;
-  layoutFileName: string | null;
-  showProceed: boolean;
-  loadedInfo: string | null;
-  onCsvFile: (csvText: string, fileName: string) => void;
-  onLayoutFile: (layout: Layout, meta: LayoutMeta, fileName: string, rawText: string) => void;
-  onLoadFromSaved: (folderId: string) => void;
-  onProceed: () => void;
+  onComplete: (csv: CsvData, layout: LayoutData) => void;
 }
 
 const TABS: { key: Tab; labelKey: string }[] = [
@@ -23,38 +19,121 @@ const TABS: { key: Tab; labelKey: string }[] = [
   { key: "saved", labelKey: "import.tab.saved" },
 ];
 
-export default function ImportScreen({
-  csvFileName,
-  layoutFileName,
-  showProceed,
-  loadedInfo,
-  onCsvFile,
-  onLayoutFile,
-  onLoadFromSaved,
-  onProceed,
-}: ImportScreenProps) {
+export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const [activeTab, setActiveTab] = useState<Tab>("file");
+  const [csvFileName, setCsvFileName] = useState<string | null>(null);
+  const [layoutFileName, setLayoutFileName] = useState<string | null>(null);
+  const [showProceed, setShowProceed] = useState(false);
+  const [loadedInfo, setLoadedInfo] = useState<string | null>(null);
+
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const csvRef = useRef<CsvData | null>(null);
+  const layoutRef = useRef<LayoutData | null>(null);
 
   const { entries, deleteEntry } = useSavedFiles();
 
-  const handleCsvFile = useCallback(
-    async (file: File) => {
-      const text = await file.text();
-      onCsvFile(text, file.name);
-    },
-    [onCsvFile],
-  );
+  function updateLoadedInfo(): void {
+    const csv = csvRef.current;
+    const layout = layoutRef.current;
+    if (!csv && !layout) {
+      setLoadedInfo(null);
+      return;
+    }
+    const lines: string[] = [];
+    if (csv) lines.push(csv.fileName);
+    if (layout) lines.push(layout.fileName);
+    if (csv) {
+      lines.push(
+        t("summary.rows", {
+          rows: csv.rowCount.toLocaleString(),
+          cols: csv.headers.length,
+        }),
+      );
+    }
+    setLoadedInfo(lines.join("\n"));
+  }
 
-  const handleLayoutFile = useCallback(
-    async (file: File) => {
+  function checkBothLoaded(): void {
+    if (!csvRef.current || !layoutRef.current) return;
+    setShowProceed(true);
+    updateLoadedInfo();
+  }
+
+  async function trySaveToOPFS(): Promise<void> {
+    const csv = csvRef.current;
+    const layout = layoutRef.current;
+    if (!csv || !layout) return;
+    try {
+      await saveData(csv.fileName, csv.text, layout.fileName, layout.json);
+      triggerSavedFilesRefresh();
+    } catch (e) {
+      console.warn("OPFS save failed:", e);
+    }
+  }
+
+  const handleCsvFile = useCallback(async (file: File) => {
+    try {
+      const text = await file.text();
+      const result = await loadCSV(text);
+      csvRef.current = {
+        text,
+        fileName: file.name,
+        headers: result.headers,
+        rowCount: result.rowCount,
+      };
+      setCsvFileName(file.name);
+      updateLoadedInfo();
+      checkBothLoaded();
+      trySaveToOPFS();
+    } catch (e) {
+      console.error("CSV load failed:", e);
+    }
+  }, []);
+
+  const handleLayoutFile = useCallback(async (file: File) => {
+    try {
       const text = await file.text();
       const layout = parseLayout(text);
       const meta = buildLayoutMeta(layout);
-      onLayoutFile(layout, meta, file.name, text);
-    },
-    [onLayoutFile],
-  );
+      layoutRef.current = { json: text, fileName: file.name, meta };
+      setLayoutFileName(file.name);
+      updateLoadedInfo();
+      checkBothLoaded();
+      trySaveToOPFS();
+    } catch (e) {
+      console.error("Layout load failed:", e);
+    }
+  }, []);
+
+  const handleLoadFromSaved = useCallback(async (folderId: string) => {
+    try {
+      const { csvText, csvName, layoutJson, layoutName } = await loadSaved(folderId);
+      const layout = parseLayout(layoutJson);
+      const meta = buildLayoutMeta(layout);
+      const result = await loadCSV(csvText);
+
+      csvRef.current = {
+        text: csvText,
+        fileName: csvName,
+        headers: result.headers,
+        rowCount: result.rowCount,
+      };
+      layoutRef.current = { json: layoutJson, fileName: layoutName, meta };
+
+      setCsvFileName(csvName);
+      setLayoutFileName(layoutName);
+      updateLoadedInfo();
+      checkBothLoaded();
+    } catch (e) {
+      console.error("Saved data load failed:", e);
+    }
+  }, []);
+
+  function handleProceed(): void {
+    if (csvRef.current && layoutRef.current) {
+      onComplete(csvRef.current, layoutRef.current);
+    }
+  }
 
   function activateTab(idx: number) {
     setActiveTab(TABS[idx].key);
@@ -145,7 +224,7 @@ export default function ImportScreen({
           <div class="flex flex-col gap-2">
             <SavedFilesList
               entries={entries}
-              onSelectEntry={onLoadFromSaved}
+              onSelectEntry={handleLoadFromSaved}
               onDeleteEntry={deleteEntry}
             />
           </div>
@@ -165,7 +244,7 @@ export default function ImportScreen({
         {showProceed && (
           <button
             class="mt-5 min-h-12 w-full cursor-pointer rounded-lg border-none bg-accent px-4 py-3 text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
-            onClick={onProceed}
+            onClick={handleProceed}
           >
             {t("import.proceed")}
           </button>
