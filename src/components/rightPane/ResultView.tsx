@@ -142,9 +142,7 @@ function TableContent({
         const isCross = pv.subs.length > 1;
 
         const gtSub = pv.subs.find((s) => s.label === "GT")!;
-        const nLabel = weightCol
-          ? `n=${gtSub.n.toFixed(1)}`
-          : `n=${gtSub.n.toLocaleString()}`;
+        const nLabel = weightCol ? `n=${gtSub.n.toFixed(1)}` : `n=${gtSub.n.toLocaleString()}`;
 
         const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
         const hasLabel = questionLabel !== res.question;
