@@ -1,6 +1,6 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import { aggregate, type Query, type AggResult } from "./agg/aggregate";
-import { setDotStatus } from "../components/shared/StatusDot";
+import { setWasmStatus } from "../components/header/WasmStatus";
 
 const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
 
@@ -12,9 +12,7 @@ let status: DuckStatus = "loading";
 let initPromise: Promise<void> | null = null;
 
 function updateStatusUI(s: DuckStatus, label?: string): void {
-  setDotStatus(s);
-  const lbl = document.getElementById("wasm-label");
-  if (lbl) lbl.textContent = label ?? s;
+  setWasmStatus(s, label);
 }
 
 export async function initDuckDB(): Promise<void> {
