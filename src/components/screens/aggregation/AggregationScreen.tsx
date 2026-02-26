@@ -1,8 +1,7 @@
-import { render } from "preact";
 import { t } from "../../../lib/i18n";
 import { ToggleButton, ToggleGroup } from "../../shared/ToggleButton";
 
-function DataSummary({
+export function DataSummary({
   csv,
   layout,
 }: {
@@ -30,22 +29,7 @@ function DataSummary({
   );
 }
 
-export function renderDataSummary(
-  csv: { fileName: string; rowCount: number; headers: string[] },
-  layout: { fileName: string; colCount: number },
-): void {
-  const el = document.getElementById("data-summary")!;
-  render(<DataSummary csv={csv} layout={layout} />, el);
-}
-
-// Weight toggle state
-let weightEnabled = true;
-
-export function getWeightEnabled(): boolean {
-  return weightEnabled;
-}
-
-function WeightToggle({
+export function WeightInfo({
   weightCol,
   enabled,
   onToggle,
@@ -55,41 +39,18 @@ function WeightToggle({
   onToggle: (on: boolean) => void;
 }) {
   return (
-    <ToggleGroup>
-      <ToggleButton active={enabled} onClick={() => !enabled || onToggle(true)}>
-        {t("weight.on")}
-      </ToggleButton>
-      <ToggleButton active={!enabled} onClick={() => enabled && onToggle(false)}>
-        {t("weight.off")}
-      </ToggleButton>
-    </ToggleGroup>
+    <div class="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-[0.875rem] text-text">
+      <span>{t("weight.label", { col: weightCol })}</span>
+      <div class="ml-auto flex">
+        <ToggleGroup>
+          <ToggleButton active={enabled} onClick={() => onToggle(true)}>
+            {t("weight.on")}
+          </ToggleButton>
+          <ToggleButton active={!enabled} onClick={() => onToggle(false)}>
+            {t("weight.off")}
+          </ToggleButton>
+        </ToggleGroup>
+      </div>
+    </div>
   );
-}
-
-function renderWeightToggle(weightCol: string): void {
-  const toggle = document.getElementById("weight-toggle")!;
-  render(
-    <WeightToggle
-      weightCol={weightCol}
-      enabled={weightEnabled}
-      onToggle={(on) => {
-        weightEnabled = on;
-        renderWeightToggle(weightCol);
-      }}
-    />,
-    toggle,
-  );
-}
-
-export function renderWeightInfo(weightCol: string): void {
-  const el = document.getElementById("weight-info")!;
-  if (weightCol) {
-    const label = document.getElementById("weight-label")!;
-    label.textContent = t("weight.label", { col: weightCol });
-    renderWeightToggle(weightCol);
-    el.classList.remove("hidden");
-  } else {
-    weightEnabled = true;
-    el.classList.add("hidden");
-  }
 }

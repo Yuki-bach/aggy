@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { initCrossConfig, getCrossColsSelected } from "./components/leftPane/CrossConfig";
+import CrossConfig from "./components/leftPane/CrossConfig";
 import { renderResultView } from "./components/rightPane/ResultView";
 import { initDuckDB, loadCSV, runDuckDBAggregation } from "./lib/duckdbBridge";
 import {
@@ -9,16 +9,13 @@ import {
   type Layout,
   type LayoutMeta,
 } from "./lib/layout";
+import { questionKey, type QuestionDef } from "./lib/agg/aggregate";
 import { saveData, loadSaved } from "./lib/opfs";
 import { triggerSavedFilesRefresh } from "./components/leftPane/SavedFiles";
 import { initGettingStarted } from "./components/shared/GettingStarted";
 import { initSettings } from "./components/shared/SettingsModal";
 import ImportScreen from "./components/screens/import/ImportScreen";
-import {
-  renderDataSummary,
-  renderWeightInfo,
-  getWeightEnabled,
-} from "./components/screens/aggregation/AggregationScreen";
+import { DataSummary, WeightInfo } from "./components/screens/aggregation/AggregationScreen";
 import { onLocaleChange, t } from "./lib/i18n";
 import { mountStatusDot } from "./components/shared/StatusDot";
 
@@ -36,6 +33,15 @@ export default function App() {
   const [layoutFileName, setLayoutFileName] = useState<string | null>(null);
   const [showProceed, setShowProceed] = useState(false);
   const [loadedInfo, setLoadedInfo] = useState<string | null>(null);
+
+  // Aggregation left panel state
+  const [crossQuestions, setCrossQuestions] = useState<QuestionDef[]>([]);
+  const [crossLabels, setCrossLabels] = useState<Record<string, string>>({});
+  const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
+  const [weightCol, setWeightCol] = useState("");
+  const [weightEnabled, setWeightEnabled] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [dataReady, setDataReady] = useState(false);
 
   const isImport = screen === "import";
 
@@ -66,31 +72,21 @@ export default function App() {
   function initAfterBothLoaded(): void {
     if (!currentCsv || !currentLayout) return;
 
-    const crossCandidates = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
-    initCrossConfig(crossCandidates, currentLayout.meta.questionLabels);
+    const questions = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
+    setCrossQuestions(questions);
+    setCrossLabels(currentLayout.meta.questionLabels);
+    const selected: Record<string, boolean> = {};
+    questions.forEach((q) => (selected[questionKey(q)] = false));
+    setCrossSelected(selected);
 
-    document.getElementById("cross-config-section")!.classList.remove("hidden");
-    document.getElementById("run-btn")!.classList.remove("hidden");
-    (document.getElementById("run-btn") as HTMLButtonElement).disabled = false;
+    const wCol =
+      Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+    setWeightCol(wCol);
+    if (!wCol) setWeightEnabled(true);
 
+    setDataReady(true);
     setShowProceed(true);
     updateLoadedInfo();
-
-    renderDataSummary(
-      {
-        fileName: currentCsv.fileName,
-        rowCount: currentCsv.rowCount,
-        headers: currentCsv.headers,
-      },
-      {
-        fileName: currentLayout.fileName,
-        colCount: Object.keys(currentLayout.meta.colTypes).length,
-      },
-    );
-
-    const weightCol =
-      Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
-    renderWeightInfo(weightCol);
   }
 
   async function trySaveToOPFS(): Promise<void> {
@@ -108,13 +104,26 @@ export default function App() {
     }
   }
 
-  function showError(msg: string): void {
-    const el = document.getElementById("error-msg")!;
-    if (msg) {
-      el.textContent = msg;
-      el.classList.remove("hidden");
-    } else {
-      el.classList.add("hidden");
+  async function runAggregation(): Promise<void> {
+    if (!currentCsv || !currentLayout) return;
+    setErrorMsg("");
+
+    const actualWeightCol =
+      Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+    const wCol = weightEnabled ? actualWeightCol : "";
+    const crossCols = crossQuestions.filter((q) => crossSelected[questionKey(q)]);
+
+    try {
+      const questions = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
+      const results = await runDuckDBAggregation({
+        questions,
+        weight_col: wCol,
+        cross_cols: crossCols,
+      });
+      renderResultView(results, wCol, currentCsv.rowCount, currentLayout.meta, crossCols);
+    } catch (e) {
+      setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
+      console.error(e);
     }
   }
 
@@ -132,7 +141,7 @@ export default function App() {
       initAfterBothLoaded();
       trySaveToOPFS();
     } catch (e) {
-      showError(t("error.csv.load", { msg: (e as Error).message }));
+      setErrorMsg(t("error.csv.load", { msg: (e as Error).message }));
     }
   }, []);
 
@@ -167,7 +176,7 @@ export default function App() {
       updateLoadedInfo();
       initAfterBothLoaded();
     } catch (e) {
-      showError(t("error.saved.load", { msg: (e as Error).message }));
+      setErrorMsg(t("error.saved.load", { msg: (e as Error).message }));
     }
   }, []);
 
@@ -176,57 +185,7 @@ export default function App() {
     mountStatusDot(document.getElementById("wasm-dot")!);
     initSettings();
     initGettingStarted();
-
     initDuckDB().catch(() => {});
-
-    onLocaleChange(() => {
-      updateLoadedInfo();
-      if (currentCsv && currentLayout) {
-        renderDataSummary(
-          {
-            fileName: currentCsv.fileName,
-            rowCount: currentCsv.rowCount,
-            headers: currentCsv.headers,
-          },
-          {
-            fileName: currentLayout.fileName,
-            colCount: Object.keys(currentLayout.meta.colTypes).length,
-          },
-        );
-        const weightCol =
-          Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
-        renderWeightInfo(weightCol);
-      }
-    });
-
-    async function runAggregation(): Promise<void> {
-      if (!currentCsv || !currentLayout) return;
-      showError("");
-
-      const actualWeightCol =
-        Object.entries(currentLayout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
-      const weightCol = getWeightEnabled() ? actualWeightCol : "";
-      const crossCols = getCrossColsSelected();
-
-      try {
-        const questions = buildQuestionDefs(currentCsv.headers, currentLayout.meta.colTypes);
-        const results = await runDuckDBAggregation({
-          questions,
-          weight_col: weightCol,
-          cross_cols: crossCols,
-        });
-        renderResultView(results, weightCol, currentCsv.rowCount, currentLayout.meta, crossCols);
-      } catch (e) {
-        showError(t("error.aggregation", { msg: (e as Error).message }));
-        console.error(e);
-      }
-    }
-
-    document.getElementById("run-btn")!.addEventListener("click", () => {
-      runAggregation().catch((e) =>
-        showError(t("error.aggregation", { msg: (e as Error).message })),
-      );
-    });
   }, []);
 
   return (
@@ -284,53 +243,80 @@ export default function App() {
               role="region"
               aria-label={t("section.settings")}
             >
-              <section class="shrink-0 border-b border-border p-4" id="data-summary-section">
-                <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
-                  {t("section.summary")}
-                </h2>
+              {/* Data Summary */}
+              {currentCsv && currentLayout && (
+                <section class="shrink-0 border-b border-border p-4">
+                  <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
+                    {t("section.summary")}
+                  </h2>
+                  <div class="text-[0.875rem] leading-relaxed text-text-secondary">
+                    <DataSummary
+                      csv={{
+                        fileName: currentCsv.fileName,
+                        rowCount: currentCsv.rowCount,
+                        headers: currentCsv.headers,
+                      }}
+                      layout={{
+                        fileName: currentLayout.fileName,
+                        colCount: Object.keys(currentLayout.meta.colTypes).length,
+                      }}
+                    />
+                  </div>
+                </section>
+              )}
+
+              {/* Cross Config */}
+              {dataReady && (
+                <section class="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4">
+                  <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
+                    {t("section.cross")}
+                  </h2>
+                  <div
+                    class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
+                    role="group"
+                    aria-label={t("section.cross.label")}
+                  >
+                    <CrossConfig
+                      questions={crossQuestions}
+                      questionLabels={crossLabels}
+                      crossSelected={crossSelected}
+                      onToggle={(key, checked) =>
+                        setCrossSelected((prev) => ({ ...prev, [key]: checked }))
+                      }
+                    />
+                  </div>
+                </section>
+              )}
+
+              {/* Weight Info */}
+              {weightCol && (
+                <WeightInfo
+                  weightCol={weightCol}
+                  enabled={weightEnabled}
+                  onToggle={setWeightEnabled}
+                />
+              )}
+
+              {/* Error Message */}
+              {errorMsg && (
                 <div
-                  id="data-summary"
-                  class="text-[0.875rem] leading-relaxed text-text-secondary"
-                ></div>
-              </section>
+                  class="mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm leading-normal text-danger"
+                  role="alert"
+                  aria-live="assertive"
+                >
+                  {errorMsg}
+                </div>
+              )}
 
-              <section
-                class="hidden flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4"
-                id="cross-config-section"
-              >
-                <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
-                  {t("section.cross")}
-                </h2>
-                <div
-                  class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
-                  id="cross-col-list"
-                  role="group"
-                  aria-label={t("section.cross.label")}
-                ></div>
-              </section>
-
-              <div
-                id="weight-info"
-                class="hidden flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-[0.875rem] text-text"
-              >
-                <span id="weight-label"></span>
-                <div id="weight-toggle" class="ml-auto flex"></div>
-              </div>
-
-              <div
-                id="error-msg"
-                class="hidden mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm leading-normal text-danger"
-                role="alert"
-                aria-live="assertive"
-              ></div>
-
-              <button
-                class="hidden mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)] disabled:cursor-not-allowed disabled:bg-[var(--color-gray-300)] disabled:text-[var(--color-gray-600)]"
-                id="run-btn"
-                disabled
-              >
-                {t("run.button")}
-              </button>
+              {/* Run Button */}
+              {dataReady && (
+                <button
+                  class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
+                  onClick={() => runAggregation()}
+                >
+                  {t("run.button")}
+                </button>
+              )}
             </div>
 
             {/* Aggregation: Right Panel */}
