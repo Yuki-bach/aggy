@@ -1,4 +1,3 @@
-import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { t, onLocaleChange } from "../../lib/i18n";
 
@@ -90,14 +89,8 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
   );
 }
 
-// Expose show function for help button
-let showFn: (() => void) | null = null;
-
-function GettingStartedRoot() {
-  const [open, setOpen] = useState(() => !localStorage.getItem(STORAGE_KEY));
+export function GettingStartedModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [, setTick] = useState(0);
-
-  showFn = () => setOpen(true);
 
   // Re-render on locale change
   useEffect(() => {
@@ -108,11 +101,11 @@ function GettingStartedRoot() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, onClose]);
 
   // Lock body scroll
   useEffect(() => {
@@ -135,21 +128,14 @@ function GettingStartedRoot() {
       aria-modal={true}
       aria-labelledby="gs-title"
       onClick={(e) => {
-        if (e.target === e.currentTarget) setOpen(false);
+        if (e.target === e.currentTarget) onClose();
       }}
     >
-      <GettingStartedContent onClose={() => setOpen(false)} />
+      <GettingStartedContent onClose={onClose} />
     </div>
   );
 }
 
-export function showGettingStarted(): void {
-  showFn?.();
-}
-
-export function initGettingStarted(): void {
-  const container = document.getElementById("getting-started-modal")!;
-  render(<GettingStartedRoot />, container);
-
-  document.getElementById("help-btn")!.addEventListener("click", () => showFn?.());
+export function shouldShowGettingStarted(): boolean {
+  return !localStorage.getItem(STORAGE_KEY);
 }

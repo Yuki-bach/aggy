@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { initDuckDB } from "./lib/duckdbBridge";
-import { initGettingStarted } from "./components/import/GettingStarted";
 import { initTheme } from "./components/header/SettingsModal";
 import Header from "./components/Header";
 import ImportScreen from "./components/ImportScreen";
 import AggregationScreen from "./components/AggregationScreen";
-import { onLocaleChange, t } from "./lib/i18n";
+import { onLocaleChange } from "./lib/i18n";
 import type { CsvData, LayoutData } from "./lib/types";
 
 export default function App() {
@@ -27,7 +26,6 @@ export default function App() {
   // Imperative initialization (runs once after mount)
   useEffect(() => {
     initTheme();
-    initGettingStarted();
     initDuckDB().catch(() => {});
   }, []);
 
@@ -46,20 +44,6 @@ export default function App() {
           loadedData && <AggregationScreen csv={loadedData.csv} layout={loadedData.layout} />
         )}
       </main>
-
-      {/* Help Button */}
-      {isImport && (
-        <button
-          id="help-btn"
-          class="fixed bottom-5 left-5 z-900 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-border-strong bg-surface text-base font-bold text-text-secondary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-[background,color,transform] duration-150 hover:scale-[1.08] hover:border-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)] hover:text-[var(--color-primary-700)]"
-          aria-label={t("help.label")}
-        >
-          ?
-        </button>
-      )}
-
-      {/* Getting Started Modal */}
-      <div id="getting-started-modal"></div>
     </div>
   );
 }
