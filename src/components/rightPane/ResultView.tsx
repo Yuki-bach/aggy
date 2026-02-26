@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
-import { resolveQuestionLabel } from "../../lib/labelResolver";
+import { resolveQuestionLabel } from "../../lib/labels";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
