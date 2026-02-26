@@ -1,6 +1,6 @@
-import { t } from "../../lib/i18n";
-import { SettingsRoot } from "./SettingsModal";
-import WasmStatus from "./WasmStatus";
+import { t } from "../lib/i18n";
+import { SettingsRoot } from "./header/SettingsModal";
+import WasmStatus from "./header/WasmStatus";
 
 interface HeaderProps {
   isImport: boolean;
