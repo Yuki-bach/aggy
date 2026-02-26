@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState } from "preact/hooks";
 import type { JSX } from "preact";
-import { parseLayout, buildLayoutMeta } from "../../lib/layout";
-import { loadCSV } from "../../lib/duckdbBridge";
-import { saveData, loadSaved } from "../../lib/opfs";
-import { t } from "../../lib/i18n";
-import { Dropzone } from "./Dropzone";
-import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./SavedFiles";
-import type { CsvData, LayoutData } from "../../lib/types";
+import { parseLayout, buildLayoutMeta } from "../lib/layout";
+import { loadCSV } from "../lib/duckdbBridge";
+import { saveData, loadSaved } from "../lib/opfs";
+import { t } from "../lib/i18n";
+import { Dropzone } from "./import/Dropzone";
+import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./import/SavedFiles";
+import type { CsvData, LayoutData } from "../lib/types";
 
 type Tab = "file" | "saved";
 

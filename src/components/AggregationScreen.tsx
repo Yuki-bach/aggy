@@ -1,12 +1,12 @@
 import { useState } from "preact/hooks";
-import CrossConfig from "./CrossConfig";
-import ResultView from "./ResultView";
-import { runDuckDBAggregation } from "../../lib/duckdbBridge";
-import { buildQuestionDefs, type LayoutMeta } from "../../lib/layout";
-import { questionKey, type AggResult, type QuestionDef } from "../../lib/agg/aggregate";
-import { t } from "../../lib/i18n";
-import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
-import type { CsvData, LayoutData } from "../../lib/types";
+import CrossConfig from "./aggregation/CrossConfig";
+import ResultView from "./aggregation/ResultView";
+import { runDuckDBAggregation } from "../lib/duckdbBridge";
+import { buildQuestionDefs, type LayoutMeta } from "../lib/layout";
+import { questionKey, type AggResult, type QuestionDef } from "../lib/agg/aggregate";
+import { t } from "../lib/i18n";
+import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
+import type { CsvData, LayoutData } from "../lib/types";
 
 interface AggregationScreenProps {
   csv: CsvData;

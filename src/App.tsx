@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { initDuckDB } from "./lib/duckdbBridge";
 import { initGettingStarted } from "./components/import/GettingStarted";
 import { initTheme } from "./components/header/SettingsModal";
-import Header from "./components/header/Header";
-import ImportScreen from "./components/import/ImportScreen";
-import AggregationScreen from "./components/aggregation/AggregationScreen";
+import Header from "./components/Header";
+import ImportScreen from "./components/ImportScreen";
+import AggregationScreen from "./components/AggregationScreen";
 import { onLocaleChange, t } from "./lib/i18n";
 import type { CsvData, LayoutData } from "./lib/types";
 
