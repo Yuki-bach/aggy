@@ -2,19 +2,6 @@ import * as duckdb from "@duckdb/duckdb-wasm";
 import { aggregate, type Query, type AggResult } from "./agg/aggregate";
 import { setWasmStatus } from "../components/header/WasmStatus";
 
-const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
-
-type DuckStatus = "loading" | "ready" | "error";
-
-let db: duckdb.AsyncDuckDB | null = null;
-let conn: duckdb.AsyncDuckDBConnection | null = null;
-let status: DuckStatus = "loading";
-let initPromise: Promise<void> | null = null;
-
-function updateStatusUI(s: DuckStatus, label?: string): void {
-  setWasmStatus(s, label);
-}
-
 export async function initDuckDB(): Promise<void> {
   if (initPromise) return initPromise;
 
@@ -55,12 +42,6 @@ export async function initDuckDB(): Promise<void> {
   return initPromise;
 }
 
-async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
-  if (!db || status !== "ready") throw new Error("DuckDB is not ready");
-  if (!conn) conn = await db.connect();
-  return conn;
-}
-
 /** Register CSV text in DuckDB and return headers and row count */
 export async function loadCSV(csvText: string): Promise<{ headers: string[]; rowCount: number }> {
   await initDuckDB();
@@ -87,4 +68,25 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
   const c = await getConnection();
   return aggregate(c, query);
+}
+
+// ─── Internal ───────────────────────────────────────────────
+
+const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
+
+type DuckStatus = "loading" | "ready" | "error";
+
+let db: duckdb.AsyncDuckDB | null = null;
+let conn: duckdb.AsyncDuckDBConnection | null = null;
+let status: DuckStatus = "loading";
+let initPromise: Promise<void> | null = null;
+
+function updateStatusUI(s: DuckStatus, label?: string): void {
+  setWasmStatus(s, label);
+}
+
+async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
+  if (!db || status !== "ready") throw new Error("DuckDB is not ready");
+  if (!conn) conn = await db.connect();
+  return conn;
 }

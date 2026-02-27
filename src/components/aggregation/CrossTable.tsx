@@ -7,6 +7,20 @@ import type { PctDirection } from "./Toolbar";
 import { Th, Td } from "./TableCells";
 import { useAggregation } from "./AggregationContext";
 
+interface CrossTableProps {
+  res: AggResult;
+  pv: ReturnType<typeof pivot>;
+  pctDir: PctDirection;
+}
+
+export function CrossTable({ res, pv, pctDir }: CrossTableProps) {
+  const data = useCrossTableData(res, pv);
+  if (pctDir === "horizontal") {
+    return <TransposedCrossTable data={data} res={res} />;
+  }
+  return <VerticalCrossTable data={data} res={res} />;
+}
+
 type SubInfo = { label: string; n: number };
 type CrossGroup = { crossCol: QuestionDef; subs: SubInfo[] };
 
@@ -52,8 +66,6 @@ const TH_BASE =
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
-// ─── Common data preparation ────────────────────────────────
-
 interface CrossTableData {
   mains: string[];
   gtSub: SubInfo;
@@ -76,8 +88,6 @@ function useCrossTableData(res: AggResult, pv: ReturnType<typeof pivot>): CrossT
 
   return { mains, gtSub, crossGroups, questionLabel, lookup, weightCol };
 }
-
-// ─── Vertical % Table ───────────────────────────────────────
 
 function VerticalCrossTable({ data, res }: { data: CrossTableData; res: AggResult }) {
   const { layoutMeta, crossCols } = useAggregation();
@@ -156,8 +166,6 @@ function VerticalCrossTable({ data, res }: { data: CrossTableData; res: AggResul
     </table>
   );
 }
-
-// ─── Transposed (Horizontal %) Table ────────────────────────
 
 function TransposedSubRow({
   sub,
@@ -257,20 +265,4 @@ function TransposedCrossTable({ data, res }: { data: CrossTableData; res: AggRes
       </tbody>
     </table>
   );
-}
-
-// ─── Public API ─────────────────────────────────────────────
-
-interface CrossTableProps {
-  res: AggResult;
-  pv: ReturnType<typeof pivot>;
-  pctDir: PctDirection;
-}
-
-export function CrossTable({ res, pv, pctDir }: CrossTableProps) {
-  const data = useCrossTableData(res, pv);
-  if (pctDir === "horizontal") {
-    return <TransposedCrossTable data={data} res={res} />;
-  }
-  return <VerticalCrossTable data={data} res={res} />;
 }

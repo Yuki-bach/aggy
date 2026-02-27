@@ -154,8 +154,6 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
   );
 }
 
-// --- Sub-components ---
-
 export function DataSummary({
   csv,
   layout,

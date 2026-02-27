@@ -70,31 +70,6 @@ interface ViewOptsProps {
   >;
 }
 
-function ChartTypeSelect({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: ChartType;
-  onChange: (type: ChartType) => void;
-}) {
-  return (
-    <label>
-      {label}{" "}
-      <select
-        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-[0.8125rem] text-text"
-        value={value}
-        onChange={(e) => onChange((e.target as HTMLSelectElement).value as ChartType)}
-      >
-        <option value="bar-h">{t("chart.barH")}</option>
-        <option value="bar-v">{t("chart.barV")}</option>
-        <option value="obi">{t("chart.obi")}</option>
-      </select>
-    </label>
-  );
-}
-
 export function ViewOpts({
   currentViewMode,
   currentPctDirection,
@@ -146,5 +121,32 @@ export function ViewOpts({
         </ToggleGroup>
       )}
     </div>
+  );
+}
+
+// ─── Internal ───────────────────────────────────────────────
+
+function ChartTypeSelect({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: ChartType;
+  onChange: (type: ChartType) => void;
+}) {
+  return (
+    <label>
+      {label}{" "}
+      <select
+        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-[0.8125rem] text-text"
+        value={value}
+        onChange={(e) => onChange((e.target as HTMLSelectElement).value as ChartType)}
+      >
+        <option value="bar-h">{t("chart.barH")}</option>
+        <option value="bar-v">{t("chart.barV")}</option>
+        <option value="obi">{t("chart.obi")}</option>
+      </select>
+    </label>
   );
 }

@@ -1,6 +1,55 @@
 import { useEffect, useState } from "preact/hooks";
 import { t, onLocaleChange } from "../../lib/i18n";
 
+export function GettingStartedModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [, setTick] = useState(0);
+
+  // Re-render on locale change
+  useEffect(() => {
+    onLocaleChange(() => setTick((n) => n + 1));
+  }, []);
+
+  // Escape key to close
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  // Lock body scroll
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4 animate-[fadeIn_0.2s_ease]"
+      role="dialog"
+      aria-modal={true}
+      aria-labelledby="gs-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <GettingStartedContent onClose={onClose} />
+    </div>
+  );
+}
+
+// ─── Internal ───────────────────────────────────────────────
+
 function GettingStartedContent({ onClose }: { onClose: () => void }) {
   return (
     <div
@@ -70,53 +119,6 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
           {t("gs.ok")}
         </button>
       </div>
-    </div>
-  );
-}
-
-export function GettingStartedModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [, setTick] = useState(0);
-
-  // Re-render on locale change
-  useEffect(() => {
-    onLocaleChange(() => setTick((n) => n + 1));
-  }, []);
-
-  // Escape key to close
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  // Lock body scroll
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
-  if (!open) return null;
-
-  return (
-    <div
-      class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4 animate-[fadeIn_0.2s_ease]"
-      role="dialog"
-      aria-modal={true}
-      aria-labelledby="gs-title"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <GettingStartedContent onClose={onClose} />
     </div>
   );
 }

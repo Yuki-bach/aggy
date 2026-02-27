@@ -29,7 +29,45 @@ declare global {
   var LanguageModel: LanguageModelStatic | undefined;
 }
 
-// --- Prompt Payload ---
+export function buildPromptPayload(
+  results: AggResult[],
+  weightCol: string,
+  layoutMeta?: LayoutMeta,
+): string {
+  for (const topN of [5, 3, 2]) {
+    const text = summarizeResults(results, weightCol, layoutMeta, topN);
+    if (text.length <= MAX_PAYLOAD_CHARS) return text;
+  }
+  return summarizeResults(results.slice(0, 20), weightCol, layoutMeta, 2);
+}
+
+export async function generateComment(
+  results: AggResult[],
+  weightCol: string,
+  layoutMeta?: LayoutMeta,
+): Promise<string | null> {
+  try {
+    if (results.length === 0) return null;
+
+    const locale = getLocale();
+    const payload = buildPromptPayload(results, weightCol, layoutMeta);
+    const session = await LanguageModel!.create({
+      systemPrompt: t("ai.systemPrompt"),
+      expectedInputs: [{ type: "text", languages: [locale] }],
+      expectedOutputs: [{ type: "text", languages: [locale] }],
+    });
+
+    try {
+      return await session.prompt(payload);
+    } finally {
+      session.destroy();
+    }
+  } catch {
+    return null;
+  }
+}
+
+// ─── Internal ───────────────────────────────────────────────
 
 const MAX_PAYLOAD_CHARS = 3500;
 
@@ -77,44 +115,4 @@ function summarizeResults(
   lines.push("");
   lines.push(t("ai.userPrompt"));
   return lines.join("\n");
-}
-
-export function buildPromptPayload(
-  results: AggResult[],
-  weightCol: string,
-  layoutMeta?: LayoutMeta,
-): string {
-  for (const topN of [5, 3, 2]) {
-    const text = summarizeResults(results, weightCol, layoutMeta, topN);
-    if (text.length <= MAX_PAYLOAD_CHARS) return text;
-  }
-  return summarizeResults(results.slice(0, 20), weightCol, layoutMeta, 2);
-}
-
-// --- Comment Generation ---
-
-export async function generateComment(
-  results: AggResult[],
-  weightCol: string,
-  layoutMeta?: LayoutMeta,
-): Promise<string | null> {
-  try {
-    if (results.length === 0) return null;
-
-    const locale = getLocale();
-    const payload = buildPromptPayload(results, weightCol, layoutMeta);
-    const session = await LanguageModel!.create({
-      systemPrompt: t("ai.systemPrompt"),
-      expectedInputs: [{ type: "text", languages: [locale] }],
-      expectedOutputs: [{ type: "text", languages: [locale] }],
-    });
-
-    try {
-      return await session.prompt(payload);
-    } finally {
-      session.destroy();
-    }
-  } catch {
-    return null;
-  }
 }

@@ -1,16 +1,6 @@
 import { useState } from "preact/hooks";
 import { t } from "../../lib/i18n";
 
-type DotStatus = "loading" | "ready" | "error";
-
-const STATUS_CLASSES: Record<DotStatus, string> = {
-  loading: "bg-[var(--color-warning-700)] animate-[pulse_1s_infinite]",
-  ready: "bg-[var(--color-success-700)]",
-  error: "bg-danger",
-};
-
-let rerender: ((s: DotStatus, label?: string) => void) | null = null;
-
 export function setWasmStatus(s: DotStatus, label?: string): void {
   rerender?.(s, label);
 }
@@ -38,3 +28,15 @@ export default function WasmStatus() {
     </div>
   );
 }
+
+// ─── Internal ───────────────────────────────────────────────
+
+type DotStatus = "loading" | "ready" | "error";
+
+const STATUS_CLASSES: Record<DotStatus, string> = {
+  loading: "bg-[var(--color-warning-700)] animate-[pulse_1s_infinite]",
+  ready: "bg-[var(--color-success-700)]",
+  error: "bg-danger",
+};
+
+let rerender: ((s: DotStatus, label?: string) => void) | null = null;

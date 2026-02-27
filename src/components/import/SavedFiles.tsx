@@ -8,10 +8,6 @@ export interface SavedEntry {
   timestamp: number;
 }
 
-// Global refresh trigger for imperative callers (e.g. after OPFS save)
-type Listener = () => void;
-const listeners = new Set<Listener>();
-
 /** Trigger refresh from outside Preact (e.g. after saving to OPFS) */
 export function triggerSavedFilesRefresh(): void {
   for (const fn of listeners) fn();
@@ -96,3 +92,8 @@ export function SavedFilesList({
     </>
   );
 }
+
+// ─── Internal ───────────────────────────────────────────────
+
+type Listener = () => void;
+const listeners = new Set<Listener>();

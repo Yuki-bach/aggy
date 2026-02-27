@@ -4,6 +4,25 @@ import type { LayoutMeta } from "../layout";
 import { NA_VALUE } from "./sqlHelpers";
 import { pivot } from "./pivot";
 
+export function downloadAllCSV(
+  results: AggResult[],
+  _weightCol: string,
+  layoutMeta?: LayoutMeta,
+): void {
+  const hasCross = results.some((r) => {
+    const { subs } = pivot(r.cells);
+    return subs.length > 1;
+  });
+
+  if (hasCross) {
+    downloadCrossCSV(results, layoutMeta);
+  } else {
+    downloadGtCSV(results);
+  }
+}
+
+// ─── Internal ───────────────────────────────────────────────
+
 /** Resolve cross sub value to label */
 function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
   if (subLabel === NA_VALUE) return "無回答";
@@ -25,23 +44,6 @@ function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
 /** Resolve option label for CSV export */
 function resolveMainLabel(main: string): string {
   return main === NA_VALUE ? "無回答" : main;
-}
-
-export function downloadAllCSV(
-  results: AggResult[],
-  _weightCol: string,
-  layoutMeta?: LayoutMeta,
-): void {
-  const hasCross = results.some((r) => {
-    const { subs } = pivot(r.cells);
-    return subs.length > 1;
-  });
-
-  if (hasCross) {
-    downloadCrossCSV(results, layoutMeta);
-  } else {
-    downloadGtCSV(results);
-  }
 }
 
 function downloadGtCSV(results: AggResult[]): void {
