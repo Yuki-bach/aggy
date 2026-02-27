@@ -15,12 +15,13 @@ export type GtChartType = "bar-h" | "bar-v" | "obi";
 
 interface ChartContentProps {
   results: AggResult[];
-  hasCross: boolean;
   saChartType: GtChartType;
   maChartType: GtChartType;
 }
 
-export function ChartContent({ results, hasCross, saChartType, maChartType }: ChartContentProps) {
+export function ChartContent({ results, saChartType, maChartType }: ChartContentProps) {
+  const { crossCols } = useAggregation();
+  const hasCross = crossCols.length > 0;
   return (
     <div
       class={

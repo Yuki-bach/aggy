@@ -4,14 +4,16 @@ import type { PctDirection } from "./Toolbar";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
 import { ResultCard } from "./ResultCard";
+import { useAggregation } from "./AggregationContext";
 
 interface TableContentProps {
   results: AggResult[];
-  hasCross: boolean;
   pctDirection: PctDirection;
 }
 
-export function TableContent({ results, hasCross, pctDirection }: TableContentProps) {
+export function TableContent({ results, pctDirection }: TableContentProps) {
+  const { crossCols } = useAggregation();
+  const hasCross = crossCols.length > 0;
   const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 

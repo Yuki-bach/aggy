@@ -63,7 +63,6 @@ export function Toolbar({ results, currentViewMode, callbacks }: ToolbarProps) {
 
 interface ViewOptsProps {
   currentViewMode: ViewMode;
-  hasCross: boolean;
   currentPctDirection: PctDirection;
   saChartType: GtChartType;
   maChartType: GtChartType;
@@ -100,12 +99,13 @@ function ChartTypeSelect({
 
 export function ViewOpts({
   currentViewMode,
-  hasCross,
   currentPctDirection,
   saChartType,
   maChartType,
   callbacks,
 }: ViewOptsProps) {
+  const { crossCols } = useAggregation();
+  const hasCross = crossCols.length > 0;
   return (
     <div class="mb-4 flex items-center justify-end gap-4 text-[0.8125rem] text-text-secondary">
       {currentViewMode === "chart" && (
