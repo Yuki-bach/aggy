@@ -1,4 +1,4 @@
-/** Chart rendering component */
+/** Chart content: grid layout + individual chart cards */
 
 import { useRef, useEffect } from "preact/hooks";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
@@ -13,12 +13,41 @@ import type { ChartConfiguration } from "chart.js";
 
 export type GtChartType = "bar-h" | "bar-v" | "obi";
 
+interface ChartContentProps {
+  results: AggResult[];
+  hasCross: boolean;
+  saChartType: GtChartType;
+  maChartType: GtChartType;
+}
+
+export function ChartContent({ results, hasCross, saChartType, maChartType }: ChartContentProps) {
+  return (
+    <div
+      class={
+        hasCross
+          ? "grid grid-cols-[1fr] gap-6"
+          : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
+      }
+    >
+      {results.map((res) => (
+        <ChartCard
+          key={res.question}
+          res={res}
+          gtChartType={res.type === "SA" ? saChartType : maChartType}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Individual chart card ──────────────────────────────────
+
 interface ChartCardProps {
   res: AggResult;
   gtChartType: GtChartType;
 }
 
-export function ChartCard({ res, gtChartType }: ChartCardProps) {
+function ChartCard({ res, gtChartType }: ChartCardProps) {
   const { layoutMeta, crossCols } = useAggregation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);

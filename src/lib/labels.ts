@@ -1,4 +1,4 @@
-/** Label resolution utility (shared by ResultTable / ChartRenderer) */
+/** Label resolution utility (shared by table / chart components) */
 
 import type { QuestionDef } from "./agg/aggregate";
 import { parseCrossSub } from "./agg/aggregate";
