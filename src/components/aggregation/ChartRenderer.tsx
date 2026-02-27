@@ -5,8 +5,9 @@ import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
-import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labels";
+import { resolveValueLabel, resolveSubLabel } from "../../lib/labels";
 import { useAggregation } from "./AggregationContext";
+import { ResultCard } from "./ResultCard";
 
 import type { ChartConfiguration } from "chart.js";
 
@@ -24,9 +25,6 @@ export function ChartCard({ res, gtChartType }: ChartCardProps) {
 
   const pv = pivot(res.cells);
   const isCross = pv.subs.length > 1;
-  const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
-  const hasLabel = questionLabel !== res.question;
-  const gtSub = pv.subs.find((s) => s.label === "GT")!;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -57,19 +55,11 @@ export function ChartCard({ res, gtChartType }: ChartCardProps) {
   }, [res, gtChartType, layoutMeta, crossCols]);
 
   return (
-    <div class="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
-      <div class="flex items-baseline gap-3 p-4 border-b border-border">
-        <div class="flex flex-col gap-0.5 min-w-0">
-          <span class="font-bold text-sm text-accent">{questionLabel}</span>
-          {hasLabel && <span class="text-xs text-muted tracking-[0.04em]">{res.question}</span>}
-        </div>
-        <span class="text-xs text-muted tracking-[0.04em]">{res.type}</span>
-        <span class="ml-auto text-[0.8125rem] text-muted">n={gtSub.n.toLocaleString()}</span>
-      </div>
+    <ResultCard res={res}>
       <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
         <canvas ref={canvasRef} />
       </div>
-    </div>
+    </ResultCard>
   );
 }
 

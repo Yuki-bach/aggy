@@ -1,0 +1,38 @@
+import type { ComponentChildren } from "preact";
+import type { AggResult } from "../../lib/agg/aggregate";
+import { pivot } from "../../lib/agg/pivot";
+import { resolveQuestionLabel } from "../../lib/labels";
+import { useAggregation } from "./AggregationContext";
+
+interface ResultCardProps {
+  res: AggResult;
+  extraClass?: string;
+  children: ComponentChildren;
+}
+
+export function ResultCard({ res, extraClass, children }: ResultCardProps) {
+  const { layoutMeta, weightCol } = useAggregation();
+
+  const pv = pivot(res.cells);
+  const gtSub = pv.subs.find((s) => s.label === "GT")!;
+  const nLabel = weightCol ? `n=${gtSub.n.toFixed(1)}` : `n=${gtSub.n.toLocaleString()}`;
+
+  const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
+  const hasLabel = questionLabel !== res.question;
+
+  return (
+    <div
+      class={`overflow-hidden rounded-xl border border-border bg-surface shadow-sm${extraClass ? ` ${extraClass}` : ""}`}
+    >
+      <div class="flex items-baseline gap-3 border-b border-border p-4">
+        <div class="flex min-w-0 flex-col gap-[2px]">
+          <span class="text-[0.875rem] font-bold text-accent">{questionLabel}</span>
+          {hasLabel && <span class="text-xs tracking-[0.04em] text-muted">{res.question}</span>}
+        </div>
+        <span class="text-xs tracking-[0.04em] text-muted">{res.type}</span>
+        <span class="ml-auto text-[0.8125rem] text-muted">{nLabel}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
