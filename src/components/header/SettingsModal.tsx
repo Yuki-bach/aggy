@@ -1,23 +1,8 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { t, getLocale, setLocale, onLocaleChange } from "../../lib/i18n";
 
-const THEME_KEY = "aggy-theme";
-const AI_KEY = "aggy-ai-comment";
-
-type Theme = "light" | "dark" | "system";
-
 export function isAICommentEnabled(): boolean {
   return localStorage.getItem(AI_KEY) !== "off";
-}
-
-function setAIComment(on: boolean): void {
-  localStorage.setItem(AI_KEY, on ? "on" : "off");
-}
-
-function getStoredTheme(): Theme {
-  const v = localStorage.getItem(THEME_KEY);
-  if (v === "dark" || v === "light" || v === "system") return v;
-  return "system";
 }
 
 export function applyTheme(theme: Theme): void {
@@ -35,6 +20,104 @@ export function applyTheme(theme: Theme): void {
   } else {
     delete document.documentElement.dataset.theme;
   }
+}
+
+export function SettingsRoot() {
+  const [open, setOpen] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState(false);
+  const [, setTick] = useState(0);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // System theme change listener
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => {
+      if (getStoredTheme() === "system") applyTheme("system");
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Re-render on locale change
+  useEffect(() => {
+    onLocaleChange(() => setTick((n) => n + 1));
+  }, []);
+
+  // Close on outside click or Escape
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("click", onClickOutside);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", onClickOutside);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const handleToggle = async (e: MouseEvent) => {
+    e.stopPropagation();
+    if (open) {
+      setOpen(false);
+    } else {
+      // Check AI availability once
+      if (typeof LanguageModel !== "undefined" && (await LanguageModel.availability()) !== "no") {
+        setAiAvailable(true);
+      }
+      setOpen(true);
+    }
+  };
+
+  const rerender = () => setTick((n) => n + 1);
+
+  return (
+    <div class="relative" ref={wrapRef}>
+      <button
+        id="settings-btn"
+        class="cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
+        data-i18n="header.settings"
+        data-i18n-attr="aria-label"
+        aria-label={t("header.settings")}
+        onClick={handleToggle}
+      >
+        ⚙
+      </button>
+      {open && (
+        <div class="absolute top-[calc(100%+8px)] right-0 z-100 w-[300px] rounded-xl border border-border bg-surface p-4 shadow-lg">
+          <SettingsPanel showAI={aiAvailable} onRerender={rerender} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Apply stored theme on app startup (call once in App useEffect) */
+export function initTheme(): void {
+  applyTheme(getStoredTheme());
+}
+
+// ─── Internal ───────────────────────────────────────────────
+
+const THEME_KEY = "aggy-theme";
+const AI_KEY = "aggy-ai-comment";
+
+type Theme = "light" | "dark" | "system";
+
+function setAIComment(on: boolean): void {
+  localStorage.setItem(AI_KEY, on ? "on" : "off");
+}
+
+function getStoredTheme(): Theme {
+  const v = localStorage.getItem(THEME_KEY);
+  if (v === "dark" || v === "light" || v === "system") return v;
+  return "system";
 }
 
 function SegmentControl({
@@ -128,85 +211,4 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
       )}
     </>
   );
-}
-
-export function SettingsRoot() {
-  const [open, setOpen] = useState(false);
-  const [aiAvailable, setAiAvailable] = useState(false);
-  const [, setTick] = useState(0);
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  // System theme change listener
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => {
-      if (getStoredTheme() === "system") applyTheme("system");
-    };
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  // Re-render on locale change
-  useEffect(() => {
-    onLocaleChange(() => setTick((n) => n + 1));
-  }, []);
-
-  // Close on outside click or Escape
-  useEffect(() => {
-    if (!open) return;
-    const onClickOutside = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("click", onClickOutside);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("click", onClickOutside);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  const handleToggle = async (e: MouseEvent) => {
-    e.stopPropagation();
-    if (open) {
-      setOpen(false);
-    } else {
-      // Check AI availability once
-      if (typeof LanguageModel !== "undefined" && (await LanguageModel.availability()) !== "no") {
-        setAiAvailable(true);
-      }
-      setOpen(true);
-    }
-  };
-
-  const rerender = () => setTick((n) => n + 1);
-
-  return (
-    <div class="relative" ref={wrapRef}>
-      <button
-        id="settings-btn"
-        class="cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
-        data-i18n="header.settings"
-        data-i18n-attr="aria-label"
-        aria-label={t("header.settings")}
-        onClick={handleToggle}
-      >
-        ⚙
-      </button>
-      {open && (
-        <div class="absolute top-[calc(100%+8px)] right-0 z-100 w-[300px] rounded-xl border border-border bg-surface p-4 shadow-lg">
-          <SettingsPanel showAI={aiAvailable} onRerender={rerender} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Apply stored theme on app startup (call once in App useEffect) */
-export function initTheme(): void {
-  applyTheme(getStoredTheme());
 }

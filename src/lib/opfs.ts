@@ -5,11 +5,6 @@ export interface SavedEntry {
   timestamp: number;
 }
 
-async function getAggyDir(): Promise<FileSystemDirectoryHandle> {
-  const root = await navigator.storage.getDirectory();
-  return root.getDirectoryHandle("aggy-data", { create: true });
-}
-
 export async function saveData(
   csvName: string,
   csvText: string,
@@ -83,4 +78,11 @@ export async function loadSaved(
 export async function deleteSaved(folderId: string): Promise<void> {
   const dir = await getAggyDir();
   await dir.removeEntry(folderId, { recursive: true });
+}
+
+// ─── Internal ───────────────────────────────────────────────
+
+async function getAggyDir(): Promise<FileSystemDirectoryHandle> {
+  const root = await navigator.storage.getDirectory();
+  return root.getDirectoryHandle("aggy-data", { create: true });
 }

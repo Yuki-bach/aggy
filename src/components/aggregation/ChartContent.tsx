@@ -39,8 +39,6 @@ export function ChartContent({ saChartType, maChartType }: ChartContentProps) {
   );
 }
 
-// ─── Individual chart card ──────────────────────────────────
-
 interface ChartCardProps {
   res: AggResult;
   gtChartType: ChartType;
@@ -90,8 +88,6 @@ function ChartCard({ res, gtChartType }: ChartCardProps) {
     </ResultCard>
   );
 }
-
-// ─── Chart builders (pure logic, unchanged) ─────────────────
 
 function buildGtChart(
   canvas: HTMLCanvasElement,

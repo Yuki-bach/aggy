@@ -60,6 +60,7 @@ interface Cell { main: string; sub: string; n: number; count: number; pct: numbe
 - Module-level variables as app state (no state management library); migrating toward hooks
 - UI language is Japanese
 - Formatting: oxfmt; Linting: oxlint; Testing: vitest
+- File ordering: `imports → exports (Public API) → internal implementation`. Props interfaces stay with their exported component
 
 ## Vite Config Notes
 
