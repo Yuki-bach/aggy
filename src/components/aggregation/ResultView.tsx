@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import type { AggResult } from "../../lib/agg/aggregate";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
-import { ChartContent, type GtChartType } from "./ChartContent";
+import { ChartContent, type ChartType } from "./ChartContent";
 import { TableContent } from "./TableContent";
 import { AIBubble } from "./AIBubble";
 import { useAggregation } from "./AggregationContext";
@@ -12,8 +12,8 @@ export interface ResultViewProps {
 
 export default function ResultView({ results }: ResultViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
-  const [saChartType, setSaChartType] = useState<GtChartType>("bar-h");
-  const [maChartType, setMaChartType] = useState<GtChartType>("bar-h");
+  const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
+  const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
   const [pctDirection, setPctDirection] = useState<PctDirection>("vertical");
   const [, setThemeTick] = useState(0);
 

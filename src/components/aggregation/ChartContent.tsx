@@ -11,12 +11,12 @@ import { ResultCard } from "./ResultCard";
 
 import type { ChartConfiguration } from "chart.js";
 
-export type GtChartType = "bar-h" | "bar-v" | "obi";
+export type ChartType = "bar-h" | "bar-v" | "obi";
 
 interface ChartContentProps {
   results: AggResult[];
-  saChartType: GtChartType;
-  maChartType: GtChartType;
+  saChartType: ChartType;
+  maChartType: ChartType;
 }
 
 export function ChartContent({ results, saChartType, maChartType }: ChartContentProps) {
@@ -45,7 +45,7 @@ export function ChartContent({ results, saChartType, maChartType }: ChartContent
 
 interface ChartCardProps {
   res: AggResult;
-  gtChartType: GtChartType;
+  gtChartType: ChartType;
 }
 
 function ChartCard({ res, gtChartType }: ChartCardProps) {
@@ -98,7 +98,7 @@ function ChartCard({ res, gtChartType }: ChartCardProps) {
 function buildGtChart(
   canvas: HTMLCanvasElement,
   pv: ReturnType<typeof pivot>,
-  chartType: GtChartType,
+  chartType: ChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
   layoutMeta: LayoutMeta,
@@ -190,7 +190,7 @@ function buildGtChart(
 function buildCrossChart(
   canvas: HTMLCanvasElement,
   pv: ReturnType<typeof pivot>,
-  gtChartType: GtChartType,
+  gtChartType: ChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
   layoutMeta: LayoutMeta,
