@@ -176,12 +176,10 @@ function TransposedSubRow({
   sub,
   mains,
   lookup,
-  mainGtCounts,
 }: {
   sub: SubInfo;
   mains: string[];
   lookup: Map<string, { count: number; pct: number }>;
-  mainGtCounts: Map<string, number>;
 }) {
   const { layoutMeta, weightCol, crossCols } = useAggregation();
   return (
@@ -195,11 +193,9 @@ function TransposedSubRow({
       </td>
       {mains.map((main) => {
         const cell = lookup.get(`${main}\0${sub.label}`);
-        const denom = mainGtCounts.get(main) ?? 0;
-        const pct = cell && denom > 0 ? (cell.count / denom) * 100 : 0;
         return (
           <td key={main} class={`${TD_BASE} ${MONO} text-accent2 border-l border-l-row-border`}>
-            {cell ? pct.toFixed(1) + "%" : "-"}
+            {cell ? cell.pct.toFixed(1) + "%" : "-"}
           </td>
         );
       })}
@@ -219,12 +215,6 @@ function TransposedCrossTable({ res, pv }: TransposedCrossTableProps) {
   const crossSubs = subs.filter((s) => s.label !== "GT");
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
 
-  const mainGtCounts = new Map<string, number>();
-  for (const main of mains) {
-    const gtCell = lookup.get(`${main}\0GT`);
-    mainGtCounts.set(main, gtCell?.count ?? 0);
-  }
-
   const crossGroups =
     crossCols.length > 0 ? groupSubsByCrossAxis(crossSubs, crossCols, res.type) : [];
 
@@ -236,7 +226,7 @@ function TransposedCrossTable({ res, pv }: TransposedCrossTableProps) {
           <th class="py-3 px-4" />
           {mains.map((main) => {
             const label = resolveValueLabel(res.type, res.question, main, layoutMeta);
-            const gtCount = mainGtCounts.get(main) ?? 0;
+            const gtCell = lookup.get(`${main}\0GT`);
             return (
               <th
                 key={main}
@@ -244,7 +234,9 @@ function TransposedCrossTable({ res, pv }: TransposedCrossTableProps) {
               >
                 {label}
                 <br />
-                <span class="text-muted text-xs font-normal">n={formatN(gtCount, weightCol)}</span>
+                <span class="text-muted text-xs font-normal">
+                  n={formatN(gtCell?.count ?? 0, weightCol)}
+                </span>
               </th>
             );
           })}
@@ -283,24 +275,12 @@ function TransposedCrossTable({ res, pv }: TransposedCrossTableProps) {
                   </td>
                 </tr>
                 {group.subs.map((sub) => (
-                  <TransposedSubRow
-                    key={sub.label}
-                    sub={sub}
-                    mains={mains}
-                    lookup={lookup}
-                    mainGtCounts={mainGtCounts}
-                  />
+                  <TransposedSubRow key={sub.label} sub={sub} mains={mains} lookup={lookup} />
                 ))}
               </>
             ))
           : crossSubs.map((sub) => (
-              <TransposedSubRow
-                key={sub.label}
-                sub={sub}
-                mains={mains}
-                lookup={lookup}
-                mainGtCounts={mainGtCounts}
-              />
+              <TransposedSubRow key={sub.label} sub={sub} mains={mains} lookup={lookup} />
             ))}
       </tbody>
     </table>
