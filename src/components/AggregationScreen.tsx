@@ -1,10 +1,7 @@
 import { useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
-import {
-  AggregationContext,
-  type AggregationContextValue,
-} from "./aggregation/AggregationContext";
+import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
 import { runDuckDBAggregation } from "../lib/duckdbBridge";
 import { buildQuestionDefs } from "../lib/layout";
 import { questionKey } from "../lib/agg/aggregate";
