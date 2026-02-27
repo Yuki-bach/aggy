@@ -5,8 +5,10 @@ import type { Cell } from "./aggregate";
 import {
   esc,
   weightExpr,
+  weightedCountExpr,
   maWeightedCountExpr,
   maShownCondition,
+  maNoneSelectedCondition,
   mkCell,
   NA_VALUE,
 } from "./sqlHelpers";
@@ -42,10 +44,7 @@ export class GtAggregator {
     });
 
     // No-answer: shown but nothing selected
-    const noneSelected = cols.map((c) => `"${esc(c)}" != '1'`).join(" AND ");
-    const naExpr = this.weightCol
-      ? `SUM(CASE WHEN ${noneSelected} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
-      : `COUNT(CASE WHEN ${noneSelected} THEN 1 END)::DOUBLE`;
+    const naExpr = weightedCountExpr(maNoneSelectedCondition(cols), this.weightCol);
 
     // questionN: number of respondents shown
     const nExpr = this.weightCol
