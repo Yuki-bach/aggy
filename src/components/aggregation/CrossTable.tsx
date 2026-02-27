@@ -1,4 +1,4 @@
-import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
+import type { AggResult, Cell, QuestionDef } from "../../lib/agg/aggregate";
 import { questionKey, parseCrossSub } from "../../lib/agg/aggregate";
 import type { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labels";
@@ -8,13 +8,14 @@ import { Th, Td } from "./TableCells";
 import { useAggregation } from "./AggregationContext";
 
 type SubInfo = { label: string; n: number };
+type CrossGroup = { crossCol: QuestionDef; subs: SubInfo[] };
 
 /** Group subs by cross axis using prefixed sub values */
 function groupSubsByCrossAxis(
   crossSubs: SubInfo[],
   crossCols: QuestionDef[],
   resType: "SA" | "MA",
-): { crossCol: QuestionDef; subs: SubInfo[] }[] {
+): CrossGroup[] {
   const orderedCols =
     resType === "SA"
       ? [...crossCols.filter((q) => q.type === "SA"), ...crossCols.filter((q) => q.type === "MA")]
@@ -51,22 +52,35 @@ const TH_BASE =
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
-// ─── Vertical % Table ───────────────────────────────────────
+// ─── Common data preparation ────────────────────────────────
 
-interface VerticalCrossTableProps {
-  res: AggResult;
-  pv: ReturnType<typeof pivot>;
+interface CrossTableData {
+  mains: string[];
+  gtSub: SubInfo;
+  crossSubs: SubInfo[];
+  crossGroups: CrossGroup[];
+  questionLabel: string;
+  lookup: Map<string, Cell>;
+  weightCol: string;
 }
 
-function VerticalCrossTable({ res, pv }: VerticalCrossTableProps) {
+function useCrossTableData(res: AggResult, pv: ReturnType<typeof pivot>): CrossTableData {
   const { layoutMeta, weightCol, crossCols } = useAggregation();
   const { mains, subs, lookup } = pv;
   const gtSub = subs.find((s) => s.label === "GT")!;
   const crossSubs = subs.filter((s) => s.label !== "GT");
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
-
   const crossGroups =
     crossCols.length > 0 ? groupSubsByCrossAxis(crossSubs, crossCols, res.type) : [];
+
+  return { mains, gtSub, crossSubs, crossGroups, questionLabel, lookup, weightCol };
+}
+
+// ─── Vertical % Table ───────────────────────────────────────
+
+function VerticalCrossTable({ data, res }: { data: CrossTableData; res: AggResult }) {
+  const { layoutMeta, crossCols } = useAggregation();
+  const { mains, gtSub, crossSubs, crossGroups, questionLabel, lookup, weightCol } = data;
   const hasMultipleAxes = crossGroups.length > 1;
 
   // Precompute axis group boundary indices
@@ -179,7 +193,7 @@ function TransposedSubRow({
 }: {
   sub: SubInfo;
   mains: string[];
-  lookup: Map<string, { count: number; pct: number }>;
+  lookup: Map<string, Cell>;
 }) {
   const { layoutMeta, weightCol, crossCols } = useAggregation();
   return (
@@ -203,20 +217,9 @@ function TransposedSubRow({
   );
 }
 
-interface TransposedCrossTableProps {
-  res: AggResult;
-  pv: ReturnType<typeof pivot>;
-}
-
-function TransposedCrossTable({ res, pv }: TransposedCrossTableProps) {
-  const { layoutMeta, weightCol, crossCols } = useAggregation();
-  const { mains, subs, lookup } = pv;
-  const gtSub = subs.find((s) => s.label === "GT")!;
-  const crossSubs = subs.filter((s) => s.label !== "GT");
-  const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
-
-  const crossGroups =
-    crossCols.length > 0 ? groupSubsByCrossAxis(crossSubs, crossCols, res.type) : [];
+function TransposedCrossTable({ data, res }: { data: CrossTableData; res: AggResult }) {
+  const { layoutMeta } = useAggregation();
+  const { mains, gtSub, crossSubs, crossGroups, questionLabel, lookup, weightCol } = data;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
@@ -296,8 +299,9 @@ interface CrossTableProps {
 }
 
 export function CrossTable({ res, pv, pctDir }: CrossTableProps) {
+  const data = useCrossTableData(res, pv);
   if (pctDir === "horizontal") {
-    return <TransposedCrossTable res={res} pv={pv} />;
+    return <TransposedCrossTable data={data} res={res} />;
   }
-  return <VerticalCrossTable res={res} pv={pv} />;
+  return <VerticalCrossTable data={data} res={res} />;
 }
