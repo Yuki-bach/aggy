@@ -1,12 +1,14 @@
 import { createContext } from "preact";
 import { useContext } from "preact/hooks";
 import type { LayoutMeta } from "../../lib/layout";
-import type { QuestionDef } from "../../lib/agg/aggregate";
+import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 
 export interface AggregationContextValue {
+  results: AggResult[];
   layoutMeta: LayoutMeta;
   weightCol: string;
   crossCols: QuestionDef[];
+  hasCross: boolean;
 }
 
 export const AggregationContext = createContext<AggregationContextValue | null>(null);

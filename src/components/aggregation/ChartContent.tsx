@@ -14,14 +14,12 @@ import type { ChartConfiguration } from "chart.js";
 export type ChartType = "bar-h" | "bar-v" | "obi";
 
 interface ChartContentProps {
-  results: AggResult[];
   saChartType: ChartType;
   maChartType: ChartType;
 }
 
-export function ChartContent({ results, saChartType, maChartType }: ChartContentProps) {
-  const { crossCols } = useAggregation();
-  const hasCross = crossCols.length > 0;
+export function ChartContent({ saChartType, maChartType }: ChartContentProps) {
+  const { results, hasCross } = useAggregation();
   return (
     <div
       class={
