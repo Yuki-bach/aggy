@@ -48,7 +48,6 @@ export default function ResultView({ results }: ResultViewProps) {
   return (
     <>
       <Toolbar
-        hasCross={hasCross}
         results={results}
         currentViewMode={viewMode}
         callbacks={callbacks}

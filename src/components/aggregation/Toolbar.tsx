@@ -16,7 +16,6 @@ export interface ToolbarCallbacks {
 }
 
 interface ToolbarProps {
-  hasCross: boolean;
   results: AggResult[];
   currentViewMode: ViewMode;
   callbacks: ToolbarCallbacks;
