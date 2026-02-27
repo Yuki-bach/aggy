@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
@@ -27,6 +27,14 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [aggCtx, setAggCtx] = useState<AggregationContextValue | null>(null);
+
+  const didAutoRun = useRef(false);
+  useEffect(() => {
+    if (!didAutoRun.current) {
+      didAutoRun.current = true;
+      runAggregation();
+    }
+  }, []);
 
   async function runAggregation(): Promise<void> {
     setErrorMsg("");
