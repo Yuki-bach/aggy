@@ -6,6 +6,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labels";
+import { useAggregation } from "./AggregationContext";
 
 import type { ChartConfiguration } from "chart.js";
 
@@ -14,11 +15,10 @@ export type GtChartType = "bar-h" | "bar-v" | "obi";
 interface ChartCardProps {
   res: AggResult;
   gtChartType: GtChartType;
-  layoutMeta?: LayoutMeta;
-  crossCols?: QuestionDef[];
 }
 
-export function ChartCard({ res, gtChartType, layoutMeta, crossCols }: ChartCardProps) {
+export function ChartCard({ res, gtChartType }: ChartCardProps) {
+  const { layoutMeta, crossCols } = useAggregation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -81,7 +81,7 @@ function buildGtChart(
   chartType: GtChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
-  layoutMeta?: LayoutMeta,
+  layoutMeta: LayoutMeta | undefined,
 ): Chart {
   const { mains, lookup } = pv;
   const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
@@ -173,8 +173,8 @@ function buildCrossChart(
   gtChartType: GtChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
-  layoutMeta?: LayoutMeta,
-  crossCols?: QuestionDef[],
+  layoutMeta: LayoutMeta | undefined,
+  crossCols: QuestionDef[],
 ): Chart {
   const { mains, subs, lookup } = pv;
   const crossSubs = subs.filter((s) => s.label !== "GT");

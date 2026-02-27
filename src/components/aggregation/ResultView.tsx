@@ -1,6 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
-import type { LayoutMeta } from "../../lib/layout";
+import type { AggResult } from "../../lib/agg/aggregate";
 import { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel } from "../../lib/labels";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
@@ -8,16 +7,13 @@ import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
 import { AIBubble } from "./AIBubble";
 import { ChartCard, type GtChartType } from "./ChartRenderer";
+import { useAggregation } from "./AggregationContext";
 
 export interface ResultViewProps {
   results: AggResult[];
-  weightCol: string;
-  rawN: number;
-  layoutMeta?: LayoutMeta;
-  crossCols?: QuestionDef[];
 }
 
-export default function ResultView({ results, weightCol, layoutMeta, crossCols }: ResultViewProps) {
+export default function ResultView({ results }: ResultViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<GtChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<GtChartType>("bar-h");
@@ -55,9 +51,7 @@ export default function ResultView({ results, weightCol, layoutMeta, crossCols }
       <Toolbar
         hasCross={hasCross}
         results={results}
-        weightCol={weightCol}
         currentViewMode={viewMode}
-        layoutMeta={layoutMeta}
         callbacks={callbacks}
       />
       {showViewOpts && (
@@ -76,20 +70,11 @@ export default function ResultView({ results, weightCol, layoutMeta, crossCols }
           hasCross={hasCross}
           saChartType={saChartType}
           maChartType={maChartType}
-          layoutMeta={layoutMeta}
-          crossCols={crossCols}
         />
       ) : (
-        <TableContent
-          results={results}
-          weightCol={weightCol}
-          hasCross={hasCross}
-          pctDirection={pctDirection}
-          layoutMeta={layoutMeta}
-          crossCols={crossCols}
-        />
+        <TableContent results={results} hasCross={hasCross} pctDirection={pctDirection} />
       )}
-      <AIBubble results={results} weightCol={weightCol} layoutMeta={layoutMeta} />
+      <AIBubble results={results} />
     </>
   );
 }
@@ -101,15 +86,11 @@ function ChartContent({
   hasCross,
   saChartType,
   maChartType,
-  layoutMeta,
-  crossCols,
 }: {
   results: AggResult[];
   hasCross: boolean;
   saChartType: GtChartType;
   maChartType: GtChartType;
-  layoutMeta?: LayoutMeta;
-  crossCols?: QuestionDef[];
 }) {
   return (
     <div
@@ -124,8 +105,6 @@ function ChartContent({
           key={res.question}
           res={res}
           gtChartType={res.type === "SA" ? saChartType : maChartType}
-          layoutMeta={layoutMeta}
-          crossCols={crossCols}
         />
       ))}
     </div>
@@ -134,19 +113,14 @@ function ChartContent({
 
 function TableContent({
   results,
-  weightCol,
   hasCross,
   pctDirection,
-  layoutMeta,
-  crossCols,
 }: {
   results: AggResult[];
-  weightCol: string;
   hasCross: boolean;
   pctDirection: PctDirection;
-  layoutMeta?: LayoutMeta;
-  crossCols?: QuestionDef[];
 }) {
+  const { layoutMeta, weightCol } = useAggregation();
   const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 
@@ -184,22 +158,9 @@ function TableContent({
               <span class="ml-auto text-[0.8125rem] text-muted">{nLabel}</span>
             </div>
             {isCross ? (
-              <CrossTable
-                res={res}
-                pv={pv}
-                weightCol={weightCol}
-                pctDir={pctDirection}
-                layoutMeta={layoutMeta}
-                crossCols={crossCols}
-              />
+              <CrossTable res={res} pv={pv} pctDir={pctDirection} />
             ) : (
-              <GtTable
-                res={res}
-                pv={pv}
-                weightCol={weightCol}
-                maxPct={maxPct}
-                layoutMeta={layoutMeta}
-              />
+              <GtTable res={res} pv={pv} maxPct={maxPct} />
             )}
           </div>
         );

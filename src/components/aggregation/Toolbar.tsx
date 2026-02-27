@@ -1,9 +1,9 @@
 import type { AggResult } from "../../lib/agg/aggregate";
-import type { LayoutMeta } from "../../lib/layout";
 import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
 import type { GtChartType } from "./ChartRenderer";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
+import { useAggregation } from "./AggregationContext";
 
 export type ViewMode = "table" | "chart";
 export type PctDirection = "vertical" | "horizontal";
@@ -18,19 +18,12 @@ export interface ToolbarCallbacks {
 interface ToolbarProps {
   hasCross: boolean;
   results: AggResult[];
-  weightCol: string;
   currentViewMode: ViewMode;
-  layoutMeta: LayoutMeta | undefined;
   callbacks: ToolbarCallbacks;
 }
 
-export function Toolbar({
-  results,
-  weightCol,
-  currentViewMode,
-  layoutMeta,
-  callbacks,
-}: ToolbarProps) {
+export function Toolbar({ results, currentViewMode, callbacks }: ToolbarProps) {
+  const { weightCol, layoutMeta } = useAggregation();
   const weightText = weightCol
     ? t("result.weight.applied", { col: weightCol })
     : t("result.weight.none");

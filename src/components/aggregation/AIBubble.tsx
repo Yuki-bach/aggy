@@ -1,17 +1,16 @@
 import { useState, useEffect } from "preact/hooks";
 import type { AggResult } from "../../lib/agg/aggregate";
-import type { LayoutMeta } from "../../lib/layout";
 import { generateComment } from "../../lib/aiComment";
 import { t } from "../../lib/i18n";
 import { isAICommentEnabled } from "../header/SettingsModal";
+import { useAggregation } from "./AggregationContext";
 
 interface AIBubbleProps {
   results: AggResult[];
-  weightCol: string;
-  layoutMeta?: LayoutMeta;
 }
 
-export function AIBubble({ results, weightCol, layoutMeta }: AIBubbleProps) {
+export function AIBubble({ results }: AIBubbleProps) {
+  const { weightCol, layoutMeta } = useAggregation();
   const [comment, setComment] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(true);

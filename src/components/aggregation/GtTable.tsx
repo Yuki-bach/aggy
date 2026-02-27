@@ -1,20 +1,18 @@
-import { render } from "preact";
 import type { AggResult } from "../../lib/agg/aggregate";
-import type { LayoutMeta } from "../../lib/layout";
 import type { pivot } from "../../lib/agg/pivot";
 import { resolveQuestionLabel, resolveValueLabel } from "../../lib/labels";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
+import { useAggregation } from "./AggregationContext";
 
 interface GtTableProps {
   res: AggResult;
   pv: ReturnType<typeof pivot>;
-  weightCol: string;
   maxPct: number;
-  layoutMeta?: LayoutMeta;
 }
 
-export function GtTable({ res, pv, weightCol, maxPct, layoutMeta }: GtTableProps) {
+export function GtTable({ res, pv, maxPct }: GtTableProps) {
+  const { layoutMeta, weightCol } = useAggregation();
   const { mains, lookup } = pv;
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
 
@@ -60,20 +58,4 @@ export function GtTable({ res, pv, weightCol, maxPct, layoutMeta }: GtTableProps
       </tbody>
     </table>
   );
-}
-
-/** Bridge: render GtTable into a container div for vanilla DOM callers */
-export function buildGtTable(
-  res: AggResult,
-  pv: ReturnType<typeof pivot>,
-  weightCol: string,
-  maxPct: number,
-  layoutMeta?: LayoutMeta,
-): HTMLDivElement {
-  const container = document.createElement("div");
-  render(
-    <GtTable res={res} pv={pv} weightCol={weightCol} maxPct={maxPct} layoutMeta={layoutMeta} />,
-    container,
-  );
-  return container;
 }
