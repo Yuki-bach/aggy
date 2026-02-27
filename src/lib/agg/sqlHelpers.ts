@@ -21,6 +21,18 @@ export function maShownCondition(cols: string[]): string {
   return cols.map((c) => `("${esc(c)}" IS NOT NULL AND "${esc(c)}" != '')`).join(" OR ");
 }
 
+/** Weighted count expression with a CASE WHEN condition */
+export function weightedCountExpr(condition: string, weightCol: string): string {
+  return weightCol
+    ? `SUM(CASE WHEN ${condition} THEN TRY_CAST("${esc(weightCol)}" AS DOUBLE) ELSE 0 END)`
+    : `COUNT(CASE WHEN ${condition} THEN 1 END)::DOUBLE`;
+}
+
+/** MA "none selected" condition: all sub-columns != '1' */
+export function maNoneSelectedCondition(cols: string[]): string {
+  return cols.map((c) => `"${esc(c)}" != '1'`).join(" AND ");
+}
+
 export function mkCell(main: string, sub: string, n: number, count: number): Cell {
   return { main, sub, n, count, pct: n > 0 ? (count / n) * 100 : 0 };
 }

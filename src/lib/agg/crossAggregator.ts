@@ -1,13 +1,15 @@
 /** Cross-tabulation aggregation — one cross axis at a time */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Cell, QuestionDef } from "./aggregate";
+import type { Cell, QuestionDef, SAQuestion, MAQuestion } from "./aggregate";
 import { crossSub } from "./aggregate";
 import {
   esc,
   weightExpr,
+  weightedCountExpr,
   maWeightedCountExpr,
   maShownCondition,
+  maNoneSelectedCondition,
   mkCell,
   NA_VALUE,
 } from "./sqlHelpers";
@@ -78,23 +80,23 @@ export class CrossAggregator {
   /** Cross-tabulate an SA main question against this cross axis */
   async aggregateSA(col: string, mainValues: string[]): Promise<Cell[]> {
     if (this.crossQ.type === "SA") {
-      return this.saSA(col, mainValues);
+      return this.saSA(col, mainValues, this.crossQ);
     }
-    return this.saMA(col, mainValues);
+    return this.saMA(col, mainValues, this.crossQ);
   }
 
   /** Cross-tabulate an MA main question against this cross axis */
   async aggregateMA(cols: string[]): Promise<Cell[]> {
     if (this.crossQ.type === "SA") {
-      return this.maSA(cols);
+      return this.maSA(cols, this.crossQ);
     }
-    return this.maMA(cols);
+    return this.maMA(cols, this.crossQ);
   }
 
   // ── SA main × SA cross ──
 
-  private async saSA(col: string, mainValues: string[]): Promise<Cell[]> {
-    const crossCol = (this.crossQ as { type: "SA"; column: string }).column;
+  private async saSA(col: string, mainValues: string[], crossQ: SAQuestion): Promise<Cell[]> {
+    const crossCol = crossQ.column;
     const { headers, crossValues } = this.crossHeader;
 
     const sql = `
@@ -132,8 +134,7 @@ export class CrossAggregator {
 
   // ── SA main × MA cross ──
 
-  private async saMA(col: string, mainValues: string[]): Promise<Cell[]> {
-    const crossQ = this.crossQ as { type: "MA"; prefix: string; columns: string[] };
+  private async saMA(col: string, mainValues: string[], crossQ: MAQuestion): Promise<Cell[]> {
     const { headers } = this.crossHeader;
 
     const selectClauses = crossQ.columns.map(
@@ -179,8 +180,8 @@ export class CrossAggregator {
 
   // ── MA main × SA cross ──
 
-  private async maSA(maCols: string[]): Promise<Cell[]> {
-    const crossCol = (this.crossQ as { type: "SA"; column: string }).column;
+  private async maSA(maCols: string[], crossQ: SAQuestion): Promise<Cell[]> {
+    const crossCol = crossQ.column;
     const { headers, crossValues } = this.crossHeader;
 
     const selectClauses = maCols.map(
@@ -188,10 +189,8 @@ export class CrossAggregator {
     );
 
     // No-answer count: shown but nothing selected
-    const naCondition = `${maCols.map((c) => `"${esc(c)}" != '1'`).join(" AND ")} AND (${maShownCondition(maCols)})`;
-    const naExpr = this.weightCol
-      ? `SUM(CASE WHEN ${naCondition} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
-      : `COUNT(CASE WHEN ${naCondition} THEN 1 END)::DOUBLE`;
+    const naCondition = `${maNoneSelectedCondition(maCols)} AND (${maShownCondition(maCols)})`;
+    const naExpr = weightedCountExpr(naCondition, this.weightCol);
 
     const sql = `
       SELECT
@@ -245,29 +244,22 @@ export class CrossAggregator {
 
   // ── MA main × MA cross ──
 
-  private async maMA(rowMaCols: string[]): Promise<Cell[]> {
-    const crossQ = this.crossQ as { type: "MA"; prefix: string; columns: string[] };
+  private async maMA(rowMaCols: string[], crossQ: MAQuestion): Promise<Cell[]> {
     const { headers } = this.crossHeader;
 
     const selectClauses: string[] = [];
     for (let r = 0; r < rowMaCols.length; r++) {
       for (let c = 0; c < crossQ.columns.length; c++) {
         const cond = `"${esc(rowMaCols[r])}" = '1' AND "${esc(crossQ.columns[c])}" = '1'`;
-        const expr = this.weightCol
-          ? `SUM(CASE WHEN ${cond} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
-          : `COUNT(CASE WHEN ${cond} THEN 1 END)::DOUBLE`;
-        selectClauses.push(`${expr} AS r${r}c${c}`);
+        selectClauses.push(`${weightedCountExpr(cond, this.weightCol)} AS r${r}c${c}`);
       }
     }
 
     // No-answer × each cross MA column
-    const naBase = `${rowMaCols.map((col) => `"${esc(col)}" != '1'`).join(" AND ")} AND (${maShownCondition(rowMaCols)})`;
+    const naBase = `${maNoneSelectedCondition(rowMaCols)} AND (${maShownCondition(rowMaCols)})`;
     for (let c = 0; c < crossQ.columns.length; c++) {
       const naCondition = `${naBase} AND "${esc(crossQ.columns[c])}" = '1'`;
-      const expr = this.weightCol
-        ? `SUM(CASE WHEN ${naCondition} THEN TRY_CAST("${esc(this.weightCol)}" AS DOUBLE) ELSE 0 END)`
-        : `COUNT(CASE WHEN ${naCondition} THEN 1 END)::DOUBLE`;
-      selectClauses.push(`${expr} AS na_c${c}`);
+      selectClauses.push(`${weightedCountExpr(naCondition, this.weightCol)} AS na_c${c}`);
     }
 
     const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;

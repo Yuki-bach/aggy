@@ -20,12 +20,12 @@ export interface AggResult {
 
 export type QuestionDef = SAQuestion | MAQuestion;
 
-interface SAQuestion {
+export interface SAQuestion {
   type: "SA";
   column: string;
 }
 
-interface MAQuestion {
+export interface MAQuestion {
   type: "MA";
   prefix: string;
   columns: string[];
