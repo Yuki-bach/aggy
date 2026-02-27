@@ -132,17 +132,17 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       {/* Right Panel */}
       <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
         {aggResults ? (
-          <AggregationContext.Provider
-            value={{
-              layoutMeta: aggResults.layoutMeta,
-              weightCol: aggResults.weightCol,
-              crossCols: aggResults.crossCols,
-            }}
-          >
-            <div aria-live="polite">
+          <div aria-live="polite">
+            <AggregationContext.Provider
+              value={{
+                layoutMeta: aggResults.layoutMeta,
+                weightCol: aggResults.weightCol,
+                crossCols: aggResults.crossCols,
+              }}
+            >
               <ResultView results={aggResults.results} />
-            </div>
-          </AggregationContext.Provider>
+            </AggregationContext.Provider>
+          </div>
         ) : (
           <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
             <span class="text-[2.5rem]" aria-hidden="true">
