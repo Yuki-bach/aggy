@@ -81,7 +81,7 @@ function buildGtChart(
   chartType: GtChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
-  layoutMeta: LayoutMeta | undefined,
+  layoutMeta: LayoutMeta,
 ): Chart {
   const { mains, lookup } = pv;
   const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
@@ -173,7 +173,7 @@ function buildCrossChart(
   gtChartType: GtChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
-  layoutMeta: LayoutMeta | undefined,
+  layoutMeta: LayoutMeta,
   crossCols: QuestionDef[],
 ): Chart {
   const { mains, subs, lookup } = pv;
