@@ -1,7 +1,7 @@
 import type { AggResult } from "../../lib/agg/aggregate";
 import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
-import type { GtChartType } from "./ChartContent";
+import type { ChartType } from "./ChartContent";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { useAggregation } from "./AggregationContext";
 
@@ -10,8 +10,8 @@ export type PctDirection = "vertical" | "horizontal";
 
 export interface ToolbarCallbacks {
   onViewModeChange: (mode: ViewMode) => void;
-  onSaChartTypeChange: (type: GtChartType) => void;
-  onMaChartTypeChange: (type: GtChartType) => void;
+  onSaChartTypeChange: (type: ChartType) => void;
+  onMaChartTypeChange: (type: ChartType) => void;
   onPctDirectionChange: (dir: PctDirection) => void;
 }
 
@@ -63,10 +63,9 @@ export function Toolbar({ results, currentViewMode, callbacks }: ToolbarProps) {
 
 interface ViewOptsProps {
   currentViewMode: ViewMode;
-  hasCross: boolean;
   currentPctDirection: PctDirection;
-  saChartType: GtChartType;
-  maChartType: GtChartType;
+  saChartType: ChartType;
+  maChartType: ChartType;
   callbacks: Pick<
     ToolbarCallbacks,
     "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange"
@@ -79,8 +78,8 @@ function ChartTypeSelect({
   onChange,
 }: {
   label: string;
-  value: GtChartType;
-  onChange: (type: GtChartType) => void;
+  value: ChartType;
+  onChange: (type: ChartType) => void;
 }) {
   return (
     <label>
@@ -88,7 +87,7 @@ function ChartTypeSelect({
       <select
         class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-[0.8125rem] text-text"
         value={value}
-        onChange={(e) => onChange((e.target as HTMLSelectElement).value as GtChartType)}
+        onChange={(e) => onChange((e.target as HTMLSelectElement).value as ChartType)}
       >
         <option value="bar-h">{t("chart.barH")}</option>
         <option value="bar-v">{t("chart.barV")}</option>
@@ -100,12 +99,13 @@ function ChartTypeSelect({
 
 export function ViewOpts({
   currentViewMode,
-  hasCross,
   currentPctDirection,
   saChartType,
   maChartType,
   callbacks,
 }: ViewOptsProps) {
+  const { crossCols } = useAggregation();
+  const hasCross = crossCols.length > 0;
   return (
     <div class="mb-4 flex items-center justify-end gap-4 text-[0.8125rem] text-text-secondary">
       {currentViewMode === "chart" && (

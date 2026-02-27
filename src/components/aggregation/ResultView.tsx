@@ -1,10 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
 import type { AggResult } from "../../lib/agg/aggregate";
-import { pivot } from "../../lib/agg/pivot";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
-import { ChartContent, type GtChartType } from "./ChartContent";
+import { ChartContent, type ChartType } from "./ChartContent";
 import { TableContent } from "./TableContent";
 import { AIBubble } from "./AIBubble";
+import { useAggregation } from "./AggregationContext";
 
 export interface ResultViewProps {
   results: AggResult[];
@@ -12,8 +12,8 @@ export interface ResultViewProps {
 
 export default function ResultView({ results }: ResultViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
-  const [saChartType, setSaChartType] = useState<GtChartType>("bar-h");
-  const [maChartType, setMaChartType] = useState<GtChartType>("bar-h");
+  const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
+  const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
   const [pctDirection, setPctDirection] = useState<PctDirection>("vertical");
   const [, setThemeTick] = useState(0);
 
@@ -29,10 +29,8 @@ export default function ResultView({ results }: ResultViewProps) {
     return () => observer.disconnect();
   }, []);
 
-  const hasCross = results.some((r) => {
-    const { subs } = pivot(r.cells);
-    return subs.length > 1;
-  });
+  const { crossCols } = useAggregation();
+  const hasCross = crossCols.length > 0;
 
   const callbacks = {
     onViewModeChange: setViewMode,
@@ -49,7 +47,6 @@ export default function ResultView({ results }: ResultViewProps) {
       {showViewOpts && (
         <ViewOpts
           currentViewMode={viewMode}
-          hasCross={hasCross}
           currentPctDirection={pctDirection}
           saChartType={saChartType}
           maChartType={maChartType}
@@ -57,14 +54,9 @@ export default function ResultView({ results }: ResultViewProps) {
         />
       )}
       {viewMode === "chart" ? (
-        <ChartContent
-          results={results}
-          hasCross={hasCross}
-          saChartType={saChartType}
-          maChartType={maChartType}
-        />
+        <ChartContent results={results} saChartType={saChartType} maChartType={maChartType} />
       ) : (
-        <TableContent results={results} hasCross={hasCross} pctDirection={pctDirection} />
+        <TableContent results={results} pctDirection={pctDirection} />
       )}
       <AIBubble results={results} />
     </>
