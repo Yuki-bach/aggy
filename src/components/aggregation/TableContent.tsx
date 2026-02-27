@@ -1,4 +1,3 @@
-import type { AggResult } from "../../lib/agg/aggregate";
 import { pivot } from "../../lib/agg/pivot";
 import type { PctDirection } from "./Toolbar";
 import { GtTable } from "./GtTable";
@@ -7,13 +6,11 @@ import { ResultCard } from "./ResultCard";
 import { useAggregation } from "./AggregationContext";
 
 interface TableContentProps {
-  results: AggResult[];
   pctDirection: PctDirection;
 }
 
-export function TableContent({ results, pctDirection }: TableContentProps) {
-  const { crossCols } = useAggregation();
-  const hasCross = crossCols.length > 0;
+export function TableContent({ pctDirection }: TableContentProps) {
+  const { results, hasCross } = useAggregation();
   const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 

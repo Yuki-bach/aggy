@@ -1,4 +1,3 @@
-import type { AggResult } from "../../lib/agg/aggregate";
 import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
 import type { ChartType } from "./ChartContent";
@@ -16,13 +15,12 @@ export interface ToolbarCallbacks {
 }
 
 interface ToolbarProps {
-  results: AggResult[];
   currentViewMode: ViewMode;
   callbacks: ToolbarCallbacks;
 }
 
-export function Toolbar({ results, currentViewMode, callbacks }: ToolbarProps) {
-  const { weightCol, layoutMeta } = useAggregation();
+export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
+  const { results, weightCol, layoutMeta } = useAggregation();
   const weightText = weightCol
     ? t("result.weight.applied", { col: weightCol })
     : t("result.weight.none");
@@ -104,11 +102,16 @@ export function ViewOpts({
   maChartType,
   callbacks,
 }: ViewOptsProps) {
-  const { crossCols } = useAggregation();
-  const hasCross = crossCols.length > 0;
+  const { hasCross } = useAggregation();
+
+  const showChart = currentViewMode === "chart";
+  const showPctToggle = currentViewMode === "table" && hasCross;
+
+  if (!showChart && !showPctToggle) return null;
+
   return (
     <div class="mb-4 flex items-center justify-end gap-4 text-[0.8125rem] text-text-secondary">
-      {currentViewMode === "chart" && (
+      {showChart && (
         <>
           <ChartTypeSelect
             label="SA:"
@@ -122,7 +125,7 @@ export function ViewOpts({
           />
         </>
       )}
-      {currentViewMode === "table" && hasCross && (
+      {showPctToggle && (
         <ToggleGroup class="ml-auto">
           <ToggleButton
             active={currentPctDirection === "vertical"}

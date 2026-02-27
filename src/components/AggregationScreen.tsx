@@ -1,10 +1,13 @@
 import { useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
-import { AggregationContext } from "./aggregation/AggregationContext";
+import {
+  AggregationContext,
+  type AggregationContextValue,
+} from "./aggregation/AggregationContext";
 import { runDuckDBAggregation } from "../lib/duckdbBridge";
-import { buildQuestionDefs, type LayoutMeta } from "../lib/layout";
-import { questionKey, type AggResult, type QuestionDef } from "../lib/agg/aggregate";
+import { buildQuestionDefs } from "../lib/layout";
+import { questionKey } from "../lib/agg/aggregate";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
 import type { CsvData, LayoutData } from "../lib/types";
@@ -26,12 +29,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
   });
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [aggResults, setAggResults] = useState<{
-    results: AggResult[];
-    weightCol: string;
-    layoutMeta: LayoutMeta;
-    crossCols: QuestionDef[];
-  } | null>(null);
+  const [aggCtx, setAggCtx] = useState<AggregationContextValue | null>(null);
 
   async function runAggregation(): Promise<void> {
     setErrorMsg("");
@@ -45,11 +43,12 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
         weight_col: wCol,
         cross_cols: crossCols,
       });
-      setAggResults({
+      setAggCtx({
         results,
         weightCol: wCol,
         layoutMeta: layout.meta,
         crossCols,
+        hasCross: crossCols.length > 0,
       });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
@@ -131,16 +130,10 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
 
       {/* Right Panel */}
       <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
-        {aggResults ? (
+        {aggCtx ? (
           <div aria-live="polite">
-            <AggregationContext.Provider
-              value={{
-                layoutMeta: aggResults.layoutMeta,
-                weightCol: aggResults.weightCol,
-                crossCols: aggResults.crossCols,
-              }}
-            >
-              <ResultView results={aggResults.results} />
+            <AggregationContext.Provider value={aggCtx}>
+              <ResultView />
             </AggregationContext.Provider>
           </div>
         ) : (
