@@ -1,7 +1,7 @@
 import type { AggResult } from "../../lib/agg/aggregate";
 import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
-import type { GtChartType } from "./ChartRenderer";
+import type { GtChartType } from "./ChartContent";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { useAggregation } from "./AggregationContext";
 
@@ -16,7 +16,6 @@ export interface ToolbarCallbacks {
 }
 
 interface ToolbarProps {
-  hasCross: boolean;
   results: AggResult[];
   currentViewMode: ViewMode;
   callbacks: ToolbarCallbacks;

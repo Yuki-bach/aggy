@@ -2,11 +2,9 @@ import { useEffect, useState } from "preact/hooks";
 import type { AggResult } from "../../lib/agg/aggregate";
 import { pivot } from "../../lib/agg/pivot";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
-import { GtTable } from "./GtTable";
-import { CrossTable } from "./CrossTable";
+import { ChartContent, type GtChartType } from "./ChartContent";
+import { TableContent } from "./TableContent";
 import { AIBubble } from "./AIBubble";
-import { ChartCard, type GtChartType } from "./ChartRenderer";
-import { ResultCard } from "./ResultCard";
 
 export interface ResultViewProps {
   results: AggResult[];
@@ -47,12 +45,7 @@ export default function ResultView({ results }: ResultViewProps) {
 
   return (
     <>
-      <Toolbar
-        hasCross={hasCross}
-        results={results}
-        currentViewMode={viewMode}
-        callbacks={callbacks}
-      />
+      <Toolbar results={results} currentViewMode={viewMode} callbacks={callbacks} />
       {showViewOpts && (
         <ViewOpts
           currentViewMode={viewMode}
@@ -75,79 +68,5 @@ export default function ResultView({ results }: ResultViewProps) {
       )}
       <AIBubble results={results} />
     </>
-  );
-}
-
-// --- Sub-components ---
-
-function ChartContent({
-  results,
-  hasCross,
-  saChartType,
-  maChartType,
-}: {
-  results: AggResult[];
-  hasCross: boolean;
-  saChartType: GtChartType;
-  maChartType: GtChartType;
-}) {
-  return (
-    <div
-      class={
-        hasCross
-          ? "grid grid-cols-[1fr] gap-6"
-          : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
-      }
-    >
-      {results.map((res) => (
-        <ChartCard
-          key={res.question}
-          res={res}
-          gtChartType={res.type === "SA" ? saChartType : maChartType}
-        />
-      ))}
-    </div>
-  );
-}
-
-function TableContent({
-  results,
-  hasCross,
-  pctDirection,
-}: {
-  results: AggResult[];
-  hasCross: boolean;
-  pctDirection: PctDirection;
-}) {
-  const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
-  const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
-
-  return (
-    <div
-      class={
-        hasCross
-          ? "grid grid-cols-[1fr] gap-6"
-          : "grid grid-cols-[repeat(auto-fill,minmax(360px,1fr))] gap-6"
-      }
-    >
-      {results.map((res) => {
-        const pv = pivot(res.cells);
-        const isCross = pv.subs.length > 1;
-
-        return (
-          <ResultCard
-            key={res.question}
-            res={res}
-            extraClass={isCross ? "overflow-x-auto" : undefined}
-          >
-            {isCross ? (
-              <CrossTable res={res} pv={pv} pctDir={pctDirection} />
-            ) : (
-              <GtTable res={res} pv={pv} maxPct={maxPct} />
-            )}
-          </ResultCard>
-        );
-      })}
-    </div>
   );
 }
