@@ -6,8 +6,6 @@ import { t } from "../lib/i18n";
 
 import { TabBar } from "./import/TabBar";
 import { FileUploadPanel } from "./import/FileUploadPanel";
-import { HelpButton } from "./import/HelpButton";
-import { LoadedInfo } from "./import/LoadedInfo";
 import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./import/SavedFiles";
 import { GettingStartedModal } from "./import/GettingStarted";
 import type { CsvData, LayoutData } from "../lib/types";
@@ -22,6 +20,31 @@ const TABS: { key: Tab; labelKey: string }[] = [
   { key: "file", labelKey: "import.tab.file" },
   { key: "saved", labelKey: "import.tab.saved" },
 ];
+
+function LoadedInfo({ info }: { info: string | null }) {
+  if (!info) return null;
+
+  return (
+    <div
+      class="mt-3 whitespace-pre-line rounded-lg border border-accent-light bg-accent-bg px-4 py-3 text-[0.875rem] leading-normal text-text-secondary"
+      aria-live="polite"
+    >
+      {info}
+    </div>
+  );
+}
+
+function HelpButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      class="fixed bottom-5 left-5 z-900 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-border-strong bg-surface text-base font-bold text-text-secondary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-[background,color,transform] duration-150 hover:scale-[1.08] hover:border-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)] hover:text-[var(--color-primary-700)]"
+      aria-label={t("help.label")}
+      onClick={onClick}
+    >
+      ?
+    </button>
+  );
+}
 
 export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const [activeTab, setActiveTab] = useState<Tab>("file");
