@@ -6,6 +6,7 @@ import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labels";
+import { useAggregation } from "./AggregationContext";
 
 import type { ChartConfiguration } from "chart.js";
 
@@ -14,11 +15,10 @@ export type GtChartType = "bar-h" | "bar-v" | "obi";
 interface ChartCardProps {
   res: AggResult;
   gtChartType: GtChartType;
-  layoutMeta?: LayoutMeta;
-  crossCols?: QuestionDef[];
 }
 
-export function ChartCard({ res, gtChartType, layoutMeta, crossCols }: ChartCardProps) {
+export function ChartCard({ res, gtChartType }: ChartCardProps) {
+  const { layoutMeta, crossCols } = useAggregation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 

@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
+import { AggregationContext } from "./aggregation/AggregationContext";
 import { runDuckDBAggregation } from "../lib/duckdbBridge";
 import { buildQuestionDefs, type LayoutMeta } from "../lib/layout";
 import { questionKey, type AggResult, type QuestionDef } from "../lib/agg/aggregate";
@@ -28,7 +29,6 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
   const [aggResults, setAggResults] = useState<{
     results: AggResult[];
     weightCol: string;
-    rawN: number;
     layoutMeta: LayoutMeta;
     crossCols: QuestionDef[];
   } | null>(null);
@@ -48,7 +48,6 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       setAggResults({
         results,
         weightCol: wCol,
-        rawN: csv.rowCount,
         layoutMeta: layout.meta,
         crossCols,
       });
@@ -133,15 +132,17 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       {/* Right Panel */}
       <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
         {aggResults ? (
-          <div aria-live="polite">
-            <ResultView
-              results={aggResults.results}
-              weightCol={aggResults.weightCol}
-              rawN={aggResults.rawN}
-              layoutMeta={aggResults.layoutMeta}
-              crossCols={aggResults.crossCols}
-            />
-          </div>
+          <AggregationContext.Provider
+            value={{
+              layoutMeta: aggResults.layoutMeta,
+              weightCol: aggResults.weightCol,
+              crossCols: aggResults.crossCols,
+            }}
+          >
+            <div aria-live="polite">
+              <ResultView results={aggResults.results} />
+            </div>
+          </AggregationContext.Provider>
         ) : (
           <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
             <span class="text-[2.5rem]" aria-hidden="true">
