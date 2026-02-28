@@ -61,6 +61,14 @@ const en: Record<string, string> = {
   "export.download.markdown": "Markdown",
   "export.download.json": "JSON",
   "export.copied": "Copied ✓",
+  "export.header.variable": "Variable",
+  "export.header.type": "Type",
+  "export.header.option": "Option",
+  "export.header.n": "n",
+  "export.header.pct": "%",
+  "export.header.total.n": "Total_n",
+  "export.header.total.pct": "Total_%",
+  "export.na": "No answer",
 
   // Chart type
   "chart.barH": "Horizontal Bar",

@@ -61,6 +61,14 @@ const ja: Record<string, string> = {
   "export.download.markdown": "Markdown",
   "export.download.json": "JSON",
   "export.copied": "コピーしました ✓",
+  "export.header.variable": "変数名",
+  "export.header.type": "種別",
+  "export.header.option": "選択肢",
+  "export.header.n": "n",
+  "export.header.pct": "%",
+  "export.header.total.n": "全体_n",
+  "export.header.total.pct": "全体_%",
+  "export.na": "無回答",
 
   // Chart type
   "chart.barH": "横棒",

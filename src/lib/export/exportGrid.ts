@@ -3,6 +3,7 @@ import { parseCrossSub } from "../agg/aggregate";
 import type { LayoutMeta } from "../layout";
 import { NA_VALUE } from "../agg/sqlHelpers";
 import { pivot } from "../agg/pivot";
+import { t } from "../i18n";
 
 export interface ExportGrid {
   question: string;
@@ -22,16 +23,16 @@ export function buildExportGrids(results: AggResult[], layoutMeta?: LayoutMeta):
 // ─── Internal ───────────────────────────────────────────────
 
 export function resolveMainLabel(main: string): string {
-  return main === NA_VALUE ? "無回答" : main;
+  return main === NA_VALUE ? t("export.na") : main;
 }
 
 export function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
-  if (subLabel === NA_VALUE) return "無回答";
+  if (subLabel === NA_VALUE) return t("export.na");
 
   const parsed = parseCrossSub(subLabel);
   if (parsed) {
     const { axisKey, rawValue } = parsed;
-    if (rawValue === NA_VALUE) return "無回答";
+    if (rawValue === NA_VALUE) return t("export.na");
     if (!meta) return rawValue;
     const maLabel = meta.valueLabels[rawValue]?.["1"];
     if (maLabel) return maLabel;
@@ -45,7 +46,15 @@ export function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
 function buildGtGrid(res: AggResult): ExportGrid {
   const { mains, lookup } = pivot(res.cells);
   const gtSub = pivot(res.cells).subs.find((s) => s.label === "GT")!;
-  const headers = [["変数名", "種別", "選択肢", "n", "%"]];
+  const headers = [
+    [
+      t("export.header.variable"),
+      t("export.header.type"),
+      t("export.header.option"),
+      t("export.header.n"),
+      t("export.header.pct"),
+    ],
+  ];
   const rows: string[][] = [];
 
   for (const main of mains) {
@@ -70,7 +79,13 @@ function buildCrossGrids(results: AggResult[], layoutMeta?: LayoutMeta): ExportG
   const firstPivot = pivot(firstResult.cells);
   const crossSubs = firstPivot.subs.filter((s) => s.label !== "GT");
 
-  const headerRow1 = ["変数名", "種別", "選択肢", "全体_n", "全体_%"];
+  const headerRow1 = [
+    t("export.header.variable"),
+    t("export.header.type"),
+    t("export.header.option"),
+    t("export.header.total.n"),
+    t("export.header.total.pct"),
+  ];
   const headerRow2 = ["", "", "", "", ""];
   for (const sub of crossSubs) {
     headerRow1.push("");
