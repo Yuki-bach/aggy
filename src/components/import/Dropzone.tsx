@@ -5,12 +5,11 @@ interface DropzoneProps {
   accept: string;
   icon: string;
   text: string;
-  hint: string;
   loadedFileName: string | null;
   onFile: (file: File) => void;
 }
 
-export function Dropzone({ accept, icon, text, hint, loadedFileName, onFile }: DropzoneProps) {
+export function Dropzone({ accept, icon, text, loadedFileName, onFile }: DropzoneProps) {
   const [isDragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -65,19 +64,18 @@ export function Dropzone({ accept, icon, text, hint, loadedFileName, onFile }: D
         class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         onChange={handleChange}
       />
-      {isLoaded ? (
-        <div class="pointer-events-none flex items-center gap-2 text-[0.8125rem] font-medium text-[var(--color-success-700)]">
-          {loadedFileName}
-        </div>
-      ) : (
-        <div class="pointer-events-none flex flex-col items-center gap-1">
-          <span class="rounded-sm bg-accent-light px-3 py-1 text-[0.8125rem] font-bold tracking-[0.04em] text-accent">
-            {icon}
+      <div class="pointer-events-none flex flex-col items-center gap-1">
+        <span class="rounded-sm bg-accent-light px-3 py-1 text-[0.8125rem] font-bold tracking-[0.04em] text-accent">
+          {icon}
+        </span>
+        {isLoaded ? (
+          <span class="max-w-full truncate text-[0.875rem] font-medium text-[var(--color-success-700)]">
+            {loadedFileName}
           </span>
+        ) : (
           <span class="text-[0.875rem] font-medium text-text-secondary">{text}</span>
-          <span class="text-xs text-muted">{hint}</span>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

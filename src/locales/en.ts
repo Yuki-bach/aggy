@@ -9,18 +9,16 @@ const en: Record<string, string> = {
 
   // Import screen
   "import.title": "Load Data",
-  "import.tab.file": "From File",
-  "import.tab.saved": "From History",
-  "import.tab.label": "Data loading method",
+  "import.history": "History",
+  "import.step.select": "Select Files",
+  "import.step.proceed": "Aggregate",
   "import.proceed": "Proceed to Aggregation →",
 
   // Dropzone
   "dropzone.csv.icon": "Raw Data",
-  "dropzone.csv.text": "Drop raw data file (csv) here",
-  "dropzone.csv.hint": "or click to select",
+  "dropzone.csv.text": "Drop or select .csv",
   "dropzone.layout.icon": "Layout",
-  "dropzone.layout.text": "Drop layout file (json) here",
-  "dropzone.layout.hint": "or click to select",
+  "dropzone.layout.text": "Drop or select .json",
 
   // Saved files
   "saved.empty": "No history",
