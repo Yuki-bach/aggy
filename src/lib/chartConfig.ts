@@ -98,7 +98,7 @@ export const PALETTE_BASES: Record<Exclude<PaletteId, "default">, string> = {
   purple: "#6a51a3",
 };
 
-export const PALETTE_IDS: PaletteId[] = ["default", "blue", "green", "orange", "red", "purple"];
+export const PALETTE_IDS: PaletteId[] = ["default", "red", "orange", "green", "blue", "purple"];
 
 export function getSeriesColor(index: number, paletteId: PaletteId = "default"): string {
   if (paletteId === "default") {
