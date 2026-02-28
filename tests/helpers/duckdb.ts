@@ -34,7 +34,7 @@ export async function setupDuckDB() {
   const csvText = readFileSync(csvPath, "utf-8");
   await db.registerFileText("survey.csv", csvText);
   await conn.query(
-    `CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv', all_varchar=true)`,
+    `CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv')`,
   );
 
   return conn;

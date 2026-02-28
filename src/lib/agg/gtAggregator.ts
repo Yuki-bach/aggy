@@ -23,9 +23,9 @@ export class GtAggregator {
     const sql = `
       SELECT "${esc(col)}" AS mv, ${weightExpr(this.weightCol)} AS cnt
       FROM survey
-      WHERE "${esc(col)}" IS NOT NULL AND "${esc(col)}" != ''
+      WHERE "${esc(col)}" IS NOT NULL
       GROUP BY "${esc(col)}"
-      ORDER BY TRY_CAST("${esc(col)}" AS DOUBLE) NULLS LAST, "${esc(col)}" ASC
+      ORDER BY "${esc(col)}" NULLS LAST
     `;
 
     const result = await this.conn.query(sql);
@@ -48,7 +48,7 @@ export class GtAggregator {
 
     // questionN: number of respondents shown
     const nExpr = this.weightCol
-      ? `COALESCE(SUM(TRY_CAST("${esc(this.weightCol)}" AS DOUBLE)), 0)`
+      ? `COALESCE(SUM("${esc(this.weightCol)}"), 0)`
       : `COUNT(*)::DOUBLE`;
 
     const sql = `

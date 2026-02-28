@@ -44,7 +44,7 @@ async function initDuckDB(): Promise<void> {
 async function loadCSVIntoDuckDB(csvText: string): Promise<void> {
   await db.registerFileText("survey.csv", csvText);
   await conn.query(
-    `CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv', all_varchar=true)`,
+    `CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv')`,
   );
 }
 
