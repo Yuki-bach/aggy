@@ -9,18 +9,16 @@ const ja: Record<string, string> = {
 
   // Import screen
   "import.title": "データ読み込み",
-  "import.tab.file": "ファイルから",
-  "import.tab.saved": "履歴から",
-  "import.tab.label": "データ読み込み方法",
+  "import.history": "履歴",
+  "import.step.select": "ファイル選択",
+  "import.step.proceed": "集計へ",
   "import.proceed": "集計画面へ進む →",
 
   // Dropzone
   "dropzone.csv.icon": "ローデータ",
-  "dropzone.csv.text": "ここにローデータファイル(csv)をドロップ",
-  "dropzone.csv.hint": "またはクリックして選択",
+  "dropzone.csv.text": ".csv をドロップまたは選択",
   "dropzone.layout.icon": "レイアウト",
-  "dropzone.layout.text": "ここにレイアウトファイル(json)をドロップ",
-  "dropzone.layout.hint": "またはクリックして選択",
+  "dropzone.layout.text": ".json をドロップまたは選択",
 
   // Saved files
   "saved.empty": "履歴なし",
