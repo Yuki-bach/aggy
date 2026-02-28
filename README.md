@@ -30,7 +30,7 @@ npm run dev
 - **SA**: 単一回答（1列）
 - **MA**: 複数回答（0/1フラグ列、`key_code` の命名規則）
 - **WEIGHT**: ウェイト列（ウェイトバック集計に使用）
-- **ID / EXCLUDE**: 集計除外列
+- **ID**: 識別列（集計対象外）
 
 ## AI分析コメント（Chrome Built-in AI）
 
