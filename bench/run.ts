@@ -43,9 +43,7 @@ async function initDuckDB(): Promise<void> {
 
 async function loadCSVIntoDuckDB(csvText: string): Promise<void> {
   await db.registerFileText("survey.csv", csvText);
-  await conn.query(
-    `CREATE OR REPLACE TABLE survey AS SELECT * FROM read_csv('survey.csv')`,
-  );
+  await conn.query(`CREATE OR REPLACE TABLE survey AS SELECT * FROM read_csv('survey.csv')`);
 }
 
 async function closeDuckDB(): Promise<void> {
@@ -111,9 +109,7 @@ async function benchPattern(
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  const targets = args.length > 0
-    ? PATTERNS.filter((p) => args.includes(p.name))
-    : PATTERNS;
+  const targets = args.length > 0 ? PATTERNS.filter((p) => args.includes(p.name)) : PATTERNS;
 
   if (targets.length === 0) {
     console.error(`Unknown pattern(s): ${args.join(", ")}`);
@@ -123,9 +119,7 @@ async function main(): Promise<void> {
 
   // Ensure data exists
   const dataDir = resolve(import.meta.dirname!, "data");
-  const missing = targets.filter(
-    (p) => !existsSync(resolve(dataDir, `${p.name}.csv`)),
-  );
+  const missing = targets.filter((p) => !existsSync(resolve(dataDir, `${p.name}.csv`)));
   if (missing.length > 0) {
     console.log(`Generating missing data: ${missing.map((p) => p.name).join(", ")}`);
     generate(missing.map((p) => p.name));
@@ -153,15 +147,21 @@ async function main(): Promise<void> {
     const headers = csvText.slice(0, csvText.indexOf("\n")).split(",");
     const questions = buildQuestionDefs(headers, meta.colTypes);
 
-    // Pick 2 SA questions for cross-tab
-    const saQuestions = questions.filter((q): q is Extract<QuestionDef, { type: "SA" }> => q.type === "SA");
-    const crossCols = saQuestions.slice(0, 2);
+    // Pick 2 questions for cross-tab (prefer SA; fall back to MA for MA-only patterns)
+    const saQuestions = questions.filter(
+      (q): q is Extract<QuestionDef, { type: "SA" }> => q.type === "SA",
+    );
+    const maQuestions = questions.filter(
+      (q): q is Extract<QuestionDef, { type: "MA" }> => q.type === "MA",
+    );
+    const crossCols = saQuestions.length >= 2 ? saQuestions.slice(0, 2) : maQuestions.slice(0, 2);
+    const crossLabel = saQuestions.length >= 2 ? "SA×2" : "MA×2";
 
     // Run: no cross
     results.push(await benchPattern(pattern, questions, [], "none"));
 
-    // Run: SA×2 cross
-    results.push(await benchPattern(pattern, questions, crossCols, `SA×2`));
+    // Run: cross
+    results.push(await benchPattern(pattern, questions, crossCols, crossLabel));
   }
 
   await closeDuckDB();
@@ -172,24 +172,24 @@ async function main(): Promise<void> {
   console.log("=".repeat(80));
   console.log(
     padEnd("Pattern", 10) +
-    padEnd("Rows", 10) +
-    padEnd("Cols", 8) +
-    padEnd("Cross", 8) +
-    padEnd("Runs", 6) +
-    padEnd("Median", 14) +
-    "All (ms)",
+      padEnd("Rows", 10) +
+      padEnd("Cols", 8) +
+      padEnd("Cross", 8) +
+      padEnd("Runs", 6) +
+      padEnd("Median", 14) +
+      "All (ms)",
   );
   console.log("-".repeat(80));
 
   for (const r of results) {
     console.log(
       padEnd(r.pattern, 10) +
-      padEnd(r.rows.toLocaleString(), 10) +
-      padEnd(String(r.cols), 8) +
-      padEnd(r.cross, 8) +
-      padEnd(String(RUNS), 6) +
-      padEnd(r.medianMs.toFixed(1) + " ms", 14) +
-      r.allMs.map((t) => t.toFixed(1)).join(", "),
+        padEnd(r.rows.toLocaleString(), 10) +
+        padEnd(String(r.cols), 8) +
+        padEnd(r.cross, 8) +
+        padEnd(String(RUNS), 6) +
+        padEnd(r.medianMs.toFixed(1) + " ms", 14) +
+        r.allMs.map((t) => t.toFixed(1)).join(", "),
     );
   }
 
