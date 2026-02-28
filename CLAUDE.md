@@ -19,6 +19,9 @@ pnpm lint          # oxlint
 pnpm lint:fix      # oxlint --fix
 pnpm fmt           # oxfmt (format)
 pnpm fmt:check     # oxfmt --check
+pnpm bench         # aggregate() benchmark (all patterns)
+pnpm bench rows    # single pattern (rows / cols / both)
+pnpm bench:gen     # generate benchmark data
 ```
 
 ## Architecture
