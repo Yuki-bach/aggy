@@ -9,9 +9,9 @@ const en: Record<string, string> = {
 
   // Import screen
   "import.title": "Load Data",
-  "import.tab.file": "From File",
-  "import.tab.saved": "From History",
-  "import.tab.label": "Data loading method",
+  "import.history": "History",
+  "import.step.select": "Select Files",
+  "import.step.proceed": "Aggregate",
   "import.proceed": "Proceed to Aggregation →",
 
   // Dropzone

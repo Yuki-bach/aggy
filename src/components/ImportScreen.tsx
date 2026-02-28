@@ -4,22 +4,59 @@ import { loadCSV } from "../lib/duckdbBridge";
 import { saveData, loadSaved } from "../lib/opfs";
 import { t } from "../lib/i18n";
 
-import { TabBar } from "./import/TabBar";
 import { FileUploadPanel } from "./import/FileUploadPanel";
 import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./import/SavedFiles";
 import { GettingStartedModal } from "./import/GettingStarted";
 import type { CsvData, LayoutData } from "../lib/types";
 
-type Tab = "file" | "saved";
-
 interface ImportScreenProps {
   onComplete: (csv: CsvData, layout: LayoutData) => void;
 }
 
-const TABS: { key: Tab; labelKey: string }[] = [
-  { key: "file", labelKey: "import.tab.file" },
-  { key: "saved", labelKey: "import.tab.saved" },
-];
+const STEPS = [
+  { num: 1, labelKey: "import.step.select" },
+  { num: 2, labelKey: "import.step.proceed" },
+] as const;
+
+function StepIndicator({ bothLoaded }: { bothLoaded: boolean }) {
+  return (
+    <div class="mb-6 flex items-center justify-center gap-0">
+      {STEPS.map((step, i) => {
+        const isDone = step.num === 1 && bothLoaded;
+        const isActive = step.num === 1 ? !bothLoaded : bothLoaded;
+        return (
+          <div key={step.num} class="flex items-center">
+            {i > 0 && (
+              <div
+                class={`mx-2 h-px w-8 transition-colors duration-300 ${bothLoaded ? "bg-accent" : "bg-border"}`}
+              />
+            )}
+            <div class="flex items-center gap-2">
+              <span
+                class={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors duration-300 ${
+                  isDone
+                    ? "bg-accent text-accent-contrast"
+                    : isActive
+                      ? "border-2 border-accent bg-surface text-accent"
+                      : "border-2 border-border bg-surface text-muted"
+                }`}
+              >
+                {isDone ? "\u2713" : step.num}
+              </span>
+              <span
+                class={`text-[0.8125rem] font-medium transition-colors duration-300 ${
+                  isActive ? "text-text" : isDone ? "text-accent" : "text-muted"
+                }`}
+              >
+                {t(step.labelKey)}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function LoadedInfo({ info }: { info: string | null }) {
   if (!info) return null;
@@ -47,10 +84,9 @@ function HelpButton({ onClick }: { onClick: () => void }) {
 }
 
 export default function ImportScreen({ onComplete }: ImportScreenProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("file");
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [layoutFileName, setLayoutFileName] = useState<string | null>(null);
-  const [showProceed, setShowProceed] = useState(false);
+  const [bothLoaded, setBothLoaded] = useState(false);
   const [loadedInfo, setLoadedInfo] = useState<string | null>(null);
   const [gsOpen, setGsOpen] = useState(false);
 
@@ -61,28 +97,21 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
   function updateLoadedInfo(): void {
     const csv = csvRef.current;
-    const layout = layoutRef.current;
-    if (!csv && !layout) {
-      setLoadedInfo(null);
-      return;
-    }
-    const lines: string[] = [];
-    if (csv) lines.push(csv.fileName);
-    if (layout) lines.push(layout.fileName);
     if (csv) {
-      lines.push(
+      setLoadedInfo(
         t("summary.rows", {
           rows: csv.rowCount.toLocaleString(),
           cols: csv.headers.length,
         }),
       );
+    } else {
+      setLoadedInfo(null);
     }
-    setLoadedInfo(lines.join("\n"));
   }
 
   function checkBothLoaded(): void {
     if (!csvRef.current || !layoutRef.current) return;
-    setShowProceed(true);
+    setBothLoaded(true);
     updateLoadedInfo();
   }
 
@@ -167,31 +196,18 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       <div class="w-full max-w-[480px] rounded-xl border border-border bg-surface p-8 shadow-md">
         <h2 class="mb-5 text-xl font-bold text-text">{t("import.title")}</h2>
 
-        <TabBar tabs={TABS} activeTab={activeTab} onTabChange={(key) => setActiveTab(key as Tab)} />
+        <StepIndicator bothLoaded={bothLoaded} />
 
-        {/* File Tab */}
-        <div
-          class={`h-[250px] overflow-y-auto${activeTab !== "file" ? " hidden" : ""}`}
-          id="tab-file"
-          role="tabpanel"
-          aria-labelledby="tab-btn-file"
-        >
-          <FileUploadPanel
-            csvFileName={csvFileName}
-            layoutFileName={layoutFileName}
-            onCsvFile={handleCsvFile}
-            onLayoutFile={handleLayoutFile}
-          />
-        </div>
+        <FileUploadPanel
+          csvFileName={csvFileName}
+          layoutFileName={layoutFileName}
+          onCsvFile={handleCsvFile}
+          onLayoutFile={handleLayoutFile}
+        />
 
-        {/* Saved Tab */}
-        <div
-          class={`h-[250px] overflow-y-auto${activeTab !== "saved" ? " hidden" : ""}`}
-          id="tab-saved"
-          role="tabpanel"
-          aria-labelledby="tab-btn-saved"
-        >
-          <div class="flex flex-col gap-2">
+        <div class="mt-5 border-t border-border pt-4">
+          <h3 class="mb-3 text-sm font-bold tracking-[0.04em] text-muted">{t("import.history")}</h3>
+          <div class="flex max-h-[160px] flex-col gap-2 overflow-y-auto">
             <SavedFilesList
               entries={entries}
               onSelectEntry={handleLoadFromSaved}
@@ -202,8 +218,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
         <LoadedInfo info={loadedInfo} />
 
-        {/* Proceed button */}
-        {showProceed && (
+        {bothLoaded && (
           <button
             class="mt-5 min-h-12 w-full cursor-pointer rounded-lg border-none bg-accent px-4 py-3 text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
             onClick={handleProceed}

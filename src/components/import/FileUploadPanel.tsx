@@ -15,16 +15,18 @@ export function FileUploadPanel({
   onLayoutFile,
 }: FileUploadPanelProps) {
   return (
-    <>
-      <Dropzone
-        accept=".csv"
-        icon={t("dropzone.csv.icon")}
-        text={t("dropzone.csv.text")}
-        hint={t("dropzone.csv.hint")}
-        loadedFileName={csvFileName}
-        onFile={onCsvFile}
-      />
-      <div class="mt-3">
+    <div class="flex flex-col gap-3 md:flex-row">
+      <div class="flex-1">
+        <Dropzone
+          accept=".csv"
+          icon={t("dropzone.csv.icon")}
+          text={t("dropzone.csv.text")}
+          hint={t("dropzone.csv.hint")}
+          loadedFileName={csvFileName}
+          onFile={onCsvFile}
+        />
+      </div>
+      <div class="flex-1">
         <Dropzone
           accept=".json"
           icon={t("dropzone.layout.icon")}
@@ -34,6 +36,6 @@ export function FileUploadPanel({
           onFile={onLayoutFile}
         />
       </div>
-    </>
+    </div>
   );
 }
