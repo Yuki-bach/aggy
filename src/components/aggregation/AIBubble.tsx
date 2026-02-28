@@ -43,7 +43,7 @@ export function AIBubble() {
         style="border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--surface)"
       />
       <button
-        class="absolute top-2 right-3 flex min-h-11 min-w-11 cursor-pointer items-center justify-center border-none bg-transparent p-1 text-lg leading-none text-muted hover:text-text"
+        class="absolute top-2 right-3 flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-1 text-lg leading-none text-muted hover:text-text"
         aria-label={t("ai.close")}
         onClick={() => setVisible(false)}
       >
@@ -51,7 +51,7 @@ export function AIBubble() {
       </button>
       <div class="mb-3 text-sm font-bold text-accent2">{t("ai.header")}</div>
       <div
-        class={`whitespace-pre-wrap text-sm leading-[1.75] text-text${loading ? " text-muted animate-[pulse_1.2s_ease-in-out_infinite]" : ""}`}
+        class={`whitespace-pre-wrap text-sm leading-relaxed text-text${loading ? " text-muted animate-[pulse_1.2s_ease-in-out_infinite]" : ""}`}
       >
         {loading ? t("ai.loading") : comment}
       </div>

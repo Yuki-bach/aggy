@@ -1,3 +1,4 @@
+import type { ComponentChildren } from "preact";
 import { useRef, useState, useEffect, useCallback } from "preact/hooks";
 import { t } from "../../lib/i18n";
 import type { ExportAction } from "../../lib/export/export";
@@ -51,7 +52,7 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
   return (
     <div ref={ref} class="relative">
       <button
-        class="relative m-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-border bg-transparent text-muted transition-colors duration-150 hover:border-accent hover:text-accent"
+        class="relative flex size-9 cursor-pointer items-center justify-center rounded-lg border border-border text-muted transition-colors hover:border-accent hover:text-accent"
         onClick={() => setOpen((v) => !v)}
         aria-label={t("export.label")}
         title={t("export.label")}
@@ -89,18 +90,14 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
 
       {open && (
         <div class="absolute right-0 z-10 mt-1 min-w-48 rounded-lg border border-border bg-surface shadow-lg">
-          <div class="px-3 pt-2.5 pb-1 text-[0.6875rem] font-medium tracking-wide text-muted uppercase">
-            {t("export.section.copy")}
-          </div>
+          <SectionLabel>{t("export.section.copy")}</SectionLabel>
           <MenuItem label="TSV" onClick={() => handleAction("copy-tsv")} />
           <MenuItem label="Markdown" onClick={() => handleAction("copy-markdown")} />
           <MenuItem label="JSON" onClick={() => handleAction("copy-json")} />
 
           <div class="mx-3 my-1 border-t border-border" />
 
-          <div class="px-3 pt-1.5 pb-1 text-[0.6875rem] font-medium tracking-wide text-muted uppercase">
-            {t("export.section.download")}
-          </div>
+          <SectionLabel class="pt-1.5">{t("export.section.download")}</SectionLabel>
           <div class="pb-1.5">
             <MenuItem label="CSV" onClick={() => handleAction("download-csv")} />
             <MenuItem label="Markdown (.md)" onClick={() => handleAction("download-markdown")} />
@@ -114,10 +111,20 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
 
 // ─── Internal ───────────────────────────────────────────────
 
+function SectionLabel({ class: cls, children }: { class?: string; children: ComponentChildren }) {
+  return (
+    <div
+      class={`px-3 pt-2.5 pb-1 text-[0.6875rem] font-medium tracking-wide text-muted uppercase${cls ? ` ${cls}` : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
 function MenuItem({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
-      class="block w-full cursor-pointer border-none bg-transparent px-3 py-1.5 text-left text-[0.8125rem] text-text hover:bg-accent-bg"
+      class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs text-text hover:bg-accent-bg"
       onClick={onClick}
     >
       {label}

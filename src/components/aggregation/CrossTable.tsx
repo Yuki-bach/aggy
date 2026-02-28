@@ -61,8 +61,7 @@ function crossColKey(col: QuestionDef): string {
   return col.type === "SA" ? col.column : col.prefix;
 }
 
-const TH_BASE =
-  "py-3 px-4 text-[0.8125rem] font-bold tracking-[0.04em] border-b-2 border-border-strong";
+const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong";
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
@@ -180,7 +179,7 @@ function TransposedSubRow({
   return (
     <tr>
       <td
-        class={`${TD_BASE} text-left text-[0.8125rem] font-bold whitespace-nowrap border-r-2 border-r-border-strong text-accent2`}
+        class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong text-accent2`}
       >
         {resolveSubLabel(sub.label, layoutMeta, crossCols)}
         <br />
@@ -230,7 +229,7 @@ function TransposedCrossTable({ data, res }: { data: CrossTableData; res: AggRes
         {/* GT row */}
         <tr class="[&_td]:border-b-2 [&_td]:border-border-strong">
           <td
-            class={`${TD_BASE} text-left text-[0.8125rem] font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-gt-bg text-accent`}
+            class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-gt-bg text-accent`}
           >
             {t("table.total")}
             <br />
@@ -252,7 +251,7 @@ function TransposedCrossTable({ data, res }: { data: CrossTableData; res: AggRes
             <tr key={`hdr-${crossColKey(group.crossCol)}`}>
               <td
                 colSpan={mains.length + 1}
-                class="py-3 px-4 bg-cross-bg text-accent2 font-bold text-[0.8125rem] tracking-[0.04em] border-b-2 border-border-strong border-t-2 border-t-border-strong"
+                class="py-3 px-4 bg-cross-bg text-accent2 font-bold text-xs tracking-wide border-b-2 border-border-strong border-t-2 border-t-border-strong"
               >
                 {resolveQuestionLabel(crossColKey(group.crossCol), layoutMeta)}
               </td>
