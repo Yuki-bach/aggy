@@ -14,7 +14,9 @@
     "fmt:check": "oxfmt --check src/ scripts/ vite.config.ts index.html",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "pnpm run fmt:check && pnpm run lint && tsc --noEmit"
+    "check": "pnpm run fmt:check && pnpm run lint && tsc --noEmit",
+    "bench:gen": "tsx bench/generate.ts",
+    "bench": "tsx bench/run.ts"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
