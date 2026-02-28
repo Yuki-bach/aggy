@@ -46,15 +46,45 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
     [onExport],
   );
 
-  const buttonLabel = feedback ?? t("export.label");
+  const showFeedback = feedback != null;
 
   return (
     <div ref={ref} class="relative">
       <button
-        class="m-0 min-h-9 w-auto cursor-pointer rounded-lg border border-accent bg-transparent px-4 py-2 text-[0.875rem] font-medium text-accent transition-[background] duration-150 hover:bg-accent-bg"
+        class="relative m-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-border bg-transparent text-muted transition-colors duration-150 hover:border-accent hover:text-accent"
         onClick={() => setOpen((v) => !v)}
+        aria-label={t("export.label")}
+        title={t("export.label")}
       >
-        {buttonLabel}
+        {showFeedback ? (
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        ) : (
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        )}
       </button>
 
       {open && (
@@ -62,12 +92,9 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
           <div class="px-3 pt-2.5 pb-1 text-[0.6875rem] font-medium tracking-wide text-muted uppercase">
             {t("export.section.copy")}
           </div>
-          <MenuItem label={t("export.copy.tsv")} onClick={() => handleAction("copy-tsv")} />
-          <MenuItem
-            label={t("export.copy.markdown")}
-            onClick={() => handleAction("copy-markdown")}
-          />
-          <MenuItem label={t("export.copy.json")} onClick={() => handleAction("copy-json")} />
+          <MenuItem label="TSV" onClick={() => handleAction("copy-tsv")} />
+          <MenuItem label="Markdown" onClick={() => handleAction("copy-markdown")} />
+          <MenuItem label="JSON" onClick={() => handleAction("copy-json")} />
 
           <div class="mx-3 my-1 border-t border-border" />
 
@@ -75,18 +102,9 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
             {t("export.section.download")}
           </div>
           <div class="pb-1.5">
-            <MenuItem
-              label={t("export.download.csv")}
-              onClick={() => handleAction("download-csv")}
-            />
-            <MenuItem
-              label={t("export.download.markdown")}
-              onClick={() => handleAction("download-markdown")}
-            />
-            <MenuItem
-              label={t("export.download.json")}
-              onClick={() => handleAction("download-json")}
-            />
+            <MenuItem label="CSV" onClick={() => handleAction("download-csv")} />
+            <MenuItem label="Markdown (.md)" onClick={() => handleAction("download-markdown")} />
+            <MenuItem label="JSON (.json)" onClick={() => handleAction("download-json")} />
           </div>
         </div>
       )}
