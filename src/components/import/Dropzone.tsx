@@ -51,7 +51,7 @@ export function Dropzone({ accept, icon, text, loadedFileName, onFile }: Dropzon
 
   return (
     <div
-      class={`relative cursor-pointer rounded-lg border-2 border-dashed border-border-strong px-4 py-5 text-center transition-[border-color,background] duration-150 hover:border-accent hover:bg-accent-bg${isDragOver ? " drag-over" : ""}${isLoaded ? " loaded" : ""}`}
+      class={`relative cursor-pointer rounded-lg border-2 border-dashed border-border-strong px-4 py-5 text-center transition-colors duration-150 hover:border-accent hover:bg-accent-bg${isDragOver ? " drag-over" : ""}${isLoaded ? " loaded" : ""}`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -65,15 +65,15 @@ export function Dropzone({ accept, icon, text, loadedFileName, onFile }: Dropzon
         onChange={handleChange}
       />
       <div class="pointer-events-none flex flex-col items-center gap-1">
-        <span class="rounded-sm bg-accent-light px-3 py-1 text-[0.8125rem] font-bold tracking-[0.04em] text-accent">
+        <span class="rounded-sm bg-accent-light px-3 py-1 text-xs font-bold tracking-wide text-accent">
           {icon}
         </span>
         {isLoaded ? (
-          <span class="max-w-full truncate text-[0.875rem] font-medium text-[var(--color-success-700)]">
+          <span class="max-w-full truncate text-sm font-medium text-[var(--color-success-700)]">
             {loadedFileName}
           </span>
         ) : (
-          <span class="text-[0.875rem] font-medium text-text-secondary">{text}</span>
+          <span class="text-sm font-medium text-text-secondary">{text}</span>
         )}
       </div>
     </div>
