@@ -39,6 +39,8 @@ export const PATTERNS: PatternDef[] = [
   { name: "rows", rows: 10_000, saCount: 10, maCount: 10, maSubCount: 5 },
   { name: "cols", rows: 1_000, saCount: 100, maCount: 100, maSubCount: 5 },
   { name: "both", rows: 10_000, saCount: 100, maCount: 100, maSubCount: 5 },
+  { name: "sa-only", rows: 10_000, saCount: 100, maCount: 0, maSubCount: 5 },
+  { name: "ma-only", rows: 10_000, saCount: 0, maCount: 100, maSubCount: 5 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -134,9 +136,7 @@ export function generate(patternNames?: string[]): void {
   const dataDir = resolve(import.meta.dirname!, "data");
   mkdirSync(dataDir, { recursive: true });
 
-  const targets = patternNames
-    ? PATTERNS.filter((p) => patternNames.includes(p.name))
-    : PATTERNS;
+  const targets = patternNames ? PATTERNS.filter((p) => patternNames.includes(p.name)) : PATTERNS;
 
   if (targets.length === 0) {
     console.error(`Unknown pattern(s): ${patternNames?.join(", ")}`);
