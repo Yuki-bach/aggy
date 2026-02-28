@@ -14,7 +14,8 @@
     "items": [
       { "code": "1", "label": "男性" },
       { "code": "2", "label": "女性" },
-      { "code": "3", "label": "その他" }
+      { "code": "3", "label": "その他" },
+      { "code": "99", "label": "無回答" }
     ]
   },
   {
@@ -24,7 +25,8 @@
     "items": [
       { "code": "1", "label": "満足" },
       { "code": "2", "label": "どちらでもない" },
-      { "code": "3", "label": "不満" }
+      { "code": "3", "label": "不満" },
+      { "code": "99", "label": "無回答" }
     ]
   },
   {

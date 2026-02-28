@@ -37,11 +37,8 @@ export async function fetchCrossHeaders(
           ${weightExpr(weightCol)} AS n
         FROM survey
         WHERE "${esc(col)}" IS NOT NULL
-          AND "${esc(col)}" != ''
         GROUP BY "${esc(col)}"
-        ORDER BY
-          TRY_CAST("${esc(col)}" AS DOUBLE) NULLS LAST,
-          "${esc(col)}" ASC
+        ORDER BY "${esc(col)}" NULLS LAST
       `;
       const result = await conn.query(sql);
       const headers = result.toArray().map((r) => ({ label: String(r.cv), n: Number(r.n) }));
@@ -102,10 +99,10 @@ export class CrossAggregator {
     const sql = `
       SELECT "${esc(col)}" AS mv, "${esc(crossCol)}" AS sv, ${weightExpr(this.weightCol)} AS cnt
       FROM survey
-      WHERE "${esc(col)}" IS NOT NULL AND "${esc(col)}" != ''
-        AND "${esc(crossCol)}" IS NOT NULL AND "${esc(crossCol)}" != ''
+      WHERE "${esc(col)}" IS NOT NULL
+        AND "${esc(crossCol)}" IS NOT NULL
       GROUP BY "${esc(col)}", "${esc(crossCol)}"
-      ORDER BY sv, TRY_CAST(mv AS DOUBLE) NULLS LAST, mv ASC
+      ORDER BY sv, mv NULLS LAST
     `;
 
     const result = await this.conn.query(sql);
@@ -147,7 +144,6 @@ export class CrossAggregator {
         ${selectClauses.join(", ")}
       FROM survey
       WHERE "${esc(col)}" IS NOT NULL
-        AND "${esc(col)}" != ''
       GROUP BY "${esc(col)}"
     `;
 
@@ -199,7 +195,6 @@ export class CrossAggregator {
         ${naExpr} AS na_cnt
       FROM survey
       WHERE "${esc(crossCol)}" IS NOT NULL
-        AND "${esc(crossCol)}" != ''
       GROUP BY "${esc(crossCol)}"
     `;
 
@@ -250,7 +245,7 @@ export class CrossAggregator {
     const selectClauses: string[] = [];
     for (let r = 0; r < rowMaCols.length; r++) {
       for (let c = 0; c < crossQ.columns.length; c++) {
-        const cond = `"${esc(rowMaCols[r])}" = '1' AND "${esc(crossQ.columns[c])}" = '1'`;
+        const cond = `"${esc(rowMaCols[r])}" = 1 AND "${esc(crossQ.columns[c])}" = 1`;
         selectClauses.push(`${weightedCountExpr(cond, this.weightCol)} AS r${r}c${c}`);
       }
     }
@@ -258,7 +253,7 @@ export class CrossAggregator {
     // No-answer × each cross MA column
     const naBase = `${maNoneSelectedCondition(rowMaCols)} AND (${maShownCondition(rowMaCols)})`;
     for (let c = 0; c < crossQ.columns.length; c++) {
-      const naCondition = `${naBase} AND "${esc(crossQ.columns[c])}" = '1'`;
+      const naCondition = `${naBase} AND "${esc(crossQ.columns[c])}" = 1`;
       selectClauses.push(`${weightedCountExpr(naCondition, this.weightCol)} AS na_c${c}`);
     }
 

@@ -20,7 +20,8 @@ function findCell(cells: Cell[], main: string, sub: string): Cell | undefined {
 
 // ============================================================
 // テストデータ (testdata/test_data.csv) 14行
-// SA の WHERE: IS NOT NULL AND != '' → "N/A"は有効な文字列として残る
+// DuckDB型推論: SA/MA列=BIGINT, weight=DOUBLE
+// SA WHERE: IS NOT NULL → 99=無回答(有効値), NULL=回答対象外
 //
 // CSV行(1-indexed, ヘッダー除く):
 //  1: id=1,  w=1.2, q1=1,   q2=3,   q3_1=1, q3_2=0, q3_3=1
@@ -33,10 +34,10 @@ function findCell(cells: Cell[], main: string, sub: string): Cell | undefined {
 //  8: id=8,  w=0.7, q1=3,   q2=3,   q3_1=1, q3_2=0, q3_3=1
 //  9: id=9,  w=1.4, q1=2,   q2=2,   q3_1=1, q3_2=1, q3_3=0
 // 10: id=10, w=1.0, q1=1,   q2=1,   q3_1=0, q3_2=0, q3_3=1
-// 11: id=11, w=1.0, q1=N/A, q2=N/A, q3_1=0, q3_2=0, q3_3=0
-// 12: id=12, w=0.8, q1=1,   q2='',  q3_1=0, q3_2=0, q3_3=0
-// 13: id=13, w=1.1, q1=N/A, q2=2,   q3_1='',q3_2='',q3_3=''
-// 14: id=14, w=1.0, q1='',  q2=1,   q3_1=1, q3_2=0, q3_3=1
+// 11: id=11, w=1.0, q1=99,  q2=99,  q3_1=0, q3_2=0, q3_3=0
+// 12: id=12, w=0.8, q1=1,   q2=NULL, q3_1=0, q3_2=0, q3_3=0
+// 13: id=13, w=1.1, q1=99,  q2=2,   q3_1=NULL,q3_2=NULL,q3_3=NULL
+// 14: id=14, w=1.0, q1=NULL,q2=1,   q3_1=1, q3_2=0, q3_3=1
 // ============================================================
 
 describe("aggregate - 重みなし", () => {
@@ -55,11 +56,11 @@ describe("aggregate - 重みなし", () => {
       expect(r.question).toBe("q1");
       expect(r.type).toBe("SA");
 
-      // q1 有効行: 行1-13 (行14=空のみ除外, N/Aは文字列として有効) = 13行
+      // q1 有効行: IS NOT NULL → 行1-13 (行14=NULL除外) = 13行
       // q1=1: 行1,3,5,7,10,12 = 6件
       // q1=2: 行2,6,9 = 3件
       // q1=3: 行4,8 = 2件
-      // q1=N/A: 行11,13 = 2件
+      // q1=99(無回答): 行11,13 = 2件
       const n = 13;
       const cell1 = findCell(r.cells, "1", "GT")!;
       expect(cell1).toBeDefined();
@@ -73,7 +74,7 @@ describe("aggregate - 重みなし", () => {
       const cell3 = findCell(r.cells, "3", "GT")!;
       expect(cell3.count).toBe(2);
 
-      const cellNA = findCell(r.cells, "N/A", "GT")!;
+      const cellNA = findCell(r.cells, "99", "GT")!;
       expect(cellNA.count).toBe(2);
     });
   });
@@ -93,8 +94,8 @@ describe("aggregate - 重みなし", () => {
       expect(r.question).toBe("q3");
       expect(r.type).toBe("MA");
 
-      // MA shown条件: q3_1~q3_3 のいずれかが非空かつ非NULL
-      // 行13: q3_1='',q3_2='',q3_3='' → 全部空なので除外
+      // MA shown条件: q3_1~q3_3 のいずれかが非NULL
+      // 行13: q3_1=NULL,q3_2=NULL,q3_3=NULL → 全部NULLなので除外
       // 行1-12,14 = 13行が shown
       // q3_1='1': 行1,3,4,6,8,9,14 = 7件
       // q3_2='1': 行2,3,5,7,9 = 5件
@@ -131,21 +132,21 @@ describe("aggregate - 重みなし", () => {
       expect(results).toHaveLength(1);
 
       const r = results[0];
-      // q2有効行(非空・非NULL): 行1-10,13,14 + 行11(N/A) = 13行 (行12=空のみ除外)
+      // q2有効行(IS NOT NULL): 行1-11,13,14 = 13行 (行12=NULL除外)
       // q2=1: 行2,4,7,10,14 = 5件
       // q2=2: 行3,6,9,13 = 4件
       // q2=3: 行1,5,8 = 3件
-      // q2=N/A: 行11 = 1件
+      // q2=99(無回答): 行11 = 1件
       const gtN = 13;
       expect(findCell(r.cells, "1", "GT")!.n).toBe(gtN);
       expect(findCell(r.cells, "1", "GT")!.count).toBe(5);
       expect(findCell(r.cells, "2", "GT")!.count).toBe(4);
       expect(findCell(r.cells, "3", "GT")!.count).toBe(3);
-      expect(findCell(r.cells, "N/A", "GT")!.count).toBe(1);
+      expect(findCell(r.cells, "99", "GT")!.count).toBe(1);
 
       // クロス: q2有効行の中で q1 の値ごとに分岐
       // クロスヘッダーのn: q1=1かつq2有効 の行数
-      // q1=1 かつ q2有効: 行1,3,5,7,10 (行12はq2空で除外) = 5行
+      // q1=1 かつ q2有効: 行1,3,5,7,10 (行12はq2=NULL除外) = 5行
       // q1=1 でq2=1: 行7,10 = 2件
       const crossCell = findCell(r.cells, "1", crossSub("q1", "1")); // q2=1, q1=1
       expect(crossCell).toBeDefined();

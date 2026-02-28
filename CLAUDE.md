@@ -54,9 +54,10 @@ interface Cell { main: string; sub: string; n: number; count: number; pct: numbe
 
 ## Conventions
 
-- All CSV columns read as `VARCHAR` (`all_varchar=true`); weight uses `TRY_CAST` to float
+- CSV columns use DuckDB type inference (no `all_varchar`); weight column is natively DOUBLE
 - SQL column names escaped via `esc()` helper (double-quote escaping)
-- MA truthy values: `'1'` only
+- MA truthy values: `1` (numeric)
+- SA no-answer: numeric code (e.g. `99`) defined in layout JSON items; NULL = not shown
 - Component files: PascalCase `.tsx` (`GtTable.tsx`); lib files: camelCase `.ts` (`aggregate.ts`)
 - Components export Preact function components; PascalCase functions
 - Module-level singleton state for infrastructure (`duckdbBridge`, `i18n`); UI state uses hooks + Context
