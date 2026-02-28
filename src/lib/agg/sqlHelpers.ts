@@ -11,9 +11,7 @@ export function weightExpr(weightCol: string): string {
 }
 
 export function maWeightedCountExpr(maCol: string, weightCol: string): string {
-  return weightCol
-    ? `SUM(CASE WHEN "${esc(maCol)}" = 1 THEN "${esc(weightCol)}" ELSE 0 END)`
-    : `COUNT(CASE WHEN "${esc(maCol)}" = 1 THEN 1 END)::DOUBLE`;
+  return weightCol ? `SUM("${esc(maCol)}" * "${esc(weightCol)}")` : `SUM("${esc(maCol)}")::DOUBLE`;
 }
 
 /** MA "shown" condition: at least one sub-column is non-NULL */
