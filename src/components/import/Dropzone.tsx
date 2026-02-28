@@ -5,12 +5,11 @@ interface DropzoneProps {
   accept: string;
   icon: string;
   text: string;
-  hint: string;
   loadedFileName: string | null;
   onFile: (file: File) => void;
 }
 
-export function Dropzone({ accept, icon, text, hint, loadedFileName, onFile }: DropzoneProps) {
+export function Dropzone({ accept, icon, text, loadedFileName, onFile }: DropzoneProps) {
   const [isDragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -70,17 +69,11 @@ export function Dropzone({ accept, icon, text, hint, loadedFileName, onFile }: D
           {icon}
         </span>
         {isLoaded ? (
-          <>
-            <span class="max-w-full truncate text-[0.875rem] font-medium text-[var(--color-success-700)]">
-              {loadedFileName}
-            </span>
-            <span class="text-xs text-muted">{hint}</span>
-          </>
+          <span class="max-w-full truncate text-[0.875rem] font-medium text-[var(--color-success-700)]">
+            {loadedFileName}
+          </span>
         ) : (
-          <>
-            <span class="text-[0.875rem] font-medium text-text-secondary">{text}</span>
-            <span class="text-xs text-muted">{hint}</span>
-          </>
+          <span class="text-[0.875rem] font-medium text-text-secondary">{text}</span>
         )}
       </div>
     </div>

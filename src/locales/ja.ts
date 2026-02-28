@@ -16,11 +16,9 @@ const ja: Record<string, string> = {
 
   // Dropzone
   "dropzone.csv.icon": "ローデータ",
-  "dropzone.csv.text": "ここにローデータファイル(csv)をドロップ",
-  "dropzone.csv.hint": "またはクリックして選択",
+  "dropzone.csv.text": ".csv をドロップまたは選択",
   "dropzone.layout.icon": "レイアウト",
-  "dropzone.layout.text": "ここにレイアウトファイル(json)をドロップ",
-  "dropzone.layout.hint": "またはクリックして選択",
+  "dropzone.layout.text": ".json をドロップまたは選択",
 
   // Saved files
   "saved.empty": "履歴なし",

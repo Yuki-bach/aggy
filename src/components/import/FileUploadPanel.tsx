@@ -21,7 +21,6 @@ export function FileUploadPanel({
           accept=".csv"
           icon={t("dropzone.csv.icon")}
           text={t("dropzone.csv.text")}
-          hint={t("dropzone.csv.hint")}
           loadedFileName={csvFileName}
           onFile={onCsvFile}
         />
@@ -31,7 +30,6 @@ export function FileUploadPanel({
           accept=".json"
           icon={t("dropzone.layout.icon")}
           text={t("dropzone.layout.text")}
-          hint={t("dropzone.layout.hint")}
           loadedFileName={layoutFileName}
           onFile={onLayoutFile}
         />
