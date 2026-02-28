@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://aggy.app/schemas/layout.schema.json",
   "title": "Aggy Layout",
-  "description": "アンケートローデータのレイアウト定義。CSV列の種別（SA/MA/ID/WEIGHT）と選択肢ラベルを指定する。",
+  "description": "アンケートローデータのレイアウト定義。CSV列の種別（SA/MA/WEIGHT）と選択肢ラベルを指定する。",
   "type": "array",
   "items": {
     "$ref": "#/definitions/LayoutEntry"
@@ -29,7 +29,7 @@
       "properties": {
         "key": {
           "type": "string",
-          "description": "CSV列名（SA/ID/WEIGHT）またはMA列の接頭辞"
+          "description": "CSV列名（SA/WEIGHT）またはMA列の接頭辞"
         },
         "label": {
           "type": "string",
@@ -37,7 +37,7 @@
         },
         "type": {
           "type": "string",
-          "enum": ["SA", "MA", "ID", "WEIGHT"],
+          "enum": ["SA", "MA", "WEIGHT"],
           "description": "列の種別"
         },
         "items": {
@@ -70,7 +70,7 @@
         },
         {
           "if": {
-            "properties": { "type": { "enum": ["ID", "WEIGHT"] } }
+            "properties": { "type": { "const": "WEIGHT" } }
           },
           "then": {
             "properties": {

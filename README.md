@@ -22,15 +22,13 @@ npm run dev
 [
   { "key": "q1", "type": "SA", "label": "性別", "items": [{"code": "1", "label": "男性"}, {"code": "2", "label": "女性"}] },
   { "key": "q3", "type": "MA", "label": "利用メディア", "items": [{"code": "1", "label": "TV"}, {"code": "2", "label": "Web"}] },
-  { "key": "weight", "type": "WEIGHT" },
-  { "key": "id", "type": "ID" }
+  { "key": "weight", "type": "WEIGHT" }
 ]
 ```
 
 - **SA**: 単一回答（1列）
 - **MA**: 複数回答（0/1フラグ列、`key_code` の命名規則）
 - **WEIGHT**: ウェイト列（ウェイトバック集計に使用）
-- **ID**: 識別列（集計対象外）
 
 ## AI分析コメント（Chrome Built-in AI）
 
