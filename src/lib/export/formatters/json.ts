@@ -1,6 +1,6 @@
-import type { AggResult } from "../aggregate";
+import type { AggResult } from "../../agg/aggregate";
 import type { LayoutMeta } from "../../layout";
-import { pivot } from "../pivot";
+import { pivot } from "../../agg/pivot";
 import { resolveMainLabel, resolveSubLabel } from "../exportGrid";
 import { downloadFile, today } from "../export";
 

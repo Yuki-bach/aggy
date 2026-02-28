@@ -4,7 +4,7 @@ import type { ChartType } from "./ChartContent";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { useAggregation } from "./AggregationContext";
 import { ExportMenu } from "./ExportMenu";
-import { executeExport, type ExportAction } from "../../lib/agg/export";
+import { executeExport, type ExportAction } from "../../lib/export/export";
 
 export type ViewMode = "table" | "chart";
 export type PctDirection = "vertical" | "horizontal";

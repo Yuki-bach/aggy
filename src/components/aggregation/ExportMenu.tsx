@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "preact/hooks";
 import { t } from "../../lib/i18n";
-import type { ExportAction } from "../../lib/agg/export";
+import type { ExportAction } from "../../lib/export/export";
 
 interface ExportMenuProps {
   onExport: (action: ExportAction) => void;

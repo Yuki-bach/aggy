@@ -1,8 +1,8 @@
-import type { AggResult } from "./aggregate";
-import { parseCrossSub } from "./aggregate";
+import type { AggResult } from "../agg/aggregate";
+import { parseCrossSub } from "../agg/aggregate";
 import type { LayoutMeta } from "../layout";
-import { NA_VALUE } from "./sqlHelpers";
-import { pivot } from "./pivot";
+import { NA_VALUE } from "../agg/sqlHelpers";
+import { pivot } from "../agg/pivot";
 
 export interface ExportGrid {
   question: string;

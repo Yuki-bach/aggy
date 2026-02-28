@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregate, type Query, type AggResult } from "../src/lib/agg/aggregate";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
-import { buildExportGrids, type ExportGrid } from "../src/lib/agg/exportGrid";
-import { formatCSV } from "../src/lib/agg/formatters/csv";
-import { formatTSV, formatHTML } from "../src/lib/agg/formatters/tsv";
-import { formatMarkdown } from "../src/lib/agg/formatters/markdown";
-import { formatJSON } from "../src/lib/agg/formatters/json";
+import { buildExportGrids, type ExportGrid } from "../src/lib/export/exportGrid";
+import { formatCSV } from "../src/lib/export/formatters/csv";
+import { formatTSV, formatHTML } from "../src/lib/export/formatters/tsv";
+import { formatMarkdown } from "../src/lib/export/formatters/markdown";
+import { formatJSON } from "../src/lib/export/formatters/json";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let conn: any;

@@ -1,7 +1,7 @@
-import type { AggResult } from "./aggregate";
+import type { AggResult } from "../agg/aggregate";
 import type { LayoutMeta } from "../layout";
 import { buildExportGrids } from "./exportGrid";
-import { pivot } from "./pivot";
+import { pivot } from "../agg/pivot";
 import { downloadCSV } from "./formatters/csv";
 import { formatTSV, formatHTML } from "./formatters/tsv";
 import { formatMarkdown, downloadMarkdown } from "./formatters/markdown";
