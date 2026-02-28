@@ -92,6 +92,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
   const csvRef = useRef<CsvData | null>(null);
   const layoutRef = useRef<LayoutData | null>(null);
+  const loadedFromSavedRef = useRef(false);
 
   const { entries, deleteEntry } = useSavedFiles();
 
@@ -137,6 +138,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         headers: result.headers,
         rowCount: result.rowCount,
       };
+      loadedFromSavedRef.current = false;
       setCsvFileName(file.name);
       updateLoadedInfo();
       checkBothLoaded();
@@ -151,6 +153,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       const layout = parseLayout(text);
       const meta = buildLayoutMeta(layout);
       layoutRef.current = { json: text, fileName: file.name, meta };
+      loadedFromSavedRef.current = false;
       setLayoutFileName(file.name);
       updateLoadedInfo();
       checkBothLoaded();
@@ -174,6 +177,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       };
       layoutRef.current = { json: layoutJson, fileName: layoutName, meta };
 
+      loadedFromSavedRef.current = true;
       setCsvFileName(csvName);
       setLayoutFileName(layoutName);
       updateLoadedInfo();
@@ -185,7 +189,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
   function handleProceed(): void {
     if (csvRef.current && layoutRef.current) {
-      saveToOPFS();
+      if (!loadedFromSavedRef.current) saveToOPFS();
       onComplete(csvRef.current, layoutRef.current);
     }
   }
