@@ -50,7 +50,7 @@ type QuestionDef = SAQuestion | MAQuestion;  // Tagged union
 interface Cell { main: string; sub: string; n: number; count: number; pct: number; }
 ```
 
-`LayoutMeta` maps column names to labels, value labels, and column types (`"sa"|"ma:PREFIX"|"id"|"weight"`).
+`LayoutMeta` maps column names to labels, value labels, and column types (`"sa"|"ma:PREFIX"|"weight"`).
 
 ## Conventions
 

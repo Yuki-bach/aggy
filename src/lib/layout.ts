@@ -5,7 +5,7 @@ export interface LayoutItem {
   label: string;
 }
 
-export type LayoutColType = "SA" | "MA" | "ID" | "WEIGHT";
+export type LayoutColType = "SA" | "MA" | "WEIGHT";
 
 export interface LayoutEntry {
   key: string;
@@ -85,9 +85,6 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
     }
 
     switch (type) {
-      case "ID":
-        colTypes[key] = "id";
-        break;
       case "WEIGHT":
         colTypes[key] = "weight";
         break;

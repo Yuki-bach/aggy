@@ -1,9 +1,5 @@
 [
   {
-    "key": "id",
-    "type": "ID"
-  },
-  {
     "key": "weight",
     "type": "WEIGHT"
   },
