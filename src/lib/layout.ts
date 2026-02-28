@@ -3,7 +3,6 @@ import type { QuestionDef } from "./agg/aggregate";
 export interface LayoutItem {
   code: string;
   label: string;
-  column?: string; // Explicit column name (defaults to `{key}_{code}`)
 }
 
 export type LayoutColType = "SA" | "MA" | "ID" | "WEIGHT";
@@ -105,7 +104,7 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
       case "MA":
         if (items) {
           for (const item of items) {
-            const colName = item.column ?? `${key}_${item.code}`;
+            const colName = `${key}_${item.code}`;
             colTypes[colName] = `ma:${key}`;
             // MA columns are 1/0 flags; store item.label as display label for "1"
             valueLabels[colName] = { "1": item.label };

@@ -19,10 +19,6 @@
         "label": {
           "type": "string",
           "description": "選択肢の表示ラベル"
-        },
-        "column": {
-          "type": "string",
-          "description": "MA列の明示的なCSV列名。省略時は {key}_{code} が使われる"
         }
       },
       "required": ["code", "label"],
