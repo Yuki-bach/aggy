@@ -25,12 +25,12 @@ export function ResultCard({ res, extraClass, children }: ResultCardProps) {
       class={`overflow-hidden rounded-xl border border-border bg-surface shadow-sm${extraClass ? ` ${extraClass}` : ""}`}
     >
       <div class="flex items-baseline gap-3 border-b border-border p-4">
-        <div class="flex min-w-0 flex-col gap-[2px]">
-          <span class="text-[0.875rem] font-bold text-accent">{questionLabel}</span>
-          {hasLabel && <span class="text-xs tracking-[0.04em] text-muted">{res.question}</span>}
+        <div class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-sm font-bold text-accent">{questionLabel}</span>
+          {hasLabel && <span class="text-xs tracking-wide text-muted">{res.question}</span>}
         </div>
-        <span class="text-xs tracking-[0.04em] text-muted">{res.type}</span>
-        <span class="ml-auto text-[0.8125rem] text-muted">{nLabel}</span>
+        <span class="text-xs tracking-wide text-muted">{res.type}</span>
+        <span class="ml-auto text-xs text-muted">{nLabel}</span>
       </div>
       {children}
     </div>

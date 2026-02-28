@@ -31,7 +31,7 @@ export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
   return (
     <div class="mb-6 flex items-center gap-4">
       <h2 class="text-xl font-bold">{t("result.title.gt")}</h2>
-      <span class="text-[0.8125rem] text-muted">
+      <span class="text-xs text-muted">
         {t("result.meta", { count: results.length, weight: weightText })}
       </span>
 
@@ -86,7 +86,7 @@ export function ViewOpts({
   if (!showChart && !showPctToggle) return null;
 
   return (
-    <div class="mb-4 flex items-center justify-end gap-4 text-[0.8125rem] text-text-secondary">
+    <div class="mb-4 flex items-center justify-end gap-4 text-xs text-text-secondary">
       {showChart && (
         <>
           <ChartTypeSelect
@@ -148,7 +148,7 @@ function PaletteSelector({
             role="radio"
             aria-checked={isActive}
             aria-label={id}
-            class={`h-5 w-5 cursor-pointer rounded-full border-2 transition-shadow ${isActive ? "border-accent shadow-[0_0_0_1px_var(--accent)]" : "border-border hover:border-muted"}`}
+            class={`size-5 cursor-pointer rounded-full border-2 transition-shadow ${isActive ? "border-accent shadow-[0_0_0_1px_var(--accent)]" : "border-border hover:border-muted"}`}
             style={
               base
                 ? { backgroundColor: base }
@@ -178,7 +178,7 @@ function ChartTypeSelect({
     <label>
       {label}{" "}
       <select
-        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-[0.8125rem] text-text"
+        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-xs text-text"
         value={value}
         onChange={(e) => onChange((e.target as HTMLSelectElement).value as ChartType)}
       >

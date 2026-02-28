@@ -7,7 +7,7 @@ interface ThProps extends JSX.HTMLAttributes<HTMLTableCellElement> {
 export function Th({ right, class: cls, children, ...props }: ThProps) {
   return (
     <th
-      class={`py-3 px-4 text-[0.8125rem] font-bold tracking-[0.04em] border-b-2 border-border-strong text-text-secondary bg-surface2 ${right ? "text-right" : "text-left"} ${cls ?? ""}`}
+      class={`py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong text-text-secondary bg-surface2 ${right ? "text-right" : "text-left"} ${cls ?? ""}`}
       {...props}
     >
       {children}
