@@ -50,8 +50,18 @@ export function GettingStartedModal({ open, onClose }: { open: boolean; onClose:
 
 // ─── Internal ───────────────────────────────────────────────
 
-const sampleLinkClass =
-  "inline-flex items-center gap-1 rounded border border-border-strong bg-surface px-3 py-1 text-xs font-semibold text-accent no-underline transition-colors hover:border-accent hover:bg-accent-bg dark:bg-surface2 dark:border-accent";
+function SampleLink({ href, name, children }: { href: string; name: string; children: string }) {
+  return (
+    <a
+      href={href}
+      download={name}
+      class="flex items-center gap-1 rounded border border-border-strong bg-surface px-3 py-1 text-xs font-semibold text-accent transition-colors hover:border-accent hover:bg-accent-bg dark:bg-surface2 dark:border-accent"
+    >
+      <span class="text-base">{"\u{1F4C4}"}</span>
+      {children}
+    </a>
+  );
+}
 
 function GettingStartedContent({ onClose }: { onClose: () => void }) {
   return (
@@ -80,18 +90,12 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
           <div class="mt-3 rounded border border-border bg-surface2 px-4 py-3">
             <p class="m-0 mb-2">{t("gs.section1.sample")}</p>
             <div class="flex gap-3">
-              <a href="samples/sample_data.csv" download="sample_data.csv" class={sampleLinkClass}>
-                <span class="text-base">{"\u{1F4C4}"}</span>
+              <SampleLink href="samples/sample_data.csv" name="sample_data.csv">
                 {t("gs.section1.sampleCsv")}
-              </a>
-              <a
-                href="samples/sample_layout.json"
-                download="sample_layout.json"
-                class={sampleLinkClass}
-              >
-                <span class="text-base">{"\u{1F4C4}"}</span>
+              </SampleLink>
+              <SampleLink href="samples/sample_layout.json" name="sample_layout.json">
                 {t("gs.section1.sampleLayout")}
-              </a>
+              </SampleLink>
             </div>
           </div>
         </section>
