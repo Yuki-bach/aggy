@@ -54,6 +54,7 @@ const en: Record<string, string> = {
   "chart.barH": "Horizontal Bar",
   "chart.barV": "Vertical Bar",
   "chart.obi": "Stacked",
+  "chart.palette": "Color",
 
   // Table headers
   "table.option": "Option",

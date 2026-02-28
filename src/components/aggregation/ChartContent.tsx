@@ -4,7 +4,7 @@ import { useRef, useEffect } from "preact/hooks";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
-import { Chart, getSeriesColor, getThemeColors } from "../../lib/chartConfig";
+import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
 import { resolveValueLabel, resolveSubLabel } from "../../lib/labels";
 import { useAggregation } from "./AggregationContext";
 import { ResultCard } from "./ResultCard";
@@ -16,9 +16,10 @@ export type ChartType = "bar-h" | "bar-v" | "obi";
 interface ChartContentProps {
   saChartType: ChartType;
   maChartType: ChartType;
+  paletteId: PaletteId;
 }
 
-export function ChartContent({ saChartType, maChartType }: ChartContentProps) {
+export function ChartContent({ saChartType, maChartType, paletteId }: ChartContentProps) {
   const { results, hasCross } = useAggregation();
   return (
     <div
@@ -33,6 +34,7 @@ export function ChartContent({ saChartType, maChartType }: ChartContentProps) {
           key={res.question}
           res={res}
           gtChartType={res.type === "SA" ? saChartType : maChartType}
+          paletteId={paletteId}
         />
       ))}
     </div>
@@ -42,9 +44,10 @@ export function ChartContent({ saChartType, maChartType }: ChartContentProps) {
 interface ChartCardProps {
   res: AggResult;
   gtChartType: ChartType;
+  paletteId: PaletteId;
 }
 
-function ChartCard({ res, gtChartType }: ChartCardProps) {
+function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
   const { layoutMeta, crossCols } = useAggregation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -69,16 +72,17 @@ function ChartCard({ res, gtChartType }: ChartCardProps) {
         theme,
         layoutMeta,
         crossCols,
+        paletteId,
       );
     } else {
-      chartRef.current = buildGtChart(canvas, pv, gtChartType, res, theme, layoutMeta);
+      chartRef.current = buildGtChart(canvas, pv, gtChartType, res, theme, layoutMeta, paletteId);
     }
 
     return () => {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [res, gtChartType, layoutMeta, crossCols]);
+  }, [res, gtChartType, layoutMeta, crossCols, paletteId]);
 
   return (
     <ResultCard res={res}>
@@ -96,18 +100,19 @@ function buildGtChart(
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
   layoutMeta: LayoutMeta,
+  paletteId: PaletteId,
 ): Chart {
   const { mains, lookup } = pv;
   const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
   const data = mains.map((m) => lookup.get(`${m}\0GT`)?.pct ?? 0);
-  const colors = mains.map((_, i) => getSeriesColor(i));
+  const colors = mains.map((_, i) => getSeriesColor(i, paletteId));
 
   // Stacked bar: each option as a segment in one horizontal bar
   if (chartType === "obi") {
     const datasets = mains.map((m, i) => ({
       label: resolveValueLabel(res.type, res.question, m, layoutMeta),
       data: [lookup.get(`${m}\0GT`)?.pct ?? 0],
-      backgroundColor: getSeriesColor(i),
+      backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
     }));
 
@@ -189,6 +194,7 @@ function buildCrossChart(
   theme: ReturnType<typeof getThemeColors>,
   layoutMeta: LayoutMeta,
   crossCols: QuestionDef[],
+  paletteId: PaletteId,
 ): Chart {
   const { mains, subs, lookup } = pv;
   const crossSubs = subs.filter((s) => s.label !== "GT");
@@ -202,7 +208,7 @@ function buildCrossChart(
         const cell = lookup.get(`${m}\0${sub.label}`);
         return cell?.pct ?? 0;
       }),
-      backgroundColor: getSeriesColor(i),
+      backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
     }));
 
@@ -244,7 +250,7 @@ function buildCrossChart(
       const cell = lookup.get(`${m}\0${sub.label}`);
       return cell?.pct ?? 0;
     }),
-    backgroundColor: getSeriesColor(i),
+    backgroundColor: getSeriesColor(i, paletteId),
     borderRadius: 3,
     maxBarThickness: 40,
   }));

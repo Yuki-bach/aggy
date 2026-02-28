@@ -3,12 +3,14 @@ import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
 import { ChartContent, type ChartType } from "./ChartContent";
 import { TableContent } from "./TableContent";
 import { AIBubble } from "./AIBubble";
+import type { PaletteId } from "../../lib/chartConfig";
 
 export default function ResultView() {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
   const [pctDirection, setPctDirection] = useState<PctDirection>("vertical");
+  const [paletteId, setPaletteId] = useState<PaletteId>("default");
   const [, setThemeTick] = useState(0);
 
   // Re-render on theme change (needed for canvas-based charts)
@@ -28,6 +30,7 @@ export default function ResultView() {
     onSaChartTypeChange: setSaChartType,
     onMaChartTypeChange: setMaChartType,
     onPctDirectionChange: setPctDirection,
+    onPaletteChange: setPaletteId,
   };
 
   return (
@@ -38,10 +41,11 @@ export default function ResultView() {
         currentPctDirection={pctDirection}
         saChartType={saChartType}
         maChartType={maChartType}
+        paletteId={paletteId}
         callbacks={callbacks}
       />
       {viewMode === "chart" ? (
-        <ChartContent saChartType={saChartType} maChartType={maChartType} />
+        <ChartContent saChartType={saChartType} maChartType={maChartType} paletteId={paletteId} />
       ) : (
         <TableContent pctDirection={pctDirection} />
       )}

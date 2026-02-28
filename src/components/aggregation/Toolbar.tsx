@@ -1,5 +1,6 @@
 import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
+import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfig";
 import type { ChartType } from "./ChartContent";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { useAggregation } from "./AggregationContext";
@@ -12,6 +13,7 @@ export interface ToolbarCallbacks {
   onSaChartTypeChange: (type: ChartType) => void;
   onMaChartTypeChange: (type: ChartType) => void;
   onPctDirectionChange: (dir: PctDirection) => void;
+  onPaletteChange: (id: PaletteId) => void;
 }
 
 interface ToolbarProps {
@@ -64,9 +66,10 @@ interface ViewOptsProps {
   currentPctDirection: PctDirection;
   saChartType: ChartType;
   maChartType: ChartType;
+  paletteId: PaletteId;
   callbacks: Pick<
     ToolbarCallbacks,
-    "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange"
+    "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange" | "onPaletteChange"
   >;
 }
 
@@ -75,6 +78,7 @@ export function ViewOpts({
   currentPctDirection,
   saChartType,
   maChartType,
+  paletteId,
   callbacks,
 }: ViewOptsProps) {
   const { hasCross } = useAggregation();
@@ -98,6 +102,7 @@ export function ViewOpts({
             value={maChartType}
             onChange={callbacks.onMaChartTypeChange}
           />
+          <PaletteSelector current={paletteId} onChange={callbacks.onPaletteChange} />
         </>
       )}
       {showPctToggle && (
@@ -125,6 +130,43 @@ export function ViewOpts({
 }
 
 // ─── Internal ───────────────────────────────────────────────
+
+function PaletteSelector({
+  current,
+  onChange,
+}: {
+  current: PaletteId;
+  onChange: (id: PaletteId) => void;
+}) {
+  return (
+    <div class="flex items-center gap-1.5" role="radiogroup" aria-label={t("chart.palette")}>
+      <span class="mr-0.5 text-muted">{t("chart.palette")}:</span>
+      {PALETTE_IDS.map((id) => {
+        const isActive = id === current;
+        const base = id === "default" ? undefined : PALETTE_BASES[id];
+        return (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={isActive}
+            aria-label={id}
+            class={`h-5 w-5 cursor-pointer rounded-full border-2 transition-shadow ${isActive ? "border-accent shadow-[0_0_0_1px_var(--accent)]" : "border-border hover:border-muted"}`}
+            style={
+              base
+                ? { backgroundColor: base }
+                : {
+                    background:
+                      "conic-gradient(#0064d4, #0097a7, #1b7d3a, #e06500, #c62828, #6a1b9a, #0064d4)",
+                  }
+            }
+            onClick={() => onChange(id)}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 function ChartTypeSelect({
   label,
