@@ -115,7 +115,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
     updateLoadedInfo();
   }
 
-  async function trySaveToOPFS(): Promise<void> {
+  async function saveToOPFS(): Promise<void> {
     const csv = csvRef.current;
     const layout = layoutRef.current;
     if (!csv || !layout) return;
@@ -140,7 +140,6 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       setCsvFileName(file.name);
       updateLoadedInfo();
       checkBothLoaded();
-      trySaveToOPFS();
     } catch (e) {
       console.error("CSV load failed:", e);
     }
@@ -155,7 +154,6 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       setLayoutFileName(file.name);
       updateLoadedInfo();
       checkBothLoaded();
-      trySaveToOPFS();
     } catch (e) {
       console.error("Layout load failed:", e);
     }
@@ -187,6 +185,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
   function handleProceed(): void {
     if (csvRef.current && layoutRef.current) {
+      saveToOPFS();
       onComplete(csvRef.current, layoutRef.current);
     }
   }
