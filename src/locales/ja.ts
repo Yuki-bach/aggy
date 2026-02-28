@@ -54,6 +54,7 @@ const ja: Record<string, string> = {
   "chart.barH": "横棒",
   "chart.barV": "縦棒",
   "chart.obi": "帯",
+  "chart.palette": "配色",
 
   // Table headers
   "table.option": "選択肢",
