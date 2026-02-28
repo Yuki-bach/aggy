@@ -1,9 +1,10 @@
-import { downloadAllCSV } from "../../lib/agg/download";
 import { t } from "../../lib/i18n";
 import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfig";
 import type { ChartType } from "./ChartContent";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { useAggregation } from "./AggregationContext";
+import { ExportMenu } from "./ExportMenu";
+import { executeExport, type ExportAction } from "../../lib/export/export";
 
 export type ViewMode = "table" | "chart";
 export type PctDirection = "vertical" | "horizontal";
@@ -50,13 +51,9 @@ export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
         </ToggleButton>
       </ToggleGroup>
 
-      {/* CSV export */}
-      <button
-        class="m-0 min-h-9 w-auto cursor-pointer rounded-lg border border-accent bg-transparent px-4 py-2 text-[0.875rem] font-medium text-accent transition-[background] duration-150 hover:bg-accent-bg"
-        onClick={() => downloadAllCSV(results, weightCol, layoutMeta)}
-      >
-        {t("result.csv.export")}
-      </button>
+      <ExportMenu
+        onExport={(action: ExportAction) => executeExport(action, results, weightCol, layoutMeta)}
+      />
     </div>
   );
 }
