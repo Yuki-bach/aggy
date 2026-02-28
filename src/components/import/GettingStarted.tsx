@@ -51,7 +51,7 @@ export function GettingStartedModal({ open, onClose }: { open: boolean; onClose:
 // ─── Internal ───────────────────────────────────────────────
 
 const sampleLinkClass =
-  "inline-flex items-center gap-1 rounded border border-border-strong bg-surface px-3 py-1 text-xs font-semibold text-accent no-underline transition-colors hover:border-accent hover:bg-accent-bg dark:bg-surface2 dark:border-accent dark:hover:bg-surface";
+  "inline-flex items-center gap-1 rounded border border-border-strong bg-surface px-3 py-1 text-xs font-semibold text-accent no-underline transition-colors hover:border-accent hover:bg-accent-bg dark:bg-surface2 dark:border-accent";
 
 function GettingStartedContent({ onClose }: { onClose: () => void }) {
   return (
@@ -60,7 +60,7 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
       role="document"
     >
       <button
-        class="absolute top-3 right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded border-none bg-transparent text-2xl leading-none text-text-secondary hover:bg-surface2 hover:text-text"
+        class="absolute top-3 right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded text-2xl leading-none text-text-secondary hover:bg-surface2 hover:text-text"
         aria-label={t("gs.close")}
         onClick={onClose}
       >
@@ -117,7 +117,7 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
 
       <div class="mt-6 flex items-center justify-end border-t border-border pt-4">
         <button
-          class="cursor-pointer rounded border-none bg-accent px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent/90"
+          class="cursor-pointer rounded bg-accent px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent/90"
           data-autofocus
           onClick={onClose}
         >

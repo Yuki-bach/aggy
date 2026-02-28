@@ -51,7 +51,7 @@ export function Dropzone({ accept, icon, text, loadedFileName, onFile }: Dropzon
 
   return (
     <div
-      class={`relative cursor-pointer rounded-lg border-2 border-dashed border-border-strong px-4 py-5 text-center transition-colors duration-150 hover:border-accent hover:bg-accent-bg${isDragOver ? " drag-over" : ""}${isLoaded ? " loaded" : ""}`}
+      class={`relative rounded-lg border-2 border-dashed border-border-strong px-4 py-5 transition-colors hover:border-accent hover:bg-accent-bg${isDragOver ? " drag-over" : ""}${isLoaded ? " loaded" : ""}`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -61,7 +61,7 @@ export function Dropzone({ accept, icon, text, loadedFileName, onFile }: Dropzon
         ref={inputRef}
         type="file"
         accept={accept}
-        class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        class="absolute inset-0 cursor-pointer opacity-0"
         onChange={handleChange}
       />
       <div class="pointer-events-none flex flex-col items-center gap-1">
