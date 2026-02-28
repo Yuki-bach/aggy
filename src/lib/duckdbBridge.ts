@@ -51,7 +51,7 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 
   const c = await getConnection();
   await c.query(
-    `CREATE OR REPLACE VIEW survey AS
+    `CREATE OR REPLACE TABLE survey AS
      SELECT * FROM read_csv('survey.csv')`,
   );
 
