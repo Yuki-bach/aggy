@@ -6,7 +6,7 @@ export interface LayoutItem {
   column?: string; // Explicit column name (defaults to `{key}_{code}`)
 }
 
-export type LayoutColType = "SA" | "MA" | "ID" | "WEIGHT" | "EXCLUDE";
+export type LayoutColType = "SA" | "MA" | "ID" | "WEIGHT";
 
 export interface LayoutEntry {
   key: string;
@@ -91,9 +91,6 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
         break;
       case "WEIGHT":
         colTypes[key] = "weight";
-        break;
-      case "EXCLUDE":
-        colTypes[key] = "exclude";
         break;
       case "SA":
         colTypes[key] = "sa";
