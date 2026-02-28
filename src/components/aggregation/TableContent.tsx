@@ -23,20 +23,30 @@ export function TableContent({ pctDirection }: TableContentProps) {
       }
     >
       {results.map((res) => {
-        const pv = pivot(res.cells);
-        const isCross = pv.subs.length > 1;
+        if (!hasCross) {
+          const pv = pivot(res.cells);
+          return (
+            <ResultCard key={res.question} res={res}>
+              <GtTable res={res} pv={pv} maxPct={maxPct} />
+            </ResultCard>
+          );
+        }
+
+        const gtCells = res.cells.filter((c) => c.sub === "GT");
+        const crossCells = res.cells.filter((c) => c.sub !== "GT");
+        const gtPv = pivot(gtCells);
+        const crossPv = pivot(crossCells);
 
         return (
-          <ResultCard
-            key={res.question}
-            res={res}
-            extraClass={isCross ? "overflow-x-auto" : undefined}
-          >
-            {isCross ? (
-              <CrossTable res={res} pv={pv} pctDir={pctDirection} />
-            ) : (
-              <GtTable res={res} pv={pv} maxPct={maxPct} />
-            )}
+          <ResultCard key={res.question} res={res} extraClass="overflow-x-auto">
+            <div class="flex items-end gap-4 pl-4">
+              <div class="shrink-0">
+                <GtTable res={res} pv={gtPv} maxPct={maxPct} />
+              </div>
+              <div class="min-w-0 overflow-x-auto">
+                <CrossTable res={res} pv={crossPv} pctDir={pctDirection} />
+              </div>
+            </div>
           </ResultCard>
         );
       })}

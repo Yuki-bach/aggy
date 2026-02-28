@@ -29,68 +29,99 @@ export function ChartContent({ saChartType, maChartType, paletteId }: ChartConte
           : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
       }
     >
-      {results.map((res) => (
-        <ChartCard
-          key={res.question}
-          res={res}
-          gtChartType={res.type === "SA" ? saChartType : maChartType}
-          paletteId={paletteId}
-        />
-      ))}
+      {results.map((res) => {
+        const chartType = res.type === "SA" ? saChartType : maChartType;
+
+        if (!hasCross) {
+          return <GtChartCard key={res.question} res={res} chartType={chartType} paletteId={paletteId} />;
+        }
+
+        return (
+          <ResultCard key={res.question} res={res}>
+            <div class="flex items-end gap-4 pl-4">
+              <div class="shrink-0 p-4 h-80">
+                <GtChartCanvas res={res} chartType={chartType} paletteId={paletteId} />
+              </div>
+              <div class="min-w-0 flex-1 p-4 h-[400px]">
+                <CrossChartCanvas res={res} chartType={chartType} paletteId={paletteId} />
+              </div>
+            </div>
+          </ResultCard>
+        );
+      })}
     </div>
   );
 }
 
-interface ChartCardProps {
+interface ChartCanvasProps {
   res: AggResult;
-  gtChartType: ChartType;
+  chartType: ChartType;
   paletteId: PaletteId;
 }
 
-function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
-  const { layoutMeta, crossCols } = useAggregation();
+function GtChartCard({ res, chartType, paletteId }: ChartCanvasProps) {
+  return (
+    <ResultCard res={res}>
+      <div class="p-4 h-80">
+        <GtChartCanvas res={res} chartType={chartType} paletteId={paletteId} />
+      </div>
+    </ResultCard>
+  );
+}
+
+function GtChartCanvas({ res, chartType, paletteId }: ChartCanvasProps) {
+  const { layoutMeta } = useAggregation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
-  const pv = pivot(res.cells);
-  const isCross = pv.subs.length > 1;
+  const gtCells = res.cells.filter((c) => c.sub === "GT");
+  const pv = pivot(gtCells);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    // Destroy previous chart if any
     chartRef.current?.destroy();
-
     const theme = getThemeColors();
-    if (isCross) {
-      chartRef.current = buildCrossChart(
-        canvas,
-        pv,
-        gtChartType,
-        res,
-        theme,
-        layoutMeta,
-        crossCols,
-        paletteId,
-      );
-    } else {
-      chartRef.current = buildGtChart(canvas, pv, gtChartType, res, theme, layoutMeta, paletteId);
-    }
-
+    chartRef.current = buildGtChart(canvas, pv, chartType, res, theme, layoutMeta, paletteId);
     return () => {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [res, gtChartType, layoutMeta, crossCols, paletteId]);
+  }, [res, chartType, layoutMeta, paletteId]);
 
-  return (
-    <ResultCard res={res}>
-      <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
-        <canvas ref={canvasRef} />
-      </div>
-    </ResultCard>
-  );
+  return <canvas ref={canvasRef} />;
+}
+
+function CrossChartCanvas({ res, chartType, paletteId }: ChartCanvasProps) {
+  const { layoutMeta, crossCols } = useAggregation();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const chartRef = useRef<Chart | null>(null);
+
+  const crossCells = res.cells.filter((c) => c.sub !== "GT");
+  const pv = pivot(crossCells);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    chartRef.current?.destroy();
+    const theme = getThemeColors();
+    chartRef.current = buildCrossChart(
+      canvas,
+      pv,
+      chartType,
+      res,
+      theme,
+      layoutMeta,
+      crossCols,
+      paletteId,
+    );
+    return () => {
+      chartRef.current?.destroy();
+      chartRef.current = null;
+    };
+  }, [res, chartType, layoutMeta, crossCols, paletteId]);
+
+  return <canvas ref={canvasRef} />;
 }
 
 function buildGtChart(
@@ -197,7 +228,7 @@ function buildCrossChart(
   paletteId: PaletteId,
 ): Chart {
   const { mains, subs, lookup } = pv;
-  const crossSubs = subs.filter((s) => s.label !== "GT");
+  const crossSubs = subs;
 
   // Stacked bar: one bar per cross value
   if (gtChartType === "obi") {
