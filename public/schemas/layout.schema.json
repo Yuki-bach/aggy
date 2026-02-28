@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aggy.app/schemas/layout.schema.json",
+  "title": "Aggy Layout",
+  "description": "アンケートローデータのレイアウト定義。CSV列の種別（SA/MA/ID/WEIGHT/EXCLUDE）と選択肢ラベルを指定する。",
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/LayoutEntry"
+  },
+  "definitions": {
+    "LayoutItem": {
+      "type": "object",
+      "description": "選択肢の定義",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "選択肢コード（SAの場合はCSV値、MAの場合は列名サフィックス）"
+        },
+        "label": {
+          "type": "string",
+          "description": "選択肢の表示ラベル"
+        },
+        "column": {
+          "type": "string",
+          "description": "MA列の明示的なCSV列名。省略時は {key}_{code} が使われる"
+        }
+      },
+      "required": ["code", "label"],
+      "additionalProperties": false
+    },
+    "LayoutEntry": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "CSV列名（SA/ID/WEIGHT/EXCLUDE）またはMA列の接頭辞"
+        },
+        "label": {
+          "type": "string",
+          "description": "設問の表示ラベル"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["SA", "MA", "ID", "WEIGHT", "EXCLUDE"],
+          "description": "列の種別"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LayoutItem"
+          },
+          "minItems": 1,
+          "description": "選択肢リスト（SA/MAで使用）"
+        }
+      },
+      "required": ["key", "type"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "SA" } }
+          },
+          "then": {
+            "required": ["key", "type", "items"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "MA" } }
+          },
+          "then": {
+            "required": ["key", "type", "items"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "enum": ["ID", "WEIGHT", "EXCLUDE"] } }
+          },
+          "then": {
+            "properties": {
+              "items": false
+            }
+          }
+        }
+      ]
+    }
+  }
+}
