@@ -74,16 +74,20 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
           <div class="px-3 pt-1.5 pb-1 text-[0.6875rem] font-medium tracking-wide text-muted uppercase">
             {t("export.section.download")}
           </div>
-          <MenuItem label={t("export.download.csv")} onClick={() => handleAction("download-csv")} />
-          <MenuItem
-            label={t("export.download.markdown")}
-            onClick={() => handleAction("download-markdown")}
-          />
-          <MenuItem
-            label={t("export.download.json")}
-            onClick={() => handleAction("download-json")}
-            last
-          />
+          <div class="pb-1.5">
+            <MenuItem
+              label={t("export.download.csv")}
+              onClick={() => handleAction("download-csv")}
+            />
+            <MenuItem
+              label={t("export.download.markdown")}
+              onClick={() => handleAction("download-markdown")}
+            />
+            <MenuItem
+              label={t("export.download.json")}
+              onClick={() => handleAction("download-json")}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -92,18 +96,10 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
 
 // ─── Internal ───────────────────────────────────────────────
 
-function MenuItem({
-  label,
-  onClick,
-  last,
-}: {
-  label: string;
-  onClick: () => void;
-  last?: boolean;
-}) {
+function MenuItem({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
-      class={`block w-full cursor-pointer border-none bg-transparent px-3 py-1.5 text-left text-[0.8125rem] text-text hover:bg-accent-bg ${last ? "pb-2.5" : ""}`}
+      class="block w-full cursor-pointer border-none bg-transparent px-3 py-1.5 text-left text-[0.8125rem] text-text hover:bg-accent-bg"
       onClick={onClick}
     >
       {label}
