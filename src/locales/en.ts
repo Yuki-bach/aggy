@@ -50,6 +50,18 @@ const en: Record<string, string> = {
   "result.pct.horizontal": "Row %",
   "result.csv.export": "Export All CSV",
 
+  // Export menu
+  "export.label": "Export ▼",
+  "export.section.copy": "Copy",
+  "export.section.download": "Download",
+  "export.copy.tsv": "Table (TSV)",
+  "export.copy.markdown": "Markdown",
+  "export.copy.json": "JSON",
+  "export.download.csv": "CSV",
+  "export.download.markdown": "Markdown",
+  "export.download.json": "JSON",
+  "export.copied": "Copied ✓",
+
   // Chart type
   "chart.barH": "Horizontal Bar",
   "chart.barV": "Vertical Bar",

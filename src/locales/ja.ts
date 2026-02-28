@@ -50,6 +50,18 @@ const ja: Record<string, string> = {
   "result.pct.horizontal": "横%",
   "result.csv.export": "全件CSV出力",
 
+  // Export menu
+  "export.label": "エクスポート ▼",
+  "export.section.copy": "コピー",
+  "export.section.download": "ダウンロード",
+  "export.copy.tsv": "テーブル (TSV)",
+  "export.copy.markdown": "Markdown",
+  "export.copy.json": "JSON",
+  "export.download.csv": "CSV",
+  "export.download.markdown": "Markdown",
+  "export.download.json": "JSON",
+  "export.copied": "コピーしました ✓",
+
   // Chart type
   "chart.barH": "横棒",
   "chart.barV": "縦棒",
