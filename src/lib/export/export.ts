@@ -19,7 +19,7 @@ export type ExportAction =
 export async function executeExport(
   action: ExportAction,
   results: AggResult[],
-  _weightCol: string,
+  weightCol: string,
   layoutMeta?: LayoutMeta,
 ): Promise<boolean> {
   const hasCross = results.some((r) => pivot(r.cells).subs.length > 1);
@@ -36,7 +36,7 @@ export async function executeExport(
       return true;
     }
     case "download-json": {
-      downloadJSON(results, layoutMeta, hasCross);
+      downloadJSON(results, weightCol, layoutMeta, hasCross);
       return true;
     }
     case "copy-tsv": {
@@ -53,7 +53,7 @@ export async function executeExport(
       return true;
     }
     case "copy-json": {
-      const json = formatJSON(results, layoutMeta);
+      const json = formatJSON(results, weightCol, layoutMeta);
       await copyToClipboard({ "text/plain": json });
       return true;
     }

@@ -18,7 +18,16 @@ interface JsonExportEntry {
   options: JsonOption[];
 }
 
-export function formatJSON(results: AggResult[], layoutMeta?: LayoutMeta): string {
+interface JsonExport {
+  weightColumn: string | null;
+  results: JsonExportEntry[];
+}
+
+export function formatJSON(
+  results: AggResult[],
+  weightCol: string,
+  layoutMeta?: LayoutMeta,
+): string {
   const entries: JsonExportEntry[] = results.map((res) => {
     const { mains, subs, lookup } = pivot(res.cells);
     const gtSub = subs.find((s) => s.label === "GT")!;
@@ -49,15 +58,20 @@ export function formatJSON(results: AggResult[], layoutMeta?: LayoutMeta): strin
     return { question: res.question, type: res.type, n: gtSub.n, options };
   });
 
-  return JSON.stringify(entries, null, 2);
+  const output: JsonExport = {
+    weightColumn: weightCol || null,
+    results: entries,
+  };
+  return JSON.stringify(output, null, 2);
 }
 
 export function downloadJSON(
   results: AggResult[],
+  weightCol: string,
   layoutMeta?: LayoutMeta,
   hasCross?: boolean,
 ): void {
-  const json = formatJSON(results, layoutMeta);
+  const json = formatJSON(results, weightCol, layoutMeta);
   const prefix = hasCross ? "cross_result" : "gt_result";
   downloadFile(json, `${prefix}_${today()}.json`, "application/json;charset=utf-8;");
 }

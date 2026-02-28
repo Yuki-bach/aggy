@@ -158,21 +158,29 @@ describe("formatMarkdown", () => {
 
 describe("formatJSON", () => {
   it("パース可能なJSONを出力する", () => {
-    const json = formatJSON(gtResults);
+    const json = formatJSON(gtResults, "");
     const parsed = JSON.parse(json);
 
-    expect(Array.isArray(parsed)).toBe(true);
-    expect(parsed).toHaveLength(2);
-    expect(parsed[0].question).toBe("q1");
-    expect(parsed[0].type).toBe("SA");
-    expect(typeof parsed[0].n).toBe("number");
-    expect(Array.isArray(parsed[0].options)).toBe(true);
+    expect(parsed.weightColumn).toBeNull();
+    expect(Array.isArray(parsed.results)).toBe(true);
+    expect(parsed.results).toHaveLength(2);
+    expect(parsed.results[0].question).toBe("q1");
+    expect(parsed.results[0].type).toBe("SA");
+    expect(typeof parsed.results[0].n).toBe("number");
+    expect(Array.isArray(parsed.results[0].options)).toBe(true);
+  });
+
+  it("weightCol指定時にweightColumnが含まれる", () => {
+    const json = formatJSON(gtResults, "weight");
+    const parsed = JSON.parse(json);
+
+    expect(parsed.weightColumn).toBe("weight");
   });
 
   it("各optionにcount/pctが数値で含まれる", () => {
-    const json = formatJSON(gtResults);
+    const json = formatJSON(gtResults, "");
     const parsed = JSON.parse(json);
-    const opt = parsed[0].options[0];
+    const opt = parsed.results[0].options[0];
 
     expect(typeof opt.count).toBe("number");
     expect(typeof opt.pct).toBe("number");
@@ -180,9 +188,9 @@ describe("formatJSON", () => {
   });
 
   it("クロス結果でcrossフィールドが含まれる", () => {
-    const json = formatJSON(crossResults);
+    const json = formatJSON(crossResults, "");
     const parsed = JSON.parse(json);
-    const opt = parsed[0].options[0];
+    const opt = parsed.results[0].options[0];
 
     expect(opt.cross).toBeDefined();
     expect(typeof opt.cross).toBe("object");
