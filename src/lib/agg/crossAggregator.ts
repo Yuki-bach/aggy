@@ -245,8 +245,10 @@ export class CrossAggregator {
     const selectClauses: string[] = [];
     for (let r = 0; r < rowMaCols.length; r++) {
       for (let c = 0; c < crossQ.columns.length; c++) {
-        const cond = `"${esc(rowMaCols[r])}" = 1 AND "${esc(crossQ.columns[c])}" = 1`;
-        selectClauses.push(`${weightedCountExpr(cond, this.weightCol)} AS r${r}c${c}`);
+        const expr = this.weightCol
+          ? `SUM("${esc(rowMaCols[r])}" * "${esc(crossQ.columns[c])}" * "${esc(this.weightCol)}")`
+          : `SUM("${esc(rowMaCols[r])}" * "${esc(crossQ.columns[c])}")::DOUBLE`;
+        selectClauses.push(`${expr} AS r${r}c${c}`);
       }
     }
 
