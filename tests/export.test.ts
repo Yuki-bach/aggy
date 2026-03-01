@@ -6,6 +6,9 @@ import { formatCSV } from "../src/lib/export/formatters/csv";
 import { formatTSV, formatHTML } from "../src/lib/export/formatters/tsv";
 import { formatMarkdown } from "../src/lib/export/formatters/markdown";
 import { formatJSON } from "../src/lib/export/formatters/json";
+import type { LabelMap } from "../src/lib/layout";
+
+const EMPTY_LABEL_MAP: LabelMap = { questionLabels: {}, valueLabels: {} };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let conn: any;
@@ -41,7 +44,7 @@ afterAll(async () => {
 
 describe("buildExportGrids", () => {
   it("GT結果から正しいグリッド構造を生成する", () => {
-    const grids = buildExportGrids(gtResults);
+    const grids = buildExportGrids(gtResults, EMPTY_LABEL_MAP);
     expect(grids).toHaveLength(2);
 
     const grid = grids[0];
@@ -56,7 +59,7 @@ describe("buildExportGrids", () => {
   });
 
   it("クロス結果からヘッダー2行のグリッドを生成する", () => {
-    const grids = buildExportGrids(crossResults);
+    const grids = buildExportGrids(crossResults, EMPTY_LABEL_MAP);
     expect(grids).toHaveLength(1);
 
     const grid = grids[0];
@@ -71,7 +74,7 @@ describe("buildExportGrids", () => {
 
 describe("formatCSV", () => {
   it("カンマ区切りで正しく出力される", () => {
-    const grids = buildExportGrids(gtResults);
+    const grids = buildExportGrids(gtResults, EMPTY_LABEL_MAP);
     const csv = formatCSV(grids);
     const lines = csv.split("\r\n");
 
@@ -98,7 +101,7 @@ describe("formatCSV", () => {
 
 describe("formatTSV", () => {
   it("タブ区切りで出力される", () => {
-    const grids = buildExportGrids(gtResults);
+    const grids = buildExportGrids(gtResults, EMPTY_LABEL_MAP);
     const tsv = formatTSV(grids);
     const lines = tsv.split("\n");
 
@@ -111,7 +114,7 @@ describe("formatTSV", () => {
 
 describe("formatHTML", () => {
   it("テーブルタグを含むHTMLを生成する", () => {
-    const grids = buildExportGrids(gtResults);
+    const grids = buildExportGrids(gtResults, EMPTY_LABEL_MAP);
     const html = formatHTML(grids);
 
     expect(html).toContain("<table>");
@@ -137,7 +140,7 @@ describe("formatHTML", () => {
 
 describe("formatMarkdown", () => {
   it("パイプ区切りのテーブルを生成する", () => {
-    const grids = buildExportGrids(gtResults);
+    const grids = buildExportGrids(gtResults, EMPTY_LABEL_MAP);
     const md = formatMarkdown(grids);
 
     expect(md).toContain("### q1 (SA)");
@@ -146,7 +149,7 @@ describe("formatMarkdown", () => {
   });
 
   it("クロス結果でもMarkdownテーブルを生成する", () => {
-    const grids = buildExportGrids(crossResults);
+    const grids = buildExportGrids(crossResults, EMPTY_LABEL_MAP);
     const md = formatMarkdown(grids);
 
     expect(md).toContain("### q2 (SA)");
@@ -158,7 +161,7 @@ describe("formatMarkdown", () => {
 
 describe("formatJSON", () => {
   it("パース可能なJSONを出力する", () => {
-    const json = formatJSON(gtResults, "");
+    const json = formatJSON(gtResults, "", EMPTY_LABEL_MAP);
     const parsed = JSON.parse(json);
 
     expect(parsed.weightColumn).toBeNull();
@@ -171,14 +174,14 @@ describe("formatJSON", () => {
   });
 
   it("weightCol指定時にweightColumnが含まれる", () => {
-    const json = formatJSON(gtResults, "weight");
+    const json = formatJSON(gtResults, "weight", EMPTY_LABEL_MAP);
     const parsed = JSON.parse(json);
 
     expect(parsed.weightColumn).toBe("weight");
   });
 
   it("各optionにcount/pctが数値で含まれる", () => {
-    const json = formatJSON(gtResults, "");
+    const json = formatJSON(gtResults, "", EMPTY_LABEL_MAP);
     const parsed = JSON.parse(json);
     const opt = parsed.results[0].options[0];
 
@@ -188,7 +191,7 @@ describe("formatJSON", () => {
   });
 
   it("クロス結果でcrossフィールドが含まれる", () => {
-    const json = formatJSON(crossResults, "");
+    const json = formatJSON(crossResults, "", EMPTY_LABEL_MAP);
     const parsed = JSON.parse(json);
     const opt = parsed.results[0].options[0];
 

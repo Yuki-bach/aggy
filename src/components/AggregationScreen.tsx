@@ -3,7 +3,7 @@ import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
 import { runDuckDBAggregation } from "../lib/duckdbBridge";
-import { buildQuestionDefs } from "../lib/layout";
+import { buildQuestionDefs, findWeightColumn, countLayoutColumns } from "../lib/layout";
 import { questionKey } from "../lib/agg/aggregate";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
@@ -15,9 +15,9 @@ interface AggregationScreenProps {
 }
 
 export default function AggregationScreen({ csv, layout }: AggregationScreenProps) {
-  const questions = buildQuestionDefs(csv.headers, layout.meta.colTypes);
-  const questionLabels = layout.meta.questionLabels;
-  const weightCol = Object.entries(layout.meta.colTypes).find(([, t]) => t === "weight")?.[0] ?? "";
+  const questions = buildQuestionDefs(csv.headers, layout.layout);
+  const questionLabels = layout.labelMap.questionLabels;
+  const weightCol = findWeightColumn(layout.layout);
 
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>(() => {
     const sel: Record<string, boolean> = {};
@@ -51,7 +51,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       setAggCtx({
         results,
         weightCol: wCol,
-        layoutMeta: layout.meta,
+        labelMap: layout.labelMap,
         crossCols,
         hasCross: crossCols.length > 0,
       });
@@ -83,7 +83,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
               }}
               layout={{
                 fileName: layout.fileName,
-                colCount: Object.keys(layout.meta.colTypes).length,
+                colCount: countLayoutColumns(layout.layout),
               }}
             />
           </div>

@@ -13,7 +13,7 @@ import { performance } from "node:perf_hooks";
 
 import { aggregate } from "../src/lib/agg/aggregate";
 import type { Query, QuestionDef } from "../src/lib/agg/aggregate";
-import { parseLayout, buildLayoutMeta, buildQuestionDefs } from "../src/lib/layout";
+import { parseLayout, buildQuestionDefs } from "../src/lib/layout";
 import { generate, PATTERNS, type PatternDef } from "./generate";
 
 // ---------------------------------------------------------------------------
@@ -141,11 +141,10 @@ async function main(): Promise<void> {
     // Parse layout → build questions
     const layoutText = readFileSync(resolve(dataDir, `${pattern.name}_layout.json`), "utf-8");
     const layout = parseLayout(layoutText);
-    const meta = buildLayoutMeta(layout);
 
     // Extract headers from CSV first line
     const headers = csvText.slice(0, csvText.indexOf("\n")).split(",");
-    const questions = buildQuestionDefs(headers, meta.colTypes);
+    const questions = buildQuestionDefs(headers, layout);
 
     // Pick 2 questions for cross-tab (prefer SA; fall back to MA for MA-only patterns)
     const saQuestions = questions.filter(

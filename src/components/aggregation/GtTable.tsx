@@ -12,9 +12,9 @@ interface GtTableProps {
 }
 
 export function GtTable({ res, pv, maxPct }: GtTableProps) {
-  const { layoutMeta, weightCol } = useAggregation();
+  const { labelMap, weightCol } = useAggregation();
   const { mains, lookup } = pv;
-  const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
+  const questionLabel = resolveQuestionLabel(res.question, labelMap);
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums">
@@ -32,7 +32,7 @@ export function GtTable({ res, pv, maxPct }: GtTableProps) {
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
         {mains.map((main) => {
           const cell = lookup.get(`${main}\0GT`)!;
-          const label = resolveValueLabel(res.type, res.question, main, layoutMeta);
+          const label = resolveValueLabel(res.type, res.question, main, labelMap);
           const countStr =
             res.type === "SA" && !weightCol ? cell.count.toLocaleString() : cell.count.toFixed(1);
           const barWidth = ((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1);

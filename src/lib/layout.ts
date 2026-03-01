@@ -16,13 +16,11 @@ export interface LayoutEntry {
 
 export type Layout = LayoutEntry[];
 
-export interface LayoutMeta {
+export interface LabelMap {
   /** Question labels: CSV column name (or MA group name) → display name */
   questionLabels: Record<string, string>;
   /** Value labels: SA → { colName: { code: label } }, MA → { colName: { "1": itemLabel } } */
   valueLabels: Record<string, Record<string, string>>;
-  /** Column types: { colName → type string } */
-  colTypes: Record<string, string>;
 }
 
 export function parseLayout(jsonText: string): Layout {
@@ -50,15 +48,24 @@ export function parseLayout(jsonText: string): Layout {
   return parsed as Layout;
 }
 
-/** Build QuestionDef[] from headers and colTypes */
-export function buildQuestionDefs(
-  headers: string[],
-  colTypes: Record<string, string>,
-): QuestionDef[] {
+/** Build QuestionDef[] from CSV headers and layout definition */
+export function buildQuestionDefs(headers: string[], layout: Layout): QuestionDef[] {
+  // Build a column→type lookup from layout
+  const colTypes = new Map<string, string>();
+  for (const entry of layout) {
+    if (entry.type === "SA") {
+      colTypes.set(entry.key, "sa");
+    } else if (entry.type === "MA" && entry.items) {
+      for (const item of entry.items) {
+        colTypes.set(`${entry.key}_${item.code}`, `ma:${entry.key}`);
+      }
+    }
+  }
+
   const questions: QuestionDef[] = [];
   const maAccum: Record<string, string[]> = {};
   for (const col of headers) {
-    const t = colTypes[col];
+    const t = colTypes.get(col);
     if (!t) continue;
     if (t === "sa") {
       questions.push({ type: "SA", column: col });
@@ -72,10 +79,19 @@ export function buildQuestionDefs(
   return questions;
 }
 
-export function buildLayoutMeta(layout: Layout): LayoutMeta {
+/** Find weight column name from layout, or empty string if none */
+export function findWeightColumn(layout: Layout): string {
+  return layout.find((e) => e.type === "WEIGHT")?.key ?? "";
+}
+
+/** Count total layout-defined columns (SA: 1 each, MA: items count, WEIGHT: 1) */
+export function countLayoutColumns(layout: Layout): number {
+  return layout.reduce((acc, e) => acc + (e.type === "MA" ? (e.items?.length ?? 0) : 1), 0);
+}
+
+export function buildLabelMap(layout: Layout): LabelMap {
   const questionLabels: Record<string, string> = {};
   const valueLabels: Record<string, Record<string, string>> = {};
-  const colTypes: Record<string, string> = {};
 
   for (const entry of layout) {
     const { key, label, type, items } = entry;
@@ -85,11 +101,7 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
     }
 
     switch (type) {
-      case "WEIGHT":
-        colTypes[key] = "weight";
-        break;
       case "SA":
-        colTypes[key] = "sa";
         if (items) {
           const map: Record<string, string> = {};
           for (const item of items) {
@@ -102,8 +114,6 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
         if (items) {
           for (const item of items) {
             const colName = `${key}_${item.code}`;
-            colTypes[colName] = `ma:${key}`;
-            // MA columns are 1/0 flags; store item.label as display label for "1"
             valueLabels[colName] = { "1": item.label };
           }
         }
@@ -111,5 +121,5 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
     }
   }
 
-  return { questionLabels, valueLabels, colTypes };
+  return { questionLabels, valueLabels };
 }

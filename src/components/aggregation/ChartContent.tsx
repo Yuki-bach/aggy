@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "preact/hooks";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
-import type { LayoutMeta } from "../../lib/layout";
+import type { LabelMap } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
 import { resolveValueLabel, resolveSubLabel } from "../../lib/labels";
@@ -48,7 +48,7 @@ interface ChartCardProps {
 }
 
 function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
-  const { layoutMeta, crossCols } = useAggregation();
+  const { labelMap, crossCols } = useAggregation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -70,19 +70,19 @@ function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
         gtChartType,
         res,
         theme,
-        layoutMeta,
+        labelMap,
         crossCols,
         paletteId,
       );
     } else {
-      chartRef.current = buildGtChart(canvas, pv, gtChartType, res, theme, layoutMeta, paletteId);
+      chartRef.current = buildGtChart(canvas, pv, gtChartType, res, theme, labelMap, paletteId);
     }
 
     return () => {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [res, gtChartType, layoutMeta, crossCols, paletteId]);
+  }, [res, gtChartType, labelMap, crossCols, paletteId]);
 
   return (
     <ResultCard res={res}>
@@ -99,18 +99,18 @@ function buildGtChart(
   chartType: ChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
-  layoutMeta: LayoutMeta,
+  labelMap: LabelMap,
   paletteId: PaletteId,
 ): Chart {
   const { mains, lookup } = pv;
-  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
+  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, labelMap));
   const data = mains.map((m) => lookup.get(`${m}\0GT`)?.pct ?? 0);
   const colors = mains.map((_, i) => getSeriesColor(i, paletteId));
 
   // Stacked bar: each option as a segment in one horizontal bar
   if (chartType === "obi") {
     const datasets = mains.map((m, i) => ({
-      label: resolveValueLabel(res.type, res.question, m, layoutMeta),
+      label: resolveValueLabel(res.type, res.question, m, labelMap),
       data: [lookup.get(`${m}\0GT`)?.pct ?? 0],
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
@@ -192,7 +192,7 @@ function buildCrossChart(
   gtChartType: ChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
-  layoutMeta: LayoutMeta,
+  labelMap: LabelMap,
   crossCols: QuestionDef[],
   paletteId: PaletteId,
 ): Chart {
@@ -201,9 +201,9 @@ function buildCrossChart(
 
   // Stacked bar: one bar per cross value
   if (gtChartType === "obi") {
-    const subLabels = crossSubs.map((s) => resolveSubLabel(s.label, layoutMeta, crossCols));
+    const subLabels = crossSubs.map((s) => resolveSubLabel(s.label, labelMap, crossCols));
     const datasets = mains.map((m, i) => ({
-      label: resolveValueLabel(res.type, res.question, m, layoutMeta),
+      label: resolveValueLabel(res.type, res.question, m, labelMap),
       data: crossSubs.map((sub) => {
         const cell = lookup.get(`${m}\0${sub.label}`);
         return cell?.pct ?? 0;
@@ -242,10 +242,10 @@ function buildCrossChart(
 
   // Clustered bar chart (direction matches GT selection)
   const isHorizontal = gtChartType === "bar-h";
-  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
+  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, labelMap));
 
   const datasets = crossSubs.map((sub, i) => ({
-    label: resolveSubLabel(sub.label, layoutMeta, crossCols),
+    label: resolveSubLabel(sub.label, labelMap, crossCols),
     data: mains.map((m) => {
       const cell = lookup.get(`${m}\0${sub.label}`);
       return cell?.pct ?? 0;

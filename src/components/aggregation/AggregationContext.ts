@@ -1,11 +1,11 @@
 import { createContext } from "preact";
 import { useContext } from "preact/hooks";
-import type { LayoutMeta } from "../../lib/layout";
+import type { LabelMap } from "../../lib/layout";
 import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 
 export interface AggregationContextValue {
   results: AggResult[];
-  layoutMeta: LayoutMeta;
+  labelMap: LabelMap;
   weightCol: string;
   crossCols: QuestionDef[];
   hasCross: boolean;

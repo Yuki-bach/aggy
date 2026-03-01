@@ -10,12 +10,12 @@ interface ResultCardProps {
 }
 
 export function ResultCard({ res, extraClass, children }: ResultCardProps) {
-  const { layoutMeta, weightCol } = useAggregation();
+  const { labelMap, weightCol } = useAggregation();
 
   const gtN = res.cells.find((c) => c.sub === "GT")!.n;
   const nLabel = weightCol ? `n=${gtN.toFixed(1)}` : `n=${gtN.toLocaleString()}`;
 
-  const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
+  const questionLabel = resolveQuestionLabel(res.question, labelMap);
   const hasLabel = questionLabel !== res.question;
 
   return (

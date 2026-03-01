@@ -1,6 +1,6 @@
 import type { AggResult } from "../agg/aggregate";
 import { parseCrossSub } from "../agg/aggregate";
-import type { LayoutMeta } from "../layout";
+import type { LabelMap } from "../layout";
 import { NA_VALUE } from "../agg/sqlHelpers";
 import { pivot } from "../agg/pivot";
 import { t } from "../i18n";
@@ -12,10 +12,10 @@ export interface ExportGrid {
   rows: string[][];
 }
 
-export function buildExportGrids(results: AggResult[], layoutMeta?: LayoutMeta): ExportGrid[] {
+export function buildExportGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[] {
   const hasCross = results.some((r) => pivot(r.cells).subs.length > 1);
   if (hasCross) {
-    return buildCrossGrids(results, layoutMeta);
+    return buildCrossGrids(results, labelMap);
   }
   return results.map((res) => buildGtGrid(res));
 }
@@ -26,21 +26,19 @@ export function resolveMainLabel(main: string): string {
   return main === NA_VALUE ? t("export.na") : main;
 }
 
-export function resolveSubLabel(subLabel: string, meta?: LayoutMeta): string {
+export function resolveSubLabel(subLabel: string, labelMap: LabelMap): string {
   if (subLabel === NA_VALUE) return t("export.na");
 
   const parsed = parseCrossSub(subLabel);
   if (parsed) {
     const { axisKey, rawValue } = parsed;
     if (rawValue === NA_VALUE) return t("export.na");
-    if (!meta) return rawValue;
-    const maLabel = meta.valueLabels[rawValue]?.["1"];
+    const maLabel = labelMap.valueLabels[rawValue]?.["1"];
     if (maLabel) return maLabel;
-    return meta.valueLabels[axisKey]?.[rawValue] ?? rawValue;
+    return labelMap.valueLabels[axisKey]?.[rawValue] ?? rawValue;
   }
 
-  if (!meta) return subLabel;
-  return meta.valueLabels[subLabel]?.["1"] ?? subLabel;
+  return labelMap.valueLabels[subLabel]?.["1"] ?? subLabel;
 }
 
 function buildGtGrid(res: AggResult): ExportGrid {
@@ -72,7 +70,7 @@ function buildGtGrid(res: AggResult): ExportGrid {
   return { question: res.question, type: res.type, headers, rows };
 }
 
-function buildCrossGrids(results: AggResult[], layoutMeta?: LayoutMeta): ExportGrid[] {
+function buildCrossGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[] {
   const firstResult = results.find((r) => pivot(r.cells).subs.length > 1);
   if (!firstResult) return results.map((res) => buildGtGrid(res));
 
@@ -89,7 +87,7 @@ function buildCrossGrids(results: AggResult[], layoutMeta?: LayoutMeta): ExportG
   const headerRow2 = ["", "", "", "", ""];
   for (const sub of crossSubs) {
     headerRow1.push("");
-    headerRow2.push(`${resolveSubLabel(sub.label, layoutMeta)}(n=${sub.n.toFixed(1)})`);
+    headerRow2.push(`${resolveSubLabel(sub.label, labelMap)}(n=${sub.n.toFixed(1)})`);
   }
   const sharedHeaders = [headerRow1, headerRow2];
 
