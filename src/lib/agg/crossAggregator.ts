@@ -38,7 +38,6 @@ export async function fetchCrossHeaders(
         FROM survey
         WHERE "${esc(col)}" IS NOT NULL
         GROUP BY "${esc(col)}"
-        ORDER BY "${esc(col)}" NULLS LAST
       `;
       const result = await conn.query(sql);
       const headers = result.toArray().map((r) => ({ label: String(r.cv), n: Number(r.n) }));
@@ -102,7 +101,6 @@ export class CrossAggregator {
       WHERE "${esc(col)}" IS NOT NULL
         AND "${esc(crossCol)}" IS NOT NULL
       GROUP BY "${esc(col)}", "${esc(crossCol)}"
-      ORDER BY sv, mv NULLS LAST
     `;
 
     const result = await this.conn.query(sql);
