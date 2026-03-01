@@ -20,20 +20,16 @@ const STEPS = [
 
 function StepIndicator({ bothLoaded }: { bothLoaded: boolean }) {
   return (
-    <div class="mb-6 flex items-center justify-center gap-0">
+    <div class="mb-6 flex items-center justify-center">
       {STEPS.map((step, i) => {
         const isDone = step.num === 1 && bothLoaded;
         const isActive = step.num === 1 ? !bothLoaded : bothLoaded;
         return (
           <div key={step.num} class="flex items-center">
-            {i > 0 && (
-              <div
-                class={`mx-2 h-px w-8 transition-colors duration-300 ${bothLoaded ? "bg-accent" : "bg-border"}`}
-              />
-            )}
+            {i > 0 && <div class={`mx-2 h-px w-8 ${bothLoaded ? "bg-accent" : "bg-border"}`} />}
             <div class="flex items-center gap-2">
               <span
-                class={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors duration-300 ${
+                class={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
                   isDone
                     ? "bg-accent text-accent-contrast"
                     : isActive
@@ -44,7 +40,7 @@ function StepIndicator({ bothLoaded }: { bothLoaded: boolean }) {
                 {isDone ? "\u2713" : step.num}
               </span>
               <span
-                class={`text-[0.8125rem] font-medium transition-colors duration-300 ${
+                class={`text-[0.8125rem] font-medium ${
                   isActive ? "text-text" : isDone ? "text-accent" : "text-muted"
                 }`}
               >
@@ -63,7 +59,7 @@ function LoadedInfo({ info }: { info: string | null }) {
 
   return (
     <div
-      class="mt-3 whitespace-pre-line rounded-lg border border-accent-light bg-accent-bg px-4 py-3 text-[0.875rem] leading-normal text-text-secondary"
+      class="mt-3 whitespace-pre-line rounded-lg border border-accent-light bg-accent-bg px-4 py-3 text-sm text-text-secondary"
       aria-live="polite"
     >
       {info}
@@ -74,7 +70,7 @@ function LoadedInfo({ info }: { info: string | null }) {
 function HelpButton({ onClick }: { onClick: () => void }) {
   return (
     <button
-      class="fixed bottom-5 left-5 z-900 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-border-strong bg-surface text-base font-bold text-text-secondary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-[background,color,transform] duration-150 hover:scale-[1.08] hover:border-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)] hover:text-[var(--color-primary-700)]"
+      class="fixed bottom-5 left-5 z-900 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border-strong bg-surface font-bold text-text-secondary hover:text-accent"
       aria-label={t("help.label")}
       onClick={onClick}
     >
@@ -197,7 +193,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   return (
     <div class="flex items-center justify-center p-6">
       <div class="w-full max-w-[480px] rounded-xl border border-border bg-surface p-8 shadow-md">
-        <h2 class="mb-5 text-xl font-bold text-text">{t("import.title")}</h2>
+        <h2 class="mb-5 text-xl font-bold">{t("import.title")}</h2>
 
         <StepIndicator bothLoaded={bothLoaded} />
 
@@ -223,7 +219,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
         {bothLoaded && (
           <button
-            class="mt-5 min-h-12 w-full cursor-pointer rounded-lg border-none bg-accent px-4 py-3 text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
+            class="mt-5 w-full cursor-pointer rounded-lg bg-accent px-4 py-3 font-bold text-accent-contrast hover:bg-accent-hover"
             onClick={handleProceed}
           >
             {t("import.proceed")}

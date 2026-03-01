@@ -69,7 +69,7 @@ export function SavedFilesList({
             class="flex items-center gap-2 rounded-lg border border-transparent bg-surface2 transition-colors hover:border-border-strong"
           >
             <button
-              class="min-h-11 flex-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap px-4 py-3 text-left text-sm text-text hover:text-accent"
+              class="min-h-11 flex-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap px-4 py-3 text-left text-sm hover:text-accent"
               type="button"
               onClick={() => onSelectEntry(entry.folderId)}
             >

@@ -76,11 +76,11 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
       >
         &times;
       </button>
-      <h2 id="gs-title" class="m-0 mb-6 pr-8 text-xl font-bold text-text">
+      <h2 id="gs-title" class="m-0 mb-6 pr-8 text-xl font-bold">
         {t("gs.title")}
       </h2>
 
-      <div class="text-sm leading-relaxed text-text">
+      <div class="text-sm leading-relaxed">
         <section class="mb-5 last:mb-0">
           <h3 class="m-0 mb-2 text-base font-bold text-accent dark:text-accent-light">
             {t("gs.section1.title")}

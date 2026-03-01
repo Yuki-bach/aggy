@@ -124,7 +124,7 @@ function SectionLabel({ class: cls, children }: { class?: string; children: Comp
 function MenuItem({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
-      class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs text-text hover:bg-accent-bg"
+      class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs hover:bg-accent-bg"
       onClick={onClick}
     >
       {label}

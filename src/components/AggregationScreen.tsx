@@ -164,17 +164,17 @@ export function DataSummary({
   return (
     <>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem]">
           {csv.fileName}
         </span>
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem]">
           {layout.fileName}
         </span>
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem]">
           {t("summary.rows", { rows: csv.rowCount.toLocaleString(), cols: csv.headers.length })}
         </span>
       </div>
@@ -192,7 +192,7 @@ export function WeightInfo({
   onToggle: (on: boolean) => void;
 }) {
   return (
-    <div class="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-[0.875rem] text-text">
+    <div class="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-[0.875rem]">
       <span>{t("weight.label", { col: weightCol })}</span>
       <div class="ml-auto flex">
         <ToggleGroup>

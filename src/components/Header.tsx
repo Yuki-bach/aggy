@@ -19,7 +19,7 @@ export default function Header({ isImport, onBack }: HeaderProps) {
           ←
         </button>
       )}
-      <h1 class="text-lg font-bold text-text">Aggy</h1>
+      <h1 class="text-lg font-bold">Aggy</h1>
       <span class="text-xs tracking-[0.08em] text-muted">{t("header.subtitle")}</span>
       <div class="ml-auto flex items-center gap-3">
         <WasmStatus />

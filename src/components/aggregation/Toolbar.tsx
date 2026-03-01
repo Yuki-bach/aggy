@@ -178,7 +178,7 @@ function ChartTypeSelect({
     <label>
       {label}{" "}
       <select
-        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-xs text-text"
+        class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-xs"
         value={value}
         onChange={(e) => onChange((e.target as HTMLSelectElement).value as ChartType)}
       >
