@@ -81,7 +81,7 @@ export function SettingsRoot() {
     <div class="relative" ref={wrapRef}>
       <button
         id="settings-btn"
-        class="cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
+        class="cursor-pointer rounded-lg border border-border px-3 py-2 hover:border-border-strong hover:bg-surface2"
         data-i18n="header.settings"
         data-i18n-attr="aria-label"
         aria-label={t("header.settings")}
@@ -136,7 +136,7 @@ function SegmentControl({
       {options.map((o) => (
         <button
           key={o.value}
-          class={`flex-1 cursor-pointer whitespace-nowrap rounded-[6px] border-none px-3 py-1 text-xs transition-[background,color,box-shadow] duration-150 hover:text-text ${o.value === current ? "bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "bg-transparent text-muted"}`}
+          class={`flex-1 cursor-pointer rounded-[6px] px-3 py-1 text-xs ${o.value === current ? "bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "text-muted"}`}
           onClick={(e) => {
             e.stopPropagation();
             onChange(o.value);
