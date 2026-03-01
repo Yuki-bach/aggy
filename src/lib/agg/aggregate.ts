@@ -5,16 +5,20 @@ import { GtAggregator } from "./gtAggregator";
 import { CrossAggregator, fetchCrossHeaders } from "./crossAggregator";
 
 export interface Cell {
-  main: string; // Option label (aggregation target value)
-  sub: string; // "GT" or cross-tab axis value or MA column name
-  n: number; // Denominator for this sub
+  /** Filter conditions identifying this cell (e.g. { q1: "1" } for GT, { q1: "1", q2: "2" } for cross) */
+  key: Record<string, string>;
+  n: number;
   count: number;
   pct: number;
 }
 
+/** Check if a cell is a GT (grand total) cell — has exactly one key entry */
+export function isGT(cell: Cell): boolean {
+  return Object.keys(cell.key).length === 1;
+}
+
 export interface AggResult {
   question: string;
-  type: "SA" | "MA";
   cells: Cell[];
 }
 
@@ -29,25 +33,11 @@ export interface MAQuestion {
   type: "MA";
   prefix: string;
   columns: string[];
+  codes: string[];
 }
 
 export function questionKey(q: QuestionDef): string {
   return q.type === "SA" ? q.column : q.prefix;
-}
-
-/** Cross sub value separator (separates axis key from raw value) */
-export const CROSS_SEP = "\x01";
-
-/** Build prefixed cross sub value (e.g. "q1\x011") */
-export function crossSub(axisKey: string, rawValue: string): string {
-  return `${axisKey}${CROSS_SEP}${rawValue}`;
-}
-
-/** Parse cross sub value into { axisKey, rawValue }. Returns null for unprefixed values like GT. */
-export function parseCrossSub(sub: string): { axisKey: string; rawValue: string } | null {
-  const idx = sub.indexOf(CROSS_SEP);
-  if (idx < 0) return null;
-  return { axisKey: sub.slice(0, idx), rawValue: sub.slice(idx + 1) };
 }
 
 export interface Query {
