@@ -94,7 +94,7 @@ function VerticalCrossTable({ data, res }: { data: CrossTableData; res: AggResul
   const hasMultipleAxes = crossGroups.length > 1;
 
   return (
-    <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
+    <table class="w-full text-sm tabular-nums min-w-[400px]">
       <caption class="sr-only">{t("table.caption.cross", { question: questionLabel })}</caption>
       <thead>
         <tr>
@@ -121,7 +121,7 @@ function VerticalCrossTable({ data, res }: { data: CrossTableData; res: AggResul
             group.subs.map((sub, si) => (
               <th
                 key={sub.label}
-                class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2 ${hasMultipleAxes && si === 0 && gi > 0 ? "border-l-2 border-l-border-strong" : ""}`}
+                class={`${TH_BASE} text-right whitespace-nowrap border-l border-row-border bg-surface2 ${hasMultipleAxes && si === 0 && gi > 0 ? "border-l-2 border-l-border-strong" : ""}`}
               >
                 {resolveSubLabel(sub.label, layoutMeta, crossCols)}
                 <br />
@@ -179,7 +179,7 @@ function TransposedSubRow({
   return (
     <tr>
       <td
-        class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong text-accent2`}
+        class={`${TD_BASE} text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong text-accent2`}
       >
         {resolveSubLabel(sub.label, layoutMeta, crossCols)}
         <br />
@@ -202,7 +202,7 @@ function TransposedCrossTable({ data, res }: { data: CrossTableData; res: AggRes
   const { mains, gtSub, crossGroups, questionLabel, lookup, weightCol } = data;
 
   return (
-    <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
+    <table class="w-full text-sm tabular-nums min-w-[400px]">
       <caption class="sr-only">{t("table.caption.cross", { question: questionLabel })}</caption>
       <thead>
         <tr>
@@ -213,7 +213,7 @@ function TransposedCrossTable({ data, res }: { data: CrossTableData; res: AggRes
             return (
               <th
                 key={main}
-                class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2`}
+                class={`${TH_BASE} text-right whitespace-nowrap border-l border-row-border bg-surface2`}
               >
                 {label}
                 <br />
@@ -229,7 +229,7 @@ function TransposedCrossTable({ data, res }: { data: CrossTableData; res: AggRes
         {/* GT row */}
         <tr class="[&_td]:border-b-2 [&_td]:border-border-strong">
           <td
-            class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-gt-bg text-accent`}
+            class={`${TD_BASE} text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-gt-bg text-accent`}
           >
             {t("table.total")}
             <br />
@@ -251,7 +251,7 @@ function TransposedCrossTable({ data, res }: { data: CrossTableData; res: AggRes
             <tr key={`hdr-${crossColKey(group.crossCol)}`}>
               <td
                 colSpan={mains.length + 1}
-                class="py-3 px-4 bg-cross-bg text-accent2 font-bold text-xs tracking-wide border-b-2 border-border-strong border-t-2 border-t-border-strong"
+                class={`${TH_BASE} bg-cross-bg text-accent2 border-t-2 border-t-border-strong`}
               >
                 {resolveQuestionLabel(crossColKey(group.crossCol), layoutMeta)}
               </td>
