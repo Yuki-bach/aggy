@@ -25,7 +25,6 @@ export class GtAggregator {
       FROM survey
       WHERE "${esc(col)}" IS NOT NULL
       GROUP BY "${esc(col)}"
-      ORDER BY "${esc(col)}" NULLS LAST
     `;
 
     const result = await this.conn.query(sql);
