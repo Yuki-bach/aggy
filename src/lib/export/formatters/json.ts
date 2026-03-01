@@ -1,7 +1,8 @@
 import type { AggResult } from "../../agg/aggregate";
 import type { LayoutMeta } from "../../layout";
 import { pivot } from "../../agg/pivot";
-import { resolveMainLabel, resolveSubLabel } from "../exportGrid";
+import { resolveMainLabel } from "../exportGrid";
+import { resolveValueLabel } from "../../labels";
 import { downloadFile, today } from "../export";
 
 interface JsonOption {
@@ -26,26 +27,32 @@ interface JsonExport {
 export function formatJSON(
   results: AggResult[],
   weightCol: string,
-  layoutMeta?: LayoutMeta,
+  layoutMeta: LayoutMeta,
 ): string {
   const entries: JsonExportEntry[] = results.map((res) => {
-    const { mains, subs, lookup } = pivot(res.cells);
-    const gtSub = subs.find((s) => s.label === "GT")!;
-    const crossSubs = subs.filter((s) => s.label !== "GT");
+    const pv = pivot(res.cells, res.question);
+    const { mains, crossAxes } = pv;
+    const gtCell = pv.cell(mains[0]);
+    const gtN = gtCell?.n ?? 0;
+    const qType = layoutMeta.questionTypes[res.question] ?? "SA";
+
+    const allCrossValues = crossAxes.flatMap((axis) =>
+      axis.values.map((v) => ({ question: axis.question, value: v.value })),
+    );
 
     const options: JsonOption[] = mains.map((main) => {
-      const gtCell = lookup.get(`${main}\0GT`)!;
+      const gt = pv.cell(main)!;
       const opt: JsonOption = {
         label: resolveMainLabel(main),
-        count: gtCell.count,
-        pct: gtCell.pct,
+        count: gt.count,
+        pct: gt.pct,
       };
 
-      if (crossSubs.length > 0) {
+      if (allCrossValues.length > 0) {
         opt.cross = {};
-        for (const sub of crossSubs) {
-          const cell = lookup.get(`${main}\0${sub.label}`);
-          const label = resolveSubLabel(sub.label, layoutMeta);
+        for (const cv of allCrossValues) {
+          const cell = pv.cell(main, cv);
+          const label = resolveValueLabel(cv.question, cv.value, layoutMeta);
           if (cell) {
             opt.cross[label] = { count: cell.count, pct: cell.pct };
           }
@@ -55,7 +62,7 @@ export function formatJSON(
       return opt;
     });
 
-    return { question: res.question, type: res.type, n: gtSub.n, options };
+    return { question: res.question, type: qType, n: gtN, options };
   });
 
   const output: JsonExport = {
@@ -68,7 +75,7 @@ export function formatJSON(
 export function downloadJSON(
   results: AggResult[],
   weightCol: string,
-  layoutMeta?: LayoutMeta,
+  layoutMeta: LayoutMeta,
   hasCross?: boolean,
 ): void {
   const json = formatJSON(results, weightCol, layoutMeta);

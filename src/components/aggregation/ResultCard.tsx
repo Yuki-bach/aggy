@@ -1,5 +1,6 @@
 import type { ComponentChildren } from "preact";
 import type { AggResult } from "../../lib/agg/aggregate";
+import { isGT } from "../../lib/agg/aggregate";
 import { resolveQuestionLabel } from "../../lib/labels";
 import { useAggregation } from "./AggregationContext";
 
@@ -12,11 +13,12 @@ interface ResultCardProps {
 export function ResultCard({ res, extraClass, children }: ResultCardProps) {
   const { layoutMeta, weightCol } = useAggregation();
 
-  const gtN = res.cells.find((c) => c.sub === "GT")!.n;
+  const gtN = res.cells.find(isGT)!.n;
   const nLabel = weightCol ? `n=${gtN.toFixed(1)}` : `n=${gtN.toLocaleString()}`;
 
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
   const hasLabel = questionLabel !== res.question;
+  const questionType = layoutMeta.questionTypes[res.question] ?? "SA";
 
   return (
     <div
@@ -27,7 +29,7 @@ export function ResultCard({ res, extraClass, children }: ResultCardProps) {
           <span class="text-sm font-bold text-accent">{questionLabel}</span>
           {hasLabel && <span class="text-xs tracking-wide text-muted">{res.question}</span>}
         </div>
-        <span class="text-xs tracking-wide text-muted">{res.type}</span>
+        <span class="text-xs tracking-wide text-muted">{questionType}</span>
         <span class="ml-auto text-xs text-muted">{nLabel}</span>
       </div>
       {children}

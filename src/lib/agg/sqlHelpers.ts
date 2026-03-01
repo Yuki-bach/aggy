@@ -31,8 +31,8 @@ export function maNoneSelectedCondition(cols: string[]): string {
   return cols.map((c) => `"${esc(c)}" != 1`).join(" AND ");
 }
 
-export function mkCell(main: string, sub: string, n: number, count: number): Cell {
-  return { main, sub, n, count, pct: n > 0 ? (count / n) * 100 : 0 };
+export function mkCell(key: Record<string, string>, n: number, count: number): Cell {
+  return { key, n, count, pct: n > 0 ? (count / n) * 100 : 0 };
 }
 
 /** No-answer marker */

@@ -1,3 +1,4 @@
+import { isGT } from "../../lib/agg/aggregate";
 import { pivot } from "../../lib/agg/pivot";
 import type { PctDirection } from "./Toolbar";
 import { GtTable } from "./GtTable";
@@ -11,7 +12,7 @@ interface TableContentProps {
 
 export function TableContent({ pctDirection }: TableContentProps) {
   const { results, hasCross } = useAggregation();
-  const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
+  const allGtCells = results.flatMap((r) => r.cells.filter(isGT));
   const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
 
   return (
@@ -23,8 +24,8 @@ export function TableContent({ pctDirection }: TableContentProps) {
       }
     >
       {results.map((res) => {
-        const pv = pivot(res.cells);
-        const isCross = pv.subs.length > 1;
+        const pv = pivot(res.cells, res.question);
+        const isCross = pv.crossAxes.length > 0;
 
         return (
           <ResultCard

@@ -17,6 +17,7 @@ export class GtAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
+    private mainQ: string,
   ) {}
 
   async aggregateSA(col: string): Promise<Cell[]> {
@@ -31,10 +32,10 @@ export class GtAggregator {
     const rows = result.toArray();
 
     const questionN = rows.reduce((sum, r) => sum + Number(r.cnt), 0);
-    return rows.map((r) => mkCell(String(r.mv), "GT", questionN, Number(r.cnt)));
+    return rows.map((r) => mkCell({ [this.mainQ]: String(r.mv) }, questionN, Number(r.cnt)));
   }
 
-  async aggregateMA(cols: string[]): Promise<Cell[]> {
+  async aggregateMA(cols: string[], codes: string[]): Promise<Cell[]> {
     const selectClauses = cols.map((col, i) => {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });
@@ -56,12 +57,12 @@ export class GtAggregator {
     const row = result.toArray()[0];
 
     const questionN = Number(row.question_n ?? 0);
-    const cells: Cell[] = cols.map((col, i) =>
-      mkCell(col, "GT", questionN, Number(row[`c${i}`] ?? 0)),
+    const cells: Cell[] = codes.map((code, i) =>
+      mkCell({ [this.mainQ]: code }, questionN, Number(row[`c${i}`] ?? 0)),
     );
 
     // No-answer row
-    cells.push(mkCell(NA_VALUE, "GT", questionN, Number(row.na_cnt ?? 0)));
+    cells.push(mkCell({ [this.mainQ]: NA_VALUE }, questionN, Number(row.na_cnt ?? 0)));
 
     return cells;
   }

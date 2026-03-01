@@ -1,6 +1,7 @@
 /** AI analysis comment generation via Chrome Built-in AI (Prompt API) */
 
 import type { AggResult } from "./agg/aggregate";
+import { isGT } from "./agg/aggregate";
 import type { LayoutMeta } from "./layout";
 import { getLocale, t } from "./i18n";
 
@@ -32,7 +33,7 @@ declare global {
 export function buildPromptPayload(
   results: AggResult[],
   weightCol: string,
-  layoutMeta?: LayoutMeta,
+  layoutMeta: LayoutMeta,
 ): string {
   for (const topN of [5, 3, 2]) {
     const text = summarizeResults(results, weightCol, layoutMeta, topN);
@@ -44,7 +45,7 @@ export function buildPromptPayload(
 export async function generateComment(
   results: AggResult[],
   weightCol: string,
-  layoutMeta?: LayoutMeta,
+  layoutMeta: LayoutMeta,
 ): Promise<string | null> {
   try {
     if (results.length === 0) return null;
@@ -71,20 +72,10 @@ export async function generateComment(
 
 const MAX_PAYLOAD_CHARS = 3500;
 
-function resolveQLabel(col: string, meta?: LayoutMeta): string {
-  return meta?.questionLabels[col] ?? col;
-}
-
-function resolveVLabel(type: "SA" | "MA", col: string, code: string, meta?: LayoutMeta): string {
-  if (!meta) return code;
-  if (type === "SA") return meta.valueLabels[col]?.[code] ?? code;
-  return meta.valueLabels[code]?.["1"] ?? code;
-}
-
 function summarizeResults(
   results: AggResult[],
   weightCol: string,
-  layoutMeta: LayoutMeta | undefined,
+  layoutMeta: LayoutMeta,
   topN: number,
 ): string {
   const lines: string[] = [];
@@ -93,17 +84,19 @@ function summarizeResults(
   }
 
   for (const res of results) {
-    const gtCells = res.cells.filter((c) => c.sub === "GT");
+    const gtCells = res.cells.filter(isGT);
     if (gtCells.length === 0) continue;
 
     const n = gtCells[0].n;
-    const qLabel = resolveQLabel(res.question, layoutMeta);
-    lines.push(`${res.question}: ${qLabel} (${res.type}, n=${n})`);
+    const qLabel = layoutMeta.questionLabels[res.question] ?? res.question;
+    const qType = layoutMeta.questionTypes[res.question] ?? "SA";
+    lines.push(`${res.question}: ${qLabel} (${qType}, n=${n})`);
 
     const sorted = [...gtCells].sort((a, b) => b.pct - a.pct);
     const top = sorted.slice(0, topN);
     const items = top.map((c) => {
-      const label = resolveVLabel(res.type, res.question, c.main, layoutMeta);
+      const code = c.key[res.question];
+      const label = layoutMeta.valueLabels[res.question]?.[code] ?? code;
       return `${label}: ${c.pct.toFixed(1)}%`;
     });
 

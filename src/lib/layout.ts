@@ -19,10 +19,12 @@ export type Layout = LayoutEntry[];
 export interface LayoutMeta {
   /** Question labels: CSV column name (or MA group name) → display name */
   questionLabels: Record<string, string>;
-  /** Value labels: SA → { colName: { code: label } }, MA → { colName: { "1": itemLabel } } */
+  /** Value labels: { question: { code: label } } — unified for both SA and MA */
   valueLabels: Record<string, Record<string, string>>;
-  /** Column types: { colName → type string } */
+  /** Column types: { colName → type string } (used by buildQuestionDefs) */
   colTypes: Record<string, string>;
+  /** Question types: { question → "SA" | "MA" } */
+  questionTypes: Record<string, "SA" | "MA">;
 }
 
 export function parseLayout(jsonText: string): Layout {
@@ -67,7 +69,8 @@ export function buildQuestionDefs(
     }
   }
   for (const [prefix, cols] of Object.entries(maAccum)) {
-    questions.push({ type: "MA", prefix, columns: cols });
+    const codes = cols.map((col) => col.slice(prefix.length + 1));
+    questions.push({ type: "MA", prefix, columns: cols, codes });
   }
   return questions;
 }
@@ -76,6 +79,7 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
   const questionLabels: Record<string, string> = {};
   const valueLabels: Record<string, Record<string, string>> = {};
   const colTypes: Record<string, string> = {};
+  const questionTypes: Record<string, "SA" | "MA"> = {};
 
   for (const entry of layout) {
     const { key, label, type, items } = entry;
@@ -90,6 +94,7 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
         break;
       case "SA":
         colTypes[key] = "sa";
+        questionTypes[key] = "SA";
         if (items) {
           const map: Record<string, string> = {};
           for (const item of items) {
@@ -99,17 +104,19 @@ export function buildLayoutMeta(layout: Layout): LayoutMeta {
         }
         break;
       case "MA":
+        questionTypes[key] = "MA";
         if (items) {
+          const map: Record<string, string> = {};
           for (const item of items) {
             const colName = `${key}_${item.code}`;
             colTypes[colName] = `ma:${key}`;
-            // MA columns are 1/0 flags; store item.label as display label for "1"
-            valueLabels[colName] = { "1": item.label };
+            map[item.code] = item.label;
           }
+          valueLabels[key] = map;
         }
         break;
     }
   }
 
-  return { questionLabels, valueLabels, colTypes };
+  return { questionLabels, valueLabels, colTypes, questionTypes };
 }

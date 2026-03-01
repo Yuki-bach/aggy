@@ -1,11 +1,12 @@
 /** Chart content: grid layout + individual chart cards */
 
 import { useRef, useEffect } from "preact/hooks";
-import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
+import type { AggResult } from "../../lib/agg/aggregate";
 import type { LayoutMeta } from "../../lib/layout";
 import { pivot } from "../../lib/agg/pivot";
+import type { PivotResult } from "../../lib/agg/pivot";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
-import { resolveValueLabel, resolveSubLabel } from "../../lib/labels";
+import { resolveValueLabel } from "../../lib/labels";
 import { useAggregation } from "./AggregationContext";
 import { ResultCard } from "./ResultCard";
 
@@ -20,7 +21,7 @@ interface ChartContentProps {
 }
 
 export function ChartContent({ saChartType, maChartType, paletteId }: ChartContentProps) {
-  const { results, hasCross } = useAggregation();
+  const { results, hasCross, layoutMeta } = useAggregation();
   return (
     <div
       class={
@@ -29,14 +30,17 @@ export function ChartContent({ saChartType, maChartType, paletteId }: ChartConte
           : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
       }
     >
-      {results.map((res) => (
-        <ChartCard
-          key={res.question}
-          res={res}
-          gtChartType={res.type === "SA" ? saChartType : maChartType}
-          paletteId={paletteId}
-        />
-      ))}
+      {results.map((res) => {
+        const questionType = layoutMeta.questionTypes[res.question] ?? "SA";
+        return (
+          <ChartCard
+            key={res.question}
+            res={res}
+            gtChartType={questionType === "SA" ? saChartType : maChartType}
+            paletteId={paletteId}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -48,12 +52,12 @@ interface ChartCardProps {
 }
 
 function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
-  const { layoutMeta, crossCols } = useAggregation();
+  const { layoutMeta } = useAggregation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
-  const pv = pivot(res.cells);
-  const isCross = pv.subs.length > 1;
+  const pv = pivot(res.cells, res.question);
+  const isCross = pv.crossAxes.length > 0;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -71,7 +75,6 @@ function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
         res,
         theme,
         layoutMeta,
-        crossCols,
         paletteId,
       );
     } else {
@@ -82,7 +85,7 @@ function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [res, gtChartType, layoutMeta, crossCols, paletteId]);
+  }, [res, gtChartType, layoutMeta, paletteId]);
 
   return (
     <ResultCard res={res}>
@@ -95,23 +98,23 @@ function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
 
 function buildGtChart(
   canvas: HTMLCanvasElement,
-  pv: ReturnType<typeof pivot>,
+  pv: PivotResult,
   chartType: ChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
   layoutMeta: LayoutMeta,
   paletteId: PaletteId,
 ): Chart {
-  const { mains, lookup } = pv;
-  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
-  const data = mains.map((m) => lookup.get(`${m}\0GT`)?.pct ?? 0);
+  const { mains } = pv;
+  const labels = mains.map((m) => resolveValueLabel(res.question, m, layoutMeta));
+  const data = mains.map((m) => pv.cell(m)?.pct ?? 0);
   const colors = mains.map((_, i) => getSeriesColor(i, paletteId));
 
   // Stacked bar: each option as a segment in one horizontal bar
   if (chartType === "obi") {
     const datasets = mains.map((m, i) => ({
-      label: resolveValueLabel(res.type, res.question, m, layoutMeta),
-      data: [lookup.get(`${m}\0GT`)?.pct ?? 0],
+      label: resolveValueLabel(res.question, m, layoutMeta),
+      data: [pv.cell(m)?.pct ?? 0],
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
     }));
@@ -188,24 +191,28 @@ function buildGtChart(
 
 function buildCrossChart(
   canvas: HTMLCanvasElement,
-  pv: ReturnType<typeof pivot>,
+  pv: PivotResult,
   gtChartType: ChartType,
   res: AggResult,
   theme: ReturnType<typeof getThemeColors>,
   layoutMeta: LayoutMeta,
-  crossCols: QuestionDef[],
   paletteId: PaletteId,
 ): Chart {
-  const { mains, subs, lookup } = pv;
-  const crossSubs = subs.filter((s) => s.label !== "GT");
+  const { mains, crossAxes } = pv;
+  // Flatten all cross values across all axes
+  const allCrossValues = crossAxes.flatMap((axis) =>
+    axis.values.map((v) => ({ question: axis.question, value: v.value })),
+  );
 
   // Stacked bar: one bar per cross value
   if (gtChartType === "obi") {
-    const subLabels = crossSubs.map((s) => resolveSubLabel(s.label, layoutMeta, crossCols));
+    const subLabels = allCrossValues.map((cv) =>
+      resolveValueLabel(cv.question, cv.value, layoutMeta),
+    );
     const datasets = mains.map((m, i) => ({
-      label: resolveValueLabel(res.type, res.question, m, layoutMeta),
-      data: crossSubs.map((sub) => {
-        const cell = lookup.get(`${m}\0${sub.label}`);
+      label: resolveValueLabel(res.question, m, layoutMeta),
+      data: allCrossValues.map((cv) => {
+        const cell = pv.cell(m, cv);
         return cell?.pct ?? 0;
       }),
       backgroundColor: getSeriesColor(i, paletteId),
@@ -242,12 +249,12 @@ function buildCrossChart(
 
   // Clustered bar chart (direction matches GT selection)
   const isHorizontal = gtChartType === "bar-h";
-  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, layoutMeta));
+  const labels = mains.map((m) => resolveValueLabel(res.question, m, layoutMeta));
 
-  const datasets = crossSubs.map((sub, i) => ({
-    label: resolveSubLabel(sub.label, layoutMeta, crossCols),
+  const datasets = allCrossValues.map((cv, i) => ({
+    label: resolveValueLabel(cv.question, cv.value, layoutMeta),
     data: mains.map((m) => {
-      const cell = lookup.get(`${m}\0${sub.label}`);
+      const cell = pv.cell(m, cv);
       return cell?.pct ?? 0;
     }),
     backgroundColor: getSeriesColor(i, paletteId),

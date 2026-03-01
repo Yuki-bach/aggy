@@ -20,9 +20,9 @@ export async function executeExport(
   action: ExportAction,
   results: AggResult[],
   weightCol: string,
-  layoutMeta?: LayoutMeta,
+  layoutMeta: LayoutMeta,
 ): Promise<boolean> {
-  const hasCross = results.some((r) => pivot(r.cells).subs.length > 1);
+  const hasCross = results.some((r) => pivot(r.cells, r.question).crossAxes.length > 0);
 
   switch (action) {
     case "download-csv": {

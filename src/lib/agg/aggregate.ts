@@ -59,7 +59,6 @@ export async function aggregate(
     crossCols.length > 0 ? await fetchCrossHeaders(conn, crossCols, weightCol) : new Map();
 
   // Build aggregators
-  const gt = new GtAggregator(conn, weightCol);
   const crossAggregators = crossCols.map((crossQ) => {
     const header = crossHeaderCache.get(questionKey(crossQ))!;
     return new CrossAggregator(conn, weightCol, crossQ, header);
@@ -67,14 +66,20 @@ export async function aggregate(
 
   const results: AggResult[] = [];
   for (const q of payload.questions) {
+    const mainQ = questionKey(q);
+    const gt = new GtAggregator(conn, weightCol, mainQ);
     if (q.type === "SA") {
       const gtCells = await gt.aggregateSA(q.column);
-      const crossCells = await Promise.all(crossAggregators.map((ca) => ca.aggregateSA(q.column)));
-      results.push({ question: q.column, type: "SA", cells: [...gtCells, ...crossCells.flat()] });
+      const crossCells = await Promise.all(
+        crossAggregators.map((ca) => ca.aggregateSA(q.column, mainQ)),
+      );
+      results.push({ question: mainQ, cells: [...gtCells, ...crossCells.flat()] });
     } else {
-      const gtCells = await gt.aggregateMA(q.columns);
-      const crossCells = await Promise.all(crossAggregators.map((ca) => ca.aggregateMA(q.columns)));
-      results.push({ question: q.prefix, type: "MA", cells: [...gtCells, ...crossCells.flat()] });
+      const gtCells = await gt.aggregateMA(q.columns, q.codes);
+      const crossCells = await Promise.all(
+        crossAggregators.map((ca) => ca.aggregateMA(q.columns, q.codes, mainQ)),
+      );
+      results.push({ question: mainQ, cells: [...gtCells, ...crossCells.flat()] });
     }
   }
 

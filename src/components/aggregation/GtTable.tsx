@@ -1,5 +1,5 @@
 import type { AggResult } from "../../lib/agg/aggregate";
-import type { pivot } from "../../lib/agg/pivot";
+import type { PivotResult } from "../../lib/agg/pivot";
 import { resolveQuestionLabel, resolveValueLabel } from "../../lib/labels";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
@@ -7,14 +7,15 @@ import { useAggregation } from "./AggregationContext";
 
 interface GtTableProps {
   res: AggResult;
-  pv: ReturnType<typeof pivot>;
+  pv: PivotResult;
   maxPct: number;
 }
 
 export function GtTable({ res, pv, maxPct }: GtTableProps) {
   const { layoutMeta, weightCol } = useAggregation();
-  const { mains, lookup } = pv;
+  const { mains } = pv;
   const questionLabel = resolveQuestionLabel(res.question, layoutMeta);
+  const questionType = layoutMeta.questionTypes[res.question] ?? "SA";
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums">
@@ -31,10 +32,12 @@ export function GtTable({ res, pv, maxPct }: GtTableProps) {
       </thead>
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
         {mains.map((main) => {
-          const cell = lookup.get(`${main}\0GT`)!;
-          const label = resolveValueLabel(res.type, res.question, main, layoutMeta);
+          const cell = pv.cell(main)!;
+          const label = resolveValueLabel(res.question, main, layoutMeta);
           const countStr =
-            res.type === "SA" && !weightCol ? cell.count.toLocaleString() : cell.count.toFixed(1);
+            questionType === "SA" && !weightCol
+              ? cell.count.toLocaleString()
+              : cell.count.toFixed(1);
           const barWidth = ((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1);
 
           return (
