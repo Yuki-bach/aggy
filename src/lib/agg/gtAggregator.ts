@@ -19,7 +19,7 @@ export class GtAggregator {
     private weightCol: string,
   ) {}
 
-  async aggregateSA(col: string): Promise<{ cells: Cell[]; mainValues: string[] }> {
+  async aggregateSA(col: string): Promise<Cell[]> {
     const sql = `
       SELECT "${esc(col)}" AS mv, ${weightExpr(this.weightCol)} AS cnt
       FROM survey
@@ -31,10 +31,7 @@ export class GtAggregator {
     const rows = result.toArray();
 
     const questionN = rows.reduce((sum, r) => sum + Number(r.cnt), 0);
-    const mainValues = rows.map((r) => String(r.mv));
-    const cells: Cell[] = rows.map((r) => mkCell(String(r.mv), "GT", questionN, Number(r.cnt)));
-
-    return { cells, mainValues };
+    return rows.map((r) => mkCell(String(r.mv), "GT", questionN, Number(r.cnt)));
   }
 
   async aggregateMA(cols: string[]): Promise<Cell[]> {

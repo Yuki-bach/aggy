@@ -74,11 +74,11 @@ export class CrossAggregator {
   }
 
   /** Cross-tabulate an SA main question against this cross axis */
-  async aggregateSA(col: string, mainValues: string[]): Promise<Cell[]> {
+  async aggregateSA(col: string): Promise<Cell[]> {
     if (this.crossQ.type === "SA") {
-      return this.saSA(col, mainValues, this.crossQ);
+      return this.saSA(col, this.crossQ);
     }
-    return this.saMA(col, mainValues, this.crossQ);
+    return this.saMA(col, this.crossQ);
   }
 
   /** Cross-tabulate an MA main question against this cross axis */
@@ -91,7 +91,7 @@ export class CrossAggregator {
 
   // ── SA main × SA cross ──
 
-  private async saSA(col: string, mainValues: string[], crossQ: SAQuestion): Promise<Cell[]> {
+  private async saSA(col: string, crossQ: SAQuestion): Promise<Cell[]> {
     const crossCol = crossQ.column;
     const { headers, crossValues } = this.crossHeader;
 
@@ -104,24 +104,13 @@ export class CrossAggregator {
     `;
 
     const result = await this.conn.query(sql);
-    const bucket = new Map<string, Map<string, number>>();
-    for (const r of result.toArray()) {
-      const sv = String(r.sv);
-      const mv = String(r.mv);
-      let inner = bucket.get(sv);
-      if (!inner) {
-        inner = new Map();
-        bucket.set(sv, inner);
-      }
-      inner.set(mv, Number(r.cnt));
-    }
-
     const cells: Cell[] = [];
-    for (const mv of mainValues) {
-      for (let i = 0; i < crossValues.length; i++) {
-        const sv = crossValues[i];
-        const cnt = bucket.get(sv)?.get(mv) ?? 0;
-        cells.push(mkCell(mv, crossSub(crossCol, sv), headers[i].n, cnt));
+    for (const r of result.toArray()) {
+      const mv = String(r.mv);
+      const sv = String(r.sv);
+      const idx = crossValues.indexOf(sv);
+      if (idx >= 0) {
+        cells.push(mkCell(mv, crossSub(crossCol, sv), headers[idx].n, Number(r.cnt)));
       }
     }
     return cells;
@@ -129,7 +118,7 @@ export class CrossAggregator {
 
   // ── SA main × MA cross ──
 
-  private async saMA(col: string, mainValues: string[], crossQ: MAQuestion): Promise<Cell[]> {
+  private async saMA(col: string, crossQ: MAQuestion): Promise<Cell[]> {
     const { headers } = this.crossHeader;
 
     const selectClauses = crossQ.columns.map(
@@ -146,25 +135,16 @@ export class CrossAggregator {
     `;
 
     const result = await this.conn.query(sql);
-    const rowMap = new Map<string, Record<string, number>>();
-    for (const r of result.toArray()) {
-      const counts: Record<string, number> = {};
-      crossQ.columns.forEach((_, i) => {
-        counts[`c${i}`] = Number(r[`c${i}`] ?? 0);
-      });
-      rowMap.set(String(r.mv), counts);
-    }
-
     const cells: Cell[] = [];
-    for (const mv of mainValues) {
-      const counts = rowMap.get(mv);
+    for (const r of result.toArray()) {
+      const mv = String(r.mv);
       for (let i = 0; i < crossQ.columns.length; i++) {
         cells.push(
           mkCell(
             mv,
             crossSub(crossQ.prefix, crossQ.columns[i]),
             headers[i].n,
-            counts?.[`c${i}`] ?? 0,
+            Number(r[`c${i}`] ?? 0),
           ),
         );
       }
