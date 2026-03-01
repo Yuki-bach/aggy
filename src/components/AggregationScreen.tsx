@@ -74,7 +74,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
           <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
             {t("section.summary")}
           </h2>
-          <div class="text-[0.875rem] leading-relaxed text-text-secondary">
+          <div class="text-sm leading-relaxed text-text-secondary">
             <DataSummary
               csv={{
                 fileName: csv.fileName,
@@ -116,7 +116,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
         {/* Error Message */}
         {errorMsg && (
           <div
-            class="mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm leading-normal text-danger"
+            class="mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm text-danger"
             role="alert"
             aria-live="assertive"
           >
@@ -126,7 +126,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
 
         {/* Run Button */}
         <button
-          class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
+          class="mx-4 my-4 shrink-0 cursor-pointer rounded-lg bg-accent font-bold text-accent-contrast hover:bg-accent-hover"
           onClick={() => runAggregation()}
         >
           {t("run.button")}
@@ -164,17 +164,13 @@ export function DataSummary({
   return (
     <>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem]">
-          {csv.fileName}
-        </span>
+        <span class="truncate">{csv.fileName}</span>
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem]">
-          {layout.fileName}
-        </span>
+        <span class="truncate">{layout.fileName}</span>
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem]">
+        <span class="truncate">
           {t("summary.rows", { rows: csv.rowCount.toLocaleString(), cols: csv.headers.length })}
         </span>
       </div>
@@ -192,7 +188,7 @@ export function WeightInfo({
   onToggle: (on: boolean) => void;
 }) {
   return (
-    <div class="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-[0.875rem]">
+    <div class="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-sm">
       <span>{t("weight.label", { col: weightCol })}</span>
       <div class="ml-auto flex">
         <ToggleGroup>
