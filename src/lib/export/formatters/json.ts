@@ -1,5 +1,5 @@
 import type { AggResult } from "../../agg/aggregate";
-import type { LayoutMeta } from "../../layout";
+import type { LabelMap } from "../../layout";
 import { pivot } from "../../agg/pivot";
 import { resolveMainLabel, resolveSubLabel } from "../exportGrid";
 import { downloadFile, today } from "../export";
@@ -23,11 +23,7 @@ interface JsonExport {
   results: JsonExportEntry[];
 }
 
-export function formatJSON(
-  results: AggResult[],
-  weightCol: string,
-  layoutMeta?: LayoutMeta,
-): string {
+export function formatJSON(results: AggResult[], weightCol: string, labelMap: LabelMap): string {
   const entries: JsonExportEntry[] = results.map((res) => {
     const { mains, subs, lookup } = pivot(res.cells);
     const gtSub = subs.find((s) => s.label === "GT")!;
@@ -45,7 +41,7 @@ export function formatJSON(
         opt.cross = {};
         for (const sub of crossSubs) {
           const cell = lookup.get(`${main}\0${sub.label}`);
-          const label = resolveSubLabel(sub.label, layoutMeta);
+          const label = resolveSubLabel(sub.label, labelMap);
           if (cell) {
             opt.cross[label] = { count: cell.count, pct: cell.pct };
           }
@@ -68,10 +64,10 @@ export function formatJSON(
 export function downloadJSON(
   results: AggResult[],
   weightCol: string,
-  layoutMeta?: LayoutMeta,
+  labelMap: LabelMap,
   hasCross?: boolean,
 ): void {
-  const json = formatJSON(results, weightCol, layoutMeta);
+  const json = formatJSON(results, weightCol, labelMap);
   const prefix = hasCross ? "cross_result" : "gt_result";
   downloadFile(json, `${prefix}_${today()}.json`, "application/json;charset=utf-8;");
 }

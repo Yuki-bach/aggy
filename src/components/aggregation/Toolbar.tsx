@@ -23,7 +23,7 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
-  const { results, weightCol, layoutMeta } = useAggregation();
+  const { results, weightCol, labelMap } = useAggregation();
   const weightText = weightCol
     ? t("result.weight.applied", { col: weightCol })
     : t("result.weight.none");
@@ -52,7 +52,7 @@ export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
       </ToggleGroup>
 
       <ExportMenu
-        onExport={(action: ExportAction) => executeExport(action, results, weightCol, layoutMeta)}
+        onExport={(action: ExportAction) => executeExport(action, results, weightCol, labelMap)}
       />
     </div>
   );

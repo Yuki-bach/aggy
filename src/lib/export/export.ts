@@ -1,5 +1,5 @@
 import type { AggResult } from "../agg/aggregate";
-import type { LayoutMeta } from "../layout";
+import type { LabelMap } from "../layout";
 import { buildExportGrids } from "./exportGrid";
 import { pivot } from "../agg/pivot";
 import { downloadCSV } from "./formatters/csv";
@@ -20,40 +20,40 @@ export async function executeExport(
   action: ExportAction,
   results: AggResult[],
   weightCol: string,
-  layoutMeta?: LayoutMeta,
+  labelMap: LabelMap,
 ): Promise<boolean> {
   const hasCross = results.some((r) => pivot(r.cells).subs.length > 1);
 
   switch (action) {
     case "download-csv": {
-      const grids = buildExportGrids(results, layoutMeta);
+      const grids = buildExportGrids(results, labelMap);
       downloadCSV(grids, hasCross);
       return true;
     }
     case "download-markdown": {
-      const grids = buildExportGrids(results, layoutMeta);
+      const grids = buildExportGrids(results, labelMap);
       downloadMarkdown(grids, hasCross);
       return true;
     }
     case "download-json": {
-      downloadJSON(results, weightCol, layoutMeta, hasCross);
+      downloadJSON(results, weightCol, labelMap, hasCross);
       return true;
     }
     case "copy-tsv": {
-      const grids = buildExportGrids(results, layoutMeta);
+      const grids = buildExportGrids(results, labelMap);
       const tsv = formatTSV(grids);
       const html = formatHTML(grids);
       await copyToClipboard({ "text/plain": tsv, "text/html": html });
       return true;
     }
     case "copy-markdown": {
-      const grids = buildExportGrids(results, layoutMeta);
+      const grids = buildExportGrids(results, labelMap);
       const md = formatMarkdown(grids);
       await copyToClipboard({ "text/plain": md });
       return true;
     }
     case "copy-json": {
-      const json = formatJSON(results, weightCol, layoutMeta);
+      const json = formatJSON(results, weightCol, labelMap);
       await copyToClipboard({ "text/plain": json });
       return true;
     }

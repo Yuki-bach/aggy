@@ -15,10 +15,10 @@ pnpm dev           # Vite dev server (COOP/COEP headers for SharedArrayBuffer)
 pnpm build         # tsc + vite build
 pnpm check         # fmt:check + lint + tsc --noEmit (CI validation)
 pnpm test          # vitest run
-pnpm lint          # oxlint
-pnpm lint:fix      # oxlint --fix
-pnpm fmt           # oxfmt (format)
-pnpm fmt:check     # oxfmt --check
+pnpm lint          # oxlint src/ scripts/ vite.config.ts
+pnpm lint:fix      # oxlint --fix src/ scripts/ vite.config.ts
+pnpm fmt           # oxfmt src/ scripts/ vite.config.ts index.html
+pnpm fmt:check     # oxfmt --check src/ scripts/ vite.config.ts index.html
 pnpm bench         # aggregate() benchmark (all patterns)
 pnpm bench rows    # single pattern (rows / cols / both)
 pnpm bench:gen     # generate benchmark data
@@ -28,12 +28,12 @@ pnpm bench:gen     # generate benchmark data
 
 ### Data Flow
 
-1. User uploads CSV → `Dropzone.tsx` → `duckdbBridge.loadCSV()` (registers as DuckDB view)
-2. User uploads JSON layout → `Dropzone.tsx` → `layout.parseLayout()` + `buildLayoutMeta()`
+1. User uploads CSV → `ImportScreen` → `duckdbBridge.loadCSV()` (registers as DuckDB table)
+2. User uploads JSON layout → `ImportScreen` → `layout.parseLayout()` + `buildLabelMap()`
 3. Both loaded → `ImportScreen` calls `onComplete` → `AggregationScreen` builds `QuestionDef[]`
 4. User clicks run → `aggregate()` executes SQL queries → returns `AggResult[]` (flat `Cell[]` arrays)
-5. `ResultView` / `GtTable` / `CrossTable` call `pivot()` to convert `Cell[]` → grid, then render tables
-6. CSV download: `download.downloadAllCSV()` re-pivots and outputs BOM-prefixed UTF-8 CSV
+5. `TableContent` / `ChartContent` call `pivot()` to convert `Cell[]` → grid, then pass to `GtTable` / `CrossTable` as props
+6. Export: `export.executeExport()` re-pivots and outputs files (CSV is BOM-prefixed UTF-8)
 
 ### Module Responsibilities
 
@@ -41,7 +41,7 @@ pnpm bench:gen     # generate benchmark data
 - **`src/lib/`** — Pure logic (aggregation SQL, DuckDB bridge, layout parsing, pivot, CSV export)
 - `agg/aggregate.ts` — Entry point; `gtAggregator.ts` / `crossAggregator.ts` build and run SQL for SA/MA GT and cross-tab (SA×SA, SA×MA, MA×SA, MA×MA)
 - `duckdbBridge.ts` — DuckDB Wasm lifecycle (init, CSV load, query execution). Module-level singleton state
-- `pivot.ts` — Converts flat `Cell[]` into `{ mains, subs, lookup }` grid structure using `\0`-separated composite keys in Maps
+- `pivot.ts` — Converts flat `Cell[]` into `{ mains: string[], subs: { label, n }[], lookup: Map }` grid structure using `\0`-separated composite keys
 
 ### Key Types
 
@@ -50,7 +50,7 @@ type QuestionDef = SAQuestion | MAQuestion;  // Tagged union
 interface Cell { main: string; sub: string; n: number; count: number; pct: number; }
 ```
 
-`LayoutMeta` maps column names to labels, value labels, and column types (`"sa"|"ma:PREFIX"|"weight"`).
+`LabelMap` maps question labels (`questionLabels: Record<string, string>`) and value labels (`valueLabels: Record<string, Record<string, string>>`).
 
 ## Conventions
 

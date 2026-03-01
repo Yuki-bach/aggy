@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "preact/hooks";
-import { parseLayout, buildLayoutMeta } from "../lib/layout";
+import { parseLayout, buildLabelMap } from "../lib/layout";
 import { loadCSV } from "../lib/duckdbBridge";
 import { saveData, loadSaved } from "../lib/opfs";
 import { t } from "../lib/i18n";
@@ -150,9 +150,9 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const handleLayoutFile = useCallback(async (file: File) => {
     try {
       const text = await file.text();
-      const layout = parseLayout(text);
-      const meta = buildLayoutMeta(layout);
-      layoutRef.current = { json: text, fileName: file.name, meta };
+      const parsed = parseLayout(text);
+      const labelMap = buildLabelMap(parsed);
+      layoutRef.current = { json: text, fileName: file.name, layout: parsed, labelMap };
       loadedFromSavedRef.current = false;
       setLayoutFileName(file.name);
       updateLoadedInfo();
@@ -165,8 +165,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const handleLoadFromSaved = useCallback(async (folderId: string) => {
     try {
       const { csvText, csvName, layoutJson, layoutName } = await loadSaved(folderId);
-      const layout = parseLayout(layoutJson);
-      const meta = buildLayoutMeta(layout);
+      const parsed = parseLayout(layoutJson);
+      const labelMap = buildLabelMap(parsed);
       const result = await loadCSV(csvText);
 
       csvRef.current = {
@@ -175,7 +175,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         headers: result.headers,
         rowCount: result.rowCount,
       };
-      layoutRef.current = { json: layoutJson, fileName: layoutName, meta };
+      layoutRef.current = { json: layoutJson, fileName: layoutName, layout: parsed, labelMap };
 
       loadedFromSavedRef.current = true;
       setCsvFileName(csvName);
