@@ -78,10 +78,8 @@ export async function aggregate(
   const results: AggResult[] = [];
   for (const q of payload.questions) {
     if (q.type === "SA") {
-      const { cells: gtCells, mainValues } = await gt.aggregateSA(q.column);
-      const crossCells = await Promise.all(
-        crossAggregators.map((ca) => ca.aggregateSA(q.column, mainValues)),
-      );
+      const gtCells = await gt.aggregateSA(q.column);
+      const crossCells = await Promise.all(crossAggregators.map((ca) => ca.aggregateSA(q.column)));
       results.push({ question: q.column, type: "SA", cells: [...gtCells, ...crossCells.flat()] });
     } else {
       const gtCells = await gt.aggregateMA(q.columns);
