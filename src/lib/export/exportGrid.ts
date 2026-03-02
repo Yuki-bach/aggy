@@ -1,8 +1,8 @@
 import type { AggResult } from "../agg/aggregate";
-import { parseCrossSub } from "../agg/aggregate";
 import type { LabelMap } from "../layout";
 import { NA_VALUE } from "../agg/sqlHelpers";
 import { pivot } from "../agg/pivot";
+import { resolveSubLabel } from "../labels";
 import { t } from "../i18n";
 
 export interface ExportGrid {
@@ -24,21 +24,6 @@ export function buildExportGrids(results: AggResult[], labelMap: LabelMap): Expo
 
 export function resolveMainLabel(main: string): string {
   return main === NA_VALUE ? t("export.na") : main;
-}
-
-export function resolveSubLabel(subLabel: string, labelMap: LabelMap): string {
-  if (subLabel === NA_VALUE) return t("export.na");
-
-  const parsed = parseCrossSub(subLabel);
-  if (parsed) {
-    const { axisKey, rawValue } = parsed;
-    if (rawValue === NA_VALUE) return t("export.na");
-    const maLabel = labelMap.valueLabels[rawValue]?.["1"];
-    if (maLabel) return maLabel;
-    return labelMap.valueLabels[axisKey]?.[rawValue] ?? rawValue;
-  }
-
-  return labelMap.valueLabels[subLabel]?.["1"] ?? subLabel;
 }
 
 function buildGtGrid(res: AggResult): ExportGrid {
@@ -87,7 +72,9 @@ function buildCrossGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[]
   const headerRow2 = ["", "", "", "", ""];
   for (const sub of crossSubs) {
     headerRow1.push("");
-    headerRow2.push(`${resolveSubLabel(sub.label, labelMap)}(n=${sub.n.toFixed(1)})`);
+    headerRow2.push(
+      `${resolveSubLabel(sub.label, labelMap, t("export.na"))}(n=${sub.n.toFixed(1)})`,
+    );
   }
   const sharedHeaders = [headerRow1, headerRow2];
 

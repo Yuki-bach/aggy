@@ -19,8 +19,10 @@ export type Layout = LayoutEntry[];
 export interface LabelMap {
   /** Question labels: CSV column name (or MA group name) → display name */
   questionLabels: Record<string, string>;
-  /** Value labels: SA → { colName: { code: label } }, MA → { colName: { "1": itemLabel } } */
+  /** Value labels: unified { questionKey: { code: label } } for both SA and MA */
   valueLabels: Record<string, Record<string, string>>;
+  /** MA column name → item code (e.g. { "q3_1": "1" }) */
+  colToCode: Record<string, string>;
 }
 
 export function parseLayout(jsonText: string): Layout {
@@ -57,24 +59,27 @@ export function buildQuestionDefs(headers: string[], layout: Layout): QuestionDe
       colTypes.set(entry.key, "sa");
     } else if (entry.type === "MA" && entry.items) {
       for (const item of entry.items) {
-        colTypes.set(`${entry.key}_${item.code}`, `ma:${entry.key}`);
+        colTypes.set(`${entry.key}_${item.code}`, `ma:${entry.key}:${item.code}`);
       }
     }
   }
 
   const questions: QuestionDef[] = [];
-  const maAccum: Record<string, string[]> = {};
+  const maAccum: Record<string, { columns: string[]; codes: string[] }> = {};
   for (const col of headers) {
     const t = colTypes.get(col);
     if (!t) continue;
     if (t === "sa") {
       questions.push({ type: "SA", column: col });
     } else if (t.startsWith("ma:")) {
-      (maAccum[t.slice(3)] ??= []).push(col);
+      const [, prefix, code] = t.split(":");
+      const acc = (maAccum[prefix] ??= { columns: [], codes: [] });
+      acc.columns.push(col);
+      acc.codes.push(code);
     }
   }
-  for (const [prefix, cols] of Object.entries(maAccum)) {
-    questions.push({ type: "MA", prefix, columns: cols });
+  for (const [prefix, { columns, codes }] of Object.entries(maAccum)) {
+    questions.push({ type: "MA", prefix, columns, codes });
   }
   return questions;
 }
@@ -92,6 +97,7 @@ export function countLayoutColumns(layout: Layout): number {
 export function buildLabelMap(layout: Layout): LabelMap {
   const questionLabels: Record<string, string> = {};
   const valueLabels: Record<string, Record<string, string>> = {};
+  const colToCode: Record<string, string> = {};
 
   for (const entry of layout) {
     const { key, label, type, items } = entry;
@@ -112,14 +118,16 @@ export function buildLabelMap(layout: Layout): LabelMap {
         break;
       case "MA":
         if (items) {
+          const map: Record<string, string> = {};
           for (const item of items) {
-            const colName = `${key}_${item.code}`;
-            valueLabels[colName] = { "1": item.label };
+            map[item.code] = item.label;
+            colToCode[`${key}_${item.code}`] = item.code;
           }
+          valueLabels[key] = map;
         }
         break;
     }
   }
 
-  return { questionLabels, valueLabels };
+  return { questionLabels, valueLabels, colToCode };
 }

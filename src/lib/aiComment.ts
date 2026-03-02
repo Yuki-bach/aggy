@@ -2,6 +2,7 @@
 
 import type { AggResult } from "./agg/aggregate";
 import type { LabelMap } from "./layout";
+import { resolveQuestionLabel, resolveValueLabel } from "./labels";
 import { getLocale, t } from "./i18n";
 
 // Chrome Prompt API type declarations
@@ -71,15 +72,6 @@ export async function generateComment(
 
 const MAX_PAYLOAD_CHARS = 3500;
 
-function resolveQLabel(col: string, labelMap: LabelMap): string {
-  return labelMap.questionLabels[col] ?? col;
-}
-
-function resolveVLabel(type: "SA" | "MA", col: string, code: string, labelMap: LabelMap): string {
-  if (type === "SA") return labelMap.valueLabels[col]?.[code] ?? code;
-  return labelMap.valueLabels[code]?.["1"] ?? code;
-}
-
 function summarizeResults(
   results: AggResult[],
   weightCol: string,
@@ -96,13 +88,13 @@ function summarizeResults(
     if (gtCells.length === 0) continue;
 
     const n = gtCells[0].n;
-    const qLabel = resolveQLabel(res.question, labelMap);
+    const qLabel = resolveQuestionLabel(res.question, labelMap);
     lines.push(`${res.question}: ${qLabel} (${res.type}, n=${n})`);
 
     const sorted = [...gtCells].sort((a, b) => b.pct - a.pct);
     const top = sorted.slice(0, topN);
     const items = top.map((c) => {
-      const label = resolveVLabel(res.type, res.question, c.main, labelMap);
+      const label = resolveValueLabel(res.type, res.question, c.main, labelMap);
       return `${label}: ${c.pct.toFixed(1)}%`;
     });
 

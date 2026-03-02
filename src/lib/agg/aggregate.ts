@@ -29,6 +29,7 @@ export interface MAQuestion {
   type: "MA";
   prefix: string;
   columns: string[];
+  codes: string[];
 }
 
 export function questionKey(q: QuestionDef): string {
