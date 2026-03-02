@@ -13,7 +13,7 @@ export interface ExportGrid {
 }
 
 export function buildExportGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[] {
-  const hasCross = results.some((r) => pivot(r.cells, r.nBySubLabel).subs.length > 1);
+  const hasCross = results.some((r) => pivot(r.cells).subs.length > 1);
   if (hasCross) {
     return buildCrossGrids(results, labelMap);
   }
@@ -27,7 +27,7 @@ export function resolveMainLabel(main: string): string {
 }
 
 function buildGtGrid(res: AggResult): ExportGrid {
-  const { mains, subs, lookup } = pivot(res.cells, res.nBySubLabel);
+  const { mains, subs, lookup } = pivot(res.cells);
   const gtSub = subs.find((s) => s.label === "GT")!;
   const headers = [
     [
@@ -56,10 +56,10 @@ function buildGtGrid(res: AggResult): ExportGrid {
 }
 
 function buildCrossGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[] {
-  const firstResult = results.find((r) => pivot(r.cells, r.nBySubLabel).subs.length > 1);
+  const firstResult = results.find((r) => pivot(r.cells).subs.length > 1);
   if (!firstResult) return results.map((res) => buildGtGrid(res));
 
-  const firstPivot = pivot(firstResult.cells, firstResult.nBySubLabel);
+  const firstPivot = pivot(firstResult.cells);
   const crossSubs = firstPivot.subs.filter((s) => s.label !== "GT");
 
   const headerRow1 = [
@@ -77,7 +77,7 @@ function buildCrossGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[]
   const sharedHeaders = [headerRow1, headerRow2];
 
   return results.map((res) => {
-    const { mains, subs, lookup } = pivot(res.cells, res.nBySubLabel);
+    const { mains, subs, lookup } = pivot(res.cells);
     const resCrossSubs = subs.filter((s) => s.label !== "GT");
     const gtSub = subs.find((s) => s.label === "GT")!;
     const rows: string[][] = [];

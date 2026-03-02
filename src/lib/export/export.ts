@@ -22,7 +22,7 @@ export async function executeExport(
   weightCol: string,
   labelMap: LabelMap,
 ): Promise<boolean> {
-  const hasCross = results.some((r) => pivot(r.cells, r.nBySubLabel).subs.length > 1);
+  const hasCross = results.some((r) => pivot(r.cells).subs.length > 1);
 
   switch (action) {
     case "download-csv": {

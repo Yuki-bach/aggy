@@ -8,6 +8,8 @@ export interface Cell {
   main: string; // Option label (aggregation target value)
   sub: string; // "GT" or cross-tab axis value
   count: number;
+  n: number;
+  pct: number;
 }
 
 /** Aggregation result per question */
@@ -15,14 +17,11 @@ export interface AggResult {
   question: string;
   type: "SA" | "MA";
   cells: Cell[];
-  /** Denominator (n) per sub label: e.g. { "GT": 100, "q1\x011": 40 } */
-  nBySubLabel: Record<string, number>;
 }
 
-/** Aggregator return type (cells + n map) */
+/** Aggregator return type */
 export interface AggCells {
   cells: Cell[];
-  nBySubLabel: Record<string, number>;
 }
 
 export type QuestionDef = SAQuestion | MAQuestion;
@@ -91,24 +90,14 @@ export async function aggregate(
         crossAggregators.map((ca) => ca.aggregateSA(q.column)),
       );
       const cells = [...gtResult.cells, ...crossResults.flatMap((r) => r.cells)];
-      const nBySubLabel = Object.assign(
-        {},
-        gtResult.nBySubLabel,
-        ...crossResults.map((r) => r.nBySubLabel),
-      );
-      results.push({ question: q.column, type: "SA", cells, nBySubLabel });
+      results.push({ question: q.column, type: "SA", cells });
     } else {
       const gtResult = await gt.aggregateMA(q.columns);
       const crossResults = await Promise.all(
         crossAggregators.map((ca) => ca.aggregateMA(q.columns)),
       );
       const cells = [...gtResult.cells, ...crossResults.flatMap((r) => r.cells)];
-      const nBySubLabel = Object.assign(
-        {},
-        gtResult.nBySubLabel,
-        ...crossResults.map((r) => r.nBySubLabel),
-      );
-      results.push({ question: q.prefix, type: "MA", cells, nBySubLabel });
+      results.push({ question: q.prefix, type: "MA", cells });
     }
   }
 
