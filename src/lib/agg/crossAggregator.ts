@@ -49,11 +49,11 @@ export async function fetchCrossHeaders(
       const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
       const result = await conn.query(sql);
       const row = result.toArray()[0];
-      const headers = crossQ.columns.map((col, i) => ({
-        label: col,
+      const headers = crossQ.columns.map((_, i) => ({
+        label: crossQ.codes[i],
         n: Number(row[`c${i}`] ?? 0),
       }));
-      cache.set(crossQ.prefix, { headers, crossValues: headers.map((h) => h.label) });
+      cache.set(crossQ.prefix, { headers, crossValues: crossQ.codes });
     }
   }
   return cache;
@@ -142,7 +142,7 @@ export class CrossAggregator {
         cells.push(
           mkCell(
             mv,
-            crossSub(crossQ.prefix, crossQ.columns[i]),
+            crossSub(crossQ.prefix, crossQ.codes[i]),
             headers[i].n,
             Number(r[`c${i}`] ?? 0),
           ),
@@ -247,7 +247,7 @@ export class CrossAggregator {
         cells.push(
           mkCell(
             rowMaCols[r],
-            crossSub(crossQ.prefix, crossQ.columns[c]),
+            crossSub(crossQ.prefix, crossQ.codes[c]),
             headers[c].n,
             Number(row[`r${r}c${c}`] ?? 0),
           ),
@@ -260,7 +260,7 @@ export class CrossAggregator {
       cells.push(
         mkCell(
           NA_VALUE,
-          crossSub(crossQ.prefix, crossQ.columns[c]),
+          crossSub(crossQ.prefix, crossQ.codes[c]),
           headers[c].n,
           Number(row[`na_c${c}`] ?? 0),
         ),

@@ -201,7 +201,7 @@ function buildCrossChart(
 
   // Stacked bar: one bar per cross value
   if (gtChartType === "obi") {
-    const subLabels = crossSubs.map((s) => resolveSubLabel(s.label, labelMap, crossCols));
+    const subLabels = crossSubs.map((s) => resolveSubLabel(s.label, labelMap));
     const datasets = mains.map((m, i) => ({
       label: resolveValueLabel(res.type, res.question, m, labelMap),
       data: crossSubs.map((sub) => {
@@ -245,7 +245,7 @@ function buildCrossChart(
   const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, labelMap));
 
   const datasets = crossSubs.map((sub, i) => ({
-    label: resolveSubLabel(sub.label, labelMap, crossCols),
+    label: resolveSubLabel(sub.label, labelMap),
     data: mains.map((m) => {
       const cell = lookup.get(`${m}\0${sub.label}`);
       return cell?.pct ?? 0;

@@ -82,7 +82,7 @@ describe("aggregate - 重みなし", () => {
   describe("MA GT集計（クロスなし）", () => {
     it("q3 の GT 集計で各サブカラムの count と無回答が正しい", async () => {
       const query: Query = {
-        questions: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"] }],
+        questions: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"], codes: ["1", "2", "3"] }],
         weight_col: "",
         cross_cols: [],
       };
@@ -159,7 +159,7 @@ describe("aggregate - 重みなし", () => {
       const query: Query = {
         questions: [{ type: "SA", column: "q1" }],
         weight_col: "",
-        cross_cols: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"] }],
+        cross_cols: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"], codes: ["1", "2", "3"] }],
       };
 
       const results = await aggregate(conn, query);
@@ -172,7 +172,7 @@ describe("aggregate - 重みなし", () => {
       // q1有効: 行1-13 (行14=空除外) = 13行
       // q1=1 の行: 行1,3,5,7,10,12
       // q1=1 かつ q3_1='1': 行1,3 = 2件
-      const cell = findCell(r.cells, "1", crossSub("q3", "q3_1"));
+      const cell = findCell(r.cells, "1", crossSub("q3", "1"));
       expect(cell).toBeDefined();
       expect(cell!.count).toBe(2);
     });
@@ -181,7 +181,7 @@ describe("aggregate - 重みなし", () => {
   describe("MA × SA クロス集計", () => {
     it("q3 を q1 でクロスした結果が正しい", async () => {
       const query: Query = {
-        questions: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"] }],
+        questions: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"], codes: ["1", "2", "3"] }],
         weight_col: "",
         cross_cols: [{ type: "SA", column: "q1" }],
       };
@@ -207,9 +207,9 @@ describe("aggregate - 重みなし", () => {
   describe("MA × MA クロス集計", () => {
     it("q3 を自身でクロスした結果にセルが存在する", async () => {
       const query: Query = {
-        questions: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"] }],
+        questions: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"], codes: ["1", "2", "3"] }],
         weight_col: "",
-        cross_cols: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"] }],
+        cross_cols: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"], codes: ["1", "2", "3"] }],
       };
 
       const results = await aggregate(conn, query);
@@ -217,12 +217,12 @@ describe("aggregate - 重みなし", () => {
 
       const r = results[0];
       // q3_1='1' かつ q3_1='1': 行1,3,4,6,8,9,14 = 7件
-      const cell = findCell(r.cells, "q3_1", crossSub("q3", "q3_1"));
+      const cell = findCell(r.cells, "q3_1", crossSub("q3", "1"));
       expect(cell).toBeDefined();
       expect(cell!.count).toBe(7);
 
       // q3_1='1' かつ q3_2='1': 行3,9 = 2件
-      const cell12 = findCell(r.cells, "q3_1", crossSub("q3", "q3_2"));
+      const cell12 = findCell(r.cells, "q3_1", crossSub("q3", "2"));
       expect(cell12).toBeDefined();
       expect(cell12!.count).toBe(2);
     });
@@ -264,7 +264,7 @@ describe("aggregate - 重み付き", () => {
   describe("MA GT集計（重み付き）", () => {
     it("q3 の重み付き GT 集計で weighted count が正しい", async () => {
       const query: Query = {
-        questions: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"] }],
+        questions: [{ type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"], codes: ["1", "2", "3"] }],
         weight_col: "weight",
         cross_cols: [],
       };

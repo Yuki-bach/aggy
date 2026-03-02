@@ -8,7 +8,7 @@ import { formatMarkdown } from "../src/lib/export/formatters/markdown";
 import { formatJSON } from "../src/lib/export/formatters/json";
 import type { LabelMap } from "../src/lib/layout";
 
-const EMPTY_LABEL_MAP: LabelMap = { questionLabels: {}, valueLabels: {} };
+const EMPTY_LABEL_MAP: LabelMap = { questionLabels: {}, valueLabels: {}, colToCode: {} };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let conn: any;
@@ -21,7 +21,7 @@ beforeAll(async () => {
   const gtQuery: Query = {
     questions: [
       { type: "SA", column: "q1" },
-      { type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"] },
+      { type: "MA", prefix: "q3", columns: ["q3_1", "q3_2", "q3_3"], codes: ["1", "2", "3"] },
     ],
     weight_col: "",
     cross_cols: [],

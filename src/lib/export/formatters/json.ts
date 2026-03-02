@@ -1,7 +1,8 @@
 import type { AggResult } from "../../agg/aggregate";
 import type { LabelMap } from "../../layout";
 import { pivot } from "../../agg/pivot";
-import { resolveMainLabel, resolveSubLabel } from "../exportGrid";
+import { resolveMainLabel } from "../exportGrid";
+import { resolveSubLabel } from "../../labels";
 import { downloadFile, today } from "../export";
 
 interface JsonOption {
