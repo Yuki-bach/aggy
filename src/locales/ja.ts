@@ -62,7 +62,7 @@ const ja: Record<string, string> = {
   "export.header.pct": "%",
   "export.header.total.n": "全体_n",
   "export.header.total.pct": "全体_%",
-  "export.na": "無回答",
+  "label.na": "無回答",
 
   // Chart type
   "chart.barH": "横棒",

@@ -62,7 +62,7 @@ const en: Record<string, string> = {
   "export.header.pct": "%",
   "export.header.total.n": "Total_n",
   "export.header.total.pct": "Total_%",
-  "export.na": "No answer",
+  "label.na": "No answer",
 
   // Chart type
   "chart.barH": "Horizontal Bar",

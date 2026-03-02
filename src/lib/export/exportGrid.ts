@@ -23,7 +23,7 @@ export function buildExportGrids(results: AggResult[], labelMap: LabelMap): Expo
 // ─── Internal ───────────────────────────────────────────────
 
 export function resolveMainLabel(main: string): string {
-  return main === NA_VALUE ? t("export.na") : main;
+  return main === NA_VALUE ? t("label.na") : main;
 }
 
 function buildGtGrid(res: AggResult): ExportGrid {
@@ -72,9 +72,7 @@ function buildCrossGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[]
   const headerRow2 = ["", "", "", "", ""];
   for (const sub of crossSubs) {
     headerRow1.push("");
-    headerRow2.push(
-      `${resolveSubLabel(sub.label, labelMap, t("export.na"))}(n=${sub.n.toFixed(1)})`,
-    );
+    headerRow2.push(`${resolveSubLabel(sub.label, labelMap)}(n=${sub.n.toFixed(1)})`);
   }
   const sharedHeaders = [headerRow1, headerRow2];
 
