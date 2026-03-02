@@ -1,7 +1,7 @@
 /** Cross-tabulation aggregation — one cross axis at a time */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Cell, QuestionDef, SAQuestion, MAQuestion } from "./aggregate";
+import type { AggCells, QuestionDef, SAQuestion, MAQuestion } from "./aggregate";
 import { crossSub } from "./aggregate";
 import {
   esc,
@@ -74,7 +74,7 @@ export class CrossAggregator {
   }
 
   /** Cross-tabulate an SA main question against this cross axis */
-  async aggregateSA(col: string): Promise<Cell[]> {
+  async aggregateSA(col: string): Promise<AggCells> {
     if (this.crossQ.type === "SA") {
       return this.saSA(col, this.crossQ);
     }
@@ -82,7 +82,7 @@ export class CrossAggregator {
   }
 
   /** Cross-tabulate an MA main question against this cross axis */
-  async aggregateMA(cols: string[]): Promise<Cell[]> {
+  async aggregateMA(cols: string[]): Promise<AggCells> {
     if (this.crossQ.type === "SA") {
       return this.maSA(cols, this.crossQ);
     }
@@ -91,7 +91,7 @@ export class CrossAggregator {
 
   // ── SA main × SA cross ──
 
-  private async saSA(col: string, crossQ: SAQuestion): Promise<Cell[]> {
+  private async saSA(col: string, crossQ: SAQuestion): Promise<AggCells> {
     const crossCol = crossQ.column;
     const { headers, crossValues } = this.crossHeader;
 
@@ -104,21 +104,26 @@ export class CrossAggregator {
     `;
 
     const result = await this.conn.query(sql);
-    const cells: Cell[] = [];
+    const cells: AggCells["cells"] = [];
     for (const r of result.toArray()) {
       const mv = String(r.mv);
       const sv = String(r.sv);
       const idx = crossValues.indexOf(sv);
       if (idx >= 0) {
-        cells.push(mkCell(mv, crossSub(crossCol, sv), headers[idx].n, Number(r.cnt)));
+        cells.push(mkCell(mv, crossSub(crossCol, sv), Number(r.cnt)));
       }
     }
-    return cells;
+
+    const nBySubLabel: Record<string, number> = {};
+    for (let i = 0; i < headers.length; i++) {
+      nBySubLabel[crossSub(crossCol, crossValues[i])] = headers[i].n;
+    }
+    return { cells, nBySubLabel };
   }
 
   // ── SA main × MA cross ──
 
-  private async saMA(col: string, crossQ: MAQuestion): Promise<Cell[]> {
+  private async saMA(col: string, crossQ: MAQuestion): Promise<AggCells> {
     const { headers } = this.crossHeader;
 
     const selectClauses = crossQ.columns.map(
@@ -135,26 +140,24 @@ export class CrossAggregator {
     `;
 
     const result = await this.conn.query(sql);
-    const cells: Cell[] = [];
+    const cells: AggCells["cells"] = [];
     for (const r of result.toArray()) {
       const mv = String(r.mv);
       for (let i = 0; i < crossQ.columns.length; i++) {
-        cells.push(
-          mkCell(
-            mv,
-            crossSub(crossQ.prefix, crossQ.codes[i]),
-            headers[i].n,
-            Number(r[`c${i}`] ?? 0),
-          ),
-        );
+        cells.push(mkCell(mv, crossSub(crossQ.prefix, crossQ.codes[i]), Number(r[`c${i}`] ?? 0)));
       }
     }
-    return cells;
+
+    const nBySubLabel: Record<string, number> = {};
+    for (let i = 0; i < headers.length; i++) {
+      nBySubLabel[crossSub(crossQ.prefix, crossQ.codes[i])] = headers[i].n;
+    }
+    return { cells, nBySubLabel };
   }
 
   // ── MA main × SA cross ──
 
-  private async maSA(maCols: string[], crossQ: SAQuestion): Promise<Cell[]> {
+  private async maSA(maCols: string[], crossQ: SAQuestion): Promise<AggCells> {
     const crossCol = crossQ.column;
     const { headers, crossValues } = this.crossHeader;
 
@@ -185,39 +188,31 @@ export class CrossAggregator {
       naMap.set(String(r.cv), Number(r.na_cnt ?? 0));
     }
 
-    const cells: Cell[] = [];
+    const cells: AggCells["cells"] = [];
     for (let maIdx = 0; maIdx < maCols.length; maIdx++) {
       for (let i = 0; i < crossValues.length; i++) {
         const counts = rowMap.get(crossValues[i]);
-        cells.push(
-          mkCell(
-            maCols[maIdx],
-            crossSub(crossCol, crossValues[i]),
-            headers[i].n,
-            counts?.[maIdx] ?? 0,
-          ),
-        );
+        cells.push(mkCell(maCols[maIdx], crossSub(crossCol, crossValues[i]), counts?.[maIdx] ?? 0));
       }
     }
 
     // No-answer cross cells
     for (let i = 0; i < crossValues.length; i++) {
       cells.push(
-        mkCell(
-          NA_VALUE,
-          crossSub(crossCol, crossValues[i]),
-          headers[i].n,
-          naMap.get(crossValues[i]) ?? 0,
-        ),
+        mkCell(NA_VALUE, crossSub(crossCol, crossValues[i]), naMap.get(crossValues[i]) ?? 0),
       );
     }
 
-    return cells;
+    const nBySubLabel: Record<string, number> = {};
+    for (let i = 0; i < headers.length; i++) {
+      nBySubLabel[crossSub(crossCol, crossValues[i])] = headers[i].n;
+    }
+    return { cells, nBySubLabel };
   }
 
   // ── MA main × MA cross ──
 
-  private async maMA(rowMaCols: string[], crossQ: MAQuestion): Promise<Cell[]> {
+  private async maMA(rowMaCols: string[], crossQ: MAQuestion): Promise<AggCells> {
     const { headers } = this.crossHeader;
 
     const selectClauses: string[] = [];
@@ -241,14 +236,13 @@ export class CrossAggregator {
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
 
-    const cells: Cell[] = [];
+    const cells: AggCells["cells"] = [];
     for (let r = 0; r < rowMaCols.length; r++) {
       for (let c = 0; c < crossQ.columns.length; c++) {
         cells.push(
           mkCell(
             rowMaCols[r],
             crossSub(crossQ.prefix, crossQ.codes[c]),
-            headers[c].n,
             Number(row[`r${r}c${c}`] ?? 0),
           ),
         );
@@ -258,15 +252,14 @@ export class CrossAggregator {
     // No-answer cross cells
     for (let c = 0; c < crossQ.columns.length; c++) {
       cells.push(
-        mkCell(
-          NA_VALUE,
-          crossSub(crossQ.prefix, crossQ.codes[c]),
-          headers[c].n,
-          Number(row[`na_c${c}`] ?? 0),
-        ),
+        mkCell(NA_VALUE, crossSub(crossQ.prefix, crossQ.codes[c]), Number(row[`na_c${c}`] ?? 0)),
       );
     }
 
-    return cells;
+    const nBySubLabel: Record<string, number> = {};
+    for (let c = 0; c < headers.length; c++) {
+      nBySubLabel[crossSub(crossQ.prefix, crossQ.codes[c])] = headers[c].n;
+    }
+    return { cells, nBySubLabel };
   }
 }

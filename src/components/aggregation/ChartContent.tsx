@@ -52,7 +52,7 @@ function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
-  const pv = pivot(res.cells);
+  const pv = pivot(res.cells, res.nBySubLabel);
   const isCross = pv.subs.length > 1;
 
   useEffect(() => {

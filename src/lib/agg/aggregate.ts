@@ -6,16 +6,23 @@ import { CrossAggregator, fetchCrossHeaders } from "./crossAggregator";
 
 export interface Cell {
   main: string; // Option label (aggregation target value)
-  sub: string; // "GT" or cross-tab axis value or MA column name
-  n: number; // Denominator for this sub
+  sub: string; // "GT" or cross-tab axis value
   count: number;
-  pct: number;
 }
 
+/** Aggregation result per question */
 export interface AggResult {
   question: string;
   type: "SA" | "MA";
   cells: Cell[];
+  /** Denominator (n) per sub label: e.g. { "GT": 100, "q1\x011": 40 } */
+  nBySubLabel: Record<string, number>;
+}
+
+/** Aggregator return type (cells + n map) */
+export interface AggCells {
+  cells: Cell[];
+  nBySubLabel: Record<string, number>;
 }
 
 export type QuestionDef = SAQuestion | MAQuestion;
@@ -79,13 +86,29 @@ export async function aggregate(
   const results: AggResult[] = [];
   for (const q of payload.questions) {
     if (q.type === "SA") {
-      const gtCells = await gt.aggregateSA(q.column);
-      const crossCells = await Promise.all(crossAggregators.map((ca) => ca.aggregateSA(q.column)));
-      results.push({ question: q.column, type: "SA", cells: [...gtCells, ...crossCells.flat()] });
+      const gtResult = await gt.aggregateSA(q.column);
+      const crossResults = await Promise.all(
+        crossAggregators.map((ca) => ca.aggregateSA(q.column)),
+      );
+      const cells = [...gtResult.cells, ...crossResults.flatMap((r) => r.cells)];
+      const nBySubLabel = Object.assign(
+        {},
+        gtResult.nBySubLabel,
+        ...crossResults.map((r) => r.nBySubLabel),
+      );
+      results.push({ question: q.column, type: "SA", cells, nBySubLabel });
     } else {
-      const gtCells = await gt.aggregateMA(q.columns);
-      const crossCells = await Promise.all(crossAggregators.map((ca) => ca.aggregateMA(q.columns)));
-      results.push({ question: q.prefix, type: "MA", cells: [...gtCells, ...crossCells.flat()] });
+      const gtResult = await gt.aggregateMA(q.columns);
+      const crossResults = await Promise.all(
+        crossAggregators.map((ca) => ca.aggregateMA(q.columns)),
+      );
+      const cells = [...gtResult.cells, ...crossResults.flatMap((r) => r.cells)];
+      const nBySubLabel = Object.assign(
+        {},
+        gtResult.nBySubLabel,
+        ...crossResults.map((r) => r.nBySubLabel),
+      );
+      results.push({ question: q.prefix, type: "MA", cells, nBySubLabel });
     }
   }
 
