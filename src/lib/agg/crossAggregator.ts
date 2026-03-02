@@ -93,10 +93,16 @@ export class CrossAggregator {
 
   private async saSA(col: string, crossQ: SAQuestion): Promise<AggCells> {
     const crossCol = crossQ.column;
-    const { headers, crossValues } = this.crossHeader;
+    const { crossValues } = this.crossHeader;
+    const wExpr = weightExpr(this.weightCol);
 
     const sql = `
-      SELECT "${esc(col)}" AS mv, "${esc(crossCol)}" AS sv, ${weightExpr(this.weightCol)} AS cnt
+      SELECT
+        "${esc(col)}" AS mv,
+        "${esc(crossCol)}" AS sv,
+        ${wExpr} AS cnt,
+        SUM(${wExpr}) OVER (PARTITION BY "${esc(crossCol)}") AS n,
+        ${wExpr} * 100.0 / NULLIF(SUM(${wExpr}) OVER (PARTITION BY "${esc(crossCol)}"), 0) AS pct
       FROM survey
       WHERE "${esc(col)}" IS NOT NULL
         AND "${esc(crossCol)}" IS NOT NULL
@@ -110,15 +116,13 @@ export class CrossAggregator {
       const sv = String(r.sv);
       const idx = crossValues.indexOf(sv);
       if (idx >= 0) {
-        cells.push(mkCell(mv, crossSub(crossCol, sv), Number(r.cnt)));
+        cells.push(
+          mkCell(mv, crossSub(crossCol, sv), Number(r.cnt), Number(r.n), Number(r.pct ?? 0)),
+        );
       }
     }
 
-    const nBySubLabel: Record<string, number> = {};
-    for (let i = 0; i < headers.length; i++) {
-      nBySubLabel[crossSub(crossCol, crossValues[i])] = headers[i].n;
-    }
-    return { cells, nBySubLabel };
+    return { cells };
   }
 
   // ── SA main × MA cross ──
@@ -144,15 +148,14 @@ export class CrossAggregator {
     for (const r of result.toArray()) {
       const mv = String(r.mv);
       for (let i = 0; i < crossQ.columns.length; i++) {
-        cells.push(mkCell(mv, crossSub(crossQ.prefix, crossQ.codes[i]), Number(r[`c${i}`] ?? 0)));
+        const count = Number(r[`c${i}`] ?? 0);
+        const n = headers[i].n;
+        const pct = n > 0 ? (count / n) * 100 : 0;
+        cells.push(mkCell(mv, crossSub(crossQ.prefix, crossQ.codes[i]), count, n, pct));
       }
     }
 
-    const nBySubLabel: Record<string, number> = {};
-    for (let i = 0; i < headers.length; i++) {
-      nBySubLabel[crossSub(crossQ.prefix, crossQ.codes[i])] = headers[i].n;
-    }
-    return { cells, nBySubLabel };
+    return { cells };
   }
 
   // ── MA main × SA cross ──
@@ -192,22 +195,22 @@ export class CrossAggregator {
     for (let maIdx = 0; maIdx < maCols.length; maIdx++) {
       for (let i = 0; i < crossValues.length; i++) {
         const counts = rowMap.get(crossValues[i]);
-        cells.push(mkCell(maCols[maIdx], crossSub(crossCol, crossValues[i]), counts?.[maIdx] ?? 0));
+        const count = counts?.[maIdx] ?? 0;
+        const n = headers[i].n;
+        const pct = n > 0 ? (count / n) * 100 : 0;
+        cells.push(mkCell(maCols[maIdx], crossSub(crossCol, crossValues[i]), count, n, pct));
       }
     }
 
     // No-answer cross cells
     for (let i = 0; i < crossValues.length; i++) {
-      cells.push(
-        mkCell(NA_VALUE, crossSub(crossCol, crossValues[i]), naMap.get(crossValues[i]) ?? 0),
-      );
+      const count = naMap.get(crossValues[i]) ?? 0;
+      const n = headers[i].n;
+      const pct = n > 0 ? (count / n) * 100 : 0;
+      cells.push(mkCell(NA_VALUE, crossSub(crossCol, crossValues[i]), count, n, pct));
     }
 
-    const nBySubLabel: Record<string, number> = {};
-    for (let i = 0; i < headers.length; i++) {
-      nBySubLabel[crossSub(crossCol, crossValues[i])] = headers[i].n;
-    }
-    return { cells, nBySubLabel };
+    return { cells };
   }
 
   // ── MA main × MA cross ──
@@ -239,27 +242,21 @@ export class CrossAggregator {
     const cells: AggCells["cells"] = [];
     for (let r = 0; r < rowMaCols.length; r++) {
       for (let c = 0; c < crossQ.columns.length; c++) {
-        cells.push(
-          mkCell(
-            rowMaCols[r],
-            crossSub(crossQ.prefix, crossQ.codes[c]),
-            Number(row[`r${r}c${c}`] ?? 0),
-          ),
-        );
+        const count = Number(row[`r${r}c${c}`] ?? 0);
+        const n = headers[c].n;
+        const pct = n > 0 ? (count / n) * 100 : 0;
+        cells.push(mkCell(rowMaCols[r], crossSub(crossQ.prefix, crossQ.codes[c]), count, n, pct));
       }
     }
 
     // No-answer cross cells
     for (let c = 0; c < crossQ.columns.length; c++) {
-      cells.push(
-        mkCell(NA_VALUE, crossSub(crossQ.prefix, crossQ.codes[c]), Number(row[`na_c${c}`] ?? 0)),
-      );
+      const count = Number(row[`na_c${c}`] ?? 0);
+      const n = headers[c].n;
+      const pct = n > 0 ? (count / n) * 100 : 0;
+      cells.push(mkCell(NA_VALUE, crossSub(crossQ.prefix, crossQ.codes[c]), count, n, pct));
     }
 
-    const nBySubLabel: Record<string, number> = {};
-    for (let c = 0; c < headers.length; c++) {
-      nBySubLabel[crossSub(crossQ.prefix, crossQ.codes[c])] = headers[c].n;
-    }
-    return { cells, nBySubLabel };
+    return { cells };
   }
 }

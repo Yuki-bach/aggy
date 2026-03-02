@@ -85,8 +85,8 @@ function summarizeResults(
   }
 
   for (const res of results) {
-    const pv = pivot(res.cells, res.nBySubLabel);
-    const gtN = res.nBySubLabel["GT"] ?? 0;
+    const pv = pivot(res.cells);
+    const gtN = res.cells.find((c) => c.sub === "GT")?.n ?? 0;
     if (pv.mains.length === 0) continue;
 
     const qLabel = resolveQuestionLabel(res.question, labelMap);

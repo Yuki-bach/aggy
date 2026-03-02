@@ -20,19 +20,23 @@ export class GtAggregator {
   ) {}
 
   async aggregateSA(col: string): Promise<AggCells> {
+    const wExpr = weightExpr(this.weightCol);
     const sql = `
-      SELECT "${esc(col)}" AS mv, ${weightExpr(this.weightCol)} AS cnt
+      SELECT
+        "${esc(col)}" AS mv,
+        ${wExpr} AS cnt,
+        SUM(${wExpr}) OVER () AS n,
+        ${wExpr} * 100.0 / NULLIF(SUM(${wExpr}) OVER (), 0) AS pct
       FROM survey
       WHERE "${esc(col)}" IS NOT NULL
       GROUP BY "${esc(col)}"
     `;
 
     const result = await this.conn.query(sql);
-    const rows = result.toArray();
-
-    const questionN = rows.reduce((sum, r) => sum + Number(r.cnt), 0);
-    const cells = rows.map((r) => mkCell(String(r.mv), "GT", Number(r.cnt)));
-    return { cells, nBySubLabel: { GT: questionN } };
+    const cells = result
+      .toArray()
+      .map((r) => mkCell(String(r.mv), "GT", Number(r.cnt), Number(r.n), Number(r.pct ?? 0)));
+    return { cells };
   }
 
   async aggregateMA(cols: string[]): Promise<AggCells> {
@@ -57,11 +61,17 @@ export class GtAggregator {
     const row = result.toArray()[0];
 
     const questionN = Number(row.question_n ?? 0);
-    const cells = cols.map((col, i) => mkCell(col, "GT", Number(row[`c${i}`] ?? 0)));
+    const cells = cols.map((col, i) => {
+      const count = Number(row[`c${i}`] ?? 0);
+      const pct = questionN > 0 ? (count / questionN) * 100 : 0;
+      return mkCell(col, "GT", count, questionN, pct);
+    });
 
     // No-answer row
-    cells.push(mkCell(NA_VALUE, "GT", Number(row.na_cnt ?? 0)));
+    const naCount = Number(row.na_cnt ?? 0);
+    const naPct = questionN > 0 ? (naCount / questionN) * 100 : 0;
+    cells.push(mkCell(NA_VALUE, "GT", naCount, questionN, naPct));
 
-    return { cells, nBySubLabel: { GT: questionN } };
+    return { cells };
   }
 }

@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregate, type Query, type Cell, crossSub } from "../src/lib/agg/aggregate";
-import { pivot } from "../src/lib/agg/pivot";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,12 +62,11 @@ describe("aggregate - 重みなし", () => {
       // q1=3: 行4,8 = 2件
       // q1=99(無回答): 行11,13 = 2件
       const n = 13;
-      expect(r.nBySubLabel["GT"]).toBe(n);
       const cell1 = findCell(r.cells, "1", "GT")!;
       expect(cell1).toBeDefined();
       expect(cell1.count).toBe(6);
-      const pv = pivot(r.cells, r.nBySubLabel);
-      expect(pv.lookup.get("1\0GT")!.pct).toBeCloseTo((6 / n) * 100, 5);
+      expect(cell1.n).toBe(n);
+      expect(cell1.pct).toBeCloseTo((6 / n) * 100, 5);
 
       const cell2 = findCell(r.cells, "2", "GT")!;
       expect(cell2.count).toBe(3);
@@ -105,8 +103,8 @@ describe("aggregate - 重みなし", () => {
       // 無回答(shown but none='1'): 行11(0,0,0),12(0,0,0) = 2件
       const n = 13;
 
-      expect(r.nBySubLabel["GT"]).toBe(n);
       const cellQ3_1 = findCell(r.cells, "q3_1", "GT")!;
+      expect(cellQ3_1.n).toBe(n);
       expect(cellQ3_1).toBeDefined();
       expect(cellQ3_1.count).toBe(7);
 
@@ -140,7 +138,7 @@ describe("aggregate - 重みなし", () => {
       // q2=3: 行1,5,8 = 3件
       // q2=99(無回答): 行11 = 1件
       const gtN = 13;
-      expect(r.nBySubLabel["GT"]).toBe(gtN);
+      expect(findCell(r.cells, "1", "GT")!.n).toBe(gtN);
       expect(findCell(r.cells, "1", "GT")!.count).toBe(5);
       expect(findCell(r.cells, "2", "GT")!.count).toBe(4);
       expect(findCell(r.cells, "3", "GT")!.count).toBe(3);
@@ -252,9 +250,8 @@ describe("aggregate - 重み付き", () => {
       const cell1 = findCell(r.cells, "1", "GT")!;
       expect(cell1).toBeDefined();
       expect(cell1.count).toBeCloseTo(6.9, 1);
-      expect(r.nBySubLabel["GT"]).toBeCloseTo(13.8, 1);
-      const pv = pivot(r.cells, r.nBySubLabel);
-      expect(pv.lookup.get("1\0GT")!.pct).toBeCloseTo((6.9 / 13.8) * 100, 1);
+      expect(cell1.n).toBeCloseTo(13.8, 1);
+      expect(cell1.pct).toBeCloseTo((6.9 / 13.8) * 100, 1);
 
       const cell2 = findCell(r.cells, "2", "GT")!;
       expect(cell2.count).toBeCloseTo(3.3, 1);

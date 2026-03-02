@@ -12,7 +12,7 @@ interface ResultCardProps {
 export function ResultCard({ res, extraClass, children }: ResultCardProps) {
   const { labelMap, weightCol } = useAggregation();
 
-  const gtN = res.nBySubLabel["GT"] ?? 0;
+  const gtN = res.cells.find((c) => c.sub === "GT")?.n ?? 0;
   const nLabel = weightCol ? `n=${gtN.toFixed(1)}` : `n=${gtN.toLocaleString()}`;
 
   const questionLabel = resolveQuestionLabel(res.question, labelMap);

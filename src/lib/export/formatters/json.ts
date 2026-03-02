@@ -26,7 +26,7 @@ interface JsonExport {
 
 export function formatJSON(results: AggResult[], weightCol: string, labelMap: LabelMap): string {
   const entries: JsonExportEntry[] = results.map((res) => {
-    const { mains, subs, lookup } = pivot(res.cells, res.nBySubLabel);
+    const { mains, subs, lookup } = pivot(res.cells);
     const gtSub = subs.find((s) => s.label === "GT")!;
     const crossSubs = subs.filter((s) => s.label !== "GT");
 
