@@ -85,10 +85,10 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
           <h3 class="m-0 mb-2 text-base font-bold text-accent dark:text-accent-light">
             {t("gs.section1.title")}
           </h3>
-          <p class="m-0 mb-2">{t("gs.section1.p1")}</p>
-          <p class="m-0 mb-2">{t("gs.section1.p2")}</p>
+          <p class="m-0 mb-2" dangerouslySetInnerHTML={{ __html: t("gs.section1.p1") }} />
+          <p class="m-0 mb-2" dangerouslySetInnerHTML={{ __html: t("gs.section1.p2") }} />
           <div class="mt-3 rounded border border-border bg-surface2 px-4 py-3">
-            <p class="m-0 mb-2">{t("gs.section1.sample")}</p>
+            <p class="m-0 mb-2" dangerouslySetInnerHTML={{ __html: t("gs.section1.sample") }} />
             <div class="flex gap-3">
               <SampleLink href="samples/sample_data.csv" name="sample_data.csv">
                 {t("gs.section1.sampleCsv")}
@@ -104,7 +104,7 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
           <h3 class="m-0 mb-2 text-base font-bold text-accent dark:text-accent-light">
             {t("gs.section2.title")}
           </h3>
-          <p class="m-0 mb-2">{t("gs.section2.p1")}</p>
+          <p class="m-0 mb-2" dangerouslySetInnerHTML={{ __html: t("gs.section2.p1") }} />
         </section>
 
         <section class="mb-5 last:mb-0">
