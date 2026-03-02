@@ -1,7 +1,7 @@
 /** GT (Grand Total) aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Cell } from "./aggregate";
+import type { AggCells } from "./aggregate";
 import {
   esc,
   weightExpr,
@@ -19,7 +19,7 @@ export class GtAggregator {
     private weightCol: string,
   ) {}
 
-  async aggregateSA(col: string): Promise<Cell[]> {
+  async aggregateSA(col: string): Promise<AggCells> {
     const sql = `
       SELECT "${esc(col)}" AS mv, ${weightExpr(this.weightCol)} AS cnt
       FROM survey
@@ -31,10 +31,11 @@ export class GtAggregator {
     const rows = result.toArray();
 
     const questionN = rows.reduce((sum, r) => sum + Number(r.cnt), 0);
-    return rows.map((r) => mkCell(String(r.mv), "GT", questionN, Number(r.cnt)));
+    const cells = rows.map((r) => mkCell(String(r.mv), "GT", Number(r.cnt)));
+    return { cells, nBySubLabel: { GT: questionN } };
   }
 
-  async aggregateMA(cols: string[]): Promise<Cell[]> {
+  async aggregateMA(cols: string[]): Promise<AggCells> {
     const selectClauses = cols.map((col, i) => {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });
@@ -56,13 +57,11 @@ export class GtAggregator {
     const row = result.toArray()[0];
 
     const questionN = Number(row.question_n ?? 0);
-    const cells: Cell[] = cols.map((col, i) =>
-      mkCell(col, "GT", questionN, Number(row[`c${i}`] ?? 0)),
-    );
+    const cells = cols.map((col, i) => mkCell(col, "GT", Number(row[`c${i}`] ?? 0)));
 
     // No-answer row
-    cells.push(mkCell(NA_VALUE, "GT", questionN, Number(row.na_cnt ?? 0)));
+    cells.push(mkCell(NA_VALUE, "GT", Number(row.na_cnt ?? 0)));
 
-    return cells;
+    return { cells, nBySubLabel: { GT: questionN } };
   }
 }

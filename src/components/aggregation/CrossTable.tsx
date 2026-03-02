@@ -1,6 +1,6 @@
-import type { AggResult, Cell, QuestionDef } from "../../lib/agg/aggregate";
+import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
 import { questionKey, parseCrossSub } from "../../lib/agg/aggregate";
-import type { pivot } from "../../lib/agg/pivot";
+import type { pivot, PivotCell } from "../../lib/agg/pivot";
 import { resolveQuestionLabel, resolveValueLabel, resolveSubLabel } from "../../lib/labels";
 import { t } from "../../lib/i18n";
 import type { PctDirection } from "./Toolbar";
@@ -70,7 +70,7 @@ interface CrossTableData {
   gtSub: SubInfo;
   crossGroups: CrossGroup[];
   questionLabel: string;
-  lookup: Map<string, Cell>;
+  lookup: Map<string, PivotCell>;
   weightCol: string;
 }
 
@@ -173,7 +173,7 @@ function TransposedSubRow({
 }: {
   sub: SubInfo;
   mains: string[];
-  lookup: Map<string, Cell>;
+  lookup: Map<string, PivotCell>;
 }) {
   const { labelMap, weightCol } = useAggregation();
   return (

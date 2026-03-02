@@ -11,8 +11,13 @@ interface TableContentProps {
 
 export function TableContent({ pctDirection }: TableContentProps) {
   const { results, hasCross } = useAggregation();
-  const allGtCells = results.flatMap((r) => r.cells.filter((c) => c.sub === "GT"));
-  const maxPct = Math.max(...allGtCells.map((c) => c.pct), 0);
+  const maxPct = Math.max(
+    ...results.flatMap((r) => {
+      const n = r.nBySubLabel["GT"] ?? 0;
+      return n > 0 ? r.cells.filter((c) => c.sub === "GT").map((c) => (c.count / n) * 100) : [];
+    }),
+    0,
+  );
 
   return (
     <div
@@ -23,7 +28,7 @@ export function TableContent({ pctDirection }: TableContentProps) {
       }
     >
       {results.map((res) => {
-        const pv = pivot(res.cells);
+        const pv = pivot(res.cells, res.nBySubLabel);
         const isCross = pv.subs.length > 1;
 
         return (

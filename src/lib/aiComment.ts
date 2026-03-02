@@ -2,6 +2,7 @@
 
 import type { AggResult } from "./agg/aggregate";
 import type { LabelMap } from "./layout";
+import { pivot } from "./agg/pivot";
 import { resolveQuestionLabel, resolveValueLabel } from "./labels";
 import { getLocale, t } from "./i18n";
 
@@ -84,14 +85,17 @@ function summarizeResults(
   }
 
   for (const res of results) {
-    const gtCells = res.cells.filter((c) => c.sub === "GT");
-    if (gtCells.length === 0) continue;
+    const pv = pivot(res.cells, res.nBySubLabel);
+    const gtN = res.nBySubLabel["GT"] ?? 0;
+    if (pv.mains.length === 0) continue;
 
-    const n = gtCells[0].n;
     const qLabel = resolveQuestionLabel(res.question, labelMap);
-    lines.push(`${res.question}: ${qLabel} (${res.type}, n=${n})`);
+    lines.push(`${res.question}: ${qLabel} (${res.type}, n=${gtN})`);
 
-    const sorted = [...gtCells].sort((a, b) => b.pct - a.pct);
+    const withPct = pv.mains
+      .map((m) => ({ main: m, pct: pv.lookup.get(`${m}\0GT`)?.pct ?? 0 }))
+      .filter((e) => pv.lookup.has(`${e.main}\0GT`));
+    const sorted = [...withPct].sort((a, b) => b.pct - a.pct);
     const top = sorted.slice(0, topN);
     const items = top.map((c) => {
       const label = resolveValueLabel(res.type, res.question, c.main, labelMap);
