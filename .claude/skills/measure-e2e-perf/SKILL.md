@@ -20,15 +20,7 @@ Measure the wall-clock time from clicking the aggregation ("Run") button to the 
 
 Use `$ARGUMENTS` to specify the benchmark data pattern. Defaults to `rows` if omitted.
 
-Available patterns and their characteristics:
-
-| Pattern   | Rows    | SA cols | MA cols | Description              |
-|-----------|---------|---------|---------|--------------------------|
-| `rows`    | 10,000  | 10      | 10      | Many rows, few columns   |
-| `cols`    | 1,000   | 100     | 100     | Few rows, many columns   |
-| `both`    | 10,000  | 100     | 100     | Many rows, many columns  |
-| `sa-only` | 10,000  | 100     | 0       | Single-answer only       |
-| `ma-only` | 10,000  | 0       | 100     | Multi-answer only        |
+Available patterns and their characteristics are defined in `bench/generate.ts` (`PATTERNS` array). Read that file to see the current pattern names, row counts, and column counts.
 
 Benchmark data paths:
 - CSV: `bench/data/{pattern}.csv`
