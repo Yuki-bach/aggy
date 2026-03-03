@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregate } from "../src/lib/agg/aggregate";
 import type { Question, Tally } from "../src/lib/agg/types";
-import { toTally } from "../src/lib/duckdbBridge";
+import { toTally } from "../src/lib/agg/toTally";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
 import { buildExportGrids, type ExportGrid } from "../src/lib/export/exportGrid";
 import { formatCSV } from "../src/lib/export/formatters/csv";

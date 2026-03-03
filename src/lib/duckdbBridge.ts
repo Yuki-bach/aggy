@@ -1,39 +1,8 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
-import type { Question, AggResult, Tally, Axis } from "./agg/types";
+import type { Question, Tally } from "./agg/types";
 import { aggregate } from "./agg/aggregate";
-import { NA_VALUE } from "./agg/sqlHelpers";
-import { t } from "./i18n";
+import { toTally } from "./agg/toTally";
 import { setWasmStatus } from "../components/header/WasmStatus";
-
-/** Convert AggResult + Question metadata into a consumer-friendly Tally. */
-export function toTally(question: Question, aggResult: AggResult, byQuestion?: Question): Tally {
-  // Build labels including NA if present in codes
-  const labels: Record<string, string> = { ...question.labels };
-  if (aggResult.codes.includes(NA_VALUE)) {
-    labels[NA_VALUE] = t("label.na");
-  }
-
-  let by: Axis | null = null;
-  if (byQuestion) {
-    const axisLabels: Record<string, string> = { ...byQuestion.labels };
-    // Check if any slice code is NA_VALUE to add NA label
-    const hasNA = aggResult.slices.some((s) => s.code === NA_VALUE);
-    if (hasNA) {
-      axisLabels[NA_VALUE] = t("label.na");
-    }
-    by = { code: byQuestion.code, label: byQuestion.label, labels: axisLabels };
-  }
-
-  return {
-    question: question.code,
-    type: question.type,
-    label: question.label,
-    labels,
-    codes: aggResult.codes,
-    by,
-    slices: aggResult.slices,
-  };
-}
 
 export async function initDuckDB(): Promise<void> {
   if (initPromise) return initPromise;
