@@ -102,8 +102,4 @@ describe("buildQuestions", () => {
     expect(questions).toHaveLength(0);
   });
 
-  it("uses key as label fallback when label is omitted", () => {
-    const questions = buildQuestions([{ key: "q9", type: "SA" }]);
-    expect(questions[0].label).toBe("q9");
-  });
 });

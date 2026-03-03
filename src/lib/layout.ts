@@ -60,46 +60,16 @@ export function filterLayout(headers: string[], layout: Layout): Layout {
 
 /** Build Question[] from layout definition */
 export function buildQuestions(layout: Layout): Question[] {
-  const questions: Question[] = [];
-
-  for (const entry of layout) {
-    if (entry.type === "SA") {
-      const codes = entry.items?.map((i) => i.code) ?? [];
-      const labels: Record<string, string> = {};
-      if (entry.items) {
-        for (const item of entry.items) {
-          labels[item.code] = item.label;
-        }
-      }
-      questions.push({
-        type: "SA",
-        code: entry.key,
-        columns: [entry.key],
-        codes,
-        label: entry.label ?? entry.key,
-        labels,
-      });
-    } else if (entry.type === "MA" && entry.items) {
-      const columns: string[] = [];
-      const codes: string[] = [];
-      const labels: Record<string, string> = {};
-      for (const item of entry.items) {
-        columns.push(`${entry.key}_${item.code}`);
-        codes.push(item.code);
-        labels[item.code] = item.label;
-      }
-      questions.push({
-        type: "MA",
-        code: entry.key,
-        columns,
-        codes,
-        label: entry.label ?? entry.key,
-        labels,
-      });
-    }
-  }
-
-  return questions;
+  return layout
+    .filter((e) => e.type === "SA" || e.type === "MA")
+    .map((e) => ({
+      type: e.type as "SA" | "MA",
+      code: e.key,
+      columns: e.type === "SA" ? [e.key] : (e.items ?? []).map((i) => `${e.key}_${i.code}`),
+      codes: (e.items ?? []).map((i) => i.code),
+      label: e.label ?? e.key,
+      labels: Object.fromEntries((e.items ?? []).map((i) => [i.code, i.label])),
+    }));
 }
 
 /** Find weight column name from layout, or empty string if none */
