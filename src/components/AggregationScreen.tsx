@@ -63,7 +63,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       >
         {/* Data Summary */}
         <section class="shrink-0 border-b border-border p-4">
-          <h2 class="mb-3 text-[0.8125rem] font-bold tracking-wider text-muted">
+          <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">
             {t("section.summary")}
           </h2>
           <div class="text-sm leading-relaxed text-text-secondary">
@@ -83,7 +83,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
 
         {/* Cross Config */}
         <section class="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4">
-          <h2 class="mb-3 text-[0.8125rem] font-bold tracking-wider text-muted">
+          <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">
             {t("section.cross")}
           </h2>
           <div
@@ -134,7 +134,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
           </div>
         ) : (
           <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
-            <span class="text-[2.5rem]" aria-hidden="true">
+            <span class="text-4xl" aria-hidden="true">
               ⬛
             </span>
             <p class="text-base">{t("empty.text")}</p>

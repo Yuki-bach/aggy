@@ -16,7 +16,7 @@ export default function WasmStatus() {
 
   return (
     <div
-      class="flex min-w-40 items-center justify-end gap-2 text-[0.8125rem] text-muted"
+      class="flex min-w-40 items-center justify-end gap-2 text-sm text-muted"
       role="status"
       aria-live="polite"
     >

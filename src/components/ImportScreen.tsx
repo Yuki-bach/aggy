@@ -52,7 +52,7 @@ function StepIndicator({ bothLoaded }: { bothLoaded: boolean }) {
                 {isDone ? "\u2713" : step.num}
               </span>
               <span
-                class={`text-[0.8125rem] font-medium transition-colors duration-300 ${
+                class={`text-sm font-medium transition-colors duration-300 ${
                   isActive ? "text-text" : isDone ? "text-accent" : "text-muted"
                 }`}
               >
