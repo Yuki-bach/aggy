@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTallies } from "../src/lib/agg/buildTallies";
 import type { Question, Tally } from "../src/lib/agg/types";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
-import { buildExportGrids, type ExportGrid } from "../src/lib/export/exportGrid";
+import { buildExportGrids } from "../src/lib/export/exportGrid";
 import { talliesToLongRows } from "../src/lib/export/longFormat";
 import { formatCSV } from "../src/lib/export/formatters/csv";
 import { formatTSV } from "../src/lib/export/formatters/tsv";
@@ -169,8 +169,7 @@ describe("formatTSV", () => {
 
 describe("formatMarkdown", () => {
   it("パイプ区切りのテーブルを生成する", () => {
-    const grids = buildExportGrids(gtTallies);
-    const md = formatMarkdown(grids);
+    const md = formatMarkdown(gtTallies);
 
     expect(md).toContain("### q1 (SA)");
     expect(md).toContain("| --- |");
@@ -178,8 +177,7 @@ describe("formatMarkdown", () => {
   });
 
   it("クロス結果でもMarkdownテーブルを生成する", () => {
-    const grids = buildExportGrids(crossTallies);
-    const md = formatMarkdown(grids);
+    const md = formatMarkdown(crossTallies);
 
     expect(md).toContain("### q2 (SA)");
     expect(md).toContain("| --- |");

@@ -1,5 +1,4 @@
 import type { Tally } from "../agg/types";
-import { buildExportGrids } from "./exportGrid";
 import { downloadCSV } from "./formatters/csv";
 import { formatTSV } from "./formatters/tsv";
 import { formatMarkdown, downloadMarkdown } from "./formatters/markdown";
@@ -25,9 +24,7 @@ export async function executeExport(
       return true;
     }
     case "download-markdown": {
-      const hasCross = tallies.some((t) => t.by !== null);
-      const grids = buildExportGrids(tallies);
-      downloadMarkdown(grids, hasCross);
+      downloadMarkdown(tallies);
       return true;
     }
     case "download-json": {
@@ -40,8 +37,7 @@ export async function executeExport(
       return true;
     }
     case "copy-markdown": {
-      const grids = buildExportGrids(tallies);
-      const md = formatMarkdown(grids);
+      const md = formatMarkdown(tallies);
       await copyToClipboard({ "text/plain": md });
       return true;
     }
