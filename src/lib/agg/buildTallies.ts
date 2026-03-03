@@ -13,26 +13,14 @@ export async function buildTallies(
 ): Promise<Tally[]> {
   const tallies: Tally[] = [];
   for (const q of questions) {
-    const gtResult = await aggregate(conn, q, null, weightCol);
+    const gtResult = await aggregateGt(conn, q, weightCol);
     tallies.push(toTally(q, gtResult));
     for (const cross of crossCols) {
-      const crossResult = await aggregate(conn, q, cross, weightCol);
+      const crossResult = await aggregateCross(conn, q, cross, weightCol);
       tallies.push(toTally(q, crossResult, cross));
     }
   }
   return tallies;
-}
-
-async function aggregate(
-  conn: duckdb.AsyncDuckDBConnection,
-  question: Question,
-  by: Question | null,
-  weightCol: string,
-): Promise<AggResult> {
-  if (by === null) {
-    return aggregateGt(conn, question, weightCol);
-  }
-  return aggregateCross(conn, question, by, weightCol);
 }
 
 function toTally(question: Question, aggResult: AggResult, byQuestion?: Question): Tally {
