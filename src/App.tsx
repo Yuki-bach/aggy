@@ -35,7 +35,7 @@ export default function App() {
 
       {/* Main */}
       <main
-        class="grid min-h-0 flex-1 grid-rows-[1fr]"
+        class="grid min-h-0 flex-1 grid-rows-1"
         style={{ gridTemplateColumns: isImport ? "1fr" : "360px 1fr" }}
       >
         {isImport ? (

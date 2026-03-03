@@ -27,7 +27,7 @@ export function ChartContent({ saChartType, maChartType, paletteId }: ChartConte
     <div
       class={
         hasCross
-          ? "grid grid-cols-[1fr] gap-6"
+          ? "grid grid-cols-1 gap-6"
           : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
       }
     >

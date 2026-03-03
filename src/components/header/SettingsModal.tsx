@@ -132,11 +132,11 @@ function SegmentControl({
   onChange: (value: string) => void;
 }) {
   return (
-    <div class="flex gap-[2px] rounded-lg bg-surface2 p-[2px]" data-seg-name={name}>
+    <div class="flex gap-0.5 rounded-lg bg-surface2 p-0.5" data-seg-name={name}>
       {options.map((o) => (
         <button
           key={o.value}
-          class={`flex-1 cursor-pointer whitespace-nowrap rounded-[6px] border-none px-3 py-1 text-xs transition-[background,color,box-shadow] duration-150 hover:text-text ${o.value === current ? "bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "bg-transparent text-muted"}`}
+          class={`flex-1 cursor-pointer whitespace-nowrap rounded-md border-none px-3 py-1 text-xs transition-[background,color,box-shadow] duration-150 hover:text-text ${o.value === current ? "bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "bg-transparent text-muted"}`}
           onClick={(e) => {
             e.stopPropagation();
             onChange(o.value);
@@ -156,7 +156,7 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
   return (
     <>
       <div class="mb-4 last:mb-0">
-        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+        <span class="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted">
           {t("settings.language")}
         </span>
         <SegmentControl
@@ -173,7 +173,7 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
         />
       </div>
       <div class="mb-4 last:mb-0">
-        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+        <span class="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted">
           {t("settings.theme")}
         </span>
         <SegmentControl
@@ -192,7 +192,7 @@ function SettingsPanel({ showAI, onRerender }: { showAI: boolean; onRerender: ()
       </div>
       {showAI && (
         <div class="mb-4 last:mb-0">
-          <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+          <span class="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted">
             {t("settings.ai")}
           </span>
           <SegmentControl

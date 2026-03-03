@@ -21,7 +21,7 @@ export default function CrossConfig({ questions, crossSelected, onToggle }: Cros
           >
             <input
               type="checkbox"
-              class="size-[18px] cursor-pointer accent-accent"
+              class="size-4.5 cursor-pointer accent-accent"
               checked={crossSelected[q.code] ?? false}
               onChange={(e) => {
                 onToggle(q.code, (e.target as HTMLInputElement).checked);

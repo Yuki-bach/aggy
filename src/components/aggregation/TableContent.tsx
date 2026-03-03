@@ -27,7 +27,7 @@ export function TableContent({ pctDirection }: TableContentProps) {
     <div
       class={
         hasCross
-          ? "grid grid-cols-[1fr] gap-6"
+          ? "grid grid-cols-1 gap-6"
           : "grid grid-cols-[repeat(auto-fill,minmax(360px,1fr))] gap-6"
       }
     >
