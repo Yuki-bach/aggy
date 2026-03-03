@@ -1,7 +1,5 @@
 /** Shared SQL helpers and constants for aggregation */
 
-import type { Cell } from "./types";
-
 export function esc(name: string): string {
   return name.replace(/"/g, '""');
 }
@@ -30,10 +28,5 @@ export function weightedCountExpr(condition: string, weightCol: string): string 
 export function maNoneSelectedCondition(cols: string[]): string {
   return cols.map((c) => `"${esc(c)}" != 1`).join(" AND ");
 }
-
-export function mkCell(count: number, pct: number): Cell {
-  return { count, pct };
-}
-
 /** No-answer marker */
 export const NA_VALUE = "N/A";

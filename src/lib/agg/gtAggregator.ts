@@ -9,7 +9,6 @@ import {
   maWeightedCountExpr,
   maShownCondition,
   maNoneSelectedCondition,
-  mkCell,
 } from "./sqlHelpers";
 
 /** SA result includes discovered codes (DB values ordered by question.codes) */
@@ -61,7 +60,7 @@ export class GtAggregator {
 
     const cells = codes.map((code) => {
       const entry = rowMap.get(code);
-      return entry ? mkCell(entry.count, entry.pct) : mkCell(0, 0);
+      return entry ?? { count: 0, pct: 0 };
     });
 
     return { slice: { code: "GT", n, cells }, codes };
@@ -90,13 +89,13 @@ export class GtAggregator {
     const cells = cols.map((_col, i) => {
       const count = Number(row[`c${i}`] ?? 0);
       const pct = questionN > 0 ? (count / questionN) * 100 : 0;
-      return mkCell(count, pct);
+      return { count, pct };
     });
 
     // No-answer cell
     const naCount = Number(row.na_cnt ?? 0);
     const naPct = questionN > 0 ? (naCount / questionN) * 100 : 0;
-    cells.push(mkCell(naCount, naPct));
+    cells.push({ count: naCount, pct: naPct });
 
     return { code: "GT", n: questionN, cells };
   }

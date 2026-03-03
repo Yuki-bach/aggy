@@ -9,7 +9,6 @@ import {
   maWeightedCountExpr,
   maShownCondition,
   maNoneSelectedCondition,
-  mkCell,
 } from "./sqlHelpers";
 
 export interface CrossHeader {
@@ -122,7 +121,7 @@ export class CrossAggregator {
       const inner = dataMap.get(cv);
       const cells = codes.map((code) => {
         const entry = inner?.get(code);
-        return entry ? mkCell(entry.count, entry.pct) : mkCell(0, 0);
+        return entry ?? { count: 0, pct: 0 };
       });
       return { code: cv, n: headers[ci].n, cells };
     });
@@ -160,7 +159,7 @@ export class CrossAggregator {
         const counts = rowData.get(code);
         const count = counts?.[ci] ?? 0;
         const pct = n > 0 ? (count / n) * 100 : 0;
-        return mkCell(count, pct);
+        return { count, pct };
       });
       return { code: crossCode, n, cells };
     });
@@ -207,12 +206,12 @@ export class CrossAggregator {
       const cells = maCols.map((_col, maIdx) => {
         const count = counts?.[maIdx] ?? 0;
         const pct = n > 0 ? (count / n) * 100 : 0;
-        return mkCell(count, pct);
+        return { count, pct };
       });
       // NA cell
       const naCount = naMap.get(cv) ?? 0;
       const naPct = n > 0 ? (naCount / n) * 100 : 0;
-      cells.push(mkCell(naCount, naPct));
+      cells.push({ count: naCount, pct: naPct });
       return { code: cv, n, cells };
     });
   }
@@ -249,12 +248,12 @@ export class CrossAggregator {
       const cells = rowMaCols.map((_col, r) => {
         const count = Number(row[`r${r}c${c}`] ?? 0);
         const pct = n > 0 ? (count / n) * 100 : 0;
-        return mkCell(count, pct);
+        return { count, pct };
       });
       // NA cell
       const naCount = Number(row[`na_c${c}`] ?? 0);
       const naPct = n > 0 ? (naCount / n) * 100 : 0;
-      cells.push(mkCell(naCount, naPct));
+      cells.push({ count: naCount, pct: naPct });
       return { code: crossCode, n, cells };
     });
   }
