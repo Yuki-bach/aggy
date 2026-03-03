@@ -49,5 +49,5 @@ async function aggregateCross(
     question.type === "SA"
       ? await ca.aggregateSA(question.columns[0], codes)
       : await ca.aggregateMA(question.columns, codes);
-  return { codes, by: by.code, slices };
+  return { codes, slices };
 }

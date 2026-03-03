@@ -88,7 +88,6 @@ describe("aggregate - 重みなし", () => {
     it("q1 の GT 集計で各値の count/n/pct が正しい", async () => {
       const result = await aggregate(conn, q1, "GT", "");
 
-      expect(result.by).toBeNull();
       expect(result.slices).toHaveLength(1);
 
       // q1 有効行: IS NOT NULL → 行1-13 (行14=NULL除外) = 13行
@@ -120,8 +119,6 @@ describe("aggregate - 重みなし", () => {
   describe("MA GT集計（クロスなし）", () => {
     it("q3 の GT 集計で各サブカラムの count と無回答が正しい", async () => {
       const result = await aggregate(conn, q3, "GT", "");
-
-      expect(result.by).toBeNull();
 
       // MA shown条件: q3_1~q3_3 のいずれかが非NULL
       // 行13: q3_1=NULL,q3_2=NULL,q3_3=NULL → 全部NULLなので除外
@@ -157,7 +154,6 @@ describe("aggregate - 重みなし", () => {
     it("q2 を q1 でクロスした結果が正しい", async () => {
       const result = await aggregate(conn, q2, q1, "");
 
-      expect(result.by).toBe("q1");
       expect(result.slices.length).toBeGreaterThan(0);
 
       // q2有効行(IS NOT NULL): 行1-11,13,14 = 13行 (行12=NULL除外)
@@ -173,8 +169,6 @@ describe("aggregate - 重みなし", () => {
     it("q1 を q3 でクロスした結果が正しい", async () => {
       const result = await aggregate(conn, q1, q3, "");
 
-      expect(result.by).toBe("q3");
-
       // SA×MA: q1有効行の中でq3_1='1'のカウント
       // q1=1 の行: 行1,3,5,7,10,12
       // q1=1 かつ q3_1='1': 行1,3 = 2件
@@ -188,8 +182,6 @@ describe("aggregate - 重みなし", () => {
   describe("MA × SA クロス集計", () => {
     it("q3 を q1 でクロスした結果が正しい", async () => {
       const result = await aggregate(conn, q3, q1, "");
-
-      expect(result.by).toBe("q1");
 
       // codes should be ["1", "2", "3", "N/A"] (MA codes + NA)
       expect(result.codes).toEqual(["1", "2", "3", "N/A"]);
@@ -210,8 +202,6 @@ describe("aggregate - 重みなし", () => {
   describe("MA × MA クロス集計", () => {
     it("q3 を自身でクロスした結果にセルが存在する", async () => {
       const result = await aggregate(conn, q3, q3, "");
-
-      expect(result.by).toBe("q3");
 
       // q3_1='1' かつ q3_1='1': 行1,3,4,6,8,9,14 = 7件
       const cell = findCellByCode(result, "1", "1"); // slice "1" = cross q3 code, code "1" = row q3 code

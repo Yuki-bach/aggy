@@ -41,7 +41,7 @@ export class GtAggregator {
 
     const cells = codes.map((code) => cellByCode.get(code) ?? { count: 0, pct: 0 });
 
-    return { codes, by: null, slices: [{ code: null, n, cells }] };
+    return { codes, slices: [{ code: null, n, cells }] };
   }
 
   async aggregateMA(columns: string[], codes: string[]): Promise<AggResult> {
@@ -78,6 +78,6 @@ export class GtAggregator {
       resultCodes.push(NA_VALUE);
     }
 
-    return { codes: resultCodes, by: null, slices: [{ code: null, n: questionN, cells }] };
+    return { codes: resultCodes, slices: [{ code: null, n: questionN, cells }] };
   }
 }

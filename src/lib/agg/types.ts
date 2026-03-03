@@ -23,7 +23,6 @@ export interface Slice {
 /** aggregate() の戻り値 — rawdata 由来のみ */
 export interface AggResult {
   codes: string[];
-  by: string | null; // null = GT, string = cross question code
   slices: Slice[];
 }
 
