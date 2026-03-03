@@ -1,7 +1,7 @@
 /** GT (Grand Total) aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggResult } from "./types";
+import type { AggInput, AggResult } from "./types";
 import {
   esc,
   weightExpr,
@@ -14,7 +14,7 @@ import {
 
 export async function aggregateGt(
   conn: duckdb.AsyncDuckDBConnection,
-  question: { type: string; columns: string[]; codes: string[] },
+  question: AggInput,
   weightCol: string,
 ): Promise<AggResult> {
   const gt = new GtAggregator(conn, weightCol);
