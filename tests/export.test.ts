@@ -13,7 +13,7 @@ const q1: Question = {
   type: "SA",
   code: "q1",
   columns: ["q1"],
-  codes: [],
+  codes: ["1", "2", "3", "99"],
   label: "q1",
   labels: {},
 };
@@ -22,7 +22,7 @@ const q2: Question = {
   type: "SA",
   code: "q2",
   columns: ["q2"],
-  codes: [],
+  codes: ["1", "2", "3", "99"],
   label: "q2",
   labels: {},
 };

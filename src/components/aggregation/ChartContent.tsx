@@ -204,7 +204,7 @@ function buildCrossChart(
     const axis = ct.by!;
     return ct.slices.map((s) => ({
       slice: s,
-      label: axis.labels[s.code] ?? s.code,
+      label: axis.labels[s.code!] ?? s.code,
     }));
   });
 

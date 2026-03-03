@@ -77,7 +77,7 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
     const axis = crossTally.by!;
     for (const slice of crossTally.slices) {
       headerRow1.push("");
-      const sliceLabel = axis.labels[slice.code] ?? slice.code;
+      const sliceLabel = axis.labels[slice.code!] ?? slice.code;
       headerRow2.push(`${sliceLabel}(n=${slice.n.toFixed(1)})`);
     }
   }

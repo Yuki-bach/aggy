@@ -4,7 +4,6 @@ import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, AggResult } from "./types";
 import { GtAggregator } from "./gtAggregator";
 import { CrossAggregator, fetchCrossHeaders } from "./crossAggregator";
-import { NA_VALUE } from "./sqlHelpers";
 
 /** Aggregate one question by one axis. Returns a single AggResult. */
 export async function aggregate(
@@ -27,16 +26,12 @@ async function aggregateGT(
   const gt = new GtAggregator(conn, weightCol);
 
   if (question.type === "SA") {
-    const { slice, codes } = await gt.aggregateSA(question);
+    const { slice, codes } = await gt.aggregateSA(question.columns[0], question.codes);
     return { codes, by: null, slices: [slice] };
   }
 
-  const slice = await gt.aggregateMA(question);
-  return {
-    codes: [...question.codes, NA_VALUE],
-    by: null,
-    slices: [slice],
-  };
+  const { slice, codes } = await gt.aggregateMA(question.columns, question.codes);
+  return { codes, by: null, slices: [slice] };
 }
 
 async function aggregateCross(
@@ -49,15 +44,16 @@ async function aggregateCross(
   const header = crossHeaderCache.get(by.code)!;
   const ca = new CrossAggregator(conn, weightCol, by, header);
 
+  // Discover codes via GT first, then use for cross
+  const gt = new GtAggregator(conn, weightCol);
+
   if (question.type === "SA") {
-    // For SA cross, we first discover all codes via GT, then use them for cross
-    const gt = new GtAggregator(conn, weightCol);
-    const { codes } = await gt.aggregateSA(question);
-    const slices = await ca.aggregateSA(question, codes);
+    const { codes } = await gt.aggregateSA(question.columns[0], question.codes);
+    const slices = await ca.aggregateSA(question.columns[0], codes);
     return { codes, by: by.code, slices };
   }
 
-  const codes = [...question.codes, NA_VALUE];
-  const slices = await ca.aggregateMA(question);
+  const { codes } = await gt.aggregateMA(question.columns, question.codes);
+  const slices = await ca.aggregateMA(question.columns, codes);
   return { codes, by: by.code, slices };
 }

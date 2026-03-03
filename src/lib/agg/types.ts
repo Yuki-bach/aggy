@@ -15,7 +15,7 @@ export interface Cell {
 }
 
 export interface Slice {
-  code: string;
+  code: string | null;
   n: number;
   cells: Cell[];
 }

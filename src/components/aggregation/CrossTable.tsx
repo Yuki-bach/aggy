@@ -75,7 +75,7 @@ function VerticalCrossTable({ gtTally, crossTallies }: { gtTally: Tally; crossTa
                 key={`${group.axis.code}-${slice.code}`}
                 class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2 ${hasMultipleAxes && si === 0 && gi > 0 ? "border-l-2 border-l-border-strong" : ""}`}
               >
-                {resolveAxisLabel(slice.code, group.axis)}
+                {resolveAxisLabel(slice.code!, group.axis)}
                 <br />
                 <span class="text-muted text-xs font-normal">n={formatN(slice.n, weightCol)}</span>
               </th>
@@ -210,7 +210,7 @@ function TransposedSubRow({ slice, axis, codes }: { slice: Slice; axis: Axis; co
       <td
         class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong text-accent2`}
       >
-        {resolveAxisLabel(slice.code, axis)}
+        {resolveAxisLabel(slice.code!, axis)}
         <br />
         <span class="text-muted text-xs font-normal">n={formatN(slice.n, weightCol)}</span>
       </td>

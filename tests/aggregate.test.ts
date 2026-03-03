@@ -20,7 +20,7 @@ const q1: Question = {
   type: "SA",
   code: "q1",
   columns: ["q1"],
-  codes: [],
+  codes: ["1", "2", "3", "99"],
   label: "q1",
   labels: {},
 };
@@ -29,7 +29,7 @@ const q2: Question = {
   type: "SA",
   code: "q2",
   columns: ["q2"],
-  codes: [],
+  codes: ["1", "2", "3", "99"],
   label: "q2",
   labels: {},
 };
@@ -54,7 +54,11 @@ function findCellByCode(result: AggResult, sliceCode: string, code: string): Cel
 
 /** Get the GT slice's cell for a given code */
 function gtCell(result: AggResult, code: string): Cell | undefined {
-  return findCellByCode(result, "GT", code);
+  const slice = result.slices.find((s) => s.code === null);
+  if (!slice) return undefined;
+  const idx = result.codes.indexOf(code);
+  if (idx < 0) return undefined;
+  return slice.cells[idx];
 }
 
 // ============================================================
@@ -94,7 +98,7 @@ describe("aggregate - 重みなし", () => {
       // q1=99(無回答): 行11,13 = 2件
       const n = 13;
       const slice = result.slices[0];
-      expect(slice.code).toBe("GT");
+      expect(slice.code).toBeNull();
       expect(slice.n).toBe(n);
 
       const cell1 = gtCell(result, "1")!;

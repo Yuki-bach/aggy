@@ -42,7 +42,7 @@ export function formatJSON(tallies: Tally[], weightCol: string): string {
           const axis = crossTally.by!;
           for (const slice of crossTally.slices) {
             const cell = slice.cells[i];
-            const label = axis.labels[slice.code] ?? slice.code;
+            const label = axis.labels[slice.code!] ?? slice.code;
             if (cell) {
               opt.cross[label] = { count: cell.count, pct: cell.pct };
             }
