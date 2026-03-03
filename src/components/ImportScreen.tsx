@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "preact/compat";
 import { useCallback, useRef, useState } from "preact/hooks";
 import { parseLayout } from "../lib/layout";
 import { loadCSV } from "../lib/duckdbBridge";
@@ -6,8 +7,11 @@ import { t } from "../lib/i18n";
 
 import { FileUploadPanel } from "./import/FileUploadPanel";
 import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./import/SavedFiles";
-import { GettingStartedModal } from "./import/GettingStarted";
 import type { CsvData, LayoutData } from "../lib/types";
+
+const GettingStartedModal = lazy(() =>
+  import("./import/GettingStarted").then((m) => ({ default: m.GettingStartedModal })),
+);
 
 function formatLoadedInfo(csv: CsvData | null): string | null {
   if (!csv) return null;
@@ -201,8 +205,12 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
       <HelpButton onClick={() => setGsOpen(true)} />
 
-      {/* Getting Started Modal */}
-      <GettingStartedModal open={gsOpen} onClose={() => setGsOpen(false)} />
+      {/* Getting Started Modal (lazy-loaded) */}
+      {gsOpen && (
+        <Suspense fallback={null}>
+          <GettingStartedModal open={gsOpen} onClose={() => setGsOpen(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }
