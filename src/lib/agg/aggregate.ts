@@ -24,11 +24,9 @@ async function aggregateGT(
   weightCol: string,
 ): Promise<AggResult> {
   const gt = new GtAggregator(conn, weightCol);
-  const { slice, codes } =
-    question.type === "SA"
-      ? await gt.aggregateSA(question.columns[0], question.codes)
-      : await gt.aggregateMA(question.columns, question.codes);
-  return { codes, by: null, slices: [slice] };
+  return question.type === "SA"
+    ? gt.aggregateSA(question.columns[0], question.codes)
+    : gt.aggregateMA(question.columns, question.codes);
 }
 
 async function aggregateCross(

@@ -1,7 +1,7 @@
 /** GT (Grand Total) aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Slice } from "./types";
+import type { AggResult } from "./types";
 import {
   esc,
   weightExpr,
@@ -12,18 +12,13 @@ import {
   NA_VALUE,
 } from "./sqlHelpers";
 
-export interface GtResult {
-  slice: Slice;
-  codes: string[];
-}
-
 export class GtAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
   ) {}
 
-  async aggregateSA(column: string, codes: string[]): Promise<GtResult> {
+  async aggregateSA(column: string, codes: string[]): Promise<AggResult> {
     const wExpr = weightExpr(this.weightCol);
     const sql = `
       SELECT
@@ -46,10 +41,10 @@ export class GtAggregator {
 
     const cells = codes.map((code) => cellByCode.get(code) ?? { count: 0, pct: 0 });
 
-    return { slice: { code: null, n, cells }, codes };
+    return { codes, by: null, slices: [{ code: null, n, cells }] };
   }
 
-  async aggregateMA(columns: string[], codes: string[]): Promise<GtResult> {
+  async aggregateMA(columns: string[], codes: string[]): Promise<AggResult> {
     const selectClauses = columns.map((col, i) => {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });
@@ -83,6 +78,6 @@ export class GtAggregator {
       resultCodes.push(NA_VALUE);
     }
 
-    return { slice: { code: null, n: questionN, cells }, codes: resultCodes };
+    return { codes: resultCodes, by: null, slices: [{ code: null, n: questionN, cells }] };
   }
 }
