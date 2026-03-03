@@ -62,6 +62,10 @@ const en: Record<string, string> = {
   "export.header.pct": "%",
   "export.header.total.n": "Total_n",
   "export.header.total.pct": "Total_%",
+  "export.long.total": "(Total)",
+  "export.long.crossAxis": "Cross Axis",
+  "export.long.crossValue": "Cross Value",
+  "export.long.count": "Count",
   "label.na": "No answer",
 
   // Chart type

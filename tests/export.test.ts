@@ -3,8 +3,9 @@ import { buildTallies } from "../src/lib/agg/buildTallies";
 import type { Question, Tally } from "../src/lib/agg/types";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
 import { buildExportGrids, type ExportGrid } from "../src/lib/export/exportGrid";
+import { talliesToLongRows } from "../src/lib/export/longFormat";
 import { formatCSV } from "../src/lib/export/formatters/csv";
-import { formatTSV, formatHTML } from "../src/lib/export/formatters/tsv";
+import { formatTSV } from "../src/lib/export/formatters/tsv";
 import { formatMarkdown } from "../src/lib/export/formatters/markdown";
 import { formatJSON } from "../src/lib/export/formatters/json";
 
@@ -81,29 +82,72 @@ describe("buildExportGrids", () => {
   });
 });
 
+// ─── talliesToLongRows ──────────────────────────────────────
+
+describe("talliesToLongRows", () => {
+  it("GT結果からロングフォーマット行を生成する", () => {
+    const rows = talliesToLongRows(gtTallies);
+    // ヘッダー行（i18n: ja）
+    expect(rows[0]).toEqual(["変数名", "種別", "選択肢", "クロス軸", "クロス値", "n", "度数", "%"]);
+    // GT行のcross_axis/cross_valueは(全体)
+    expect(rows[1][3]).toBe("(全体)");
+    expect(rows[1][4]).toBe("(全体)");
+    // データ行数: ヘッダー1行 + 各tallyのcodes数の合計
+    const expectedDataRows = gtTallies.reduce((sum, t) => sum + t.codes.length, 0);
+    expect(rows).toHaveLength(1 + expectedDataRows);
+  });
+
+  it("クロス結果でcross_axis/cross_valueが設定される", () => {
+    const rows = talliesToLongRows(crossTallies);
+    // GT行(by===null)は(全体)
+    const gtRows = rows.filter((r) => r[3] === "(全体)");
+    expect(gtRows.length).toBeGreaterThan(0);
+    // クロス行(by!==null)はcross_axisが軸ラベル
+    const crossRows = rows.filter((r, i) => i > 0 && r[3] !== "(全体)");
+    expect(crossRows.length).toBeGreaterThan(0);
+  });
+
+  it("ラベルが解決される", () => {
+    const labeled: Tally = {
+      question: "q_test",
+      type: "SA",
+      label: "Test Q",
+      labels: { "1": "はい", "2": "いいえ" },
+      codes: ["1", "2"],
+      by: null,
+      slices: [{ code: null, n: 10, cells: [{ count: 6, pct: 60 }, { count: 4, pct: 40 }] }],
+    };
+    const rows = talliesToLongRows([labeled]);
+    expect(rows[1][2]).toBe("はい");
+    expect(rows[2][2]).toBe("いいえ");
+  });
+});
+
 // ─── CSV formatter ──────────────────────────────────────────
 
 describe("formatCSV", () => {
-  it("カンマ区切りで正しく出力される", () => {
-    const grids = buildExportGrids(gtTallies);
-    const csv = formatCSV(grids);
+  it("ロングフォーマットのCSVを出力する", () => {
+    const csv = formatCSV(gtTallies);
     const lines = csv.split("\r\n");
 
     // ヘッダー行
     expect(lines[0]).toContain('"変数名"');
-    expect(lines[0]).toContain('"n"');
+    expect(lines[0]).toContain('"クロス軸"');
     // データ行にq1が含まれる
     expect(lines.some((l) => l.includes('"q1"'))).toBe(true);
   });
 
   it("ダブルクォートがエスケープされる", () => {
-    const grid: ExportGrid = {
+    const tally: Tally = {
       question: "test",
       type: "SA",
-      headers: [["col"]],
-      rows: [['value with "quotes"']],
+      label: "test",
+      labels: { "1": 'value with "quotes"' },
+      codes: ["1"],
+      by: null,
+      slices: [{ code: null, n: 10, cells: [{ count: 10, pct: 100 }] }],
     };
-    const csv = formatCSV([grid]);
+    const csv = formatCSV([tally]);
     expect(csv).toContain('""quotes""');
   });
 });
@@ -111,39 +155,13 @@ describe("formatCSV", () => {
 // ─── TSV formatter ──────────────────────────────────────────
 
 describe("formatTSV", () => {
-  it("タブ区切りで出力される", () => {
-    const grids = buildExportGrids(gtTallies);
-    const tsv = formatTSV(grids);
+  it("タブ区切りのロングフォーマットで出力される", () => {
+    const tsv = formatTSV(gtTallies);
     const lines = tsv.split("\n");
 
     expect(lines[0]).toContain("\t");
     expect(lines[0]).toContain("変数名");
-  });
-});
-
-// ─── HTML formatter ─────────────────────────────────────────
-
-describe("formatHTML", () => {
-  it("テーブルタグを含むHTMLを生成する", () => {
-    const grids = buildExportGrids(gtTallies);
-    const html = formatHTML(grids);
-
-    expect(html).toContain("<table>");
-    expect(html).toContain("</table>");
-    expect(html).toContain("<thead>");
-    expect(html).toContain("<tbody>");
-  });
-
-  it("HTMLエスケープが適用される", () => {
-    const grid: ExportGrid = {
-      question: "test",
-      type: "SA",
-      headers: [["<script>"]],
-      rows: [["a & b"]],
-    };
-    const html = formatHTML([grid]);
-    expect(html).toContain("&lt;script&gt;");
-    expect(html).toContain("a &amp; b");
+    expect(lines[0]).toContain("クロス軸");
   });
 });
 
