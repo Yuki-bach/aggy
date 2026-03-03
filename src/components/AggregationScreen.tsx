@@ -63,10 +63,8 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       >
         {/* Data Summary */}
         <section class="shrink-0 border-b border-border p-4">
-          <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
-            {t("section.summary")}
-          </h2>
-          <div class="text-[0.875rem] leading-relaxed text-text-secondary">
+          <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("section.summary")}</h2>
+          <div class="text-sm leading-relaxed text-text-secondary">
             <DataSummary
               csv={{
                 fileName: csv.fileName,
@@ -83,9 +81,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
 
         {/* Cross Config */}
         <section class="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4">
-          <h2 class="mb-3 text-[0.8125rem] font-bold tracking-[0.04em] text-muted">
-            {t("section.cross")}
-          </h2>
+          <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("section.cross")}</h2>
           <div
             class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
             role="group"
@@ -117,7 +113,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
 
         {/* Run Button */}
         <button
-          class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
+          class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-wide text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
           onClick={() => handleRunAggregation()}
         >
           {t("run.button")}
@@ -134,7 +130,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
           </div>
         ) : (
           <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
-            <span class="text-[2.5rem]" aria-hidden="true">
+            <span class="text-4xl" aria-hidden="true">
               ⬛
             </span>
             <p class="text-base">{t("empty.text")}</p>
@@ -155,17 +151,17 @@ export function DataSummary({
   return (
     <>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
           {csv.fileName}
         </span>
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
           {layout.fileName}
         </span>
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.875rem] text-text">
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
           {t("summary.rows", { rows: csv.rowCount.toLocaleString(), cols: csv.headers.length })}
         </span>
       </div>
@@ -183,7 +179,7 @@ export function WeightInfo({
   onToggle: (on: boolean) => void;
 }) {
   return (
-    <div class="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-[0.875rem] text-text">
+    <div class="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 text-sm text-text">
       <span>{t("weight.label", { col: weightCol })}</span>
       <div class="ml-auto flex">
         <ToggleGroup>

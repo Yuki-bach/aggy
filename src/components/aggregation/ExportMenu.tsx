@@ -114,7 +114,7 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
 function SectionLabel({ class: cls, children }: { class?: string; children: ComponentChildren }) {
   return (
     <div
-      class={`px-3 pt-2.5 pb-1 text-[0.6875rem] font-medium tracking-wide text-muted uppercase${cls ? ` ${cls}` : ""}`}
+      class={`px-3 pt-2.5 pb-1 text-xs font-medium tracking-wide text-muted uppercase${cls ? ` ${cls}` : ""}`}
     >
       {children}
     </div>

@@ -56,7 +56,7 @@ function StepIndicator({ bothLoaded }: { bothLoaded: boolean }) {
                 {isDone ? "\u2713" : step.num}
               </span>
               <span
-                class={`text-[0.8125rem] font-medium transition-colors duration-300 ${
+                class={`text-sm font-medium transition-colors duration-300 ${
                   isActive ? "text-text" : isDone ? "text-accent" : "text-muted"
                 }`}
               >
@@ -75,7 +75,7 @@ function LoadedInfo({ info }: { info: string | null }) {
 
   return (
     <div
-      class="mt-3 whitespace-pre-line rounded-lg border border-accent-light bg-accent-bg px-4 py-3 text-[0.875rem] leading-normal text-text-secondary"
+      class="mt-3 whitespace-pre-line rounded-lg border border-accent-light bg-accent-bg px-4 py-3 text-sm leading-normal text-text-secondary"
       aria-live="polite"
     >
       {info}
@@ -181,7 +181,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         />
 
         <div class="mt-5 border-t border-border pt-4">
-          <h3 class="mb-3 text-sm font-bold tracking-[0.04em] text-muted">{t("import.history")}</h3>
+          <h3 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("import.history")}</h3>
           <div class="flex max-h-[160px] flex-col gap-2 overflow-y-auto">
             <SavedFilesList
               entries={entries}
@@ -195,7 +195,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
         {bothLoaded && (
           <button
-            class="mt-5 min-h-12 w-full cursor-pointer rounded-lg border-none bg-accent px-4 py-3 text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
+            class="mt-5 min-h-12 w-full cursor-pointer rounded-lg border-none bg-accent px-4 py-3 text-base font-bold tracking-wide text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
             onClick={handleProceed}
           >
             {t("import.proceed")}
