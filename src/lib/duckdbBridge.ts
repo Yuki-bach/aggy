@@ -1,6 +1,6 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, Tally } from "./agg/types";
-import { aggregateAll } from "./agg/aggregateAll";
+import { buildTallies } from "./agg/buildTallies";
 import { setWasmStatus } from "../components/header/WasmStatus";
 
 export async function initDuckDB(): Promise<void> {
@@ -72,7 +72,7 @@ export async function runAggregation(
   weightCol: string,
 ): Promise<Tally[]> {
   const c = await getConnection();
-  return aggregateAll(c, questions, crossCols, weightCol);
+  return buildTallies(c, questions, crossCols, weightCol);
 }
 
 // ─── Internal ───────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { aggregate } from "../src/lib/agg/aggregate";
+import { aggregateGt } from "../src/lib/agg/aggregateGt";
 import type { Question, AggResult, Cell } from "../src/lib/agg/types";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
 
@@ -25,15 +25,6 @@ const q1: Question = {
   labels: {},
 };
 
-const q2: Question = {
-  type: "SA",
-  code: "q2",
-  columns: ["q2"],
-  codes: ["1", "2", "3", "99"],
-  label: "q2",
-  labels: {},
-};
-
 const q3: Question = {
   type: "MA",
   code: "q3",
@@ -42,15 +33,6 @@ const q3: Question = {
   label: "q3",
   labels: {},
 };
-
-/** Find a cell by code in a slice */
-function findCellByCode(result: AggResult, sliceCode: string, code: string): Cell | undefined {
-  const slice = result.slices.find((s) => s.code === sliceCode);
-  if (!slice) return undefined;
-  const idx = result.codes.indexOf(code);
-  if (idx < 0) return undefined;
-  return slice.cells[idx];
-}
 
 /** Get the GT slice's cell for a given code */
 function gtCell(result: AggResult, code: string): Cell | undefined {
@@ -83,10 +65,10 @@ function gtCell(result: AggResult, code: string): Cell | undefined {
 // 14: id=14, w=1.0, q1=NULL,q2=1,   q3_1=1, q3_2=0, q3_3=1
 // ============================================================
 
-describe("aggregate - 重みなし", () => {
-  describe("SA GT集計（クロスなし）", () => {
+describe("aggregateGt - 重みなし", () => {
+  describe("SA GT集計", () => {
     it("q1 の GT 集計で各値の count/n/pct が正しい", async () => {
-      const result = await aggregate(conn, q1, null, "");
+      const result = await aggregateGt(conn, q1, "");
 
       expect(result.slices).toHaveLength(1);
 
@@ -116,9 +98,9 @@ describe("aggregate - 重みなし", () => {
     });
   });
 
-  describe("MA GT集計（クロスなし）", () => {
+  describe("MA GT集計", () => {
     it("q3 の GT 集計で各サブカラムの count と無回答が正しい", async () => {
-      const result = await aggregate(conn, q3, null, "");
+      const result = await aggregateGt(conn, q3, "");
 
       // MA shown条件: q3_1~q3_3 のいずれかが非NULL
       // 行13: q3_1=NULL,q3_2=NULL,q3_3=NULL → 全部NULLなので除外
@@ -149,77 +131,12 @@ describe("aggregate - 重みなし", () => {
       expect(cellNA.count).toBe(2);
     });
   });
-
-  describe("SA × SA クロス集計", () => {
-    it("q2 を q1 でクロスした結果が正しい", async () => {
-      const result = await aggregate(conn, q2, q1, "");
-
-      expect(result.slices.length).toBeGreaterThan(0);
-
-      // q2有効行(IS NOT NULL): 行1-11,13,14 = 13行 (行12=NULL除外)
-      // q1=1 かつ q2有効: 行1,3,5,7,10 (行12はq2=NULL除外) = 5行
-      // q1=1 でq2=1: 行7,10 = 2件
-      const cell = findCellByCode(result, "1", "1"); // slice.code=q1値"1", result.codes中のq2値"1"
-      expect(cell).toBeDefined();
-      expect(cell!.count).toBe(2);
-    });
-  });
-
-  describe("SA × MA クロス集計", () => {
-    it("q1 を q3 でクロスした結果が正しい", async () => {
-      const result = await aggregate(conn, q1, q3, "");
-
-      // SA×MA: q1有効行の中でq3_1='1'のカウント
-      // q1=1 の行: 行1,3,5,7,10,12
-      // q1=1 かつ q3_1='1': 行1,3 = 2件
-      // Slice code "1" = q3のcodes[0], result.codes中の"1" = q1の値"1"
-      const cell = findCellByCode(result, "1", "1");
-      expect(cell).toBeDefined();
-      expect(cell!.count).toBe(2);
-    });
-  });
-
-  describe("MA × SA クロス集計", () => {
-    it("q3 を q1 でクロスした結果が正しい", async () => {
-      const result = await aggregate(conn, q3, q1, "");
-
-      // codes should be ["1", "2", "3", "N/A"] (MA codes + NA)
-      expect(result.codes).toEqual(["1", "2", "3", "N/A"]);
-
-      // q3_1='1' かつ q1=1: 行1,3 = 2件
-      // code "1" in result.codes maps to q3_1 column
-      const cell = findCellByCode(result, "1", "1"); // slice "1" = q1 value, code "1" = q3 code
-      expect(cell).toBeDefined();
-      expect(cell!.count).toBe(2);
-
-      // q3_2='1' かつ q1=1: 行3(q3_2=1,q1=1), 行5(q3_2=1,q1=1), 行7(q3_2=1,q1=1) = 3件
-      const cell2 = findCellByCode(result, "1", "2"); // slice "1" = q1 value, code "2" = q3 code
-      expect(cell2).toBeDefined();
-      expect(cell2!.count).toBe(3);
-    });
-  });
-
-  describe("MA × MA クロス集計", () => {
-    it("q3 を自身でクロスした結果にセルが存在する", async () => {
-      const result = await aggregate(conn, q3, q3, "");
-
-      // q3_1='1' かつ q3_1='1': 行1,3,4,6,8,9,14 = 7件
-      const cell = findCellByCode(result, "1", "1"); // slice "1" = cross q3 code, code "1" = row q3 code
-      expect(cell).toBeDefined();
-      expect(cell!.count).toBe(7);
-
-      // q3_1='1' かつ q3_2='1': 行3,9 = 2件
-      const cell12 = findCellByCode(result, "2", "1"); // slice "2" = cross q3 code, code "1" = row q3 code
-      expect(cell12).toBeDefined();
-      expect(cell12!.count).toBe(2);
-    });
-  });
 });
 
-describe("aggregate - 重み付き", () => {
+describe("aggregateGt - 重み付き", () => {
   describe("SA GT集計（重み付き）", () => {
     it("q1 の重み付き GT 集計で weighted count が正しい", async () => {
-      const result = await aggregate(conn, q1, null, "weight");
+      const result = await aggregateGt(conn, q1, "weight");
 
       // q1有効行: 行1-13 (行14=空のみ除外, N/Aは文字列として有効)
       // q1=1: 行1(1.2)+3(1.5)+5(1.1)+7(1.3)+10(1.0)+12(0.8) = 6.9
@@ -243,7 +160,7 @@ describe("aggregate - 重み付き", () => {
 
   describe("MA GT集計（重み付き）", () => {
     it("q3 の重み付き GT 集計で weighted count が正しい", async () => {
-      const result = await aggregate(conn, q3, null, "weight");
+      const result = await aggregateGt(conn, q3, "weight");
 
       // shown行: 行1-12,14 = 13行 (行13は全空で除外)
       // q3_1='1': 行1(1.2)+3(1.5)+4(0.8)+6(1.0)+8(0.7)+9(1.4)+14(1.0) = 7.6

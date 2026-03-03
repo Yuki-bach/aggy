@@ -1,12 +1,11 @@
-/** Bulk aggregation: all questions × all cross axes → Tally[] */
-
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, AggResult, Tally, Axis } from "./types";
-import { aggregate } from "./aggregate";
+import { aggregateGt } from "./aggregateGt";
+import { aggregateCross } from "./aggregateCross";
 import { NA_VALUE } from "./sqlHelpers";
 import { t } from "../i18n";
 
-export async function aggregateAll(
+export async function buildTallies(
   conn: duckdb.AsyncDuckDBConnection,
   questions: Question[],
   crossCols: Question[],
@@ -24,8 +23,19 @@ export async function aggregateAll(
   return tallies;
 }
 
-/** Convert AggResult + Question metadata into a consumer-friendly Tally. */
-export function toTally(question: Question, aggResult: AggResult, byQuestion?: Question): Tally {
+async function aggregate(
+  conn: duckdb.AsyncDuckDBConnection,
+  question: Question,
+  by: Question | null,
+  weightCol: string,
+): Promise<AggResult> {
+  if (by === null) {
+    return aggregateGt(conn, question, weightCol);
+  }
+  return aggregateCross(conn, question, by, weightCol);
+}
+
+function toTally(question: Question, aggResult: AggResult, byQuestion?: Question): Tally {
   // Build labels including NA if present in codes
   const labels: Record<string, string> = { ...question.labels };
   if (aggResult.codes.includes(NA_VALUE)) {

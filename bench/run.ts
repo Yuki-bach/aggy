@@ -11,7 +11,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
-import { aggregate } from "../src/lib/agg/aggregate";
+import { aggregateGt } from "../src/lib/agg/aggregateGt";
+import { aggregateCross } from "../src/lib/agg/aggregateCross";
 import type { Question } from "../src/lib/agg/types";
 import { parseLayout, buildQuestions } from "../src/lib/layout";
 import { generate, PATTERNS, type PatternDef } from "./generate";
@@ -84,9 +85,9 @@ async function benchPattern(
   for (let i = 0; i < RUNS; i++) {
     const start = performance.now();
     for (const q of questions) {
-      await aggregate(conn, q, null, weightCol);
+      await aggregateGt(conn, q, weightCol);
       for (const cross of crossCols) {
-        await aggregate(conn, q, cross, weightCol);
+        await aggregateCross(conn, q, cross, weightCol);
       }
     }
     const elapsed = performance.now() - start;
