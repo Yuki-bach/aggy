@@ -19,10 +19,13 @@ export async function aggregateCross(
   weightCol: string,
 ): Promise<AggResult> {
   const ca = new CrossAggregator(conn, weightCol, by);
+  const isMainSa = question.type === "SA";
+  const isCrossSa = by.type === "SA";
 
-  return question.type === "SA"
-    ? ca.aggregateSA(question.columns[0], question.codes)
-    : ca.aggregateMA(question.columns, question.codes);
+  if (isMainSa && isCrossSa) return ca.saSA(question.columns[0], question.codes);
+  if (isMainSa && !isCrossSa) return ca.saMA(question.columns[0], question.codes);
+  if (!isMainSa && isCrossSa) return ca.maSA(question.columns, question.codes);
+  return ca.maMA(question.columns, question.codes);
 }
 
 class CrossAggregator {
@@ -32,26 +35,9 @@ class CrossAggregator {
     private crossQ: Question,
   ) {}
 
-  /** Cross-tabulate an SA main question against this cross axis.
-   *  `codes` should match the Tally's codes (from GT discovery). */
-  async aggregateSA(column: string, codes: string[]): Promise<AggResult> {
-    if (this.crossQ.type === "SA") {
-      return this.saSA(column, codes);
-    }
-    return this.saMA(column, codes);
-  }
-
-  /** Cross-tabulate an MA main question against this cross axis */
-  async aggregateMA(columns: string[], codes: string[]): Promise<AggResult> {
-    if (this.crossQ.type === "SA") {
-      return this.maSA(columns, codes);
-    }
-    return this.maMA(columns, codes);
-  }
-
   // ── SA main × SA cross ──
 
-  private async saSA(column: string, codes: string[]): Promise<AggResult> {
+  async saSA(column: string, codes: string[]): Promise<AggResult> {
     const crossCol = this.crossQ.columns[0];
     const crossValues = this.crossQ.codes;
     const wExpr = weightExpr(this.weightCol);
@@ -97,7 +83,7 @@ class CrossAggregator {
 
   // ── SA main × MA cross ──
 
-  private async saMA(column: string, codes: string[]): Promise<AggResult> {
+  async saMA(column: string, codes: string[]): Promise<AggResult> {
     const selectClauses = this.crossQ.columns.map(
       (maCol, i) => `${maWeightedCountExpr(maCol, this.weightCol)} AS c${i}`,
     );
@@ -140,7 +126,7 @@ class CrossAggregator {
 
   // ── MA main × SA cross ──
 
-  private async maSA(columns: string[], codes: string[]): Promise<AggResult> {
+  async maSA(columns: string[], codes: string[]): Promise<AggResult> {
     const crossCol = this.crossQ.columns[0];
     const crossValues = this.crossQ.codes;
     const wExpr = weightExpr(this.weightCol);
@@ -199,7 +185,7 @@ class CrossAggregator {
 
   // ── MA main × MA cross ──
 
-  private async maMA(columns: string[], codes: string[]): Promise<AggResult> {
+  async maMA(columns: string[], codes: string[]): Promise<AggResult> {
     const shownCond = maShownCondition(columns);
 
     const selectClauses: string[] = [];
