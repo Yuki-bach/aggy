@@ -17,8 +17,8 @@ interface ChartContentProps {
 }
 
 export function ChartContent({ saChartType, maChartType, paletteId }: ChartContentProps) {
-  const { tallies, crossCols } = useAggregation();
-  const hasCross = crossCols.length > 0;
+  const { tallies } = useAggregation();
+  const hasCross = tallies.some((t) => t.by !== null);
 
   // Group tallies by question
   const questionCodes = [...new Set(tallies.map((t) => t.question))];

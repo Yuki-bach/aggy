@@ -78,8 +78,8 @@ export function ViewOpts({
   paletteId,
   callbacks,
 }: ViewOptsProps) {
-  const { crossCols } = useAggregation();
-  const hasCross = crossCols.length > 0;
+  const { tallies } = useAggregation();
+  const hasCross = tallies.some((t) => t.by !== null);
 
   const showChart = currentViewMode === "chart";
   const showPctToggle = currentViewMode === "table" && hasCross;

@@ -9,8 +9,8 @@ interface TableContentProps {
 }
 
 export function TableContent({ pctDirection }: TableContentProps) {
-  const { tallies, crossCols } = useAggregation();
-  const hasCross = crossCols.length > 0;
+  const { tallies } = useAggregation();
+  const hasCross = tallies.some((t) => t.by !== null);
 
   // Compute maxPct across all GT slices for bar chart scaling
   const maxPct = Math.max(

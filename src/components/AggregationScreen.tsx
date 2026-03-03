@@ -45,8 +45,6 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       setAggCtx({
         tallies,
         weightCol: wCol,
-        questions,
-        crossCols,
       });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
