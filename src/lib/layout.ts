@@ -1,4 +1,4 @@
-import type { QuestionDef } from "./agg/aggregate";
+import type { Question } from "./agg/types";
 
 export interface LayoutItem {
   code: string;
@@ -15,15 +15,6 @@ export interface LayoutEntry {
 }
 
 export type Layout = LayoutEntry[];
-
-export interface LabelMap {
-  /** Question labels: CSV column name (or MA group name) → display name */
-  questionLabels: Record<string, string>;
-  /** Value labels: unified { questionKey: { code: label } } for both SA and MA */
-  valueLabels: Record<string, Record<string, string>>;
-  /** MA column name → item code (e.g. { "q3_1": "1" }) */
-  colToCode: Record<string, string>;
-}
 
 export function parseLayout(jsonText: string): Layout {
   let parsed: unknown;
@@ -50,37 +41,54 @@ export function parseLayout(jsonText: string): Layout {
   return parsed as Layout;
 }
 
-/** Build QuestionDef[] from CSV headers and layout definition */
-export function buildQuestionDefs(headers: string[], layout: Layout): QuestionDef[] {
-  // Build a column→type lookup from layout
-  const colTypes = new Map<string, string>();
+/** Build Question[] from CSV headers and layout definition */
+export function buildQuestions(headers: string[], layout: Layout): Question[] {
+  const headerSet = new Set(headers);
+  const questions: Question[] = [];
+
   for (const entry of layout) {
     if (entry.type === "SA") {
-      colTypes.set(entry.key, "sa");
+      if (!headerSet.has(entry.key)) continue;
+      const codes = entry.items?.map((i) => i.code) ?? [];
+      const labels: Record<string, string> = {};
+      if (entry.items) {
+        for (const item of entry.items) {
+          labels[item.code] = item.label;
+        }
+      }
+      questions.push({
+        type: "SA",
+        code: entry.key,
+        columns: [entry.key],
+        codes,
+        label: entry.label ?? entry.key,
+        labels,
+      });
     } else if (entry.type === "MA" && entry.items) {
+      const columns: string[] = [];
+      const codes: string[] = [];
+      const labels: Record<string, string> = {};
       for (const item of entry.items) {
-        colTypes.set(`${entry.key}_${item.code}`, `ma:${entry.key}:${item.code}`);
+        const col = `${entry.key}_${item.code}`;
+        if (headerSet.has(col)) {
+          columns.push(col);
+          codes.push(item.code);
+          labels[item.code] = item.label;
+        }
+      }
+      if (columns.length > 0) {
+        questions.push({
+          type: "MA",
+          code: entry.key,
+          columns,
+          codes,
+          label: entry.label ?? entry.key,
+          labels,
+        });
       }
     }
   }
 
-  const questions: QuestionDef[] = [];
-  const maAccum: Record<string, { columns: string[]; codes: string[] }> = {};
-  for (const col of headers) {
-    const t = colTypes.get(col);
-    if (!t) continue;
-    if (t === "sa") {
-      questions.push({ type: "SA", column: col });
-    } else if (t.startsWith("ma:")) {
-      const [, prefix, code] = t.split(":");
-      const acc = (maAccum[prefix] ??= { columns: [], codes: [] });
-      acc.columns.push(col);
-      acc.codes.push(code);
-    }
-  }
-  for (const [prefix, { columns, codes }] of Object.entries(maAccum)) {
-    questions.push({ type: "MA", prefix, columns, codes });
-  }
   return questions;
 }
 
@@ -92,42 +100,4 @@ export function findWeightColumn(layout: Layout): string {
 /** Count total layout-defined columns (SA: 1 each, MA: items count, WEIGHT: 1) */
 export function countLayoutColumns(layout: Layout): number {
   return layout.reduce((acc, e) => acc + (e.type === "MA" ? (e.items?.length ?? 0) : 1), 0);
-}
-
-export function buildLabelMap(layout: Layout): LabelMap {
-  const questionLabels: Record<string, string> = {};
-  const valueLabels: Record<string, Record<string, string>> = {};
-  const colToCode: Record<string, string> = {};
-
-  for (const entry of layout) {
-    const { key, label, type, items } = entry;
-
-    if (label) {
-      questionLabels[key] = label;
-    }
-
-    switch (type) {
-      case "SA":
-        if (items) {
-          const map: Record<string, string> = {};
-          for (const item of items) {
-            map[item.code] = item.label;
-          }
-          valueLabels[key] = map;
-        }
-        break;
-      case "MA":
-        if (items) {
-          const map: Record<string, string> = {};
-          for (const item of items) {
-            map[item.code] = item.label;
-            colToCode[`${key}_${item.code}`] = item.code;
-          }
-          valueLabels[key] = map;
-        }
-        break;
-    }
-  }
-
-  return { questionLabels, valueLabels, colToCode };
 }

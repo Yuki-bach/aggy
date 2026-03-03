@@ -1,7 +1,7 @@
 /** GT (Grand Total) aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggCells } from "./aggregate";
+import type { Question, Slice } from "./types";
 import {
   esc,
   weightExpr,
@@ -10,8 +10,13 @@ import {
   maShownCondition,
   maNoneSelectedCondition,
   mkCell,
-  NA_VALUE,
 } from "./sqlHelpers";
+
+/** SA result includes discovered codes (DB values ordered by question.codes) */
+export interface SASliceResult {
+  slice: Slice;
+  codes: string[];
+}
 
 export class GtAggregator {
   constructor(
@@ -19,7 +24,8 @@ export class GtAggregator {
     private weightCol: string,
   ) {}
 
-  async aggregateSA(col: string): Promise<AggCells> {
+  async aggregateSA(question: Question): Promise<SASliceResult> {
+    const col = question.columns[0];
     const wExpr = weightExpr(this.weightCol);
     const sql = `
       SELECT
@@ -33,21 +39,41 @@ export class GtAggregator {
     `;
 
     const result = await this.conn.query(sql);
-    const cells = result
-      .toArray()
-      .map((r) => mkCell(String(r.mv), "GT", Number(r.cnt), Number(r.n), Number(r.pct ?? 0)));
-    return { cells };
+    const rowMap = new Map<string, { count: number; pct: number }>();
+    let n = 0;
+    for (const r of result.toArray()) {
+      rowMap.set(String(r.mv), { count: Number(r.cnt), pct: Number(r.pct ?? 0) });
+      n = Number(r.n);
+    }
+
+    // Build codes: question.codes first (preserving order), then extra DB values
+    const codes: string[] = [];
+    const used = new Set<string>();
+    for (const code of question.codes) {
+      codes.push(code);
+      used.add(code);
+    }
+    for (const mv of rowMap.keys()) {
+      if (!used.has(mv)) {
+        codes.push(mv);
+      }
+    }
+
+    const cells = codes.map((code) => {
+      const entry = rowMap.get(code);
+      return entry ? mkCell(entry.count, entry.pct) : mkCell(0, 0);
+    });
+
+    return { slice: { code: "GT", n, cells }, codes };
   }
 
-  async aggregateMA(cols: string[]): Promise<AggCells> {
+  async aggregateMA(question: Question): Promise<Slice> {
+    const cols = question.columns;
     const selectClauses = cols.map((col, i) => {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });
 
-    // No-answer: shown but nothing selected
     const naExpr = weightedCountExpr(maNoneSelectedCondition(cols), this.weightCol);
-
-    // questionN: number of respondents shown
     const nExpr = this.weightCol
       ? `COALESCE(SUM("${esc(this.weightCol)}"), 0)`
       : `COUNT(*)::DOUBLE`;
@@ -61,17 +87,17 @@ export class GtAggregator {
     const row = result.toArray()[0];
 
     const questionN = Number(row.question_n ?? 0);
-    const cells = cols.map((col, i) => {
+    const cells = cols.map((_col, i) => {
       const count = Number(row[`c${i}`] ?? 0);
       const pct = questionN > 0 ? (count / questionN) * 100 : 0;
-      return mkCell(col, "GT", count, questionN, pct);
+      return mkCell(count, pct);
     });
 
-    // No-answer row
+    // No-answer cell
     const naCount = Number(row.na_cnt ?? 0);
     const naPct = questionN > 0 ? (naCount / questionN) * 100 : 0;
-    cells.push(mkCell(NA_VALUE, "GT", naCount, questionN, naPct));
+    cells.push(mkCell(naCount, naPct));
 
-    return { cells };
+    return { code: "GT", n: questionN, cells };
   }
 }

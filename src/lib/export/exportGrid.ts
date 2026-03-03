@@ -1,8 +1,5 @@
-import type { AggResult } from "../agg/aggregate";
-import type { LabelMap } from "../layout";
+import type { Question, Tally } from "../agg/types";
 import { NA_VALUE } from "../agg/sqlHelpers";
-import { pivot } from "../agg/pivot";
-import { resolveSubLabel } from "../labels";
 import { t } from "../i18n";
 
 export interface ExportGrid {
@@ -12,23 +9,24 @@ export interface ExportGrid {
   rows: string[][];
 }
 
-export function buildExportGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[] {
-  const hasCross = results.some((r) => pivot(r.cells).subs.length > 1);
+export function buildExportGrids(tallies: Tally[], questions: Question[]): ExportGrid[] {
+  const hasCross = tallies.some((t) => t.by !== "GT");
   if (hasCross) {
-    return buildCrossGrids(results, labelMap);
+    return buildCrossGrids(tallies, questions);
   }
-  return results.map((res) => buildGtGrid(res));
+  return tallies.filter((t) => t.by === "GT").map((tally) => buildGtGrid(tally, questions));
 }
 
 // ─── Internal ───────────────────────────────────────────────
 
-export function resolveMainLabel(main: string): string {
-  return main === NA_VALUE ? t("label.na") : main;
+export function resolveMainLabel(code: string, question: Question): string {
+  if (code === NA_VALUE) return t("label.na");
+  return question.labels[code] ?? code;
 }
 
-function buildGtGrid(res: AggResult): ExportGrid {
-  const { mains, subs, lookup } = pivot(res.cells);
-  const gtSub = subs.find((s) => s.label === "GT")!;
+function buildGtGrid(tally: Tally, questions: Question[]): ExportGrid {
+  const question = questions.find((q) => q.code === tally.question);
+  const slice = tally.slices[0];
   const headers = [
     [
       t("export.header.variable"),
@@ -40,28 +38,35 @@ function buildGtGrid(res: AggResult): ExportGrid {
   ];
   const rows: string[][] = [];
 
-  for (const main of mains) {
-    const cell = lookup.get(`${main}\0GT`)!;
+  for (let i = 0; i < tally.codes.length; i++) {
+    const code = tally.codes[i];
+    const cell = slice.cells[i];
     rows.push([
-      res.question,
-      res.type,
-      resolveMainLabel(main),
+      tally.question,
+      tally.type,
+      resolveMainLabel(code, question!),
       cell.count.toFixed(1),
       cell.pct.toFixed(1),
     ]);
   }
-  rows.push([res.question, res.type, "n", gtSub.n.toFixed(1), ""]);
+  rows.push([tally.question, tally.type, "n", slice.n.toFixed(1), ""]);
 
-  return { question: res.question, type: res.type, headers, rows };
+  return { question: tally.question, type: tally.type, headers, rows };
 }
 
-function buildCrossGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[] {
-  const firstResult = results.find((r) => pivot(r.cells).subs.length > 1);
-  if (!firstResult) return results.map((res) => buildGtGrid(res));
+function buildCrossGrids(tallies: Tally[], questions: Question[]): ExportGrid[] {
+  // Find the first cross tally to build shared headers
+  const firstCross = tallies.find((t) => t.by !== "GT");
+  if (!firstCross) {
+    return tallies.filter((t) => t.by === "GT").map((tally) => buildGtGrid(tally, questions));
+  }
 
-  const firstPivot = pivot(firstResult.cells);
-  const crossSubs = firstPivot.subs.filter((s) => s.label !== "GT");
+  // Collect all cross tallies for header generation
+  const questionCodes = [...new Set(tallies.map((t) => t.question))];
+  const firstQCode = questionCodes[0];
+  const crossTalliesForFirst = tallies.filter((t) => t.question === firstQCode && t.by !== "GT");
 
+  // Build shared 2-row headers
   const headerRow1 = [
     t("export.header.variable"),
     t("export.header.type"),
@@ -70,40 +75,51 @@ function buildCrossGrids(results: AggResult[], labelMap: LabelMap): ExportGrid[]
     t("export.header.total.pct"),
   ];
   const headerRow2 = ["", "", "", "", ""];
-  for (const sub of crossSubs) {
-    headerRow1.push("");
-    headerRow2.push(`${resolveSubLabel(sub.label, labelMap)}(n=${sub.n.toFixed(1)})`);
+
+  for (const crossTally of crossTalliesForFirst) {
+    const crossQ = questions.find((q) => q.code === crossTally.by);
+    for (const slice of crossTally.slices) {
+      headerRow1.push("");
+      const sliceLabel = crossQ ? resolveMainLabel(slice.code, crossQ) : slice.code;
+      headerRow2.push(`${sliceLabel}(n=${slice.n.toFixed(1)})`);
+    }
   }
   const sharedHeaders = [headerRow1, headerRow2];
 
-  return results.map((res) => {
-    const { mains, subs, lookup } = pivot(res.cells);
-    const resCrossSubs = subs.filter((s) => s.label !== "GT");
-    const gtSub = subs.find((s) => s.label === "GT")!;
+  return questionCodes.map((qCode) => {
+    const question = questions.find((q) => q.code === qCode)!;
+    const gtTally = tallies.find((t) => t.question === qCode && t.by === "GT")!;
+    const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== "GT");
+    const gtSlice = gtTally.slices[0];
     const rows: string[][] = [];
 
-    for (const main of mains) {
-      const gtCell = lookup.get(`${main}\0GT`)!;
+    for (let i = 0; i < gtTally.codes.length; i++) {
+      const code = gtTally.codes[i];
+      const gtCell = gtSlice.cells[i];
       const dataRow = [
-        res.question,
-        res.type,
-        resolveMainLabel(main),
+        gtTally.question,
+        gtTally.type,
+        resolveMainLabel(code, question),
         gtCell.count.toFixed(1),
         gtCell.pct.toFixed(1),
       ];
-      for (const sub of resCrossSubs) {
-        const cell = lookup.get(`${main}\0${sub.label}`);
-        dataRow.push(cell ? cell.pct.toFixed(1) : "");
+      for (const crossTally of crossTallies) {
+        for (const slice of crossTally.slices) {
+          const cell = slice.cells[i];
+          dataRow.push(cell ? cell.pct.toFixed(1) : "");
+        }
       }
       rows.push(dataRow);
     }
 
-    const nRow = [res.question, res.type, "n", gtSub.n.toFixed(1), ""];
-    for (const sub of resCrossSubs) {
-      nRow.push(sub.n.toFixed(1));
+    const nRow = [gtTally.question, gtTally.type, "n", gtSlice.n.toFixed(1), ""];
+    for (const crossTally of crossTallies) {
+      for (const slice of crossTally.slices) {
+        nRow.push(slice.n.toFixed(1));
+      }
     }
     rows.push(nRow);
 
-    return { question: res.question, type: res.type, headers: sharedHeaders, rows };
+    return { question: gtTally.question, type: gtTally.type, headers: sharedHeaders, rows };
   });
 }

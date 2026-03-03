@@ -1,22 +1,22 @@
 import type { ComponentChildren } from "preact";
-import type { AggResult } from "../../lib/agg/aggregate";
-import { resolveQuestionLabel } from "../../lib/labels";
+import type { Question, Tally } from "../../lib/agg/types";
 import { useAggregation } from "./AggregationContext";
 
 interface ResultCardProps {
-  res: AggResult;
+  tally: Tally;
+  question: Question;
   extraClass?: string;
   children: ComponentChildren;
 }
 
-export function ResultCard({ res, extraClass, children }: ResultCardProps) {
-  const { labelMap, weightCol } = useAggregation();
+export function ResultCard({ tally, question, extraClass, children }: ResultCardProps) {
+  const { weightCol } = useAggregation();
 
-  const gtN = res.cells.find((c) => c.sub === "GT")?.n ?? 0;
+  const gtTally = tally.by === "GT" ? tally : undefined;
+  const gtN = gtTally?.slices[0]?.n ?? 0;
   const nLabel = weightCol ? `n=${gtN.toFixed(1)}` : `n=${gtN.toLocaleString()}`;
 
-  const questionLabel = resolveQuestionLabel(res.question, labelMap);
-  const hasLabel = questionLabel !== res.question;
+  const hasLabel = question.label !== question.code;
 
   return (
     <div
@@ -24,10 +24,10 @@ export function ResultCard({ res, extraClass, children }: ResultCardProps) {
     >
       <div class="flex items-baseline gap-3 border-b border-border p-4">
         <div class="flex min-w-0 flex-col gap-0.5">
-          <span class="text-sm font-bold text-accent">{questionLabel}</span>
-          {hasLabel && <span class="text-xs tracking-wide text-muted">{res.question}</span>}
+          <span class="text-sm font-bold text-accent">{question.label}</span>
+          {hasLabel && <span class="text-xs tracking-wide text-muted">{question.code}</span>}
         </div>
-        <span class="text-xs tracking-wide text-muted">{res.type}</span>
+        <span class="text-xs tracking-wide text-muted">{tally.type}</span>
         <span class="ml-auto text-xs text-muted">{nLabel}</span>
       </div>
       {children}

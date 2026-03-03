@@ -5,7 +5,7 @@ import { isAICommentEnabled } from "../header/SettingsModal";
 import { useAggregation } from "./AggregationContext";
 
 export function AIBubble() {
-  const { results, weightCol, labelMap } = useAggregation();
+  const { tallies, weightCol, questions } = useAggregation();
   const [comment, setComment] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(true);
@@ -19,7 +19,7 @@ export function AIBubble() {
     setLoading(true);
     setComment(null);
     setVisible(true);
-    generateComment(results, weightCol, labelMap).then((c) => {
+    generateComment(tallies, weightCol, questions).then((c) => {
       if (cancelled) return;
       if (c) {
         setComment(c);
@@ -31,7 +31,7 @@ export function AIBubble() {
     return () => {
       cancelled = true;
     };
-  }, [results, weightCol, labelMap]);
+  }, [tallies, weightCol, questions]);
 
   if (!visible) return null;
 

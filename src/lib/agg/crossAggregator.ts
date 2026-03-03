@@ -1,8 +1,7 @@
 /** Cross-tabulation aggregation — one cross axis at a time */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggCells, QuestionDef, SAQuestion, MAQuestion } from "./aggregate";
-import { crossSub } from "./aggregate";
+import type { Question, Slice } from "./types";
 import {
   esc,
   weightExpr,
@@ -11,11 +10,10 @@ import {
   maShownCondition,
   maNoneSelectedCondition,
   mkCell,
-  NA_VALUE,
 } from "./sqlHelpers";
 
 export interface CrossHeader {
-  headers: Array<{ label: string; n: number }>;
+  headers: Array<{ code: string; n: number }>;
   crossValues: string[];
 }
 
@@ -23,14 +21,14 @@ export interface CrossHeader {
 
 export async function fetchCrossHeaders(
   conn: duckdb.AsyncDuckDBConnection,
-  crossCols: QuestionDef[],
+  crossCols: Question[],
   weightCol: string,
 ): Promise<Map<string, CrossHeader>> {
   const cache = new Map<string, CrossHeader>();
 
   for (const crossQ of crossCols) {
     if (crossQ.type === "SA") {
-      const col = crossQ.column;
+      const col = crossQ.columns[0];
       const sql = `
         SELECT
           "${esc(col)}" AS cv,
@@ -40,8 +38,8 @@ export async function fetchCrossHeaders(
         GROUP BY "${esc(col)}"
       `;
       const result = await conn.query(sql);
-      const headers = result.toArray().map((r) => ({ label: String(r.cv), n: Number(r.n) }));
-      cache.set(crossQ.column, { headers, crossValues: headers.map((h) => h.label) });
+      const headers = result.toArray().map((r) => ({ code: String(r.cv), n: Number(r.n) }));
+      cache.set(crossQ.code, { headers, crossValues: headers.map((h) => h.code) });
     } else {
       const selectClauses = crossQ.columns.map(
         (col, i) => `${maWeightedCountExpr(col, weightCol)} AS c${i}`,
@@ -49,11 +47,11 @@ export async function fetchCrossHeaders(
       const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
       const result = await conn.query(sql);
       const row = result.toArray()[0];
-      const headers = crossQ.columns.map((_, i) => ({
-        label: crossQ.codes[i],
+      const headers = crossQ.codes.map((code, i) => ({
+        code,
         n: Number(row[`c${i}`] ?? 0),
       }));
-      cache.set(crossQ.prefix, { headers, crossValues: crossQ.codes });
+      cache.set(crossQ.code, { headers, crossValues: crossQ.codes });
     }
   }
   return cache;
@@ -62,38 +60,36 @@ export async function fetchCrossHeaders(
 // ── CrossAggregator ──
 
 export class CrossAggregator {
-  private crossKey: string;
-
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
-    private crossQ: QuestionDef,
+    private crossQ: Question,
     private crossHeader: CrossHeader,
-  ) {
-    this.crossKey = crossQ.type === "SA" ? crossQ.column : crossQ.prefix;
-  }
+  ) {}
 
-  /** Cross-tabulate an SA main question against this cross axis */
-  async aggregateSA(col: string): Promise<AggCells> {
+  /** Cross-tabulate an SA main question against this cross axis.
+   *  `codes` should match the Tally's codes (from GT discovery). */
+  async aggregateSA(question: Question, codes: string[]): Promise<Slice[]> {
     if (this.crossQ.type === "SA") {
-      return this.saSA(col, this.crossQ);
+      return this.saSA(question, codes);
     }
-    return this.saMA(col, this.crossQ);
+    return this.saMA(question, codes);
   }
 
   /** Cross-tabulate an MA main question against this cross axis */
-  async aggregateMA(cols: string[]): Promise<AggCells> {
+  async aggregateMA(question: Question): Promise<Slice[]> {
     if (this.crossQ.type === "SA") {
-      return this.maSA(cols, this.crossQ);
+      return this.maSA(question);
     }
-    return this.maMA(cols, this.crossQ);
+    return this.maMA(question);
   }
 
   // ── SA main × SA cross ──
 
-  private async saSA(col: string, crossQ: SAQuestion): Promise<AggCells> {
-    const crossCol = crossQ.column;
-    const { crossValues } = this.crossHeader;
+  private async saSA(question: Question, codes: string[]): Promise<Slice[]> {
+    const col = question.columns[0];
+    const crossCol = this.crossQ.columns[0];
+    const { crossValues, headers } = this.crossHeader;
     const wExpr = weightExpr(this.weightCol);
 
     const sql = `
@@ -110,27 +106,35 @@ export class CrossAggregator {
     `;
 
     const result = await this.conn.query(sql);
-    const cells: AggCells["cells"] = [];
+    const dataMap = new Map<string, Map<string, { count: number; pct: number }>>();
     for (const r of result.toArray()) {
-      const mv = String(r.mv);
       const sv = String(r.sv);
-      const idx = crossValues.indexOf(sv);
-      if (idx >= 0) {
-        cells.push(
-          mkCell(mv, crossSub(crossCol, sv), Number(r.cnt), Number(r.n), Number(r.pct ?? 0)),
-        );
+      if (!crossValues.includes(sv)) continue;
+      let inner = dataMap.get(sv);
+      if (!inner) {
+        inner = new Map();
+        dataMap.set(sv, inner);
       }
+      inner.set(String(r.mv), { count: Number(r.cnt), pct: Number(r.pct ?? 0) });
     }
 
-    return { cells };
+    return crossValues.map((cv, ci) => {
+      const inner = dataMap.get(cv);
+      const cells = codes.map((code) => {
+        const entry = inner?.get(code);
+        return entry ? mkCell(entry.count, entry.pct) : mkCell(0, 0);
+      });
+      return { code: cv, n: headers[ci].n, cells };
+    });
   }
 
   // ── SA main × MA cross ──
 
-  private async saMA(col: string, crossQ: MAQuestion): Promise<AggCells> {
+  private async saMA(question: Question, codes: string[]): Promise<Slice[]> {
+    const col = question.columns[0];
     const { headers } = this.crossHeader;
 
-    const selectClauses = crossQ.columns.map(
+    const selectClauses = this.crossQ.columns.map(
       (maCol, i) => `${maWeightedCountExpr(maCol, this.weightCol)} AS c${i}`,
     );
 
@@ -144,24 +148,29 @@ export class CrossAggregator {
     `;
 
     const result = await this.conn.query(sql);
-    const cells: AggCells["cells"] = [];
+    const rowData = new Map<string, number[]>();
     for (const r of result.toArray()) {
-      const mv = String(r.mv);
-      for (let i = 0; i < crossQ.columns.length; i++) {
-        const count = Number(r[`c${i}`] ?? 0);
-        const n = headers[i].n;
-        const pct = n > 0 ? (count / n) * 100 : 0;
-        cells.push(mkCell(mv, crossSub(crossQ.prefix, crossQ.codes[i]), count, n, pct));
-      }
+      const counts = this.crossQ.columns.map((_, i) => Number(r[`c${i}`] ?? 0));
+      rowData.set(String(r.mv), counts);
     }
 
-    return { cells };
+    return this.crossQ.codes.map((crossCode, ci) => {
+      const n = headers[ci].n;
+      const cells = codes.map((code) => {
+        const counts = rowData.get(code);
+        const count = counts?.[ci] ?? 0;
+        const pct = n > 0 ? (count / n) * 100 : 0;
+        return mkCell(count, pct);
+      });
+      return { code: crossCode, n, cells };
+    });
   }
 
   // ── MA main × SA cross ──
 
-  private async maSA(maCols: string[], crossQ: SAQuestion): Promise<AggCells> {
-    const crossCol = crossQ.column;
+  private async maSA(question: Question): Promise<Slice[]> {
+    const maCols = question.columns;
+    const crossCol = this.crossQ.columns[0];
     const { headers, crossValues } = this.crossHeader;
 
     const selectClauses = maCols.map(
@@ -191,47 +200,43 @@ export class CrossAggregator {
       naMap.set(String(r.cv), Number(r.na_cnt ?? 0));
     }
 
-    const cells: AggCells["cells"] = [];
-    for (let maIdx = 0; maIdx < maCols.length; maIdx++) {
-      for (let i = 0; i < crossValues.length; i++) {
-        const counts = rowMap.get(crossValues[i]);
+    // codes for MA include column codes + NA
+    return crossValues.map((cv, ci) => {
+      const counts = rowMap.get(cv);
+      const n = headers[ci].n;
+      const cells = maCols.map((_col, maIdx) => {
         const count = counts?.[maIdx] ?? 0;
-        const n = headers[i].n;
         const pct = n > 0 ? (count / n) * 100 : 0;
-        cells.push(mkCell(maCols[maIdx], crossSub(crossCol, crossValues[i]), count, n, pct));
-      }
-    }
-
-    // No-answer cross cells
-    for (let i = 0; i < crossValues.length; i++) {
-      const count = naMap.get(crossValues[i]) ?? 0;
-      const n = headers[i].n;
-      const pct = n > 0 ? (count / n) * 100 : 0;
-      cells.push(mkCell(NA_VALUE, crossSub(crossCol, crossValues[i]), count, n, pct));
-    }
-
-    return { cells };
+        return mkCell(count, pct);
+      });
+      // NA cell
+      const naCount = naMap.get(cv) ?? 0;
+      const naPct = n > 0 ? (naCount / n) * 100 : 0;
+      cells.push(mkCell(naCount, naPct));
+      return { code: cv, n, cells };
+    });
   }
 
   // ── MA main × MA cross ──
 
-  private async maMA(rowMaCols: string[], crossQ: MAQuestion): Promise<AggCells> {
+  private async maMA(question: Question): Promise<Slice[]> {
+    const rowMaCols = question.columns;
     const { headers } = this.crossHeader;
 
     const selectClauses: string[] = [];
     for (let r = 0; r < rowMaCols.length; r++) {
-      for (let c = 0; c < crossQ.columns.length; c++) {
+      for (let c = 0; c < this.crossQ.columns.length; c++) {
         const expr = this.weightCol
-          ? `SUM("${esc(rowMaCols[r])}" * "${esc(crossQ.columns[c])}" * "${esc(this.weightCol)}")`
-          : `SUM("${esc(rowMaCols[r])}" * "${esc(crossQ.columns[c])}")::DOUBLE`;
+          ? `SUM("${esc(rowMaCols[r])}" * "${esc(this.crossQ.columns[c])}" * "${esc(this.weightCol)}")`
+          : `SUM("${esc(rowMaCols[r])}" * "${esc(this.crossQ.columns[c])}")::DOUBLE`;
         selectClauses.push(`${expr} AS r${r}c${c}`);
       }
     }
 
     // No-answer × each cross MA column
     const naBase = `${maNoneSelectedCondition(rowMaCols)} AND (${maShownCondition(rowMaCols)})`;
-    for (let c = 0; c < crossQ.columns.length; c++) {
-      const naCondition = `${naBase} AND "${esc(crossQ.columns[c])}" = 1`;
+    for (let c = 0; c < this.crossQ.columns.length; c++) {
+      const naCondition = `${naBase} AND "${esc(this.crossQ.columns[c])}" = 1`;
       selectClauses.push(`${weightedCountExpr(naCondition, this.weightCol)} AS na_c${c}`);
     }
 
@@ -239,24 +244,18 @@ export class CrossAggregator {
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
 
-    const cells: AggCells["cells"] = [];
-    for (let r = 0; r < rowMaCols.length; r++) {
-      for (let c = 0; c < crossQ.columns.length; c++) {
-        const count = Number(row[`r${r}c${c}`] ?? 0);
-        const n = headers[c].n;
-        const pct = n > 0 ? (count / n) * 100 : 0;
-        cells.push(mkCell(rowMaCols[r], crossSub(crossQ.prefix, crossQ.codes[c]), count, n, pct));
-      }
-    }
-
-    // No-answer cross cells
-    for (let c = 0; c < crossQ.columns.length; c++) {
-      const count = Number(row[`na_c${c}`] ?? 0);
+    return this.crossQ.codes.map((crossCode, c) => {
       const n = headers[c].n;
-      const pct = n > 0 ? (count / n) * 100 : 0;
-      cells.push(mkCell(NA_VALUE, crossSub(crossQ.prefix, crossQ.codes[c]), count, n, pct));
-    }
-
-    return { cells };
+      const cells = rowMaCols.map((_col, r) => {
+        const count = Number(row[`r${r}c${c}`] ?? 0);
+        const pct = n > 0 ? (count / n) * 100 : 0;
+        return mkCell(count, pct);
+      });
+      // NA cell
+      const naCount = Number(row[`na_c${c}`] ?? 0);
+      const naPct = n > 0 ? (naCount / n) * 100 : 0;
+      cells.push(mkCell(naCount, naPct));
+      return { code: crossCode, n, cells };
+    });
   }
 }

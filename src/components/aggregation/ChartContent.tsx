@@ -1,11 +1,10 @@
 /** Chart content: grid layout + individual chart cards */
 
 import { useRef, useEffect } from "preact/hooks";
-import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
-import type { LabelMap } from "../../lib/layout";
-import { pivot } from "../../lib/agg/pivot";
+import type { Question, Tally } from "../../lib/agg/types";
+import { NA_VALUE } from "../../lib/agg/sqlHelpers";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
-import { resolveValueLabel, resolveSubLabel } from "../../lib/labels";
+import { t } from "../../lib/i18n";
 import { useAggregation } from "./AggregationContext";
 import { ResultCard } from "./ResultCard";
 
@@ -20,7 +19,12 @@ interface ChartContentProps {
 }
 
 export function ChartContent({ saChartType, maChartType, paletteId }: ChartContentProps) {
-  const { results, hasCross } = useAggregation();
+  const { tallies, questions, crossCols } = useAggregation();
+  const hasCross = crossCols.length > 0;
+
+  // Group tallies by question
+  const questionCodes = [...new Set(tallies.map((t) => t.question))];
+
   return (
     <div
       class={
@@ -29,63 +33,71 @@ export function ChartContent({ saChartType, maChartType, paletteId }: ChartConte
           : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
       }
     >
-      {results.map((res) => (
-        <ChartCard
-          key={res.question}
-          res={res}
-          gtChartType={res.type === "SA" ? saChartType : maChartType}
-          paletteId={paletteId}
-        />
-      ))}
+      {questionCodes.map((qCode) => {
+        const question = questions.find((q) => q.code === qCode)!;
+        const gtTally = tallies.find((t) => t.question === qCode && t.by === "GT")!;
+        const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== "GT");
+
+        return (
+          <ChartCard
+            key={qCode}
+            question={question}
+            gtTally={gtTally}
+            crossTallies={crossTallies}
+            gtChartType={gtTally.type === "SA" ? saChartType : maChartType}
+            paletteId={paletteId}
+          />
+        );
+      })}
     </div>
   );
 }
 
 interface ChartCardProps {
-  res: AggResult;
+  question: Question;
+  gtTally: Tally;
+  crossTallies: Tally[];
   gtChartType: ChartType;
   paletteId: PaletteId;
 }
 
-function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
-  const { labelMap, crossCols } = useAggregation();
+function ChartCard({ question, gtTally, crossTallies, gtChartType, paletteId }: ChartCardProps) {
+  const { questions } = useAggregation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
-  const pv = pivot(res.cells);
-  const isCross = pv.subs.length > 1;
+  const isCross = crossTallies.length > 0;
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Destroy previous chart if any
     chartRef.current?.destroy();
 
     const theme = getThemeColors();
     if (isCross) {
       chartRef.current = buildCrossChart(
         canvas,
-        pv,
+        gtTally,
+        crossTallies,
         gtChartType,
-        res,
+        question,
         theme,
-        labelMap,
-        crossCols,
+        questions,
         paletteId,
       );
     } else {
-      chartRef.current = buildGtChart(canvas, pv, gtChartType, res, theme, labelMap, paletteId);
+      chartRef.current = buildGtChart(canvas, gtTally, gtChartType, question, theme, paletteId);
     }
 
     return () => {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [res, gtChartType, labelMap, crossCols, paletteId]);
+  }, [gtTally, crossTallies, gtChartType, question, questions, paletteId]);
 
   return (
-    <ResultCard res={res}>
+    <ResultCard tally={gtTally} question={question}>
       <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
         <canvas ref={canvasRef} />
       </div>
@@ -93,25 +105,28 @@ function ChartCard({ res, gtChartType, paletteId }: ChartCardProps) {
   );
 }
 
+function resolveLabel(code: string, question: Question): string {
+  if (code === NA_VALUE) return t("label.na");
+  return question.labels[code] ?? code;
+}
+
 function buildGtChart(
   canvas: HTMLCanvasElement,
-  pv: ReturnType<typeof pivot>,
+  tally: Tally,
   chartType: ChartType,
-  res: AggResult,
+  question: Question,
   theme: ReturnType<typeof getThemeColors>,
-  labelMap: LabelMap,
   paletteId: PaletteId,
 ): Chart {
-  const { mains, lookup } = pv;
-  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, labelMap));
-  const data = mains.map((m) => lookup.get(`${m}\0GT`)?.pct ?? 0);
-  const colors = mains.map((_, i) => getSeriesColor(i, paletteId));
+  const slice = tally.slices[0];
+  const labels = tally.codes.map((code) => resolveLabel(code, question));
+  const data = slice.cells.map((c) => c.pct);
+  const colors = tally.codes.map((_, i) => getSeriesColor(i, paletteId));
 
-  // Stacked bar: each option as a segment in one horizontal bar
   if (chartType === "obi") {
-    const datasets = mains.map((m, i) => ({
-      label: resolveValueLabel(res.type, res.question, m, labelMap),
-      data: [lookup.get(`${m}\0GT`)?.pct ?? 0],
+    const datasets = tally.codes.map((code, i) => ({
+      label: resolveLabel(code, question),
+      data: [slice.cells[i].pct],
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
     }));
@@ -188,26 +203,28 @@ function buildGtChart(
 
 function buildCrossChart(
   canvas: HTMLCanvasElement,
-  pv: ReturnType<typeof pivot>,
+  gtTally: Tally,
+  crossTallies: Tally[],
   gtChartType: ChartType,
-  res: AggResult,
+  question: Question,
   theme: ReturnType<typeof getThemeColors>,
-  labelMap: LabelMap,
-  crossCols: QuestionDef[],
+  questions: Question[],
   paletteId: PaletteId,
 ): Chart {
-  const { mains, subs, lookup } = pv;
-  const crossSubs = subs.filter((s) => s.label !== "GT");
+  // Flatten all cross slices
+  const allSlices = crossTallies.flatMap((ct) => {
+    const crossQ = questions.find((q) => q.code === ct.by)!;
+    return ct.slices.map((s) => ({
+      slice: s,
+      label: resolveLabel(s.code, crossQ),
+    }));
+  });
 
-  // Stacked bar: one bar per cross value
   if (gtChartType === "obi") {
-    const subLabels = crossSubs.map((s) => resolveSubLabel(s.label, labelMap));
-    const datasets = mains.map((m, i) => ({
-      label: resolveValueLabel(res.type, res.question, m, labelMap),
-      data: crossSubs.map((sub) => {
-        const cell = lookup.get(`${m}\0${sub.label}`);
-        return cell?.pct ?? 0;
-      }),
+    const subLabels = allSlices.map((s) => s.label);
+    const datasets = gtTally.codes.map((code, i) => ({
+      label: resolveLabel(code, question),
+      data: allSlices.map((s) => s.slice.cells[i]?.pct ?? 0),
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
     }));
@@ -240,16 +257,12 @@ function buildCrossChart(
     } as ChartConfiguration);
   }
 
-  // Clustered bar chart (direction matches GT selection)
   const isHorizontal = gtChartType === "bar-h";
-  const labels = mains.map((m) => resolveValueLabel(res.type, res.question, m, labelMap));
+  const labels = gtTally.codes.map((code) => resolveLabel(code, question));
 
-  const datasets = crossSubs.map((sub, i) => ({
-    label: resolveSubLabel(sub.label, labelMap),
-    data: mains.map((m) => {
-      const cell = lookup.get(`${m}\0${sub.label}`);
-      return cell?.pct ?? 0;
-    }),
+  const datasets = allSlices.map((s, i) => ({
+    label: s.label,
+    data: gtTally.codes.map((_, ci) => s.slice.cells[ci]?.pct ?? 0),
     backgroundColor: getSeriesColor(i, paletteId),
     borderRadius: 3,
     maxBarThickness: 40,
