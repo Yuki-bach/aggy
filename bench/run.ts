@@ -11,9 +11,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
-import { aggregate } from "../src/lib/agg/aggregate";
-import type { Query, QuestionDef } from "../src/lib/agg/aggregate";
-import { parseLayout, buildQuestionDefs } from "../src/lib/layout";
+import { aggregateGt } from "../src/lib/agg/aggregateGt";
+import { aggregateCross } from "../src/lib/agg/aggregateCross";
+import type { Question } from "../src/lib/agg/types";
+import { parseLayout, buildQuestions } from "../src/lib/layout";
 import { generate, PATTERNS, type PatternDef } from "./generate";
 
 // ---------------------------------------------------------------------------
@@ -73,22 +74,22 @@ interface BenchResult {
 
 async function benchPattern(
   pattern: PatternDef,
-  questions: QuestionDef[],
-  crossCols: QuestionDef[],
+  questions: Question[],
+  crossCols: Question[],
   crossLabel: string,
 ): Promise<BenchResult> {
-  const query: Query = {
-    questions,
-    weight_col: "weight",
-    cross_cols: crossCols,
-  };
-
+  const weightCol = "weight";
   const totalCols = pattern.saCount + pattern.maCount * pattern.maSubCount + 2;
   const times: number[] = [];
 
   for (let i = 0; i < RUNS; i++) {
     const start = performance.now();
-    await aggregate(conn, query);
+    for (const q of questions) {
+      await aggregateGt(conn, q, weightCol);
+      for (const cross of crossCols) {
+        await aggregateCross(conn, q, cross, weightCol);
+      }
+    }
     const elapsed = performance.now() - start;
     times.push(elapsed);
   }
@@ -144,15 +145,11 @@ async function main(): Promise<void> {
 
     // Extract headers from CSV first line
     const headers = csvText.slice(0, csvText.indexOf("\n")).split(",");
-    const questions = buildQuestionDefs(headers, layout);
+    const questions = buildQuestions(headers, layout);
 
     // Pick 2 questions for cross-tab (prefer SA; fall back to MA for MA-only patterns)
-    const saQuestions = questions.filter(
-      (q): q is Extract<QuestionDef, { type: "SA" }> => q.type === "SA",
-    );
-    const maQuestions = questions.filter(
-      (q): q is Extract<QuestionDef, { type: "MA" }> => q.type === "MA",
-    );
+    const saQuestions = questions.filter((q) => q.type === "SA");
+    const maQuestions = questions.filter((q) => q.type === "MA");
     const crossCols = saQuestions.length >= 2 ? saQuestions.slice(0, 2) : maQuestions.slice(0, 2);
     const crossLabel = saQuestions.length >= 2 ? "SA×2" : "MA×2";
 

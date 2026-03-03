@@ -23,16 +23,18 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
-  const { results, weightCol, labelMap } = useAggregation();
+  const { tallies, weightCol } = useAggregation();
   const weightText = weightCol
     ? t("result.weight.applied", { col: weightCol })
     : t("result.weight.none");
+
+  const questionCount = new Set(tallies.map((t) => t.question)).size;
 
   return (
     <div class="mb-6 flex items-center gap-4">
       <h2 class="text-xl font-bold">{t("result.title.gt")}</h2>
       <span class="text-xs text-muted">
-        {t("result.meta", { count: results.length, weight: weightText })}
+        {t("result.meta", { count: questionCount, weight: weightText })}
       </span>
 
       {/* View mode toggle: table / chart */}
@@ -51,9 +53,7 @@ export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
         </ToggleButton>
       </ToggleGroup>
 
-      <ExportMenu
-        onExport={(action: ExportAction) => executeExport(action, results, weightCol, labelMap)}
-      />
+      <ExportMenu onExport={(action: ExportAction) => executeExport(action, tallies, weightCol)} />
     </div>
   );
 }
@@ -78,7 +78,8 @@ export function ViewOpts({
   paletteId,
   callbacks,
 }: ViewOptsProps) {
-  const { hasCross } = useAggregation();
+  const { tallies } = useAggregation();
+  const hasCross = tallies.some((t) => t.by !== null);
 
   const showChart = currentViewMode === "chart";
   const showPctToggle = currentViewMode === "table" && hasCross;

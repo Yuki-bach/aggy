@@ -1,24 +1,20 @@
-import type { AggResult } from "../../lib/agg/aggregate";
-import type { pivot } from "../../lib/agg/pivot";
-import { resolveQuestionLabel, resolveValueLabel } from "../../lib/labels";
+import type { Tally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 import { useAggregation } from "./AggregationContext";
 
 interface GtTableProps {
-  res: AggResult;
-  pv: ReturnType<typeof pivot>;
+  tally: Tally;
   maxPct: number;
 }
 
-export function GtTable({ res, pv, maxPct }: GtTableProps) {
-  const { labelMap, weightCol } = useAggregation();
-  const { mains, lookup } = pv;
-  const questionLabel = resolveQuestionLabel(res.question, labelMap);
+export function GtTable({ tally, maxPct }: GtTableProps) {
+  const { weightCol } = useAggregation();
+  const slice = tally.slices[0];
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums">
-      <caption class="sr-only">{t("table.caption.gt", { question: questionLabel })}</caption>
+      <caption class="sr-only">{t("table.caption.gt", { question: tally.label })}</caption>
       <thead>
         <tr>
           <Th>{t("table.option")}</Th>
@@ -30,15 +26,15 @@ export function GtTable({ res, pv, maxPct }: GtTableProps) {
         </tr>
       </thead>
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
-        {mains.map((main) => {
-          const cell = lookup.get(`${main}\0GT`)!;
-          const label = resolveValueLabel(res.type, res.question, main, labelMap);
+        {tally.codes.map((code, i) => {
+          const cell = slice.cells[i];
+          const label = tally.labels[code] ?? code;
           const countStr =
-            res.type === "SA" && !weightCol ? cell.count.toLocaleString() : cell.count.toFixed(1);
+            tally.type === "SA" && !weightCol ? cell.count.toLocaleString() : cell.count.toFixed(1);
           const barWidth = ((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1);
 
           return (
-            <tr key={main}>
+            <tr key={code}>
               <Td>{label}</Td>
               <Td right mono>
                 {countStr}

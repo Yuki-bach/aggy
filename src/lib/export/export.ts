@@ -1,7 +1,5 @@
-import type { AggResult } from "../agg/aggregate";
-import type { LabelMap } from "../layout";
+import type { Tally } from "../agg/types";
 import { buildExportGrids } from "./exportGrid";
-import { pivot } from "../agg/pivot";
 import { downloadCSV } from "./formatters/csv";
 import { formatTSV, formatHTML } from "./formatters/tsv";
 import { formatMarkdown, downloadMarkdown } from "./formatters/markdown";
@@ -18,42 +16,41 @@ export type ExportAction =
 
 export async function executeExport(
   action: ExportAction,
-  results: AggResult[],
+  tallies: Tally[],
   weightCol: string,
-  labelMap: LabelMap,
 ): Promise<boolean> {
-  const hasCross = results.some((r) => pivot(r.cells).subs.length > 1);
+  const hasCross = tallies.some((t) => t.by !== null);
 
   switch (action) {
     case "download-csv": {
-      const grids = buildExportGrids(results, labelMap);
+      const grids = buildExportGrids(tallies);
       downloadCSV(grids, hasCross);
       return true;
     }
     case "download-markdown": {
-      const grids = buildExportGrids(results, labelMap);
+      const grids = buildExportGrids(tallies);
       downloadMarkdown(grids, hasCross);
       return true;
     }
     case "download-json": {
-      downloadJSON(results, weightCol, labelMap, hasCross);
+      downloadJSON(tallies, weightCol, hasCross);
       return true;
     }
     case "copy-tsv": {
-      const grids = buildExportGrids(results, labelMap);
+      const grids = buildExportGrids(tallies);
       const tsv = formatTSV(grids);
       const html = formatHTML(grids);
       await copyToClipboard({ "text/plain": tsv, "text/html": html });
       return true;
     }
     case "copy-markdown": {
-      const grids = buildExportGrids(results, labelMap);
+      const grids = buildExportGrids(tallies);
       const md = formatMarkdown(grids);
       await copyToClipboard({ "text/plain": md });
       return true;
     }
     case "copy-json": {
-      const json = formatJSON(results, weightCol, labelMap);
+      const json = formatJSON(tallies, weightCol);
       await copyToClipboard({ "text/plain": json });
       return true;
     }

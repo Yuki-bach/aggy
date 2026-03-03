@@ -1,14 +1,10 @@
 import { createContext } from "preact";
 import { useContext } from "preact/hooks";
-import type { LabelMap } from "../../lib/layout";
-import type { AggResult, QuestionDef } from "../../lib/agg/aggregate";
+import type { Tally } from "../../lib/agg/types";
 
 export interface AggregationContextValue {
-  results: AggResult[];
-  labelMap: LabelMap;
+  tallies: Tally[];
   weightCol: string;
-  crossCols: QuestionDef[];
-  hasCross: boolean;
 }
 
 export const AggregationContext = createContext<AggregationContextValue | null>(null);

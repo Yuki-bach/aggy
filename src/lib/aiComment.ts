@@ -1,9 +1,6 @@
 /** AI analysis comment generation via Chrome Built-in AI (Prompt API) */
 
-import type { AggResult } from "./agg/aggregate";
-import type { LabelMap } from "./layout";
-import { pivot } from "./agg/pivot";
-import { resolveQuestionLabel, resolveValueLabel } from "./labels";
+import type { Tally } from "./agg/types";
 import { getLocale, t } from "./i18n";
 
 // Chrome Prompt API type declarations
@@ -31,28 +28,20 @@ declare global {
   var LanguageModel: LanguageModelStatic | undefined;
 }
 
-export function buildPromptPayload(
-  results: AggResult[],
-  weightCol: string,
-  labelMap: LabelMap,
-): string {
+export function buildPromptPayload(tallies: Tally[], weightCol: string): string {
   for (const topN of [5, 3, 2]) {
-    const text = summarizeResults(results, weightCol, labelMap, topN);
+    const text = summarizeResults(tallies, weightCol, topN);
     if (text.length <= MAX_PAYLOAD_CHARS) return text;
   }
-  return summarizeResults(results.slice(0, 20), weightCol, labelMap, 2);
+  return summarizeResults(tallies.slice(0, 20), weightCol, 2);
 }
 
-export async function generateComment(
-  results: AggResult[],
-  weightCol: string,
-  labelMap: LabelMap,
-): Promise<string | null> {
+export async function generateComment(tallies: Tally[], weightCol: string): Promise<string | null> {
   try {
-    if (results.length === 0) return null;
+    if (tallies.length === 0) return null;
 
     const locale = getLocale();
-    const payload = buildPromptPayload(results, weightCol, labelMap);
+    const payload = buildPromptPayload(tallies, weightCol);
     const session = await LanguageModel!.create({
       systemPrompt: t("ai.systemPrompt"),
       expectedInputs: [{ type: "text", languages: [locale] }],
@@ -73,32 +62,29 @@ export async function generateComment(
 
 const MAX_PAYLOAD_CHARS = 3500;
 
-function summarizeResults(
-  results: AggResult[],
-  weightCol: string,
-  labelMap: LabelMap,
-  topN: number,
-): string {
+function summarizeResults(tallies: Tally[], weightCol: string, topN: number): string {
   const lines: string[] = [];
   if (weightCol) {
     lines.push(t("ai.weight", { col: weightCol }));
   }
 
-  for (const res of results) {
-    const pv = pivot(res.cells);
-    const gtN = res.cells.find((c) => c.sub === "GT")?.n ?? 0;
-    if (pv.mains.length === 0) continue;
+  // Only use GT tallies
+  const gtTallies = tallies.filter((t) => t.by === null);
 
-    const qLabel = resolveQuestionLabel(res.question, labelMap);
-    lines.push(`${res.question}: ${qLabel} (${res.type}, n=${gtN})`);
+  for (const tally of gtTallies) {
+    const slice = tally.slices[0];
+    if (!slice || tally.codes.length === 0) continue;
 
-    const withPct = pv.mains
-      .map((m) => ({ main: m, pct: pv.lookup.get(`${m}\0GT`)?.pct ?? 0 }))
-      .filter((e) => pv.lookup.has(`${e.main}\0GT`));
+    lines.push(`${tally.question}: ${tally.label} (${tally.type}, n=${slice.n})`);
+
+    const withPct = tally.codes.map((code, i) => ({
+      code,
+      pct: slice.cells[i]?.pct ?? 0,
+    }));
     const sorted = [...withPct].sort((a, b) => b.pct - a.pct);
     const top = sorted.slice(0, topN);
     const items = top.map((c) => {
-      const label = resolveValueLabel(res.type, res.question, c.main, labelMap);
+      const label = tally.labels[c.code] ?? c.code;
       return `${label}: ${c.pct.toFixed(1)}%`;
     });
 

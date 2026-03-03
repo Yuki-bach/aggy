@@ -1,4 +1,3 @@
-import { pivot } from "../../lib/agg/pivot";
 import type { PctDirection } from "./Toolbar";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
@@ -10,11 +9,19 @@ interface TableContentProps {
 }
 
 export function TableContent({ pctDirection }: TableContentProps) {
-  const { results, hasCross } = useAggregation();
+  const { tallies } = useAggregation();
+  const hasCross = tallies.some((t) => t.by !== null);
+
+  // Compute maxPct across all GT slices for bar chart scaling
   const maxPct = Math.max(
-    ...results.flatMap((r) => r.cells.filter((c) => c.sub === "GT").map((c) => c.pct)),
+    ...tallies
+      .filter((t) => t.by === null)
+      .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct) ?? []),
     0,
   );
+
+  // Group tallies by question
+  const questionCodes = [...new Set(tallies.map((t) => t.question))];
 
   return (
     <div
@@ -24,20 +31,20 @@ export function TableContent({ pctDirection }: TableContentProps) {
           : "grid grid-cols-[repeat(auto-fill,minmax(360px,1fr))] gap-6"
       }
     >
-      {results.map((res) => {
-        const pv = pivot(res.cells);
-        const isCross = pv.subs.length > 1;
+      {questionCodes.map((qCode) => {
+        const gtTally = tallies.find((t) => t.question === qCode && t.by === null)!;
+        const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== null);
 
         return (
           <ResultCard
-            key={res.question}
-            res={res}
-            extraClass={isCross ? "overflow-x-auto" : undefined}
+            key={qCode}
+            tally={gtTally}
+            extraClass={crossTallies.length > 0 ? "overflow-x-auto" : undefined}
           >
-            {isCross ? (
-              <CrossTable res={res} pv={pv} pctDir={pctDirection} />
+            {crossTallies.length > 0 ? (
+              <CrossTable gtTally={gtTally} crossTallies={crossTallies} pctDir={pctDirection} />
             ) : (
-              <GtTable res={res} pv={pv} maxPct={maxPct} />
+              <GtTable tally={gtTally} maxPct={maxPct} />
             )}
           </ResultCard>
         );

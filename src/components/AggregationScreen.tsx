@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
-import { runDuckDBAggregation } from "../lib/duckdbBridge";
-import { buildQuestionDefs, findWeightColumn, countLayoutColumns } from "../lib/layout";
-import { questionKey } from "../lib/agg/aggregate";
+import { runAggregation } from "../lib/duckdbBridge";
+import { buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
 import type { CsvData, LayoutData } from "../lib/types";
@@ -15,13 +14,12 @@ interface AggregationScreenProps {
 }
 
 export default function AggregationScreen({ csv, layout }: AggregationScreenProps) {
-  const questions = buildQuestionDefs(csv.headers, layout.layout);
-  const questionLabels = layout.labelMap.questionLabels;
+  const questions = buildQuestions(csv.headers, layout.layout);
   const weightCol = findWeightColumn(layout.layout);
 
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>(() => {
     const sel: Record<string, boolean> = {};
-    questions.forEach((q) => (sel[questionKey(q)] = false));
+    questions.forEach((q) => (sel[q.code] = false));
     return sel;
   });
   const [weightEnabled, setWeightEnabled] = useState(true);
@@ -32,28 +30,21 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
   useEffect(() => {
     if (!didAutoRun.current) {
       didAutoRun.current = true;
-      runAggregation();
+      handleRunAggregation();
     }
   }, []);
 
-  async function runAggregation(): Promise<void> {
+  async function handleRunAggregation(): Promise<void> {
     setErrorMsg("");
 
     const wCol = weightEnabled ? weightCol : "";
-    const crossCols = questions.filter((q) => crossSelected[questionKey(q)]);
+    const crossCols = questions.filter((q) => crossSelected[q.code]);
 
     try {
-      const results = await runDuckDBAggregation({
-        questions,
-        weight_col: wCol,
-        cross_cols: crossCols,
-      });
+      const tallies = await runAggregation(questions, crossCols, wCol);
       setAggCtx({
-        results,
+        tallies,
         weightCol: wCol,
-        labelMap: layout.labelMap,
-        crossCols,
-        hasCross: crossCols.length > 0,
       });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
@@ -101,7 +92,6 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
           >
             <CrossConfig
               questions={questions}
-              questionLabels={questionLabels}
               crossSelected={crossSelected}
               onToggle={(key, checked) => setCrossSelected((prev) => ({ ...prev, [key]: checked }))}
             />
@@ -127,7 +117,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
         {/* Run Button */}
         <button
           class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
-          onClick={() => runAggregation()}
+          onClick={() => handleRunAggregation()}
         >
           {t("run.button")}
         </button>

@@ -1,5 +1,6 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
-import { aggregate, type Query, type AggResult } from "./agg/aggregate";
+import type { Question, Tally } from "./agg/types";
+import { buildTallies } from "./agg/buildTallies";
 import { setWasmStatus } from "../components/header/WasmStatus";
 
 export async function initDuckDB(): Promise<void> {
@@ -64,10 +65,14 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
   return { headers, rowCount };
 }
 
-/** Execute aggregation against the survey view */
-export async function runDuckDBAggregation(query: Query): Promise<AggResult[]> {
+/** Execute aggregation for all question × axis combinations */
+export async function runAggregation(
+  questions: Question[],
+  crossCols: Question[],
+  weightCol: string,
+): Promise<Tally[]> {
   const c = await getConnection();
-  return aggregate(c, query);
+  return buildTallies(c, questions, crossCols, weightCol);
 }
 
 // ─── Internal ───────────────────────────────────────────────
