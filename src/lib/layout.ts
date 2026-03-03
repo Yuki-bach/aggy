@@ -1,16 +1,14 @@
 import type { Question } from "./agg/types";
 
-export interface LayoutItem {
+interface LayoutItem {
   code: string;
   label: string;
 }
 
-export type LayoutColType = "SA" | "MA" | "WEIGHT";
-
-export interface LayoutEntry {
+interface LayoutEntry {
   key: string;
   label?: string;
-  type: LayoutColType;
+  type: "SA" | "MA" | "WEIGHT";
   items?: LayoutItem[];
 }
 
