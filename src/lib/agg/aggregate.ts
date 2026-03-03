@@ -24,13 +24,10 @@ async function aggregateGT(
   weightCol: string,
 ): Promise<AggResult> {
   const gt = new GtAggregator(conn, weightCol);
-
-  if (question.type === "SA") {
-    const { slice, codes } = await gt.aggregateSA(question.columns[0], question.codes);
-    return { codes, by: null, slices: [slice] };
-  }
-
-  const { slice, codes } = await gt.aggregateMA(question.columns, question.codes);
+  const { slice, codes } =
+    question.type === "SA"
+      ? await gt.aggregateSA(question.columns[0], question.codes)
+      : await gt.aggregateMA(question.columns, question.codes);
   return { codes, by: null, slices: [slice] };
 }
 
@@ -44,16 +41,15 @@ async function aggregateCross(
   const header = crossHeaderCache.get(by.code)!;
   const ca = new CrossAggregator(conn, weightCol, by, header);
 
-  // Discover codes via GT first, then use for cross
+  // Discover codes via GT first (includes conditional NA), then use for cross
   const gt = new GtAggregator(conn, weightCol);
-
-  if (question.type === "SA") {
-    const { codes } = await gt.aggregateSA(question.columns[0], question.codes);
-    const slices = await ca.aggregateSA(question.columns[0], codes);
-    return { codes, by: by.code, slices };
-  }
-
-  const { codes } = await gt.aggregateMA(question.columns, question.codes);
-  const slices = await ca.aggregateMA(question.columns, codes);
+  const { codes } =
+    question.type === "SA"
+      ? await gt.aggregateSA(question.columns[0], question.codes)
+      : await gt.aggregateMA(question.columns, question.codes);
+  const slices =
+    question.type === "SA"
+      ? await ca.aggregateSA(question.columns[0], codes)
+      : await ca.aggregateMA(question.columns, codes);
   return { codes, by: by.code, slices };
 }
