@@ -63,9 +63,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       >
         {/* Data Summary */}
         <section class="shrink-0 border-b border-border p-4">
-          <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">
-            {t("section.summary")}
-          </h2>
+          <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("section.summary")}</h2>
           <div class="text-sm leading-relaxed text-text-secondary">
             <DataSummary
               csv={{
@@ -83,9 +81,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
 
         {/* Cross Config */}
         <section class="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4">
-          <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">
-            {t("section.cross")}
-          </h2>
+          <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("section.cross")}</h2>
           <div
             class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
             role="group"
