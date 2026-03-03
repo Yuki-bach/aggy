@@ -1,7 +1,6 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, Tally } from "./agg/types";
-import { aggregate } from "./agg/aggregate";
-import { toTally } from "./agg/toTally";
+import { aggregateAll } from "./agg/aggregateAll";
 import { setWasmStatus } from "../components/header/WasmStatus";
 
 export async function initDuckDB(): Promise<void> {
@@ -73,16 +72,7 @@ export async function runDuckDBAggregation(
   weightCol: string,
 ): Promise<Tally[]> {
   const c = await getConnection();
-  const tallies: Tally[] = [];
-  for (const q of questions) {
-    const gtResult = await aggregate(c, q, "GT", weightCol);
-    tallies.push(toTally(q, gtResult));
-    for (const cross of crossCols) {
-      const crossResult = await aggregate(c, q, cross, weightCol);
-      tallies.push(toTally(q, crossResult, cross));
-    }
-  }
-  return tallies;
+  return aggregateAll(c, questions, crossCols, weightCol);
 }
 
 // ─── Internal ───────────────────────────────────────────────
