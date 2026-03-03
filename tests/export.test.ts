@@ -171,17 +171,17 @@ describe("formatMarkdown", () => {
 // ─── JSON formatter ─────────────────────────────────────────
 
 describe("formatJSON", () => {
-  it("パース可能なJSONを出力する", () => {
+  it("パース可能なJSONを出力し、Tally[]がそのまま含まれる", () => {
     const json = formatJSON(gtTallies, "");
     const parsed = JSON.parse(json);
 
     expect(parsed.weightColumn).toBeNull();
     expect(Array.isArray(parsed.results)).toBe(true);
-    expect(parsed.results).toHaveLength(2);
+    expect(parsed.results).toHaveLength(gtTallies.length);
     expect(parsed.results[0].question).toBe("q1");
     expect(parsed.results[0].type).toBe("SA");
-    expect(typeof parsed.results[0].n).toBe("number");
-    expect(Array.isArray(parsed.results[0].options)).toBe(true);
+    expect(Array.isArray(parsed.results[0].slices)).toBe(true);
+    expect(Array.isArray(parsed.results[0].codes)).toBe(true);
   });
 
   it("weightCol指定時にweightColumnが含まれる", () => {
@@ -191,22 +191,21 @@ describe("formatJSON", () => {
     expect(parsed.weightColumn).toBe("weight");
   });
 
-  it("各optionにcount/pctが数値で含まれる", () => {
+  it("各sliceのcellsにcount/pctが数値で含まれる", () => {
     const json = formatJSON(gtTallies, "");
     const parsed = JSON.parse(json);
-    const opt = parsed.results[0].options[0];
+    const cell = parsed.results[0].slices[0].cells[0];
 
-    expect(typeof opt.count).toBe("number");
-    expect(typeof opt.pct).toBe("number");
-    expect(typeof opt.label).toBe("string");
+    expect(typeof cell.count).toBe("number");
+    expect(typeof cell.pct).toBe("number");
   });
 
-  it("クロス結果でcrossフィールドが含まれる", () => {
+  it("クロス結果でbyフィールドが含まれる", () => {
     const json = formatJSON(crossTallies, "");
     const parsed = JSON.parse(json);
-    const opt = parsed.results[0].options[0];
+    const crossResult = parsed.results.find((r: Tally) => r.by !== null);
 
-    expect(opt.cross).toBeDefined();
-    expect(typeof opt.cross).toBe("object");
+    expect(crossResult).toBeDefined();
+    expect(crossResult.by.code).toBe("q1");
   });
 });
