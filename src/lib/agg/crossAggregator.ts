@@ -9,6 +9,7 @@ import {
   maWeightedCountExpr,
   maShownCondition,
   maNoneSelectedCondition,
+  NA_VALUE,
 } from "./sqlHelpers";
 
 export interface CrossHeader {
@@ -76,7 +77,10 @@ export class CrossAggregator {
   }
 
   /** Cross-tabulate an MA main question against this cross axis */
-  async aggregateMA(columns: string[], codes: string[]): Promise<Slice[]> {
+  async aggregateMA(
+    columns: string[],
+    codes: string[],
+  ): Promise<{ slices: Slice[]; codes: string[] }> {
     if (this.crossQ.type === "SA") {
       return this.maSA(columns, codes);
     }
@@ -165,7 +169,10 @@ export class CrossAggregator {
 
   // ── MA main × SA cross ──
 
-  private async maSA(columns: string[], _codes: string[]): Promise<Slice[]> {
+  private async maSA(
+    columns: string[],
+    codes: string[],
+  ): Promise<{ slices: Slice[]; codes: string[] }> {
     const crossCol = this.crossQ.columns[0];
     const { headers, crossValues } = this.crossHeader;
 
@@ -197,7 +204,8 @@ export class CrossAggregator {
     }
 
     const hasNA = [...naMap.values()].some((v) => v > 0);
-    return crossValues.map((cv, ci) => {
+    const resultCodes = hasNA ? [...codes, NA_VALUE] : codes;
+    const slices = crossValues.map((cv, ci) => {
       const counts = rowMap.get(cv);
       const n = headers[ci].n;
       const cells = columns.map((_col, maIdx) => {
@@ -212,11 +220,15 @@ export class CrossAggregator {
       }
       return { code: cv, n, cells };
     });
+    return { slices, codes: resultCodes };
   }
 
   // ── MA main × MA cross ──
 
-  private async maMA(columns: string[], _codes: string[]): Promise<Slice[]> {
+  private async maMA(
+    columns: string[],
+    codes: string[],
+  ): Promise<{ slices: Slice[]; codes: string[] }> {
     const { headers } = this.crossHeader;
 
     const selectClauses: string[] = [];
@@ -241,7 +253,8 @@ export class CrossAggregator {
     const row = result.toArray()[0];
 
     const hasNA = this.crossQ.codes.some((_, c) => Number(row[`na_c${c}`] ?? 0) > 0);
-    return this.crossQ.codes.map((crossCode, c) => {
+    const resultCodes = hasNA ? [...codes, NA_VALUE] : codes;
+    const slices = this.crossQ.codes.map((crossCode, c) => {
       const n = headers[c].n;
       const cells = columns.map((_col, r) => {
         const count = Number(row[`r${r}c${c}`] ?? 0);
@@ -255,5 +268,6 @@ export class CrossAggregator {
       }
       return { code: crossCode, n, cells };
     });
+    return { slices, codes: resultCodes };
   }
 }

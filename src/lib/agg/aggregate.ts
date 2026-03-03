@@ -39,15 +39,10 @@ async function aggregateCross(
   const header = crossHeaderCache.get(by.code)!;
   const ca = new CrossAggregator(conn, weightCol, by, header);
 
-  // Discover codes via GT first (includes conditional NA), then use for cross
-  const gt = new GtAggregator(conn, weightCol);
-  const { codes } =
-    question.type === "SA"
-      ? await gt.aggregateSA(question.columns[0], question.codes)
-      : await gt.aggregateMA(question.columns, question.codes);
-  const slices =
-    question.type === "SA"
-      ? await ca.aggregateSA(question.columns[0], codes)
-      : await ca.aggregateMA(question.columns, codes);
+  if (question.type === "SA") {
+    const slices = await ca.aggregateSA(question.columns[0], question.codes);
+    return { codes: question.codes, slices };
+  }
+  const { slices, codes } = await ca.aggregateMA(question.columns, question.codes);
   return { codes, slices };
 }
