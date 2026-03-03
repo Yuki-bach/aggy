@@ -84,7 +84,7 @@ async function benchPattern(
   for (let i = 0; i < RUNS; i++) {
     const start = performance.now();
     for (const q of questions) {
-      await aggregate(conn, q, "GT", weightCol);
+      await aggregate(conn, q, null, weightCol);
       for (const cross of crossCols) {
         await aggregate(conn, q, cross, weightCol);
       }

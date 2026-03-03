@@ -3,7 +3,7 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, AggResult } from "./types";
 import { GtAggregator } from "./gtAggregator";
-import { CrossAggregator, fetchCrossHeaders } from "./crossAggregator";
+import { CrossAggregator } from "./crossAggregator";
 
 /** Aggregate one question by one axis. Returns a single AggResult. */
 export async function aggregate(
@@ -35,9 +35,7 @@ async function aggregateCross(
   by: Question,
   weightCol: string,
 ): Promise<AggResult> {
-  const crossHeaderCache = await fetchCrossHeaders(conn, [by], weightCol);
-  const header = crossHeaderCache.get(by.code)!;
-  const ca = new CrossAggregator(conn, weightCol, by, header);
+  const ca = new CrossAggregator(conn, weightCol, by);
 
   return question.type === "SA"
     ? ca.aggregateSA(question.columns[0], question.codes)

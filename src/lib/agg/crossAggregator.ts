@@ -12,59 +12,11 @@ import {
   NA_VALUE,
 } from "./sqlHelpers";
 
-export interface CrossHeader {
-  headers: Array<{ code: string; n: number }>;
-  crossValues: string[];
-}
-
-// ── Cross-header prefetching ──
-
-export async function fetchCrossHeaders(
-  conn: duckdb.AsyncDuckDBConnection,
-  crossCols: Question[],
-  weightCol: string,
-): Promise<Map<string, CrossHeader>> {
-  const cache = new Map<string, CrossHeader>();
-
-  for (const crossQ of crossCols) {
-    if (crossQ.type === "SA") {
-      const col = crossQ.columns[0];
-      const sql = `
-        SELECT
-          "${esc(col)}" AS cv,
-          ${weightExpr(weightCol)} AS n
-        FROM survey
-        WHERE "${esc(col)}" IS NOT NULL
-        GROUP BY "${esc(col)}"
-      `;
-      const result = await conn.query(sql);
-      const headers = result.toArray().map((r) => ({ code: String(r.cv), n: Number(r.n) }));
-      cache.set(crossQ.code, { headers, crossValues: headers.map((h) => h.code) });
-    } else {
-      const selectClauses = crossQ.columns.map(
-        (col, i) => `${maWeightedCountExpr(col, weightCol)} AS c${i}`,
-      );
-      const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
-      const result = await conn.query(sql);
-      const row = result.toArray()[0];
-      const headers = crossQ.codes.map((code, i) => ({
-        code,
-        n: Number(row[`c${i}`] ?? 0),
-      }));
-      cache.set(crossQ.code, { headers, crossValues: crossQ.codes });
-    }
-  }
-  return cache;
-}
-
-// ── CrossAggregator ──
-
 export class CrossAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
     private crossQ: Question,
-    private crossHeader: CrossHeader,
   ) {}
 
   /** Cross-tabulate an SA main question against this cross axis.
@@ -88,7 +40,7 @@ export class CrossAggregator {
 
   private async saSA(column: string, codes: string[]): Promise<AggResult> {
     const crossCol = this.crossQ.columns[0];
-    const { crossValues, headers } = this.crossHeader;
+    const crossValues = this.crossQ.codes;
     const wExpr = weightExpr(this.weightCol);
 
     const sql = `
@@ -105,10 +57,12 @@ export class CrossAggregator {
     `;
 
     const result = await this.conn.query(sql);
+    const nMap = new Map<string, number>();
     const dataMap = new Map<string, Map<string, { count: number; pct: number }>>();
     for (const r of result.toArray()) {
       const sv = String(r.sv);
       if (!crossValues.includes(sv)) continue;
+      nMap.set(sv, Number(r.n));
       let inner = dataMap.get(sv);
       if (!inner) {
         inner = new Map();
@@ -117,13 +71,13 @@ export class CrossAggregator {
       inner.set(String(r.mv), { count: Number(r.cnt), pct: Number(r.pct ?? 0) });
     }
 
-    const slices = crossValues.map((cv, ci) => {
+    const slices = crossValues.map((cv) => {
       const inner = dataMap.get(cv);
       const cells = codes.map((code) => {
         const entry = inner?.get(code);
         return entry ?? { count: 0, pct: 0 };
       });
-      return { code: cv, n: headers[ci].n, cells };
+      return { code: cv, n: nMap.get(cv) ?? 0, cells };
     });
     return { codes, slices };
   }
@@ -131,8 +85,6 @@ export class CrossAggregator {
   // ── SA main × MA cross ──
 
   private async saMA(column: string, codes: string[]): Promise<AggResult> {
-    const { headers } = this.crossHeader;
-
     const selectClauses = this.crossQ.columns.map(
       (maCol, i) => `${maWeightedCountExpr(maCol, this.weightCol)} AS c${i}`,
     );
@@ -153,8 +105,15 @@ export class CrossAggregator {
       rowData.set(String(r.mv), counts);
     }
 
+    // n for each cross MA column = sum of that column across all main codes
+    const nArr = this.crossQ.columns.map((_, ci) => {
+      let total = 0;
+      for (const counts of rowData.values()) total += counts[ci];
+      return total;
+    });
+
     const slices = this.crossQ.codes.map((crossCode, ci) => {
-      const n = headers[ci].n;
+      const n = nArr[ci];
       const cells = codes.map((code) => {
         const counts = rowData.get(code);
         const count = counts?.[ci] ?? 0;
@@ -170,7 +129,8 @@ export class CrossAggregator {
 
   private async maSA(columns: string[], codes: string[]): Promise<AggResult> {
     const crossCol = this.crossQ.columns[0];
-    const { headers, crossValues } = this.crossHeader;
+    const crossValues = this.crossQ.codes;
+    const wExpr = weightExpr(this.weightCol);
 
     const selectClauses = columns.map(
       (col, i) => `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`,
@@ -184,26 +144,31 @@ export class CrossAggregator {
       SELECT
         "${esc(crossCol)}" AS cv,
         ${selectClauses.join(", ")},
-        ${naExpr} AS na_cnt
+        ${naExpr} AS na_cnt,
+        ${wExpr} AS n
       FROM survey
       WHERE "${esc(crossCol)}" IS NOT NULL
+        AND (${maShownCondition(columns)})
       GROUP BY "${esc(crossCol)}"
     `;
 
     const result = await this.conn.query(sql);
     const rowMap = new Map<string, number[]>();
     const naMap = new Map<string, number>();
+    const nMap = new Map<string, number>();
     for (const r of result.toArray()) {
+      const cv = String(r.cv);
       const counts = columns.map((_, i) => Number(r[`c${i}`] ?? 0));
-      rowMap.set(String(r.cv), counts);
-      naMap.set(String(r.cv), Number(r.na_cnt ?? 0));
+      rowMap.set(cv, counts);
+      naMap.set(cv, Number(r.na_cnt ?? 0));
+      nMap.set(cv, Number(r.n ?? 0));
     }
 
     const hasNA = [...naMap.values()].some((v) => v > 0);
     const resultCodes = hasNA ? [...codes, NA_VALUE] : codes;
-    const slices = crossValues.map((cv, ci) => {
+    const slices = crossValues.map((cv) => {
       const counts = rowMap.get(cv);
-      const n = headers[ci].n;
+      const n = nMap.get(cv) ?? 0;
       const cells = columns.map((_col, maIdx) => {
         const count = counts?.[maIdx] ?? 0;
         const pct = n > 0 ? (count / n) * 100 : 0;
@@ -222,7 +187,7 @@ export class CrossAggregator {
   // ── MA main × MA cross ──
 
   private async maMA(columns: string[], codes: string[]): Promise<AggResult> {
-    const { headers } = this.crossHeader;
+    const shownCond = maShownCondition(columns);
 
     const selectClauses: string[] = [];
     for (let r = 0; r < columns.length; r++) {
@@ -235,10 +200,16 @@ export class CrossAggregator {
     }
 
     // No-answer × each cross MA column
-    const naBase = `${maNoneSelectedCondition(columns)} AND (${maShownCondition(columns)})`;
+    const naBase = `${maNoneSelectedCondition(columns)} AND (${shownCond})`;
     for (let c = 0; c < this.crossQ.columns.length; c++) {
       const naCondition = `${naBase} AND "${esc(this.crossQ.columns[c])}" = 1`;
       selectClauses.push(`${weightedCountExpr(naCondition, this.weightCol)} AS na_c${c}`);
+    }
+
+    // n for each cross MA column: cross col = 1 AND main shown
+    for (let c = 0; c < this.crossQ.columns.length; c++) {
+      const nCondition = `(${shownCond}) AND "${esc(this.crossQ.columns[c])}" = 1`;
+      selectClauses.push(`${weightedCountExpr(nCondition, this.weightCol)} AS n_c${c}`);
     }
 
     const sql = `SELECT ${selectClauses.join(", ")} FROM survey`;
@@ -248,7 +219,7 @@ export class CrossAggregator {
     const hasNA = this.crossQ.codes.some((_, c) => Number(row[`na_c${c}`] ?? 0) > 0);
     const resultCodes = hasNA ? [...codes, NA_VALUE] : codes;
     const slices = this.crossQ.codes.map((crossCode, c) => {
-      const n = headers[c].n;
+      const n = Number(row[`n_c${c}`] ?? 0);
       const cells = columns.map((_col, r) => {
         const count = Number(row[`r${r}c${c}`] ?? 0);
         const pct = n > 0 ? (count / n) * 100 : 0;
