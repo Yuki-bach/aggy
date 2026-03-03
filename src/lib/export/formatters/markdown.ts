@@ -1,6 +1,6 @@
 import type { Tally } from "../../agg/types";
-import { buildExportGrids, type ExportGrid } from "../exportGrid";
-import { downloadFile, today } from "../export";
+import { buildExportGrids, type ExportGrid } from "./grid";
+import { downloadFile, today } from "../download";
 
 export function formatMarkdown(tallies: Tally[]): string {
   const grids = buildExportGrids(tallies);

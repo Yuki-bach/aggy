@@ -1,5 +1,5 @@
-import type { Tally } from "../agg/types";
-import { t } from "../i18n";
+import type { Tally } from "../../agg/types";
+import { t } from "../../i18n";
 
 export interface ExportGrid {
   question: string;

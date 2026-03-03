@@ -1,5 +1,5 @@
 import type { Tally } from "../../agg/types";
-import { talliesToLongRows } from "../longFormat";
+import { talliesToLongRows } from "./longFormat";
 
 export function formatTSV(tallies: Tally[]): string {
   const rows = talliesToLongRows(tallies);

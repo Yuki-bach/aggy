@@ -1,6 +1,6 @@
 import type { Tally } from "../../agg/types";
-import { downloadFile, today } from "../export";
-import { talliesToLongRows } from "../longFormat";
+import { downloadFile, today } from "../download";
+import { talliesToLongRows } from "./longFormat";
 
 export function formatCSV(tallies: Tally[]): string {
   const rows = talliesToLongRows(tallies);

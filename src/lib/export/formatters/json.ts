@@ -1,5 +1,5 @@
 import type { Tally } from "../../agg/types";
-import { downloadFile, today } from "../export";
+import { downloadFile, today } from "../download";
 
 export function formatJSON(tallies: Tally[], weightCol: string): string {
   return JSON.stringify({ weightColumn: weightCol || null, results: tallies }, null, 2);

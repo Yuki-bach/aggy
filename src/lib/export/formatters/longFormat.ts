@@ -1,5 +1,5 @@
-import type { Tally } from "../agg/types";
-import { t } from "../i18n";
+import type { Tally } from "../../agg/types";
+import { t } from "../../i18n";
 
 /**
  * Convert Tally[] to long-format rows (1 row = 1 cell).
