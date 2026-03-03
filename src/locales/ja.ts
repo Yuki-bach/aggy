@@ -62,6 +62,10 @@ const ja: Record<string, string> = {
   "export.header.pct": "%",
   "export.header.total.n": "全体_n",
   "export.header.total.pct": "全体_%",
+  "export.long.total": "(全体)",
+  "export.long.crossAxis": "クロス軸",
+  "export.long.crossValue": "クロス値",
+  "export.long.count": "度数",
   "label.na": "無回答",
 
   // Chart type

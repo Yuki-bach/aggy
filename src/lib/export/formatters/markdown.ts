@@ -1,7 +1,20 @@
-import type { ExportGrid } from "../exportGrid";
-import { downloadFile, today } from "../export";
+import type { Tally } from "../../agg/types";
+import { buildExportGrids, type ExportGrid } from "./grid";
+import { downloadFile, today } from "../download";
 
-export function formatMarkdown(grids: ExportGrid[]): string {
+export function formatMarkdown(tallies: Tally[]): string {
+  const grids = buildExportGrids(tallies);
+  return gridsToMarkdown(grids);
+}
+
+export function downloadMarkdown(tallies: Tally[]): void {
+  const md = formatMarkdown(tallies);
+  downloadFile(md, `result_${today()}.md`, "text/markdown;charset=utf-8;");
+}
+
+// ─── Internal ───────────────────────────────────────────────
+
+function gridsToMarkdown(grids: ExportGrid[]): string {
   const sections: string[] = [];
 
   for (const grid of grids) {
@@ -34,14 +47,6 @@ export function formatMarkdown(grids: ExportGrid[]): string {
 
   return sections.join("\n\n");
 }
-
-export function downloadMarkdown(grids: ExportGrid[], hasCross: boolean): void {
-  const md = formatMarkdown(grids);
-  const prefix = hasCross ? "cross_result" : "gt_result";
-  downloadFile(md, `${prefix}_${today()}.md`, "text/markdown;charset=utf-8;");
-}
-
-// ─── Internal ───────────────────────────────────────────────
 
 function pipeRow(cells: string[]): string {
   return `| ${cells.map((c) => escapeMarkdown(c)).join(" | ")} |`;
