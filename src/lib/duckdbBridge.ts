@@ -66,7 +66,7 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 }
 
 /** Execute aggregation for all question × axis combinations */
-export async function runDuckDBAggregation(
+export async function runAggregation(
   questions: Question[],
   crossCols: Question[],
   weightCol: string,

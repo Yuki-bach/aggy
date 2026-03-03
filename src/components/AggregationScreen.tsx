@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
-import { runDuckDBAggregation } from "../lib/duckdbBridge";
+import { runAggregation } from "../lib/duckdbBridge";
 import { buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
@@ -30,18 +30,18 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
   useEffect(() => {
     if (!didAutoRun.current) {
       didAutoRun.current = true;
-      runAggregation();
+      handleRunAggregation();
     }
   }, []);
 
-  async function runAggregation(): Promise<void> {
+  async function handleRunAggregation(): Promise<void> {
     setErrorMsg("");
 
     const wCol = weightEnabled ? weightCol : "";
     const crossCols = questions.filter((q) => crossSelected[q.code]);
 
     try {
-      const tallies = await runDuckDBAggregation(questions, crossCols, wCol);
+      const tallies = await runAggregation(questions, crossCols, wCol);
       setAggCtx({
         tallies,
         weightCol: wCol,
@@ -119,7 +119,7 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
         {/* Run Button */}
         <button
           class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-[0.02em] text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
-          onClick={() => runAggregation()}
+          onClick={() => handleRunAggregation()}
         >
           {t("run.button")}
         </button>
