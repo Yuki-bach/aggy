@@ -12,7 +12,18 @@ import {
   NA_VALUE,
 } from "./sqlHelpers";
 
-export class GtAggregator {
+export async function aggregateGt(
+  conn: duckdb.AsyncDuckDBConnection,
+  question: { type: string; columns: string[]; codes: string[] },
+  weightCol: string,
+): Promise<AggResult> {
+  const gt = new GtAggregator(conn, weightCol);
+  return question.type === "SA"
+    ? gt.aggregateSA(question.columns[0], question.codes)
+    : gt.aggregateMA(question.columns, question.codes);
+}
+
+class GtAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,

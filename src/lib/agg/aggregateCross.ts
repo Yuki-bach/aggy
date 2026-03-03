@@ -12,7 +12,20 @@ import {
   NA_VALUE,
 } from "./sqlHelpers";
 
-export class CrossAggregator {
+export async function aggregateCross(
+  conn: duckdb.AsyncDuckDBConnection,
+  question: { type: string; columns: string[]; codes: string[] },
+  by: Question,
+  weightCol: string,
+): Promise<AggResult> {
+  const ca = new CrossAggregator(conn, weightCol, by);
+
+  return question.type === "SA"
+    ? ca.aggregateSA(question.columns[0], question.codes)
+    : ca.aggregateMA(question.columns, question.codes);
+}
+
+class CrossAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
