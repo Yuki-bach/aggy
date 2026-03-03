@@ -41,14 +41,31 @@ export function parseLayout(jsonText: string): Layout {
   return parsed as Layout;
 }
 
-/** Build Question[] from CSV headers and layout definition */
-export function buildQuestions(headers: string[], layout: Layout): Question[] {
+/** Filter layout entries to only include columns present in CSV headers */
+export function filterLayout(headers: string[], layout: Layout): Layout {
   const headerSet = new Set(headers);
+  const filtered: Layout = [];
+
+  for (const entry of layout) {
+    if (entry.type === "SA" || entry.type === "WEIGHT") {
+      if (headerSet.has(entry.key)) filtered.push(entry);
+    } else if (entry.type === "MA" && entry.items) {
+      const matchedItems = entry.items.filter((item) => headerSet.has(`${entry.key}_${item.code}`));
+      if (matchedItems.length > 0) {
+        filtered.push({ ...entry, items: matchedItems });
+      }
+    }
+  }
+
+  return filtered;
+}
+
+/** Build Question[] from layout definition */
+export function buildQuestions(layout: Layout): Question[] {
   const questions: Question[] = [];
 
   for (const entry of layout) {
     if (entry.type === "SA") {
-      if (!headerSet.has(entry.key)) continue;
       const codes = entry.items?.map((i) => i.code) ?? [];
       const labels: Record<string, string> = {};
       if (entry.items) {
@@ -69,23 +86,18 @@ export function buildQuestions(headers: string[], layout: Layout): Question[] {
       const codes: string[] = [];
       const labels: Record<string, string> = {};
       for (const item of entry.items) {
-        const col = `${entry.key}_${item.code}`;
-        if (headerSet.has(col)) {
-          columns.push(col);
-          codes.push(item.code);
-          labels[item.code] = item.label;
-        }
+        columns.push(`${entry.key}_${item.code}`);
+        codes.push(item.code);
+        labels[item.code] = item.label;
       }
-      if (columns.length > 0) {
-        questions.push({
-          type: "MA",
-          code: entry.key,
-          columns,
-          codes,
-          label: entry.label ?? entry.key,
-          labels,
-        });
-      }
+      questions.push({
+        type: "MA",
+        code: entry.key,
+        columns,
+        codes,
+        label: entry.label ?? entry.key,
+        labels,
+      });
     }
   }
 
