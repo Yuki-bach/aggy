@@ -1,7 +1,7 @@
 /** Cross-tabulation aggregation — one cross axis at a time */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Question, Slice } from "./types";
+import type { AggResult, Question } from "./types";
 import {
   esc,
   weightExpr,
@@ -69,7 +69,7 @@ export class CrossAggregator {
 
   /** Cross-tabulate an SA main question against this cross axis.
    *  `codes` should match the Tally's codes (from GT discovery). */
-  async aggregateSA(column: string, codes: string[]): Promise<Slice[]> {
+  async aggregateSA(column: string, codes: string[]): Promise<AggResult> {
     if (this.crossQ.type === "SA") {
       return this.saSA(column, codes);
     }
@@ -77,10 +77,7 @@ export class CrossAggregator {
   }
 
   /** Cross-tabulate an MA main question against this cross axis */
-  async aggregateMA(
-    columns: string[],
-    codes: string[],
-  ): Promise<{ slices: Slice[]; codes: string[] }> {
+  async aggregateMA(columns: string[], codes: string[]): Promise<AggResult> {
     if (this.crossQ.type === "SA") {
       return this.maSA(columns, codes);
     }
@@ -89,7 +86,7 @@ export class CrossAggregator {
 
   // ── SA main × SA cross ──
 
-  private async saSA(column: string, codes: string[]): Promise<Slice[]> {
+  private async saSA(column: string, codes: string[]): Promise<AggResult> {
     const crossCol = this.crossQ.columns[0];
     const { crossValues, headers } = this.crossHeader;
     const wExpr = weightExpr(this.weightCol);
@@ -120,7 +117,7 @@ export class CrossAggregator {
       inner.set(String(r.mv), { count: Number(r.cnt), pct: Number(r.pct ?? 0) });
     }
 
-    return crossValues.map((cv, ci) => {
+    const slices = crossValues.map((cv, ci) => {
       const inner = dataMap.get(cv);
       const cells = codes.map((code) => {
         const entry = inner?.get(code);
@@ -128,11 +125,12 @@ export class CrossAggregator {
       });
       return { code: cv, n: headers[ci].n, cells };
     });
+    return { codes, slices };
   }
 
   // ── SA main × MA cross ──
 
-  private async saMA(column: string, codes: string[]): Promise<Slice[]> {
+  private async saMA(column: string, codes: string[]): Promise<AggResult> {
     const { headers } = this.crossHeader;
 
     const selectClauses = this.crossQ.columns.map(
@@ -155,7 +153,7 @@ export class CrossAggregator {
       rowData.set(String(r.mv), counts);
     }
 
-    return this.crossQ.codes.map((crossCode, ci) => {
+    const slices = this.crossQ.codes.map((crossCode, ci) => {
       const n = headers[ci].n;
       const cells = codes.map((code) => {
         const counts = rowData.get(code);
@@ -165,14 +163,12 @@ export class CrossAggregator {
       });
       return { code: crossCode, n, cells };
     });
+    return { codes, slices };
   }
 
   // ── MA main × SA cross ──
 
-  private async maSA(
-    columns: string[],
-    codes: string[],
-  ): Promise<{ slices: Slice[]; codes: string[] }> {
+  private async maSA(columns: string[], codes: string[]): Promise<AggResult> {
     const crossCol = this.crossQ.columns[0];
     const { headers, crossValues } = this.crossHeader;
 
@@ -225,10 +221,7 @@ export class CrossAggregator {
 
   // ── MA main × MA cross ──
 
-  private async maMA(
-    columns: string[],
-    codes: string[],
-  ): Promise<{ slices: Slice[]; codes: string[] }> {
+  private async maMA(columns: string[], codes: string[]): Promise<AggResult> {
     const { headers } = this.crossHeader;
 
     const selectClauses: string[] = [];

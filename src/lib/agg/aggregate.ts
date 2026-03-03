@@ -39,10 +39,7 @@ async function aggregateCross(
   const header = crossHeaderCache.get(by.code)!;
   const ca = new CrossAggregator(conn, weightCol, by, header);
 
-  if (question.type === "SA") {
-    const slices = await ca.aggregateSA(question.columns[0], question.codes);
-    return { codes: question.codes, slices };
-  }
-  const { slices, codes } = await ca.aggregateMA(question.columns, question.codes);
-  return { codes, slices };
+  return question.type === "SA"
+    ? ca.aggregateSA(question.columns[0], question.codes)
+    : ca.aggregateMA(question.columns, question.codes);
 }
