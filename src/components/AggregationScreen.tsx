@@ -3,7 +3,7 @@ import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
 import { runAggregation } from "../lib/duckdbBridge";
-import { buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
+import { filterLayout, buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
 import type { CsvData, LayoutData } from "../lib/types";
@@ -14,7 +14,8 @@ interface AggregationScreenProps {
 }
 
 export default function AggregationScreen({ csv, layout }: AggregationScreenProps) {
-  const questions = buildQuestions(csv.headers, layout.layout);
+  const filtered = filterLayout(csv.headers, layout.layout);
+  const questions = buildQuestions(filtered);
   const weightCol = findWeightColumn(layout.layout);
 
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>(() => {

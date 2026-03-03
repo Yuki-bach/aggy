@@ -14,7 +14,7 @@ import { performance } from "node:perf_hooks";
 import { aggregateGt } from "../src/lib/agg/aggregateGt";
 import { aggregateCross } from "../src/lib/agg/aggregateCross";
 import type { Question } from "../src/lib/agg/types";
-import { parseLayout, buildQuestions } from "../src/lib/layout";
+import { parseLayout, filterLayout, buildQuestions } from "../src/lib/layout";
 import { generate, PATTERNS, type PatternDef } from "./generate";
 
 // ---------------------------------------------------------------------------
@@ -145,7 +145,8 @@ async function main(): Promise<void> {
 
     // Extract headers from CSV first line
     const headers = csvText.slice(0, csvText.indexOf("\n")).split(",");
-    const questions = buildQuestions(headers, layout);
+    const filtered = filterLayout(headers, layout);
+    const questions = buildQuestions(filtered);
 
     // Pick 2 questions for cross-tab (prefer SA; fall back to MA for MA-only patterns)
     const saQuestions = questions.filter((q) => q.type === "SA");
