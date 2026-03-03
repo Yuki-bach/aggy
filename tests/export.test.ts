@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregate } from "../src/lib/agg/aggregate";
 import type { Question, Tally } from "../src/lib/agg/types";
+import { toTally } from "../src/lib/duckdbBridge";
 import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
 import { buildExportGrids, type ExportGrid } from "../src/lib/export/exportGrid";
 import { formatCSV } from "../src/lib/export/formatters/csv";
@@ -35,8 +36,6 @@ const q3: Question = {
   labels: {},
 };
 
-const ALL_QUESTIONS = [q1, q2, q3];
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let conn: any;
 let gtTallies: Tally[];
@@ -47,13 +46,17 @@ beforeAll(async () => {
 
   // GT tallies
   gtTallies = [];
-  gtTallies.push(await aggregate(conn, q1, "GT", ""));
-  gtTallies.push(await aggregate(conn, q3, "GT", ""));
+  const q1GtResult = await aggregate(conn, q1, "GT", "");
+  gtTallies.push(toTally(q1, q1GtResult));
+  const q3GtResult = await aggregate(conn, q3, "GT", "");
+  gtTallies.push(toTally(q3, q3GtResult));
 
   // Cross tallies: q2 × q1
   crossTallies = [];
-  crossTallies.push(await aggregate(conn, q2, "GT", ""));
-  crossTallies.push(await aggregate(conn, q2, q1, ""));
+  const q2GtResult = await aggregate(conn, q2, "GT", "");
+  crossTallies.push(toTally(q2, q2GtResult));
+  const q2CrossResult = await aggregate(conn, q2, q1, "");
+  crossTallies.push(toTally(q2, q2CrossResult, q1));
 }, 30_000);
 
 afterAll(async () => {
@@ -64,7 +67,7 @@ afterAll(async () => {
 
 describe("buildExportGrids", () => {
   it("GT結果から正しいグリッド構造を生成する", () => {
-    const grids = buildExportGrids(gtTallies, ALL_QUESTIONS);
+    const grids = buildExportGrids(gtTallies);
     expect(grids).toHaveLength(2);
 
     const grid = grids[0];
@@ -79,7 +82,7 @@ describe("buildExportGrids", () => {
   });
 
   it("クロス結果からヘッダー2行のグリッドを生成する", () => {
-    const grids = buildExportGrids(crossTallies, ALL_QUESTIONS);
+    const grids = buildExportGrids(crossTallies);
     expect(grids).toHaveLength(1);
 
     const grid = grids[0];
@@ -94,7 +97,7 @@ describe("buildExportGrids", () => {
 
 describe("formatCSV", () => {
   it("カンマ区切りで正しく出力される", () => {
-    const grids = buildExportGrids(gtTallies, ALL_QUESTIONS);
+    const grids = buildExportGrids(gtTallies);
     const csv = formatCSV(grids);
     const lines = csv.split("\r\n");
 
@@ -121,7 +124,7 @@ describe("formatCSV", () => {
 
 describe("formatTSV", () => {
   it("タブ区切りで出力される", () => {
-    const grids = buildExportGrids(gtTallies, ALL_QUESTIONS);
+    const grids = buildExportGrids(gtTallies);
     const tsv = formatTSV(grids);
     const lines = tsv.split("\n");
 
@@ -134,7 +137,7 @@ describe("formatTSV", () => {
 
 describe("formatHTML", () => {
   it("テーブルタグを含むHTMLを生成する", () => {
-    const grids = buildExportGrids(gtTallies, ALL_QUESTIONS);
+    const grids = buildExportGrids(gtTallies);
     const html = formatHTML(grids);
 
     expect(html).toContain("<table>");
@@ -160,7 +163,7 @@ describe("formatHTML", () => {
 
 describe("formatMarkdown", () => {
   it("パイプ区切りのテーブルを生成する", () => {
-    const grids = buildExportGrids(gtTallies, ALL_QUESTIONS);
+    const grids = buildExportGrids(gtTallies);
     const md = formatMarkdown(grids);
 
     expect(md).toContain("### q1 (SA)");
@@ -169,7 +172,7 @@ describe("formatMarkdown", () => {
   });
 
   it("クロス結果でもMarkdownテーブルを生成する", () => {
-    const grids = buildExportGrids(crossTallies, ALL_QUESTIONS);
+    const grids = buildExportGrids(crossTallies);
     const md = formatMarkdown(grids);
 
     expect(md).toContain("### q2 (SA)");
@@ -181,7 +184,7 @@ describe("formatMarkdown", () => {
 
 describe("formatJSON", () => {
   it("パース可能なJSONを出力する", () => {
-    const json = formatJSON(gtTallies, "", ALL_QUESTIONS);
+    const json = formatJSON(gtTallies, "");
     const parsed = JSON.parse(json);
 
     expect(parsed.weightColumn).toBeNull();
@@ -194,14 +197,14 @@ describe("formatJSON", () => {
   });
 
   it("weightCol指定時にweightColumnが含まれる", () => {
-    const json = formatJSON(gtTallies, "weight", ALL_QUESTIONS);
+    const json = formatJSON(gtTallies, "weight");
     const parsed = JSON.parse(json);
 
     expect(parsed.weightColumn).toBe("weight");
   });
 
   it("各optionにcount/pctが数値で含まれる", () => {
-    const json = formatJSON(gtTallies, "", ALL_QUESTIONS);
+    const json = formatJSON(gtTallies, "");
     const parsed = JSON.parse(json);
     const opt = parsed.results[0].options[0];
 
@@ -211,7 +214,7 @@ describe("formatJSON", () => {
   });
 
   it("クロス結果でcrossフィールドが含まれる", () => {
-    const json = formatJSON(crossTallies, "", ALL_QUESTIONS);
+    const json = formatJSON(crossTallies, "");
     const parsed = JSON.parse(json);
     const opt = parsed.results[0].options[0];
 

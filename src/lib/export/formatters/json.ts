@@ -1,6 +1,4 @@
-import type { Question, Tally } from "../../agg/types";
-import { NA_VALUE } from "../../agg/sqlHelpers";
-import { t } from "../../i18n";
+import type { Tally } from "../../agg/types";
 import { downloadFile, today } from "../export";
 
 interface JsonOption {
@@ -22,24 +20,18 @@ interface JsonExport {
   results: JsonExportEntry[];
 }
 
-function resolveLabel(code: string, question: Question): string {
-  if (code === NA_VALUE) return t("label.na");
-  return question.labels[code] ?? code;
-}
-
-export function formatJSON(tallies: Tally[], weightCol: string, questions: Question[]): string {
+export function formatJSON(tallies: Tally[], weightCol: string): string {
   const questionCodes = [...new Set(tallies.map((t) => t.question))];
 
   const entries: JsonExportEntry[] = questionCodes.map((qCode) => {
-    const question = questions.find((q) => q.code === qCode);
-    const gtTally = tallies.find((t) => t.question === qCode && t.by === "GT")!;
-    const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== "GT");
+    const gtTally = tallies.find((t) => t.question === qCode && t.by === null)!;
+    const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== null);
     const gtSlice = gtTally.slices[0];
 
     const options: JsonOption[] = gtTally.codes.map((code, i) => {
       const gtCell = gtSlice.cells[i];
       const opt: JsonOption = {
-        label: resolveLabel(code, question!),
+        label: gtTally.labels[code] ?? code,
         count: gtCell.count,
         pct: gtCell.pct,
       };
@@ -47,10 +39,10 @@ export function formatJSON(tallies: Tally[], weightCol: string, questions: Quest
       if (crossTallies.length > 0) {
         opt.cross = {};
         for (const crossTally of crossTallies) {
-          const crossQ = questions.find((q) => q.code === crossTally.by);
+          const axis = crossTally.by!;
           for (const slice of crossTally.slices) {
             const cell = slice.cells[i];
-            const label = crossQ ? resolveLabel(slice.code, crossQ) : slice.code;
+            const label = axis.labels[slice.code] ?? slice.code;
             if (cell) {
               opt.cross[label] = { count: cell.count, pct: cell.pct };
             }
@@ -71,13 +63,8 @@ export function formatJSON(tallies: Tally[], weightCol: string, questions: Quest
   return JSON.stringify(output, null, 2);
 }
 
-export function downloadJSON(
-  tallies: Tally[],
-  weightCol: string,
-  questions: Question[],
-  hasCross?: boolean,
-): void {
-  const json = formatJSON(tallies, weightCol, questions);
+export function downloadJSON(tallies: Tally[], weightCol: string, hasCross?: boolean): void {
+  const json = formatJSON(tallies, weightCol);
   const prefix = hasCross ? "cross_result" : "gt_result";
   downloadFile(json, `${prefix}_${today()}.json`, "application/json;charset=utf-8;");
 }

@@ -9,13 +9,13 @@ interface TableContentProps {
 }
 
 export function TableContent({ pctDirection }: TableContentProps) {
-  const { tallies, questions, crossCols } = useAggregation();
+  const { tallies, crossCols } = useAggregation();
   const hasCross = crossCols.length > 0;
 
   // Compute maxPct across all GT slices for bar chart scaling
   const maxPct = Math.max(
     ...tallies
-      .filter((t) => t.by === "GT")
+      .filter((t) => t.by === null)
       .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct) ?? []),
     0,
   );
@@ -32,26 +32,19 @@ export function TableContent({ pctDirection }: TableContentProps) {
       }
     >
       {questionCodes.map((qCode) => {
-        const question = questions.find((q) => q.code === qCode)!;
-        const gtTally = tallies.find((t) => t.question === qCode && t.by === "GT")!;
-        const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== "GT");
+        const gtTally = tallies.find((t) => t.question === qCode && t.by === null)!;
+        const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== null);
 
         return (
           <ResultCard
             key={qCode}
             tally={gtTally}
-            question={question}
             extraClass={crossTallies.length > 0 ? "overflow-x-auto" : undefined}
           >
             {crossTallies.length > 0 ? (
-              <CrossTable
-                gtTally={gtTally}
-                crossTallies={crossTallies}
-                question={question}
-                pctDir={pctDirection}
-              />
+              <CrossTable gtTally={gtTally} crossTallies={crossTallies} pctDir={pctDirection} />
             ) : (
-              <GtTable tally={gtTally} question={question} maxPct={maxPct} />
+              <GtTable tally={gtTally} maxPct={maxPct} />
             )}
           </ResultCard>
         );

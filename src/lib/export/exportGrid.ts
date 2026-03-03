@@ -1,5 +1,4 @@
-import type { Question, Tally } from "../agg/types";
-import { NA_VALUE } from "../agg/sqlHelpers";
+import type { Tally } from "../agg/types";
 import { t } from "../i18n";
 
 export interface ExportGrid {
@@ -9,23 +8,21 @@ export interface ExportGrid {
   rows: string[][];
 }
 
-export function buildExportGrids(tallies: Tally[], questions: Question[]): ExportGrid[] {
-  const hasCross = tallies.some((t) => t.by !== "GT");
+export function buildExportGrids(tallies: Tally[]): ExportGrid[] {
+  const hasCross = tallies.some((t) => t.by !== null);
   if (hasCross) {
-    return buildCrossGrids(tallies, questions);
+    return buildCrossGrids(tallies);
   }
-  return tallies.filter((t) => t.by === "GT").map((tally) => buildGtGrid(tally, questions));
+  return tallies.filter((t) => t.by === null).map((tally) => buildGtGrid(tally));
 }
 
 // ─── Internal ───────────────────────────────────────────────
 
-export function resolveMainLabel(code: string, question: Question): string {
-  if (code === NA_VALUE) return t("label.na");
-  return question.labels[code] ?? code;
+function resolveLabel(code: string, tally: Tally): string {
+  return tally.labels[code] ?? code;
 }
 
-function buildGtGrid(tally: Tally, questions: Question[]): ExportGrid {
-  const question = questions.find((q) => q.code === tally.question);
+function buildGtGrid(tally: Tally): ExportGrid {
   const slice = tally.slices[0];
   const headers = [
     [
@@ -44,7 +41,7 @@ function buildGtGrid(tally: Tally, questions: Question[]): ExportGrid {
     rows.push([
       tally.question,
       tally.type,
-      resolveMainLabel(code, question!),
+      resolveLabel(code, tally),
       cell.count.toFixed(1),
       cell.pct.toFixed(1),
     ]);
@@ -54,17 +51,17 @@ function buildGtGrid(tally: Tally, questions: Question[]): ExportGrid {
   return { question: tally.question, type: tally.type, headers, rows };
 }
 
-function buildCrossGrids(tallies: Tally[], questions: Question[]): ExportGrid[] {
+function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
   // Find the first cross tally to build shared headers
-  const firstCross = tallies.find((t) => t.by !== "GT");
+  const firstCross = tallies.find((t) => t.by !== null);
   if (!firstCross) {
-    return tallies.filter((t) => t.by === "GT").map((tally) => buildGtGrid(tally, questions));
+    return tallies.filter((t) => t.by === null).map((tally) => buildGtGrid(tally));
   }
 
   // Collect all cross tallies for header generation
   const questionCodes = [...new Set(tallies.map((t) => t.question))];
   const firstQCode = questionCodes[0];
-  const crossTalliesForFirst = tallies.filter((t) => t.question === firstQCode && t.by !== "GT");
+  const crossTalliesForFirst = tallies.filter((t) => t.question === firstQCode && t.by !== null);
 
   // Build shared 2-row headers
   const headerRow1 = [
@@ -77,19 +74,18 @@ function buildCrossGrids(tallies: Tally[], questions: Question[]): ExportGrid[] 
   const headerRow2 = ["", "", "", "", ""];
 
   for (const crossTally of crossTalliesForFirst) {
-    const crossQ = questions.find((q) => q.code === crossTally.by);
+    const axis = crossTally.by!;
     for (const slice of crossTally.slices) {
       headerRow1.push("");
-      const sliceLabel = crossQ ? resolveMainLabel(slice.code, crossQ) : slice.code;
+      const sliceLabel = axis.labels[slice.code] ?? slice.code;
       headerRow2.push(`${sliceLabel}(n=${slice.n.toFixed(1)})`);
     }
   }
   const sharedHeaders = [headerRow1, headerRow2];
 
   return questionCodes.map((qCode) => {
-    const question = questions.find((q) => q.code === qCode)!;
-    const gtTally = tallies.find((t) => t.question === qCode && t.by === "GT")!;
-    const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== "GT");
+    const gtTally = tallies.find((t) => t.question === qCode && t.by === null)!;
+    const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== null);
     const gtSlice = gtTally.slices[0];
     const rows: string[][] = [];
 
@@ -99,7 +95,7 @@ function buildCrossGrids(tallies: Tally[], questions: Question[]): ExportGrid[] 
       const dataRow = [
         gtTally.question,
         gtTally.type,
-        resolveMainLabel(code, question),
+        resolveLabel(code, gtTally),
         gtCell.count.toFixed(1),
         gtCell.pct.toFixed(1),
       ];

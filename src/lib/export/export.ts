@@ -1,4 +1,4 @@
-import type { Question, Tally } from "../agg/types";
+import type { Tally } from "../agg/types";
 import { buildExportGrids } from "./exportGrid";
 import { downloadCSV } from "./formatters/csv";
 import { formatTSV, formatHTML } from "./formatters/tsv";
@@ -18,40 +18,39 @@ export async function executeExport(
   action: ExportAction,
   tallies: Tally[],
   weightCol: string,
-  questions: Question[],
 ): Promise<boolean> {
-  const hasCross = tallies.some((t) => t.by !== "GT");
+  const hasCross = tallies.some((t) => t.by !== null);
 
   switch (action) {
     case "download-csv": {
-      const grids = buildExportGrids(tallies, questions);
+      const grids = buildExportGrids(tallies);
       downloadCSV(grids, hasCross);
       return true;
     }
     case "download-markdown": {
-      const grids = buildExportGrids(tallies, questions);
+      const grids = buildExportGrids(tallies);
       downloadMarkdown(grids, hasCross);
       return true;
     }
     case "download-json": {
-      downloadJSON(tallies, weightCol, questions, hasCross);
+      downloadJSON(tallies, weightCol, hasCross);
       return true;
     }
     case "copy-tsv": {
-      const grids = buildExportGrids(tallies, questions);
+      const grids = buildExportGrids(tallies);
       const tsv = formatTSV(grids);
       const html = formatHTML(grids);
       await copyToClipboard({ "text/plain": tsv, "text/html": html });
       return true;
     }
     case "copy-markdown": {
-      const grids = buildExportGrids(tallies, questions);
+      const grids = buildExportGrids(tallies);
       const md = formatMarkdown(grids);
       await copyToClipboard({ "text/plain": md });
       return true;
     }
     case "copy-json": {
-      const json = formatJSON(tallies, weightCol, questions);
+      const json = formatJSON(tallies, weightCol);
       await copyToClipboard({ "text/plain": json });
       return true;
     }

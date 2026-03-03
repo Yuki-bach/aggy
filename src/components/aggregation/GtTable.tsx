@@ -1,22 +1,20 @@
-import type { Question, Tally } from "../../lib/agg/types";
-import { NA_VALUE } from "../../lib/agg/sqlHelpers";
+import type { Tally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 import { useAggregation } from "./AggregationContext";
 
 interface GtTableProps {
   tally: Tally;
-  question: Question;
   maxPct: number;
 }
 
-export function GtTable({ tally, question, maxPct }: GtTableProps) {
+export function GtTable({ tally, maxPct }: GtTableProps) {
   const { weightCol } = useAggregation();
   const slice = tally.slices[0];
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums">
-      <caption class="sr-only">{t("table.caption.gt", { question: question.label })}</caption>
+      <caption class="sr-only">{t("table.caption.gt", { question: tally.label })}</caption>
       <thead>
         <tr>
           <Th>{t("table.option")}</Th>
@@ -30,7 +28,7 @@ export function GtTable({ tally, question, maxPct }: GtTableProps) {
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
         {tally.codes.map((code, i) => {
           const cell = slice.cells[i];
-          const label = code === NA_VALUE ? t("label.na") : (question.labels[code] ?? code);
+          const label = tally.labels[code] ?? code;
           const countStr =
             tally.type === "SA" && !weightCol ? cell.count.toLocaleString() : cell.count.toFixed(1);
           const barWidth = ((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1);
