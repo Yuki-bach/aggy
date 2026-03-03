@@ -19,20 +19,19 @@ export async function executeExport(
   tallies: Tally[],
   weightCol: string,
 ): Promise<boolean> {
-  const hasCross = tallies.some((t) => t.by !== null);
-
   switch (action) {
     case "download-csv": {
-      downloadCSV(tallies, hasCross);
+      downloadCSV(tallies);
       return true;
     }
     case "download-markdown": {
+      const hasCross = tallies.some((t) => t.by !== null);
       const grids = buildExportGrids(tallies);
       downloadMarkdown(grids, hasCross);
       return true;
     }
     case "download-json": {
-      downloadJSON(tallies, weightCol, hasCross);
+      downloadJSON(tallies, weightCol);
       return true;
     }
     case "copy-tsv": {

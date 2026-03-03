@@ -7,9 +7,8 @@ export function formatCSV(tallies: Tally[]): string {
   return rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
 }
 
-export function downloadCSV(tallies: Tally[], hasCross: boolean): void {
+export function downloadCSV(tallies: Tally[]): void {
   const bom = "\uFEFF";
   const csv = bom + formatCSV(tallies);
-  const prefix = hasCross ? "cross_result" : "gt_result";
-  downloadFile(csv, `${prefix}_${today()}.csv`, "text/csv;charset=utf-8;");
+  downloadFile(csv, `result_${today()}.csv`, "text/csv;charset=utf-8;");
 }
