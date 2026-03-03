@@ -1,7 +1,7 @@
 /** Cross-tabulation aggregation — one cross axis at a time */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggResult, Question } from "./types";
+import type { AggInput, AggResult } from "./types";
 import {
   esc,
   weightExpr,
@@ -14,8 +14,8 @@ import {
 
 export async function aggregateCross(
   conn: duckdb.AsyncDuckDBConnection,
-  question: { type: string; columns: string[]; codes: string[] },
-  by: Question,
+  question: AggInput,
+  by: AggInput,
   weightCol: string,
 ): Promise<AggResult> {
   const ca = new CrossAggregator(conn, weightCol, by);
@@ -32,7 +32,7 @@ class CrossAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
-    private crossQ: Question,
+    private crossQ: AggInput,
   ) {}
 
   // ── SA main × SA cross ──

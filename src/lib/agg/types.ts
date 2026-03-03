@@ -9,6 +9,8 @@ export interface Question {
   labels: Record<string, string>;
 }
 
+export type AggInput = Pick<Question, "type" | "columns" | "codes">;
+
 export interface Cell {
   count: number;
   pct: number;
