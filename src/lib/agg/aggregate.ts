@@ -9,10 +9,10 @@ import { CrossAggregator, fetchCrossHeaders } from "./crossAggregator";
 export async function aggregate(
   conn: duckdb.AsyncDuckDBConnection,
   question: Question,
-  by: Question | "GT",
+  by: Question | null,
   weightCol: string,
 ): Promise<AggResult> {
-  if (by === "GT") {
+  if (by === null) {
     return aggregateGT(conn, question, weightCol);
   }
   return aggregateCross(conn, question, by, weightCol);

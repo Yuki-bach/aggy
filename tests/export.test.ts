@@ -46,14 +46,14 @@ beforeAll(async () => {
 
   // GT tallies
   gtTallies = [];
-  const q1GtResult = await aggregate(conn, q1, "GT", "");
+  const q1GtResult = await aggregate(conn, q1, null, "");
   gtTallies.push(toTally(q1, q1GtResult));
-  const q3GtResult = await aggregate(conn, q3, "GT", "");
+  const q3GtResult = await aggregate(conn, q3, null, "");
   gtTallies.push(toTally(q3, q3GtResult));
 
   // Cross tallies: q2 × q1
   crossTallies = [];
-  const q2GtResult = await aggregate(conn, q2, "GT", "");
+  const q2GtResult = await aggregate(conn, q2, null, "");
   crossTallies.push(toTally(q2, q2GtResult));
   const q2CrossResult = await aggregate(conn, q2, q1, "");
   crossTallies.push(toTally(q2, q2CrossResult, q1));

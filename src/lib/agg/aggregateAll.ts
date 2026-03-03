@@ -14,7 +14,7 @@ export async function aggregateAll(
 ): Promise<Tally[]> {
   const tallies: Tally[] = [];
   for (const q of questions) {
-    const gtResult = await aggregate(conn, q, "GT", weightCol);
+    const gtResult = await aggregate(conn, q, null, weightCol);
     tallies.push(toTally(q, gtResult));
     for (const cross of crossCols) {
       const crossResult = await aggregate(conn, q, cross, weightCol);
