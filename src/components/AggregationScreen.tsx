@@ -60,17 +60,6 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
     }
   }
 
-  if (!preparedLayout) {
-    return (
-      <>
-        <div class="flex items-center justify-center bg-surface" role="status">
-          <p class="text-sm text-muted">...</p>
-        </div>
-        <div class="bg-bg" />
-      </>
-    );
-  }
-
   return (
     <>
       {/* Left Panel */}
