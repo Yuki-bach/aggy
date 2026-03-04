@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
-import { runAggregation, getConnection } from "../lib/duckdbBridge";
+import { runAggregation, prepareDateLayout } from "../lib/duckdbBridge";
 import { filterLayout, buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
 import type { Layout } from "../lib/layout";
-import { prepareDateColumns } from "../lib/datePreparation";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
 import type { CsvData, LayoutData } from "../lib/types";
@@ -27,11 +26,9 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
   const [aggCtx, setAggCtx] = useState<AggregationContextValue | null>(null);
 
   useEffect(() => {
-    getConnection()
-      .then((conn) => prepareDateColumns(conn, layout.layout))
-      .then((prepared) => {
-        setPreparedLayout(prepared);
-      });
+    prepareDateLayout(layout.layout).then((prepared) => {
+      setPreparedLayout(prepared);
+    });
   }, [layout]);
 
   const didAutoRun = useRef(false);

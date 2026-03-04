@@ -1,6 +1,8 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, Tally } from "./agg/types";
+import type { Layout } from "./layout";
 import { buildTallies } from "./agg/buildTallies";
+import { prepareDateColumns } from "./datePreparation";
 import { setWasmStatus } from "../components/header/WasmStatus";
 
 export async function initDuckDB(): Promise<void> {
@@ -75,6 +77,12 @@ export async function runAggregation(
   return buildTallies(c, questions, crossCols, weightCol);
 }
 
+/** Prepare DATE columns in layout (convert to SA with auto-generated items) */
+export async function prepareDateLayout(layout: Layout): Promise<Layout> {
+  const c = await getConnection();
+  return prepareDateColumns(c, layout);
+}
+
 // ─── Internal ───────────────────────────────────────────────
 
 const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
@@ -90,7 +98,7 @@ function updateStatusUI(s: DuckStatus, label?: string): void {
   setWasmStatus(s, label);
 }
 
-export async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
+async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
   if (!db || status !== "ready") throw new Error("DuckDB is not ready");
   if (!conn) conn = await db.connect();
   return conn;
