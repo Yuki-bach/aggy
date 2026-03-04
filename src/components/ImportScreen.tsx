@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "preact/compat";
-import { useCallback, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { parseLayout } from "../lib/layout";
-import { loadCSV } from "../lib/duckdbBridge";
+import { loadCSV, getHeaders, getRowCount } from "../lib/duckdbBridge";
 import { saveData, loadSaved } from "../lib/opfs";
 import { t } from "../lib/i18n";
 
@@ -13,11 +13,11 @@ const GettingStartedModal = lazy(() =>
   import("./import/GettingStarted").then((m) => ({ default: m.GettingStartedModal })),
 );
 
-function formatLoadedInfo(csv: CsvData | null): string | null {
-  if (!csv) return null;
+async function fetchLoadedInfo(): Promise<string> {
+  const [headers, rowCount] = await Promise.all([getHeaders(), getRowCount()]);
   return t("summary.rows", {
-    rows: csv.rowCount.toLocaleString(),
-    cols: csv.headers.length,
+    rows: rowCount.toLocaleString(),
+    cols: headers.length,
   });
 }
 
@@ -104,19 +104,25 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
   const { entries, deleteEntry } = useSavedFiles();
 
+  const [loadedInfo, setLoadedInfo] = useState<string | null>(null);
+
   const bothLoaded = csv !== null && layout !== null;
-  const loadedInfo = formatLoadedInfo(csv);
+
+  useEffect(() => {
+    if (!csv) {
+      setLoadedInfo(null);
+      return;
+    }
+    fetchLoadedInfo()
+      .then(setLoadedInfo)
+      .catch(() => setLoadedInfo(null));
+  }, [csv]);
 
   const handleCsvFile = useCallback(async (file: File) => {
     try {
       const text = await file.text();
-      const result = await loadCSV(text);
-      setCsv({
-        text,
-        fileName: file.name,
-        headers: result.headers,
-        rowCount: result.rowCount,
-      });
+      await loadCSV(text);
+      setCsv({ text, fileName: file.name });
       loadedFromSavedRef.current = false;
     } catch (e) {
       console.error("CSV load failed:", e);
@@ -138,14 +144,9 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
     try {
       const { csvText, csvName, layoutJson, layoutName } = await loadSaved(folderId);
       const parsed = parseLayout(layoutJson);
-      const result = await loadCSV(csvText);
+      await loadCSV(csvText);
 
-      setCsv({
-        text: csvText,
-        fileName: csvName,
-        headers: result.headers,
-        rowCount: result.rowCount,
-      });
+      setCsv({ text: csvText, fileName: csvName });
       setLayout({ json: layoutJson, fileName: layoutName, layout: parsed });
       loadedFromSavedRef.current = true;
     } catch (e) {

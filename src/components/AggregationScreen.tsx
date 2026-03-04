@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
-import { runAggregation } from "../lib/duckdbBridge";
-import { filterLayout, buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
+import { runAggregation, getHeaders, getRowCount } from "../lib/duckdbBridge";
+import { filterLayout, buildQuestions, findWeightColumn } from "../lib/layout";
+import type { Question } from "../lib/agg/types";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
 import type { CsvData, LayoutData } from "../lib/types";
@@ -14,35 +15,53 @@ interface AggregationScreenProps {
 }
 
 export default function AggregationScreen({ csv, layout }: AggregationScreenProps) {
-  const filtered = filterLayout(csv.headers, layout.layout);
-  const questions = buildQuestions(filtered);
   const weightCol = findWeightColumn(layout.layout);
 
-  const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>(() => {
-    const sel: Record<string, boolean> = {};
-    questions.forEach((q) => (sel[q.code] = false));
-    return sel;
-  });
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [summaryInfo, setSummaryInfo] = useState<{ rowCount: number; colCount: number } | null>(
+    null,
+  );
+  const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [aggCtx, setAggCtx] = useState<AggregationContextValue | null>(null);
 
-  const didAutoRun = useRef(false);
+  const questionsRef = useRef(questions);
+  questionsRef.current = questions;
+
+  // Initialize: fetch headers from bridge, build questions, then auto-run aggregation
   useEffect(() => {
-    if (!didAutoRun.current) {
-      didAutoRun.current = true;
-      handleRunAggregation();
-    }
+    (async () => {
+      try {
+        const [headers, rowCount] = await Promise.all([getHeaders(), getRowCount()]);
+        const filtered = filterLayout(headers, layout.layout);
+        const qs = buildQuestions(filtered);
+        const sel: Record<string, boolean> = {};
+        qs.forEach((q) => (sel[q.code] = false));
+
+        setQuestions(qs);
+        setCrossSelected(sel);
+        setSummaryInfo({ rowCount, colCount: headers.length });
+
+        // Auto-run GT aggregation
+        const wCol = weightCol;
+        const tallies = await runAggregation(qs, [], wCol);
+        setAggCtx({ tallies, weightCol: wCol });
+      } catch (e) {
+        setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
+        console.error(e);
+      }
+    })();
   }, []);
 
   async function handleRunAggregation(): Promise<void> {
     setErrorMsg("");
 
     const wCol = weightEnabled ? weightCol : "";
-    const crossCols = questions.filter((q) => crossSelected[q.code]);
+    const crossCols = questionsRef.current.filter((q) => crossSelected[q.code]);
 
     try {
-      const tallies = await runAggregation(questions, crossCols, wCol);
+      const tallies = await runAggregation(questionsRef.current, crossCols, wCol);
       setAggCtx({
         tallies,
         weightCol: wCol,
@@ -66,15 +85,9 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
           <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("section.summary")}</h2>
           <div class="text-sm leading-relaxed text-text-secondary">
             <DataSummary
-              csv={{
-                fileName: csv.fileName,
-                rowCount: csv.rowCount,
-                headers: csv.headers,
-              }}
-              layout={{
-                fileName: layout.fileName,
-                colCount: countLayoutColumns(layout.layout),
-              }}
+              csvFileName={csv.fileName}
+              layoutFileName={layout.fileName}
+              summaryInfo={summaryInfo}
             />
           </div>
         </section>
@@ -142,29 +155,36 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
 }
 
 export function DataSummary({
-  csv,
-  layout,
+  csvFileName,
+  layoutFileName,
+  summaryInfo,
 }: {
-  csv: { fileName: string; rowCount: number; headers: string[] };
-  layout: { fileName: string; colCount: number };
+  csvFileName: string;
+  layoutFileName: string;
+  summaryInfo: { rowCount: number; colCount: number } | null;
 }) {
   return (
     <>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
         <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
-          {csv.fileName}
+          {csvFileName}
         </span>
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
         <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
-          {layout.fileName}
+          {layoutFileName}
         </span>
       </div>
-      <div class="mb-1 flex items-baseline gap-2 pl-4">
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
-          {t("summary.rows", { rows: csv.rowCount.toLocaleString(), cols: csv.headers.length })}
-        </span>
-      </div>
+      {summaryInfo && (
+        <div class="mb-1 flex items-baseline gap-2 pl-4">
+          <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
+            {t("summary.rows", {
+              rows: summaryInfo.rowCount.toLocaleString(),
+              cols: summaryInfo.colCount,
+            })}
+          </span>
+        </div>
+      )}
     </>
   );
 }

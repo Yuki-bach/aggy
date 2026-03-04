@@ -43,8 +43,8 @@ export async function initDuckDB(): Promise<void> {
   return initPromise;
 }
 
-/** Register CSV text in DuckDB and return headers and row count */
-export async function loadCSV(csvText: string): Promise<{ headers: string[]; rowCount: number }> {
+/** Register CSV text in DuckDB as the survey table */
+export async function loadCSV(csvText: string): Promise<void> {
   await initDuckDB();
   if (!db) throw new Error("DuckDB is not ready");
 
@@ -55,14 +55,20 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
     `CREATE OR REPLACE TABLE survey AS
      SELECT * FROM read_csv('survey.csv')`,
   );
+}
 
-  const descResult = await c.query(`DESCRIBE survey`);
-  const headers = descResult.toArray().map((r) => String(r.column_name));
+/** Return column names of the survey table */
+export async function getHeaders(): Promise<string[]> {
+  const c = await getConnection();
+  const result = await c.query(`DESCRIBE survey`);
+  return result.toArray().map((r) => String(r.column_name));
+}
 
-  const countResult = await c.query(`SELECT COUNT(*) AS n FROM survey`);
-  const rowCount = Number(countResult.toArray()[0].n);
-
-  return { headers, rowCount };
+/** Return row count of the survey table */
+export async function getRowCount(): Promise<number> {
+  const c = await getConnection();
+  const result = await c.query(`SELECT COUNT(*) AS n FROM survey`);
+  return Number(result.toArray()[0].n);
 }
 
 /** Execute aggregation for all question × axis combinations */
