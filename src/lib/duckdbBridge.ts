@@ -90,7 +90,7 @@ function updateStatusUI(s: DuckStatus, label?: string): void {
   setWasmStatus(s, label);
 }
 
-async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
+export async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
   if (!db || status !== "ready") throw new Error("DuckDB is not ready");
   if (!conn) conn = await db.connect();
   return conn;

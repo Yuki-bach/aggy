@@ -5,11 +5,14 @@ interface LayoutItem {
   label: string;
 }
 
+export type DateGranularity = "year" | "month" | "week" | "day";
+
 interface LayoutEntry {
   key: string;
   label?: string;
-  type: "SA" | "MA" | "WEIGHT";
+  type: "SA" | "MA" | "WEIGHT" | "DATE";
   items?: LayoutItem[];
+  granularity?: DateGranularity;
 }
 
 export type Layout = LayoutEntry[];
@@ -45,7 +48,7 @@ export function filterLayout(headers: string[], layout: Layout): Layout {
   const filtered: Layout = [];
 
   for (const entry of layout) {
-    if (entry.type === "SA" || entry.type === "WEIGHT") {
+    if (entry.type === "SA" || entry.type === "WEIGHT" || entry.type === "DATE") {
       if (headerSet.has(entry.key)) filtered.push(entry);
     } else if (entry.type === "MA" && entry.items) {
       const matchedItems = entry.items.filter((item) => headerSet.has(`${entry.key}_${item.code}`));
