@@ -101,6 +101,12 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const [gsOpen, setGsOpen] = useState(false);
 
   const loadedFromSavedRef = useRef(false);
+  const opfsPayloadRef = useRef<{
+    csvText?: string;
+    csvFileName?: string;
+    layoutJson?: string;
+    layoutFileName?: string;
+  }>({});
 
   const { entries, deleteEntry } = useSavedFiles();
 
@@ -111,8 +117,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
     try {
       const text = await file.text();
       const result = await loadCSV(text);
+      opfsPayloadRef.current = { ...opfsPayloadRef.current, csvText: text, csvFileName: file.name };
       setCsv({
-        text,
         fileName: file.name,
         headers: result.headers,
         rowCount: result.rowCount,
@@ -127,7 +133,12 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
     try {
       const text = await file.text();
       const parsed = parseLayout(text);
-      setLayout({ json: text, fileName: file.name, layout: parsed });
+      opfsPayloadRef.current = {
+        ...opfsPayloadRef.current,
+        layoutJson: text,
+        layoutFileName: file.name,
+      };
+      setLayout({ fileName: file.name, layout: parsed });
       loadedFromSavedRef.current = false;
     } catch (e) {
       console.error("Layout load failed:", e);
@@ -140,13 +151,18 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       const parsed = parseLayout(layoutJson);
       const result = await loadCSV(csvText);
 
+      opfsPayloadRef.current = {
+        csvText,
+        csvFileName: csvName,
+        layoutJson,
+        layoutFileName: layoutName,
+      };
       setCsv({
-        text: csvText,
         fileName: csvName,
         headers: result.headers,
         rowCount: result.rowCount,
       });
-      setLayout({ json: layoutJson, fileName: layoutName, layout: parsed });
+      setLayout({ fileName: layoutName, layout: parsed });
       loadedFromSavedRef.current = true;
     } catch (e) {
       console.error("Saved data load failed:", e);
@@ -155,9 +171,15 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
   async function handleProceed(): Promise<void> {
     if (!csv || !layout) return;
-    if (!loadedFromSavedRef.current) {
+    const payload = opfsPayloadRef.current;
+    if (!loadedFromSavedRef.current && payload.csvText && payload.layoutJson) {
       try {
-        await saveData(csv.fileName, csv.text, layout.fileName, layout.json);
+        await saveData(
+          payload.csvFileName!,
+          payload.csvText,
+          payload.layoutFileName!,
+          payload.layoutJson,
+        );
         triggerSavedFilesRefresh();
       } catch (e) {
         console.warn("OPFS save failed:", e);
