@@ -24,18 +24,20 @@ export async function prepareDateColumns(
     const granularity = entry.granularity ?? "month";
     const fmt = FORMAT_MAP[granularity];
     const col = esc(entry.key);
+    const fmtCol = `${col}__${granularity}`;
 
+    await conn.query(`ALTER TABLE survey ADD COLUMN "${fmtCol}" VARCHAR`);
     await conn.query(
-      `UPDATE survey SET "${col}" = STRFTIME('${fmt}', CAST("${col}" AS DATE)) WHERE "${col}" IS NOT NULL`,
+      `UPDATE survey SET "${fmtCol}" = STRFTIME('${fmt}', CAST("${col}" AS DATE)) WHERE "${col}" IS NOT NULL`,
     );
 
     const distinct = await conn.query(
-      `SELECT DISTINCT "${col}" AS v FROM survey WHERE "${col}" IS NOT NULL ORDER BY v`,
+      `SELECT DISTINCT "${fmtCol}" AS v FROM survey WHERE "${fmtCol}" IS NOT NULL ORDER BY v`,
     );
     const values = distinct.toArray().map((r) => String(r.v));
 
     result.push({
-      key: entry.key,
+      key: `${entry.key}__${granularity}`,
       label: entry.label ?? entry.key,
       type: "SA",
       items: values.map((v) => ({ code: v, label: v })),
