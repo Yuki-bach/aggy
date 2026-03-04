@@ -12,6 +12,12 @@ import {
   NA_VALUE,
 } from "./sqlHelpers";
 
+type CrossSliceData = {
+  code: string;
+  n: number;
+  counts: number[];
+};
+
 export async function aggregateCross(
   conn: duckdb.AsyncDuckDBConnection,
   question: AggInput,
@@ -47,8 +53,7 @@ class CrossAggregator {
         "${esc(column)}" AS mv,
         "${esc(crossCol)}" AS sv,
         ${wExpr} AS cnt,
-        SUM(${wExpr}) OVER (PARTITION BY "${esc(crossCol)}") AS n,
-        ${wExpr} * 100.0 / NULLIF(SUM(${wExpr}) OVER (PARTITION BY "${esc(crossCol)}"), 0) AS pct
+        SUM(${wExpr}) OVER (PARTITION BY "${esc(crossCol)}") AS n
       FROM survey
       WHERE "${esc(column)}" IS NOT NULL
         AND "${esc(crossCol)}" IS NOT NULL
@@ -57,28 +62,28 @@ class CrossAggregator {
 
     const result = await this.conn.query(sql);
     const nMap = new Map<string, number>();
-    const dataMap = new Map<string, Map<string, { count: number; pct: number }>>();
+    const countMap = new Map<string, Map<string, number>>();
     for (const r of result.toArray()) {
       const sv = String(r.sv);
       if (!crossValues.includes(sv)) continue;
       nMap.set(sv, Number(r.n));
-      let inner = dataMap.get(sv);
+      let inner = countMap.get(sv);
       if (!inner) {
         inner = new Map();
-        dataMap.set(sv, inner);
+        countMap.set(sv, inner);
       }
-      inner.set(String(r.mv), { count: Number(r.cnt), pct: Number(r.pct ?? 0) });
+      inner.set(String(r.mv), Number(r.cnt));
     }
 
-    const slices = crossValues.map((cv) => {
-      const inner = dataMap.get(cv);
-      const cells = codes.map((code) => {
-        const entry = inner?.get(code);
-        return entry ?? { count: 0, pct: 0 };
-      });
-      return { code: cv, n: nMap.get(cv) ?? 0, cells };
+    const data: CrossSliceData[] = crossValues.map((cv) => {
+      const inner = countMap.get(cv);
+      return {
+        code: cv,
+        n: nMap.get(cv) ?? 0,
+        counts: codes.map((code) => inner?.get(code) ?? 0),
+      };
     });
-    return { codes, slices };
+    return this.buildSlices(data, codes);
   }
 
   // ── SA main × MA cross ──
@@ -111,17 +116,12 @@ class CrossAggregator {
       return total;
     });
 
-    const slices = this.crossQ.codes.map((crossCode, ci) => {
-      const n = nArr[ci];
-      const cells = codes.map((code) => {
-        const counts = rowData.get(code);
-        const count = counts?.[ci] ?? 0;
-        const pct = n > 0 ? (count / n) * 100 : 0;
-        return { count, pct };
-      });
-      return { code: crossCode, n, cells };
-    });
-    return { codes, slices };
+    const data: CrossSliceData[] = this.crossQ.codes.map((crossCode, ci) => ({
+      code: crossCode,
+      n: nArr[ci],
+      counts: codes.map((code) => rowData.get(code)?.[ci] ?? 0),
+    }));
+    return this.buildSlices(data, codes);
   }
 
   // ── MA main × SA cross ──
@@ -165,22 +165,27 @@ class CrossAggregator {
 
     const hasNA = [...naMap.values()].some((v) => v > 0);
     const resultCodes = hasNA ? [...codes, NA_VALUE] : codes;
-    const slices = crossValues.map((cv) => {
-      const counts = rowMap.get(cv);
-      const n = nMap.get(cv) ?? 0;
-      const cells = columns.map((_col, maIdx) => {
-        const count = counts?.[maIdx] ?? 0;
-        const pct = n > 0 ? (count / n) * 100 : 0;
-        return { count, pct };
-      });
-      if (hasNA) {
-        const naCount = naMap.get(cv) ?? 0;
-        const naPct = n > 0 ? (naCount / n) * 100 : 0;
-        cells.push({ count: naCount, pct: naPct });
-      }
-      return { code: cv, n, cells };
+    const data: CrossSliceData[] = crossValues.map((cv) => {
+      const rowCounts = rowMap.get(cv);
+      const counts = columns.map((_col, maIdx) => rowCounts?.[maIdx] ?? 0);
+      if (hasNA) counts.push(naMap.get(cv) ?? 0);
+      return { code: cv, n: nMap.get(cv) ?? 0, counts };
     });
-    return { slices, codes: resultCodes };
+    return this.buildSlices(data, resultCodes);
+  }
+
+  // ── shared slice builder ──
+
+  private buildSlices(data: CrossSliceData[], codes: string[]): AggResult {
+    const slices = data.map(({ code, n, counts }) => ({
+      code,
+      n,
+      cells: counts.map((count) => ({
+        count,
+        pct: n > 0 ? (count / n) * 100 : 0,
+      })),
+    }));
+    return { codes, slices };
   }
 
   // ── MA main × MA cross ──
@@ -217,20 +222,11 @@ class CrossAggregator {
 
     const hasNA = this.crossQ.codes.some((_, c) => Number(row[`na_c${c}`] ?? 0) > 0);
     const resultCodes = hasNA ? [...codes, NA_VALUE] : codes;
-    const slices = this.crossQ.codes.map((crossCode, c) => {
-      const n = Number(row[`n_c${c}`] ?? 0);
-      const cells = columns.map((_col, r) => {
-        const count = Number(row[`r${r}c${c}`] ?? 0);
-        const pct = n > 0 ? (count / n) * 100 : 0;
-        return { count, pct };
-      });
-      if (hasNA) {
-        const naCount = Number(row[`na_c${c}`] ?? 0);
-        const naPct = n > 0 ? (naCount / n) * 100 : 0;
-        cells.push({ count: naCount, pct: naPct });
-      }
-      return { code: crossCode, n, cells };
+    const data: CrossSliceData[] = this.crossQ.codes.map((crossCode, c) => {
+      const counts = columns.map((_col, r) => Number(row[`r${r}c${c}`] ?? 0));
+      if (hasNA) counts.push(Number(row[`na_c${c}`] ?? 0));
+      return { code: crossCode, n: Number(row[`n_c${c}`] ?? 0), counts };
     });
-    return { slices, codes: resultCodes };
+    return this.buildSlices(data, resultCodes);
   }
 }
