@@ -1,13 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateGt } from "../src/lib/agg/aggregateGt";
 import type { AggResult } from "../src/lib/agg/types";
-import { setupDuckDB, teardownDuckDB, getAggInput } from "./helpers/duckdb";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let conn: any;
+import { setupDuckDB, teardownDuckDB, getConn, getAggInput } from "./helpers/duckdb";
 
 beforeAll(async () => {
-  conn = await setupDuckDB();
+  await setupDuckDB();
 }, 30_000);
 
 afterAll(async () => {
@@ -47,7 +44,7 @@ function gtCell(result: AggResult, code: string): Cell {
 describe("aggregateGt - 重みなし", () => {
   describe("SA GT集計", () => {
     it("q1 の GT 集計で各値の count/n/pct が正しい", async () => {
-      const result = await aggregateGt(conn, q1, "");
+      const result = await aggregateGt(getConn(), q1, "");
 
       expect(result.slices).toHaveLength(1);
 
@@ -78,7 +75,7 @@ describe("aggregateGt - 重みなし", () => {
 
   describe("MA GT集計", () => {
     it("q3 の GT 集計で各サブカラムの count と無回答が正しい", async () => {
-      const result = await aggregateGt(conn, q3, "");
+      const result = await aggregateGt(getConn(), q3, "");
 
       // MA shown条件: q3_1~q3_3 のいずれかが非NULL
       // 行13: q3_1=NULL,q3_2=NULL,q3_3=NULL → 全部NULLなので除外
@@ -112,7 +109,7 @@ describe("aggregateGt - 重みなし", () => {
 describe("aggregateGt - 重み付き", () => {
   describe("SA GT集計（重み付き）", () => {
     it("q1 の重み付き GT 集計で weighted count が正しい", async () => {
-      const result = await aggregateGt(conn, q1, "weight");
+      const result = await aggregateGt(getConn(), q1, "weight");
 
       // q1有効行: 行1-13 (行14=空のみ除外, N/Aは文字列として有効)
       // q1=1: 行1(1.2)+3(1.5)+5(1.1)+7(1.3)+10(1.0)+12(0.8) = 6.9
@@ -135,7 +132,7 @@ describe("aggregateGt - 重み付き", () => {
 
   describe("MA GT集計（重み付き）", () => {
     it("q3 の重み付き GT 集計で weighted count が正しい", async () => {
-      const result = await aggregateGt(conn, q3, "weight");
+      const result = await aggregateGt(getConn(), q3, "weight");
 
       // shown行: 行1-12,14 = 13行 (行13は全空で除外)
       // q3_1='1': 行1(1.2)+3(1.5)+4(0.8)+6(1.0)+8(0.7)+9(1.4)+14(1.0) = 7.6

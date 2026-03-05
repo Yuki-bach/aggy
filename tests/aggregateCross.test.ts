@@ -1,13 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateCross } from "../src/lib/agg/aggregateCross";
 import type { AggResult } from "../src/lib/agg/types";
-import { setupDuckDB, teardownDuckDB, getAggInput } from "./helpers/duckdb";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let conn: any;
+import { setupDuckDB, teardownDuckDB, getConn, getAggInput } from "./helpers/duckdb";
 
 beforeAll(async () => {
-  conn = await setupDuckDB();
+  await setupDuckDB();
 }, 30_000);
 
 afterAll(async () => {
@@ -48,7 +45,7 @@ function findCell(result: AggResult, sliceCode: string, code: string): Cell {
 describe("aggregateCross - 重みなし", () => {
   describe("SA × SA クロス集計", () => {
     it("q2 を q1 でクロスした結果が正しい", async () => {
-      const result = await aggregateCross(conn, q2, q1, "");
+      const result = await aggregateCross(getConn(), q2, q1, "");
 
       expect(result.slices.length).toBeGreaterThan(0);
 
@@ -62,7 +59,7 @@ describe("aggregateCross - 重みなし", () => {
 
   describe("SA × MA クロス集計", () => {
     it("q1 を q3 でクロスした結果が正しい", async () => {
-      const result = await aggregateCross(conn, q1, q3, "");
+      const result = await aggregateCross(getConn(), q1, q3, "");
 
       // SA×MA: q1有効行の中でq3_1='1'のカウント
       // q1=1 の行: 行1,3,5,7,10,12
@@ -75,7 +72,7 @@ describe("aggregateCross - 重みなし", () => {
 
   describe("MA × SA クロス集計", () => {
     it("q3 を q1 でクロスした結果が正しい", async () => {
-      const result = await aggregateCross(conn, q3, q1, "");
+      const result = await aggregateCross(getConn(), q3, q1, "");
 
       // codes should be ["1", "2", "3", "N/A"] (MA codes + NA)
       expect(result.codes).toEqual(["1", "2", "3", "N/A"]);
@@ -93,7 +90,7 @@ describe("aggregateCross - 重みなし", () => {
 
   describe("MA × MA クロス集計", () => {
     it("q3 を自身でクロスした結果にセルが存在する", async () => {
-      const result = await aggregateCross(conn, q3, q3, "");
+      const result = await aggregateCross(getConn(), q3, q3, "");
 
       // q3_1='1' かつ q3_1='1': 行1,3,4,6,8,9,14 = 7件
       const cell = findCell(result, "1", "1"); // slice "1" = cross q3 code, code "1" = row q3 code

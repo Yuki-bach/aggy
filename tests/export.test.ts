@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTallies } from "../src/lib/agg/buildTallies";
 import type { Tally } from "../src/lib/agg/types";
-import { setupDuckDB, teardownDuckDB, getQuestion } from "./helpers/duckdb";
+import { setupDuckDB, teardownDuckDB, getConn, getQuestion } from "./helpers/duckdb";
 import { buildExportGrids } from "../src/lib/export/formatters/grid";
 import { talliesToLongRows } from "../src/lib/export/formatters/longFormat";
 import { formatCSV } from "../src/lib/export/formatters/csv";
@@ -13,16 +13,14 @@ const q1 = getQuestion("q1");
 const q2 = getQuestion("q2");
 const q3 = getQuestion("q3");
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let conn: any;
 let gtTallies: Tally[];
 let crossTallies: Tally[];
 
 beforeAll(async () => {
-  conn = await setupDuckDB();
+  await setupDuckDB();
 
-  gtTallies = await buildTallies(conn, [q1, q3], [], "");
-  crossTallies = await buildTallies(conn, [q2], [q1], "");
+  gtTallies = await buildTallies(getConn(), [q1, q3], [], "");
+  crossTallies = await buildTallies(getConn(), [q2], [q1], "");
 }, 30_000);
 
 afterAll(async () => {

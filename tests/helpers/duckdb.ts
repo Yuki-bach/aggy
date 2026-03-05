@@ -18,8 +18,14 @@ const {
 let db: ReturnType<typeof createDuckDB> extends Promise<infer T> ? T : never;
 let conn: Awaited<ReturnType<typeof db.connect>> | null = null;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getConn(): any {
+  if (!conn) throw new Error("setupDuckDB() has not been called yet");
+  return conn;
+}
+
 export async function setupDuckDB() {
-  if (conn) return conn;
+  if (conn) return;
 
   const logger = new ConsoleLogger();
   const bundles = {
@@ -38,8 +44,6 @@ export async function setupDuckDB() {
   await conn.query(
     `CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv')`,
   );
-
-  return conn;
 }
 
 export async function teardownDuckDB(): Promise<void> {
