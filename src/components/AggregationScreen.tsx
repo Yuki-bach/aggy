@@ -49,7 +49,6 @@ export default function AggregationScreen({ csv, layout }: AggregationScreenProp
       });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
-      console.error(e);
     }
   }
 
