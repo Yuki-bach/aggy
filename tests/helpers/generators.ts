@@ -48,6 +48,7 @@ interface MADataset {
 interface CrossDataset {
   csv: string;
   saInput: AggInput;
+  sa2Input: AggInput;
   maInput: AggInput;
   weightCol: string;
 }
@@ -114,6 +115,7 @@ export function generateMADataset(opts: DatasetOpts): MADataset {
 export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
   const rng = new Rng(opts.seed);
   const saCodes = ["1", "2", "3"];
+  const sa2Codes = ["1", "2", "3", "4"];
   const maCodes = ["1", "2", "3"];
   const nullRate = opts.nullRate ?? 0.1;
   const weighted = opts.weighted ?? false;
@@ -123,6 +125,7 @@ export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
     "id",
     ...(weighted ? ["weight"] : []),
     "q_sa",
+    "q_sa2",
     ...maColumns,
   ];
   const rows: (string | number | null)[][] = [];
@@ -132,8 +135,9 @@ export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
     if (weighted) {
       row.push(Math.round((0.5 + rng.next() * 1.5) * 10) / 10);
     }
-    // SA column
+    // SA columns (independently generated)
     row.push(rng.next() < nullRate ? null : rng.pick(saCodes));
+    row.push(rng.next() < nullRate ? null : rng.pick(sa2Codes));
     // MA columns
     if (rng.next() < nullRate) {
       for (let j = 0; j < maCodes.length; j++) row.push(null);
@@ -148,6 +152,7 @@ export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
   return {
     csv: buildCSV(headers, rows),
     saInput: { type: "SA", columns: ["q_sa"], codes: saCodes },
+    sa2Input: { type: "SA", columns: ["q_sa2"], codes: sa2Codes },
     maInput: { type: "MA", columns: maColumns, codes: maCodes },
     weightCol: weighted ? "weight" : "",
   };

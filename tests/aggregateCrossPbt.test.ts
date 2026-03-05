@@ -25,8 +25,8 @@ describe("PBT - aggregateCross SA×SA 重みなし", () => {
     it(`seed=${seed}, rows=${rowCount(seed)}`, async () => {
       const ds = generateCrossDataset({ seed, rowCount: rowCount(seed) });
       await loadCSV(ds.csv);
-      const result = await aggregateCross(getConn(), ds.saInput, ds.saInput, "");
-      assertCrossInvariants(result, "SA", ds.saInput.codes.length);
+      const result = await aggregateCross(getConn(), ds.saInput, ds.sa2Input, "");
+      assertCrossInvariants(result, "SA", ds.sa2Input.codes.length);
     });
   }
 });
@@ -36,8 +36,8 @@ describe("PBT - aggregateCross SA×SA 重みあり", () => {
     it(`seed=${seed}, rows=${rowCount(seed)}`, async () => {
       const ds = generateCrossDataset({ seed, rowCount: rowCount(seed), weighted: true });
       await loadCSV(ds.csv);
-      const result = await aggregateCross(getConn(), ds.saInput, ds.saInput, ds.weightCol);
-      assertCrossInvariants(result, "SA", ds.saInput.codes.length);
+      const result = await aggregateCross(getConn(), ds.saInput, ds.sa2Input, ds.weightCol);
+      assertCrossInvariants(result, "SA", ds.sa2Input.codes.length);
     });
   }
 });
