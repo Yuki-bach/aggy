@@ -4,7 +4,6 @@ import type { Layout } from "./layout";
 import { buildTallies } from "./agg/buildTallies";
 import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
 import { setWasmStatus } from "../components/header/WasmStatus";
-import type { Layout } from "./layout";
 import { validateData, type ValidationResult } from "./validateData";
 
 export async function initDuckDB(): Promise<void> {
