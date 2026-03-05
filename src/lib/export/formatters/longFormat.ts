@@ -23,8 +23,7 @@ export function talliesToLongRows(tallies: Tally[]): string[][] {
     const crossAxis = tally.by === null ? total : tally.by.label;
 
     for (const slice of tally.slices) {
-      const crossValue =
-        tally.by === null ? total : (tally.by.labels[slice.code!] ?? slice.code ?? "");
+      const crossValue = tally.by === null ? total : tally.by.labels[slice.code!];
 
       for (let i = 0; i < tally.codes.length; i++) {
         const code = tally.codes[i];
@@ -32,7 +31,7 @@ export function talliesToLongRows(tallies: Tally[]): string[][] {
         rows.push([
           tally.question,
           tally.type,
-          tally.labels[code] ?? code,
+          tally.labels[code],
           crossAxis,
           crossValue,
           String(slice.n),

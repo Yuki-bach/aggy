@@ -18,7 +18,7 @@ export function CrossTable({ gtTally, crossTallies, pctDir }: CrossTableProps) {
 }
 
 function resolveAxisLabel(code: string, axis: Axis): string {
-  return axis.labels[code] ?? code;
+  return axis.labels[code];
 }
 
 function formatN(n: number, weightCol: string): string {
@@ -88,7 +88,7 @@ function VerticalCrossTable({ gtTally, crossTallies }: { gtTally: Tally; crossTa
           const gtCell = gtSlice.cells[i];
           return (
             <tr key={code}>
-              <Td>{gtTally.labels[code] ?? code}</Td>
+              <Td>{gtTally.labels[code]}</Td>
               <Td right mono>
                 {gtTally.type === "SA" && !weightCol
                   ? gtCell.count.toLocaleString()
@@ -147,7 +147,7 @@ function TransposedCrossTable({
                 key={code}
                 class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2`}
               >
-                {gtTally.labels[code] ?? code}
+                {gtTally.labels[code]}
                 <br />
                 <span class="text-muted text-xs font-normal">
                   n={formatN(gtCell?.count ?? 0, weightCol)}

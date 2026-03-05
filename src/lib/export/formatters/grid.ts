@@ -19,7 +19,7 @@ export function buildExportGrids(tallies: Tally[]): ExportGrid[] {
 // ─── Internal ───────────────────────────────────────────────
 
 function resolveLabel(code: string, tally: Tally): string {
-  return tally.labels[code] ?? code;
+  return tally.labels[code];
 }
 
 function buildGtGrid(tally: Tally): ExportGrid {
@@ -77,7 +77,7 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
     const axis = crossTally.by!;
     for (const slice of crossTally.slices) {
       headerRow1.push("");
-      const sliceLabel = axis.labels[slice.code!] ?? slice.code;
+      const sliceLabel = axis.labels[slice.code!];
       headerRow2.push(`${sliceLabel}(n=${slice.n.toFixed(1)})`);
     }
   }

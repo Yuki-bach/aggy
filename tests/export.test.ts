@@ -15,7 +15,7 @@ const q1: Question = {
   columns: ["q1"],
   codes: ["1", "2", "3", "99"],
   label: "q1",
-  labels: {},
+  labels: { "1": "選択肢1", "2": "選択肢2", "3": "選択肢3", "99": "その他" },
 };
 
 const q2: Question = {
@@ -24,7 +24,7 @@ const q2: Question = {
   columns: ["q2"],
   codes: ["1", "2", "3", "99"],
   label: "q2",
-  labels: {},
+  labels: { "1": "選択肢1", "2": "選択肢2", "3": "選択肢3", "99": "その他" },
 };
 
 const q3: Question = {
@@ -33,7 +33,7 @@ const q3: Question = {
   columns: ["q3_1", "q3_2", "q3_3"],
   codes: ["1", "2", "3"],
   label: "q3",
-  labels: {},
+  labels: { "1": "選択肢1", "2": "選択肢2", "3": "選択肢3" },
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
