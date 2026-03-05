@@ -1,7 +1,6 @@
 import { describe, it, beforeAll, afterAll } from "vitest";
 import { aggregateCross } from "../src/lib/agg/aggregateCross";
-import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
-import { loadCSV } from "./helpers/csvLoader";
+import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { generateCrossDataset } from "./helpers/generators";
 import { assertCrossInvariants } from "./helpers/invariants";
 

@@ -1,7 +1,6 @@
 import { describe, it, beforeAll, afterAll } from "vitest";
 import { aggregateGt } from "../src/lib/agg/aggregateGt";
-import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
-import { loadCSV } from "./helpers/csvLoader";
+import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { generateSADataset, generateMADataset } from "./helpers/generators";
 import { assertGtInvariants } from "./helpers/invariants";
 

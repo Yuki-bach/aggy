@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateGt } from "../src/lib/agg/aggregateGt";
-import { setupDuckDB, teardownDuckDB, getConn, getAggInput } from "./helpers/duckdb";
+import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
+import { getAggInput } from "./helpers/fixtures";
 
 beforeAll(async () => {
   await setupDuckDB();

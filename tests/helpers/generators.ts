@@ -1,5 +1,5 @@
 import type { AggInput } from "../../src/lib/agg/types";
-import { buildCSV } from "./csvLoader";
+import { buildCSV } from "./csv";
 
 export class Rng {
   private state: number;

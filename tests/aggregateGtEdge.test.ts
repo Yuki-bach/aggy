@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateGt } from "../src/lib/agg/aggregateGt";
-import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
-import { buildCSV, loadCSV } from "./helpers/csvLoader";
+import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
+import { buildCSV } from "./helpers/csv";
 import type { AggInput } from "../src/lib/agg/types";
 
 beforeAll(async () => {

@@ -1,5 +1,3 @@
-import { getDb, getConn } from "./duckdb";
-
 export function buildCSV(
   headers: string[],
   rows: (string | number | null)[][],
@@ -17,13 +15,4 @@ export function buildCSV(
     lines.push(row.map(escape).join(","));
   }
   return lines.join("\n") + "\n";
-}
-
-export async function loadCSV(csvText: string): Promise<void> {
-  const db = getDb();
-  const conn = getConn();
-  await db.registerFileText("survey.csv", csvText);
-  await conn.query(
-    `CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv')`,
-  );
 }
