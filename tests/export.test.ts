@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTallies } from "../src/lib/agg/buildTallies";
 import type { Tally } from "../src/lib/agg/types";
-import { setupDuckDB, teardownDuckDB, getConn, getQuestion } from "./helpers/duckdb";
+import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
+import { getQuestion } from "./helpers/fixtures";
 import { buildExportGrids } from "../src/lib/export/formatters/grid";
 import { talliesToLongRows } from "../src/lib/export/formatters/longFormat";
 import { formatCSV } from "../src/lib/export/formatters/csv";
