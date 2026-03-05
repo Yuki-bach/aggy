@@ -98,7 +98,7 @@ function ChartCard({ gtTally, crossTallies, gtChartType, paletteId }: ChartCardP
 }
 
 function resolveLabel(code: string, tally: Tally): string {
-  return tally.labels[code] ?? code;
+  return tally.labels[code];
 }
 
 function buildGtChart(
@@ -204,7 +204,7 @@ function buildCrossChart(
     const axis = ct.by!;
     return ct.slices.map((s) => ({
       slice: s,
-      label: axis.labels[s.code!] ?? s.code,
+      label: axis.labels[s.code!],
     }));
   });
 

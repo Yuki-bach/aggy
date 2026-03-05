@@ -13,6 +13,20 @@ const ja: Record<string, string> = {
   "import.step.select": "ファイル選択",
   "import.step.proceed": "集計へ",
   "import.proceed": "集計画面へ進む →",
+  "import.step.validate": "検証",
+
+  // Validation step
+  "validation.title": "データ検証",
+  "validation.running": "検証中...",
+  "validation.check.saCode": "SA列の回答コードがレイアウト定義と一致",
+  "validation.check.columns": "レイアウト定義列がCSVに存在",
+  "validation.ok": "OK",
+  "validation.error": "エラーあり",
+  "validation.warn": "警告あり",
+  "validation.unknownCodes": "{key}（{label}）に未定義コード: {codes}",
+  "validation.droppedEntries": "{key}（{label}, {type}）がCSVに存在しません",
+  "validation.fixPrompt": "ファイルを修正して再アップロードしてください",
+  "validation.back": "ファイル選択に戻る",
 
   // Dropzone
   "dropzone.csv.icon": "ローデータ",

@@ -13,6 +13,20 @@ const en: Record<string, string> = {
   "import.step.select": "Select Files",
   "import.step.proceed": "Aggregate",
   "import.proceed": "Proceed to Aggregation →",
+  "import.step.validate": "Validate",
+
+  // Validation step
+  "validation.title": "Data Validation",
+  "validation.running": "Validating...",
+  "validation.check.saCode": "SA column codes match layout definition",
+  "validation.check.columns": "Layout-defined columns exist in CSV",
+  "validation.ok": "OK",
+  "validation.error": "Error",
+  "validation.warn": "Warning",
+  "validation.unknownCodes": "{key} ({label}) has undefined codes: {codes}",
+  "validation.droppedEntries": "{key} ({label}, {type}) not found in CSV",
+  "validation.fixPrompt": "Please fix the files and re-upload",
+  "validation.back": "Back to file selection",
 
   // Dropzone
   "dropzone.csv.icon": "Raw Data",

@@ -84,7 +84,7 @@ function summarizeResults(tallies: Tally[], weightCol: string, topN: number): st
     const sorted = [...withPct].sort((a, b) => b.pct - a.pct);
     const top = sorted.slice(0, topN);
     const items = top.map((c) => {
-      const label = tally.labels[c.code] ?? c.code;
+      const label = tally.labels[c.code];
       return `${label}: ${c.pct.toFixed(1)}%`;
     });
 

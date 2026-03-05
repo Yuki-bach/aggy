@@ -28,7 +28,7 @@ export function GtTable({ tally, maxPct }: GtTableProps) {
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
         {tally.codes.map((code, i) => {
           const cell = slice.cells[i];
-          const label = tally.labels[code] ?? code;
+          const label = tally.labels[code];
           const countStr =
             tally.type === "SA" && !weightCol ? cell.count.toLocaleString() : cell.count.toFixed(1);
           const barWidth = ((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1);

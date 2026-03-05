@@ -12,7 +12,6 @@ import { formatJSON } from "../src/lib/export/formatters/json";
 const q1 = getQuestion("q1");
 const q2 = getQuestion("q2");
 const q3 = getQuestion("q3");
-
 let gtTallies: Tally[];
 let crossTallies: Tally[];
 
