@@ -47,7 +47,7 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
     [onExport],
   );
 
-  const showFeedback = feedback != null;
+  const showFeedback = feedback !== null;
 
   return (
     <div ref={ref} class="relative">

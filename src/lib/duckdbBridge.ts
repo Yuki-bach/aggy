@@ -35,7 +35,6 @@ export async function initDuckDB(): Promise<void> {
     } catch (err) {
       status = "error";
       updateStatusUI("error", `DuckDB エラー: ${(err as Error).message}`);
-      console.error("DuckDB init error:", err);
       throw err;
     }
   })();

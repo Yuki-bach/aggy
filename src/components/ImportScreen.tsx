@@ -124,8 +124,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         rowCount: result.rowCount,
       });
       loadedFromSavedRef.current = false;
-    } catch (e) {
-      console.error("CSV load failed:", e);
+    } catch {
+      // handled by UI state
     }
   }, []);
 
@@ -140,8 +140,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       };
       setLayout({ fileName: file.name, layout: parsed });
       loadedFromSavedRef.current = false;
-    } catch (e) {
-      console.error("Layout load failed:", e);
+    } catch {
+      // handled by UI state
     }
   }, []);
 
@@ -164,8 +164,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       });
       setLayout({ fileName: layoutName, layout: parsed });
       loadedFromSavedRef.current = true;
-    } catch (e) {
-      console.error("Saved data load failed:", e);
+    } catch {
+      // handled by UI state
     }
   }, []);
 
@@ -181,8 +181,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
           payload.layoutJson,
         );
         triggerSavedFilesRefresh();
-      } catch (e) {
-        console.warn("OPFS save failed:", e);
+      } catch {
+        // OPFS save is best-effort
       }
     }
     onComplete(csv, layout);
