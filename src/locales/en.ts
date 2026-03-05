@@ -108,11 +108,15 @@ const en: Record<string, string> = {
   "ai.weight": "* Weight column: {col}",
   "ai.moreItems": "...{count} more",
 
+  // Warnings
+  "warn.date.cast": "{col}: {count} date values could not be converted",
+
   // Errors
   "error.csv.load": "Error loading raw data file: {msg}",
   "error.layout.load": "Error loading layout file: {msg}",
   "error.saved.load": "Error loading history data: {msg}",
   "error.aggregation": "Aggregation error: {msg}",
+  "error.date.prepare": "Date column preparation error: {msg}",
 
   // Getting Started modal
   "gs.close": "Close",

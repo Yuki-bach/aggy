@@ -1,6 +1,8 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, Tally } from "./agg/types";
+import type { Layout } from "./layout";
 import { buildTallies } from "./agg/buildTallies";
+import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
 import { setWasmStatus } from "../components/header/WasmStatus";
 import type { Layout } from "./layout";
 import { validateData, type ValidationResult } from "./validateData";
@@ -80,6 +82,12 @@ export async function runAggregation(
 ): Promise<Tally[]> {
   const c = await getConnection();
   return buildTallies(c, questions, crossCols, weightCol);
+}
+
+/** Prepare DATE columns in layout (convert to SA with auto-generated items) */
+export async function prepareDateLayout(layout: Layout): Promise<DatePreparationResult> {
+  const c = await getConnection();
+  return prepareDateColumns(c, layout);
 }
 
 // ─── Internal ───────────────────────────────────────────────

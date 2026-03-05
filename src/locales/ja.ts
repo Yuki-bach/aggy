@@ -108,11 +108,15 @@ const ja: Record<string, string> = {
   "ai.weight": "※ウェイト列: {col}",
   "ai.moreItems": "...他{count}件",
 
+  // Warnings
+  "warn.date.cast": "{col}: {count}件の日付データを変換できませんでした",
+
   // Errors
   "error.csv.load": "ローデータファイルの読み込みエラー: {msg}",
   "error.layout.load": "レイアウトファイルの読み込みエラー: {msg}",
   "error.saved.load": "履歴データの読み込みエラー: {msg}",
   "error.aggregation": "集計エラー: {msg}",
+  "error.date.prepare": "日付カラムの準備エラー: {msg}",
 
   // Getting Started modal
   "gs.close": "閉じる",

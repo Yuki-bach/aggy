@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://aggy.app/schemas/layout.schema.json",
   "title": "Aggy Layout",
-  "description": "アンケートローデータのレイアウト定義。CSV列の種別（SA/MA/WEIGHT）と選択肢ラベルを指定する。",
+  "description": "アンケートローデータのレイアウト定義。CSV列の種別（SA/MA/WEIGHT/DATE）と選択肢ラベルを指定する。",
   "type": "array",
   "items": {
     "$ref": "#/definitions/LayoutEntry"
@@ -29,7 +29,7 @@
       "properties": {
         "key": {
           "type": "string",
-          "description": "CSV列名（SA/WEIGHT）またはMA列の接頭辞"
+          "description": "CSV列名（SA/WEIGHT/DATE）またはMA列の接頭辞"
         },
         "label": {
           "type": "string",
@@ -37,8 +37,13 @@
         },
         "type": {
           "type": "string",
-          "enum": ["SA", "MA", "WEIGHT"],
+          "enum": ["SA", "MA", "WEIGHT", "DATE"],
           "description": "列の種別"
+        },
+        "granularity": {
+          "type": "string",
+          "enum": ["year", "month", "week", "day"],
+          "description": "DATE型の集計粒度"
         },
         "items": {
           "type": "array",
@@ -73,6 +78,17 @@
             "properties": { "type": { "const": "WEIGHT" } }
           },
           "then": {
+            "properties": {
+              "items": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "DATE" } }
+          },
+          "then": {
+            "required": ["key", "type", "granularity"],
             "properties": {
               "items": false
             }

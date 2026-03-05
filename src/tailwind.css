@@ -27,6 +27,9 @@
   --color-gt-bg: var(--gt-bg);
   --color-error-bg: var(--error-bg);
   --color-error-border: var(--error-border);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-border: var(--warning-border);
 
   /* Shadows */
   --shadow-sm: var(--shadow-sm);
@@ -69,6 +72,8 @@
     --color-error-100: #fde8e8;
     --color-error-50: #fff5f5;
     --color-warning-700: #e06500;
+    --color-warning-100: #fff0e0;
+    --color-warning-50: #fff8f0;
 
     /* Semantic Mapping */
     --bg: var(--color-gray-50);
@@ -99,6 +104,9 @@
     --gt-bg: var(--color-primary-50);
     --error-bg: var(--color-error-50);
     --error-border: var(--color-error-100);
+    --warning: var(--color-warning-700);
+    --warning-bg: var(--color-warning-50);
+    --warning-border: var(--color-warning-100);
   }
 
   /* Dark Mode Tokens */
@@ -130,6 +138,8 @@
     --color-success-700: #5cd87a;
     --color-success-100: #1a2e1e;
     --color-warning-700: #ffb060;
+    --color-warning-100: #3a2a1a;
+    --color-warning-50: #2a2014;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);

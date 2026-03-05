@@ -32,5 +32,11 @@
       { "code": "2", "label": "サービスB" },
       { "code": "3", "label": "サービスC" }
     ]
+  },
+  {
+    "key": "answer_date",
+    "label": "回答日",
+    "type": "DATE",
+    "granularity": "month"
   }
 ]
