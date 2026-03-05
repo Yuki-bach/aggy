@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateCross } from "../src/lib/agg/aggregateCross";
-import type { Question, AggResult, Cell } from "../src/lib/agg/types";
-import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
+import type { AggResult, Cell } from "../src/lib/agg/types";
+import { setupDuckDB, teardownDuckDB, getQuestion } from "./helpers/duckdb";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let conn: any;
@@ -14,34 +14,9 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-// ── Helper questions ──
-
-const q1: Question = {
-  type: "SA",
-  code: "q1",
-  columns: ["q1"],
-  codes: ["1", "2", "3", "99"],
-  label: "q1",
-  labels: {},
-};
-
-const q2: Question = {
-  type: "SA",
-  code: "q2",
-  columns: ["q2"],
-  codes: ["1", "2", "3", "99"],
-  label: "q2",
-  labels: {},
-};
-
-const q3: Question = {
-  type: "MA",
-  code: "q3",
-  columns: ["q3_1", "q3_2", "q3_3"],
-  codes: ["1", "2", "3"],
-  label: "q3",
-  labels: {},
-};
+const q1 = getQuestion("q1");
+const q2 = getQuestion("q2");
+const q3 = getQuestion("q3");
 
 /** Find a cell by code in a slice */
 function findCellByCode(result: AggResult, sliceCode: string, code: string): Cell | undefined {

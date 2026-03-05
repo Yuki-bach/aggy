@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTallies } from "../src/lib/agg/buildTallies";
-import type { Question, Tally } from "../src/lib/agg/types";
-import { setupDuckDB, teardownDuckDB } from "./helpers/duckdb";
+import type { Tally } from "../src/lib/agg/types";
+import { setupDuckDB, teardownDuckDB, getQuestion } from "./helpers/duckdb";
 import { buildExportGrids } from "../src/lib/export/formatters/grid";
 import { talliesToLongRows } from "../src/lib/export/formatters/longFormat";
 import { formatCSV } from "../src/lib/export/formatters/csv";
@@ -9,32 +9,9 @@ import { formatTSV } from "../src/lib/export/formatters/tsv";
 import { formatMarkdown } from "../src/lib/export/formatters/markdown";
 import { formatJSON } from "../src/lib/export/formatters/json";
 
-const q1: Question = {
-  type: "SA",
-  code: "q1",
-  columns: ["q1"],
-  codes: ["1", "2", "3", "99"],
-  label: "q1",
-  labels: {},
-};
-
-const q2: Question = {
-  type: "SA",
-  code: "q2",
-  columns: ["q2"],
-  codes: ["1", "2", "3", "99"],
-  label: "q2",
-  labels: {},
-};
-
-const q3: Question = {
-  type: "MA",
-  code: "q3",
-  columns: ["q3_1", "q3_2", "q3_3"],
-  codes: ["1", "2", "3"],
-  label: "q3",
-  labels: {},
-};
+const q1 = getQuestion("q1");
+const q2 = getQuestion("q2");
+const q3 = getQuestion("q3");
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let conn: any;
