@@ -2,6 +2,8 @@ import * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, Tally } from "./agg/types";
 import { buildTallies } from "./agg/buildTallies";
 import { setWasmStatus } from "../components/header/WasmStatus";
+import type { Layout } from "./layout";
+import { validateData, type ValidationResult } from "./validateData";
 
 export async function initDuckDB(): Promise<void> {
   if (initPromise) return initPromise;
@@ -63,6 +65,12 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
   const rowCount = Number(countResult.toArray()[0].n);
 
   return { headers, rowCount };
+}
+
+/** Validate CSV data against layout definition */
+export async function runValidation(headers: string[], layout: Layout): Promise<ValidationResult> {
+  const c = await getConnection();
+  return validateData(c, headers, layout);
 }
 
 /** Execute aggregation for all question × axis combinations */
