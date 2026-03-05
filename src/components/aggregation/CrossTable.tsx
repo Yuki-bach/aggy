@@ -2,19 +2,21 @@ import type { Tally, Slice, Axis } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import type { PctDirection } from "./Toolbar";
 import { Th, Td } from "./TableCells";
-import { useAggregation } from "./AggregationContext";
 
 interface CrossTableProps {
   gtTally: Tally;
   crossTallies: Tally[];
   pctDir: PctDirection;
+  weightCol: string;
 }
 
-export function CrossTable({ gtTally, crossTallies, pctDir }: CrossTableProps) {
+export function CrossTable({ gtTally, crossTallies, pctDir, weightCol }: CrossTableProps) {
   if (pctDir === "horizontal") {
-    return <TransposedCrossTable gtTally={gtTally} crossTallies={crossTallies} />;
+    return (
+      <TransposedCrossTable gtTally={gtTally} crossTallies={crossTallies} weightCol={weightCol} />
+    );
   }
-  return <VerticalCrossTable gtTally={gtTally} crossTallies={crossTallies} />;
+  return <VerticalCrossTable gtTally={gtTally} crossTallies={crossTallies} weightCol={weightCol} />;
 }
 
 function resolveAxisLabel(code: string, axis: Axis): string {
@@ -34,8 +36,15 @@ interface CrossGroup {
   tally: Tally;
 }
 
-function VerticalCrossTable({ gtTally, crossTallies }: { gtTally: Tally; crossTallies: Tally[] }) {
-  const { weightCol } = useAggregation();
+function VerticalCrossTable({
+  gtTally,
+  crossTallies,
+  weightCol,
+}: {
+  gtTally: Tally;
+  crossTallies: Tally[];
+  weightCol: string;
+}) {
   const gtSlice = gtTally.slices[0];
   const codes = gtTally.codes;
 
@@ -121,11 +130,12 @@ function VerticalCrossTable({ gtTally, crossTallies }: { gtTally: Tally; crossTa
 function TransposedCrossTable({
   gtTally,
   crossTallies,
+  weightCol,
 }: {
   gtTally: Tally;
   crossTallies: Tally[];
+  weightCol: string;
 }) {
-  const { weightCol } = useAggregation();
   const gtSlice = gtTally.slices[0];
   const codes = gtTally.codes;
 
@@ -194,6 +204,7 @@ function TransposedCrossTable({
                 slice={slice}
                 axis={group.axis}
                 codes={codes}
+                weightCol={weightCol}
               />
             ))}
           </>
@@ -203,8 +214,17 @@ function TransposedCrossTable({
   );
 }
 
-function TransposedSubRow({ slice, axis, codes }: { slice: Slice; axis: Axis; codes: string[] }) {
-  const { weightCol } = useAggregation();
+function TransposedSubRow({
+  slice,
+  axis,
+  codes,
+  weightCol,
+}: {
+  slice: Slice;
+  axis: Axis;
+  codes: string[];
+  weightCol: string;
+}) {
   return (
     <tr>
       <td
