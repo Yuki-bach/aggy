@@ -13,7 +13,7 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-const SEEDS = 10;
+const SEEDS = 50;
 const ROW_RANGE = { min: 50, max: 200 };
 
 function rowCount(seed: number): number {
