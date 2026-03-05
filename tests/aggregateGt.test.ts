@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateGt } from "../src/lib/agg/aggregateGt";
-import type { AggResult, Cell } from "../src/lib/agg/types";
+import type { AggResult } from "../src/lib/agg/types";
 import { setupDuckDB, teardownDuckDB, getAggInput } from "./helpers/duckdb";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,13 +17,9 @@ afterAll(async () => {
 const q1 = getAggInput("q1");
 const q3 = getAggInput("q3");
 
-/** Get the GT slice's cell for a given code */
-function gtCell(result: AggResult, code: string): Cell | undefined {
-  const slice = result.slices.find((s) => s.code === null);
-  if (!slice) return undefined;
-  const idx = result.codes.indexOf(code);
-  if (idx < 0) return undefined;
-  return slice.cells[idx];
+function gtCell(result: AggResult, code: string): Cell {
+  const slice = result.slices.find((s) => s.code === null)!;
+  return slice.cells[result.codes.indexOf(code)];
 }
 
 // ============================================================
@@ -65,18 +61,17 @@ describe("aggregateGt - 重みなし", () => {
       expect(slice.code).toBeNull();
       expect(slice.n).toBe(n);
 
-      const cell1 = gtCell(result, "1")!;
-      expect(cell1).toBeDefined();
+      const cell1 = gtCell(result, "1");
       expect(cell1.count).toBe(6);
       expect(cell1.pct).toBeCloseTo((6 / n) * 100, 5);
 
-      const cell2 = gtCell(result, "2")!;
+      const cell2 = gtCell(result, "2");
       expect(cell2.count).toBe(3);
 
-      const cell3 = gtCell(result, "3")!;
+      const cell3 = gtCell(result, "3");
       expect(cell3.count).toBe(2);
 
-      const cell99 = gtCell(result, "99")!;
+      const cell99 = gtCell(result, "99");
       expect(cell99.count).toBe(2);
     });
   });
@@ -99,18 +94,16 @@ describe("aggregateGt - 重みなし", () => {
       // codes should be ["1", "2", "3", "N/A"]
       expect(result.codes).toEqual(["1", "2", "3", "N/A"]);
 
-      const cellQ3_1 = gtCell(result, "1")!;
-      expect(cellQ3_1).toBeDefined();
+      const cellQ3_1 = gtCell(result, "1");
       expect(cellQ3_1.count).toBe(7);
 
-      const cellQ3_2 = gtCell(result, "2")!;
+      const cellQ3_2 = gtCell(result, "2");
       expect(cellQ3_2.count).toBe(5);
 
-      const cellQ3_3 = gtCell(result, "3")!;
+      const cellQ3_3 = gtCell(result, "3");
       expect(cellQ3_3.count).toBe(7);
 
-      const cellNA = gtCell(result, "N/A")!;
-      expect(cellNA).toBeDefined();
+      const cellNA = gtCell(result, "N/A");
       expect(cellNA.count).toBe(2);
     });
   });
@@ -127,16 +120,15 @@ describe("aggregateGt - 重み付き", () => {
       // q1=3: 行4(0.8)+8(0.7) = 1.5
       // q1=N/A: 行11(1.0)+13(1.1) = 2.1
       // n = 6.9+3.3+1.5+2.1 = 13.8
-      const cell1 = gtCell(result, "1")!;
-      expect(cell1).toBeDefined();
+      const cell1 = gtCell(result, "1");
       expect(cell1.count).toBeCloseTo(6.9, 1);
       expect(result.slices[0].n).toBeCloseTo(13.8, 1);
       expect(cell1.pct).toBeCloseTo((6.9 / 13.8) * 100, 1);
 
-      const cell2 = gtCell(result, "2")!;
+      const cell2 = gtCell(result, "2");
       expect(cell2.count).toBeCloseTo(3.3, 1);
 
-      const cell3 = gtCell(result, "3")!;
+      const cell3 = gtCell(result, "3");
       expect(cell3.count).toBeCloseTo(1.5, 1);
     });
   });
@@ -147,8 +139,7 @@ describe("aggregateGt - 重み付き", () => {
 
       // shown行: 行1-12,14 = 13行 (行13は全空で除外)
       // q3_1='1': 行1(1.2)+3(1.5)+4(0.8)+6(1.0)+8(0.7)+9(1.4)+14(1.0) = 7.6
-      const cellQ3_1 = gtCell(result, "1")!;
-      expect(cellQ3_1).toBeDefined();
+      const cellQ3_1 = gtCell(result, "1");
       expect(cellQ3_1.count).toBeCloseTo(7.6, 1);
     });
   });

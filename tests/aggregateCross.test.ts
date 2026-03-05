@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateCross } from "../src/lib/agg/aggregateCross";
-import type { AggResult, Cell } from "../src/lib/agg/types";
+import type { AggResult } from "../src/lib/agg/types";
 import { setupDuckDB, teardownDuckDB, getAggInput } from "./helpers/duckdb";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,13 +18,9 @@ const q1 = getAggInput("q1");
 const q2 = getAggInput("q2");
 const q3 = getAggInput("q3");
 
-/** Find a cell by code in a slice */
-function findCellByCode(result: AggResult, sliceCode: string, code: string): Cell | undefined {
-  const slice = result.slices.find((s) => s.code === sliceCode);
-  if (!slice) return undefined;
-  const idx = result.codes.indexOf(code);
-  if (idx < 0) return undefined;
-  return slice.cells[idx];
+function findCell(result: AggResult, sliceCode: string, code: string): Cell {
+  const slice = result.slices.find((s) => s.code === sliceCode)!;
+  return slice.cells[result.codes.indexOf(code)];
 }
 
 // ============================================================
@@ -59,9 +55,8 @@ describe("aggregateCross - 重みなし", () => {
       // q2有効行(IS NOT NULL): 行1-11,13,14 = 13行 (行12=NULL除外)
       // q1=1 かつ q2有効: 行1,3,5,7,10 (行12はq2=NULL除外) = 5行
       // q1=1 でq2=1: 行7,10 = 2件
-      const cell = findCellByCode(result, "1", "1"); // slice.code=q1値"1", result.codes中のq2値"1"
-      expect(cell).toBeDefined();
-      expect(cell!.count).toBe(2);
+      const cell = findCell(result, "1", "1"); // slice.code=q1値"1", result.codes中のq2値"1"
+      expect(cell.count).toBe(2);
     });
   });
 
@@ -73,9 +68,8 @@ describe("aggregateCross - 重みなし", () => {
       // q1=1 の行: 行1,3,5,7,10,12
       // q1=1 かつ q3_1='1': 行1,3 = 2件
       // Slice code "1" = q3のcodes[0], result.codes中の"1" = q1の値"1"
-      const cell = findCellByCode(result, "1", "1");
-      expect(cell).toBeDefined();
-      expect(cell!.count).toBe(2);
+      const cell = findCell(result, "1", "1");
+      expect(cell.count).toBe(2);
     });
   });
 
@@ -88,14 +82,12 @@ describe("aggregateCross - 重みなし", () => {
 
       // q3_1='1' かつ q1=1: 行1,3 = 2件
       // code "1" in result.codes maps to q3_1 column
-      const cell = findCellByCode(result, "1", "1"); // slice "1" = q1 value, code "1" = q3 code
-      expect(cell).toBeDefined();
-      expect(cell!.count).toBe(2);
+      const cell = findCell(result, "1", "1"); // slice "1" = q1 value, code "1" = q3 code
+      expect(cell.count).toBe(2);
 
       // q3_2='1' かつ q1=1: 行3(q3_2=1,q1=1), 行5(q3_2=1,q1=1), 行7(q3_2=1,q1=1) = 3件
-      const cell2 = findCellByCode(result, "1", "2"); // slice "1" = q1 value, code "2" = q3 code
-      expect(cell2).toBeDefined();
-      expect(cell2!.count).toBe(3);
+      const cell2 = findCell(result, "1", "2"); // slice "1" = q1 value, code "2" = q3 code
+      expect(cell2.count).toBe(3);
     });
   });
 
@@ -104,14 +96,12 @@ describe("aggregateCross - 重みなし", () => {
       const result = await aggregateCross(conn, q3, q3, "");
 
       // q3_1='1' かつ q3_1='1': 行1,3,4,6,8,9,14 = 7件
-      const cell = findCellByCode(result, "1", "1"); // slice "1" = cross q3 code, code "1" = row q3 code
-      expect(cell).toBeDefined();
-      expect(cell!.count).toBe(7);
+      const cell = findCell(result, "1", "1"); // slice "1" = cross q3 code, code "1" = row q3 code
+      expect(cell.count).toBe(7);
 
       // q3_1='1' かつ q3_2='1': 行3,9 = 2件
-      const cell12 = findCellByCode(result, "2", "1"); // slice "2" = cross q3 code, code "1" = row q3 code
-      expect(cell12).toBeDefined();
-      expect(cell12!.count).toBe(2);
+      const cell12 = findCell(result, "2", "1"); // slice "2" = cross q3 code, code "1" = row q3 code
+      expect(cell12.count).toBe(2);
     });
   });
 });
