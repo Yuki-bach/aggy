@@ -24,6 +24,12 @@ export function getConn(): any {
   return conn;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getDb(): any {
+  if (!db) throw new Error("setupDuckDB() has not been called yet");
+  return db;
+}
+
 export async function setupDuckDB() {
   if (conn) return;
 
