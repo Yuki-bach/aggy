@@ -199,16 +199,14 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
     onComplete(csv, layout);
   }
 
-  const currentStep = step === 2 && bothLoaded ? 2 : 1;
-
   return (
     <div class="flex items-center justify-center p-6">
       <div class="w-full max-w-[480px] rounded-xl border border-border bg-surface p-8 shadow-md">
         <h2 class="mb-5 text-xl font-bold text-text">{t("import.title")}</h2>
 
-        <StepIndicator currentStep={currentStep} />
+        <StepIndicator currentStep={step} />
 
-        {currentStep === 1 && (
+        {step === 1 && (
           <>
             <FileUploadPanel
               csvFileName={csv?.fileName ?? null}
@@ -243,7 +241,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
           </>
         )}
 
-        {currentStep === 2 && csv && layout && (
+        {step === 2 && csv && layout && (
           <ValidationStep
             csv={csv}
             layout={layout}
