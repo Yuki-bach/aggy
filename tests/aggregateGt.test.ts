@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateGt } from "../src/lib/agg/aggregateGt";
 import type { AggResult, Cell } from "../src/lib/agg/types";
-import { setupDuckDB, teardownDuckDB, getQuestion } from "./helpers/duckdb";
+import { setupDuckDB, teardownDuckDB, getAggInput } from "./helpers/duckdb";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let conn: any;
@@ -14,8 +14,8 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-const q1 = getQuestion("q1");
-const q3 = getQuestion("q3");
+const q1 = getAggInput("q1");
+const q3 = getAggInput("q3");
 
 /** Get the GT slice's cell for a given code */
 function gtCell(result: AggResult, code: string): Cell | undefined {

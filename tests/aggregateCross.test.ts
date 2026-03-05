@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateCross } from "../src/lib/agg/aggregateCross";
 import type { AggResult, Cell } from "../src/lib/agg/types";
-import { setupDuckDB, teardownDuckDB, getQuestion } from "./helpers/duckdb";
+import { setupDuckDB, teardownDuckDB, getAggInput } from "./helpers/duckdb";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let conn: any;
@@ -14,9 +14,9 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-const q1 = getQuestion("q1");
-const q2 = getQuestion("q2");
-const q3 = getQuestion("q3");
+const q1 = getAggInput("q1");
+const q2 = getAggInput("q2");
+const q3 = getAggInput("q3");
 
 /** Find a cell by code in a slice */
 function findCellByCode(result: AggResult, sliceCode: string, code: string): Cell | undefined {
