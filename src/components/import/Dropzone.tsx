@@ -13,7 +13,7 @@ export function Dropzone({ accept, icon, text, loadedFileName, onFile }: Dropzon
   const [isDragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const isLoaded = loadedFileName != null;
+  const isLoaded = loadedFileName !== null;
 
   function handleChange(e: JSX.TargetedEvent<HTMLInputElement>) {
     const f = e.currentTarget.files?.[0];
