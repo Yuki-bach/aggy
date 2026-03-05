@@ -99,7 +99,7 @@ describe("aggregateGtEdge - SA", () => {
 });
 
 describe("aggregateGtEdge - MA", () => {
-  it("全行NULL(shown=0) → n=0", async () => {
+  it("NULL行はshownから除外される → nに寄与しない", async () => {
     // 型推論のため非NULLの行を含む。NULL行のみがshown=falseで除外される
     await loadCSV(
       buildCSV(["id", "q_1", "q_2"], [
@@ -108,7 +108,6 @@ describe("aggregateGtEdge - MA", () => {
         [3, 1, 0],
       ]),
     );
-    // codes ["1","2"] のうち q_1=1が1件。全行NULLではないが、NULL行はn寄与なし確認
     const input: AggInput = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
     const result = await aggregateGt(getConn(), input, "");
 

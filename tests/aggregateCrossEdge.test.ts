@@ -84,6 +84,7 @@ describe("aggregateCrossEdge - 重みつき手計算", () => {
     //   q1=2: 行6(1.0)+9(1.4) = 2.4
     //   q1=3: 行4(0.8)+8(0.7) = 1.5
     //   q1=99: 0
+    expect(sliceN(result, "1")).toBeCloseTo(6.6, 1);
     const c = sliceCounts(result, "1");
     expect(c[0]).toBeCloseTo(2.7, 1);
     expect(c[1]).toBeCloseTo(2.4, 1);
