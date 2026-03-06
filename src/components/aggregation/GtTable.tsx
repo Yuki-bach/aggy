@@ -1,15 +1,13 @@
 import type { Tally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
-import { useAggregation } from "./AggregationContext";
-
 interface GtTableProps {
   tally: Tally;
   maxPct: number;
+  weightCol: string;
 }
 
-export function GtTable({ tally, maxPct }: GtTableProps) {
-  const { weightCol } = useAggregation();
+export function GtTable({ tally, maxPct, weightCol }: GtTableProps) {
   const slice = tally.slices[0];
 
   return (

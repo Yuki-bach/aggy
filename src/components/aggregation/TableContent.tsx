@@ -9,7 +9,7 @@ interface TableContentProps {
 }
 
 export function TableContent({ pctDirection }: TableContentProps) {
-  const { tallies } = useAggregation();
+  const { tallies, weightCol } = useAggregation();
   const hasCross = tallies.some((t) => t.by !== null);
 
   // Compute maxPct across all GT slices for bar chart scaling
@@ -42,9 +42,14 @@ export function TableContent({ pctDirection }: TableContentProps) {
             extraClass={crossTallies.length > 0 ? "overflow-x-auto" : undefined}
           >
             {crossTallies.length > 0 ? (
-              <CrossTable gtTally={gtTally} crossTallies={crossTallies} pctDir={pctDirection} />
+              <CrossTable
+                gtTally={gtTally}
+                crossTallies={crossTallies}
+                pctDir={pctDirection}
+                weightCol={weightCol}
+              />
             ) : (
-              <GtTable tally={gtTally} maxPct={maxPct} />
+              <GtTable tally={gtTally} maxPct={maxPct} weightCol={weightCol} />
             )}
           </ResultCard>
         );
