@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [tailwindcss(), preact(), wasm(), topLevelAwait()],
   test: {
     pool: "forks",
+    exclude: ["e2e/**", "node_modules/**"],
   },
   server: {
     headers: {
