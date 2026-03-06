@@ -3,3 +3,7 @@ dist/
 .claude/settings.local.json
 .claude/worktrees/
 bench/data/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
