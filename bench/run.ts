@@ -195,7 +195,7 @@ async function main(): Promise<void> {
   // Write JSON for github-action-benchmark (customSmallerIsBetter format)
   if (process.env.BENCH_OUTPUT) {
     const benchmarkEntries = results.map((r) => ({
-      name: `${r.pattern} (${r.rows} rows, cross=${r.cross})`,
+      name: `${r.pattern} (${r.rows} rows, ${r.cols} cols, cross=${r.cross})`,
       unit: "ms",
       value: Math.round(r.medianMs * 10) / 10,
     }));
