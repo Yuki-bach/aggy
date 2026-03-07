@@ -1,7 +1,7 @@
 /** New aggregation type system */
 
 export interface Question {
-  type: "SA" | "MA";
+  type: "SA" | "MA" | "NA";
   code: string;
   columns: string[];
   codes: string[];
@@ -35,13 +35,44 @@ export interface Axis {
   labels: Record<string, string>; // { "1": "男性", ... }, NA 含む
 }
 
-/** 消費用フラット型 */
-export interface Tally {
-  question: string;
+/** NA (Numerical Answer) 用の型 */
+export interface ValueCount {
+  value: number;
+  count: number;
+}
+
+export interface NaStats {
+  n: number;
+  mean: number;
+  median: number;
+  sd: number;
+  min: number;
+  max: number;
+}
+
+export interface NumericSlice {
+  code: string | null;
+  freq: ValueCount[];
+  stats: NaStats;
+}
+
+/** 消費用フラット型 — Discriminated Union */
+export interface CategoricalTally {
   type: "SA" | "MA";
+  question: string;
   label: string;
-  labels: Record<string, string>; // NA 含む
+  by: Axis | null;
   codes: string[];
-  by: Axis | null; // null = GT
+  labels: Record<string, string>;
   slices: Slice[];
 }
+
+export interface NumericTally {
+  type: "NA";
+  question: string;
+  label: string;
+  by: Axis | null;
+  slices: NumericSlice[];
+}
+
+export type Tally = CategoricalTally | NumericTally;

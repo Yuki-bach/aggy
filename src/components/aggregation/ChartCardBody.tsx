@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "preact/hooks";
-import type { Tally } from "../../lib/agg/types";
+import type { CategoricalTally } from "../../lib/agg/types";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
 
 import type { ChartConfiguration } from "chart.js";
@@ -7,8 +7,8 @@ import type { ChartConfiguration } from "chart.js";
 export type ChartType = "bar-h" | "bar-v" | "obi";
 
 interface ChartCardBodyProps {
-  gtTally: Tally;
-  crossTallies: Tally[];
+  gtTally: CategoricalTally;
+  crossTallies: CategoricalTally[];
   gtChartType: ChartType;
   paletteId: PaletteId;
 }
@@ -57,13 +57,13 @@ export function ChartCardBody({
   );
 }
 
-function resolveLabel(code: string, tally: Tally): string {
+function resolveLabel(code: string, tally: CategoricalTally): string {
   return tally.labels[code];
 }
 
 function buildGtChart(
   canvas: HTMLCanvasElement,
-  tally: Tally,
+  tally: CategoricalTally,
   chartType: ChartType,
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,
@@ -153,8 +153,8 @@ function buildGtChart(
 
 function buildCrossChart(
   canvas: HTMLCanvasElement,
-  gtTally: Tally,
-  crossTallies: Tally[],
+  gtTally: CategoricalTally,
+  crossTallies: CategoricalTally[],
   gtChartType: ChartType,
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,

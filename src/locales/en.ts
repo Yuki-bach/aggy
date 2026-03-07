@@ -82,6 +82,14 @@ const en: Record<string, string> = {
   "export.long.count": "Count",
   "label.noAnswer": "No answer",
 
+  // NA (Numerical Answer)
+  "na.stat.n": "n",
+  "na.stat.mean": "Mean",
+  "na.stat.median": "Median",
+  "na.stat.sd": "Std Dev",
+  "na.stat.min": "Min",
+  "na.stat.max": "Max",
+
   // Chart type
   "chart.barH": "Horizontal Bar",
   "chart.barV": "Vertical Bar",

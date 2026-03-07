@@ -3,10 +3,14 @@ import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
 import { ChartCardBody, type ChartType } from "./ChartCardBody";
 import { GtTable } from "./GtTable";
 import { CrossTable } from "./CrossTable";
+import { NaGtTable } from "./NaGtTable";
+import { NaCrossTable } from "./NaCrossTable";
+import { NaChartCardBody } from "./NaChartCardBody";
 import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
 import { useAggregation } from "./AggregationContext";
 import { groupByQuestion, computeMaxPct } from "../../lib/agg/groupByQuestion";
+import type { NumericTally } from "../../lib/agg/types";
 import type { PaletteId } from "../../lib/chartConfig";
 
 export default function ResultView() {
@@ -65,17 +69,29 @@ export default function ResultView() {
             tally={gtTally}
             extraClass={crossTallies.length > 0 ? "overflow-x-auto" : undefined}
           >
-            {viewMode === "chart" ? (
+            {gtTally.type === "NA" ? (
+              viewMode === "chart" ? (
+                <NaChartCardBody
+                  gtTally={gtTally}
+                  crossTallies={crossTallies as NumericTally[]}
+                  paletteId={paletteId}
+                />
+              ) : crossTallies.length > 0 ? (
+                <NaCrossTable gtTally={gtTally} crossTallies={crossTallies as NumericTally[]} />
+              ) : (
+                <NaGtTable tally={gtTally} />
+              )
+            ) : viewMode === "chart" ? (
               <ChartCardBody
                 gtTally={gtTally}
-                crossTallies={crossTallies}
+                crossTallies={crossTallies as (typeof gtTally)[]}
                 gtChartType={gtTally.type === "SA" ? saChartType : maChartType}
                 paletteId={paletteId}
               />
             ) : crossTallies.length > 0 ? (
               <CrossTable
                 gtTally={gtTally}
-                crossTallies={crossTallies}
+                crossTallies={crossTallies as (typeof gtTally)[]}
                 pctDir={pctDirection}
                 weightCol={weightCol}
               />

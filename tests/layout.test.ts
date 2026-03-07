@@ -24,17 +24,19 @@ const layout: Layout = [
   },
   { key: "weight", type: "WEIGHT" },
   { key: "answer_date", label: "回答日", type: "DATE", granularity: "month" as const },
+  { key: "score", label: "NPS", type: "NA" as const },
 ];
 
 describe("filterLayout", () => {
   it("keeps entries whose columns exist in headers", () => {
-    const headers = ["q1", "q2_1", "q2_2", "q2_3", "weight", "answer_date"];
+    const headers = ["q1", "q2_1", "q2_2", "q2_3", "weight", "answer_date", "score"];
     const filtered = filterLayout(headers, layout);
-    expect(filtered).toHaveLength(4);
+    expect(filtered).toHaveLength(5);
     expect(filtered[0].key).toBe("q1");
     expect(filtered[1].key).toBe("q2");
     expect(filtered[2].key).toBe("weight");
     expect(filtered[3].key).toBe("answer_date");
+    expect(filtered[4].key).toBe("score");
   });
 
   it("removes SA entry when column is missing", () => {
@@ -117,4 +119,16 @@ describe("buildQuestions", () => {
     expect(questions).toHaveLength(0);
   });
 
+  it("builds NA question from layout entry", () => {
+    const questions = buildQuestions([layout[4]]);
+    expect(questions).toHaveLength(1);
+    expect(questions[0]).toEqual({
+      type: "NA",
+      code: "score",
+      columns: ["score"],
+      codes: [],
+      label: "NPS",
+      labels: {},
+    });
+  });
 });

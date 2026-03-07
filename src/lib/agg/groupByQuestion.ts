@@ -1,4 +1,4 @@
-import type { Tally } from "./types";
+import type { Tally, CategoricalTally } from "./types";
 
 export interface QuestionGroup {
   questionCode: string;
@@ -18,7 +18,7 @@ export function groupByQuestion(tallies: Tally[]): QuestionGroup[] {
 export function computeMaxPct(tallies: Tally[]): number {
   return Math.max(
     ...tallies
-      .filter((t) => t.by === null)
+      .filter((t): t is CategoricalTally => t.by === null && t.type !== "NA")
       .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct) ?? []),
     0,
   );
