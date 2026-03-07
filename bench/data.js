@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1772860597457,
+  "lastUpdate": 1772861624030,
   "repoUrl": "https://github.com/Yuki-bach/aggy",
   "entries": {
     "Benchmark": [
@@ -295,6 +295,80 @@ window.BENCHMARK_DATA = {
           {
             "name": "ma-only (10000 rows, cross=MA×2)",
             "value": 1450.4,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56685372+Yuki-bach@users.noreply.github.com",
+            "name": "Yuki Ogawa",
+            "username": "Yuki-bach"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3909b86f13a50000a18b33336dde13fa8613ff48",
+          "message": "Merge pull request #129 from Yuki-bach/worktree-rename-na-to-no-answer\n\nrefactor: NA_VALUE関連の変数名をNO_ANSWER_VALUE系にrename",
+          "timestamp": "2026-03-07T14:33:02+09:00",
+          "tree_id": "c0f9c0ad907d7416000b1c075eb275ff10a6d937",
+          "url": "https://github.com/Yuki-bach/aggy/commit/3909b86f13a50000a18b33336dde13fa8613ff48"
+        },
+        "date": 1772861623335,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "rows (10000 rows, cross=none)",
+            "value": 111.7,
+            "unit": "ms"
+          },
+          {
+            "name": "rows (10000 rows, cross=SA×2)",
+            "value": 201.9,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, cross=none)",
+            "value": 417.3,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, cross=SA×2)",
+            "value": 1301.4,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, cross=none)",
+            "value": 295.7,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, cross=SA×2)",
+            "value": 1010.4,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, cross=none)",
+            "value": 106.7,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, cross=SA×2)",
+            "value": 436.6,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, cross=none)",
+            "value": 143.6,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, cross=MA×2)",
+            "value": 1469.3,
             "unit": "ms"
           }
         ]
