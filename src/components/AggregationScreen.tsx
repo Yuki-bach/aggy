@@ -38,7 +38,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
     setErrorMsg("");
 
     const wCol = weightEnabled ? weightCol : "";
-    const crossCols = questions.filter((q) => crossSelected[q.code]);
+    const crossCols = questions.filter((q) => q.crossable && crossSelected[q.code]);
 
     try {
       const tallies = await runAggregation(questions, crossCols, wCol);
@@ -86,7 +86,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
             aria-label={t("section.cross.label")}
           >
             <CrossConfig
-              questions={questions}
+              questions={questions.filter((q) => q.crossable)}
               crossSelected={crossSelected}
               onToggle={(key, checked) => setCrossSelected((prev) => ({ ...prev, [key]: checked }))}
             />

@@ -96,6 +96,7 @@ describe("buildQuestions", () => {
       codes: ["1", "2"],
       label: "Gender",
       labels: { "1": "Male", "2": "Female" },
+      crossable: true,
     });
   });
 
@@ -109,6 +110,7 @@ describe("buildQuestions", () => {
       codes: ["1", "2", "3"],
       label: "Hobbies",
       labels: { "1": "Sports", "2": "Music", "3": "Reading" },
+      crossable: true,
     });
   });
 
