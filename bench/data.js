@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1772848093256,
+  "lastUpdate": 1772849731718,
   "repoUrl": "https://github.com/Yuki-bach/aggy",
   "entries": {
     "Benchmark": [
@@ -73,6 +73,80 @@ window.BENCHMARK_DATA = {
           {
             "name": "ma-only (10000 rows, cross=MA×2)",
             "value": 1428.8,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56685372+Yuki-bach@users.noreply.github.com",
+            "name": "Yuki Ogawa",
+            "username": "Yuki-bach"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0cb021915d5ebc4dc3970bfb2e554412881de00b",
+          "message": "Merge pull request #126 from Yuki-bach/feat/playwright-e2e\n\nfeat: Playwright E2Eテストを導入（Chromium/Firefox/WebKit）",
+          "timestamp": "2026-03-07T11:14:49+09:00",
+          "tree_id": "79077e6f298df0a42b2c475a80ce2407f7f47485",
+          "url": "https://github.com/Yuki-bach/aggy/commit/0cb021915d5ebc4dc3970bfb2e554412881de00b"
+        },
+        "date": 1772849730595,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "rows (10000 rows, cross=none)",
+            "value": 120.4,
+            "unit": "ms"
+          },
+          {
+            "name": "rows (10000 rows, cross=SA×2)",
+            "value": 207.8,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, cross=none)",
+            "value": 348.4,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, cross=SA×2)",
+            "value": 1387.6,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, cross=none)",
+            "value": 288.8,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, cross=SA×2)",
+            "value": 1001.2,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, cross=none)",
+            "value": 104.2,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, cross=SA×2)",
+            "value": 429.5,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, cross=none)",
+            "value": 142.5,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, cross=MA×2)",
+            "value": 1430.1,
             "unit": "ms"
           }
         ]
