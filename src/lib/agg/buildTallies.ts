@@ -2,7 +2,7 @@ import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, AggResult, Tally, Axis } from "./types";
 import { aggregateGt } from "./aggregateGt";
 import { aggregateCross } from "./aggregateCross";
-import { NA_VALUE } from "./sqlHelpers";
+import { NO_ANSWER_VALUE } from "./sqlHelpers";
 import { t } from "../i18n";
 
 export async function buildTallies(
@@ -26,17 +26,17 @@ export async function buildTallies(
 function toTally(question: Question, aggResult: AggResult, byQuestion?: Question): Tally {
   // Build labels including NA if present in codes
   const labels: Record<string, string> = { ...question.labels };
-  if (aggResult.codes.includes(NA_VALUE)) {
-    labels[NA_VALUE] = t("label.na");
+  if (aggResult.codes.includes(NO_ANSWER_VALUE)) {
+    labels[NO_ANSWER_VALUE] = t("label.noAnswer");
   }
 
   let by: Axis | null = null;
   if (byQuestion) {
     const axisLabels: Record<string, string> = { ...byQuestion.labels };
-    // Check if any slice code is NA_VALUE to add NA label
-    const hasNA = aggResult.slices.some((s) => s.code === NA_VALUE);
-    if (hasNA) {
-      axisLabels[NA_VALUE] = t("label.na");
+    // Check if any slice code is NO_ANSWER_VALUE to add no-answer label
+    const hasNoAnswer = aggResult.slices.some((s) => s.code === NO_ANSWER_VALUE);
+    if (hasNoAnswer) {
+      axisLabels[NO_ANSWER_VALUE] = t("label.noAnswer");
     }
     by = { code: byQuestion.code, label: byQuestion.label, labels: axisLabels };
   }

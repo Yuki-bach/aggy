@@ -9,7 +9,7 @@ import {
   maWeightedCountExpr,
   maShownCondition,
   maNoneSelectedCondition,
-  NA_VALUE,
+  NO_ANSWER_VALUE,
 } from "./sqlHelpers";
 
 export async function aggregateGt(
@@ -86,7 +86,7 @@ class GtAggregator {
     if (naCount > 0) {
       const naPct = questionN > 0 ? (naCount / questionN) * 100 : 0;
       cells.push({ count: naCount, pct: naPct });
-      resultCodes.push(NA_VALUE);
+      resultCodes.push(NO_ANSWER_VALUE);
     }
 
     return { codes: resultCodes, slices: [{ code: null, n: questionN, cells }] };

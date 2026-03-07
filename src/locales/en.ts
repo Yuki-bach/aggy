@@ -80,7 +80,7 @@ const en: Record<string, string> = {
   "export.long.crossAxis": "Cross Axis",
   "export.long.crossValue": "Cross Value",
   "export.long.count": "Count",
-  "label.na": "No answer",
+  "label.noAnswer": "No answer",
 
   // Chart type
   "chart.barH": "Horizontal Bar",

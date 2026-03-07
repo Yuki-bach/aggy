@@ -9,7 +9,7 @@ import {
   maWeightedCountExpr,
   maShownCondition,
   maNoneSelectedCondition,
-  NA_VALUE,
+  NO_ANSWER_VALUE,
 } from "./sqlHelpers";
 
 type CrossSliceData = {
@@ -153,22 +153,22 @@ class CrossAggregator {
 
     const result = await this.conn.query(sql);
     const rowMap = new Map<string, number[]>();
-    const naMap = new Map<string, number>();
+    const noAnswerMap = new Map<string, number>();
     const nMap = new Map<string, number>();
     for (const r of result.toArray()) {
       const cv = String(r.cv);
       const counts = columns.map((_, i) => Number(r[`c${i}`] ?? 0));
       rowMap.set(cv, counts);
-      naMap.set(cv, Number(r.na_cnt ?? 0));
+      noAnswerMap.set(cv, Number(r.na_cnt ?? 0));
       nMap.set(cv, Number(r.n ?? 0));
     }
 
-    const hasNA = [...naMap.values()].some((v) => v > 0);
-    const resultCodes = hasNA ? [...codes, NA_VALUE] : codes;
+    const hasNoAnswer = [...noAnswerMap.values()].some((v) => v > 0);
+    const resultCodes = hasNoAnswer ? [...codes, NO_ANSWER_VALUE] : codes;
     const data: CrossSliceData[] = crossValues.map((cv) => {
       const rowCounts = rowMap.get(cv);
       const counts = columns.map((_col, maIdx) => rowCounts?.[maIdx] ?? 0);
-      if (hasNA) counts.push(naMap.get(cv) ?? 0);
+      if (hasNoAnswer) counts.push(noAnswerMap.get(cv) ?? 0);
       return { code: cv, n: nMap.get(cv) ?? 0, counts };
     });
     return this.buildSlices(data, resultCodes);
@@ -220,11 +220,11 @@ class CrossAggregator {
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
 
-    const hasNA = this.crossQ.codes.some((_, c) => Number(row[`na_c${c}`] ?? 0) > 0);
-    const resultCodes = hasNA ? [...codes, NA_VALUE] : codes;
+    const hasNoAnswer = this.crossQ.codes.some((_, c) => Number(row[`na_c${c}`] ?? 0) > 0);
+    const resultCodes = hasNoAnswer ? [...codes, NO_ANSWER_VALUE] : codes;
     const data: CrossSliceData[] = this.crossQ.codes.map((crossCode, c) => {
       const counts = columns.map((_col, r) => Number(row[`r${r}c${c}`] ?? 0));
-      if (hasNA) counts.push(Number(row[`na_c${c}`] ?? 0));
+      if (hasNoAnswer) counts.push(Number(row[`na_c${c}`] ?? 0));
       return { code: crossCode, n: Number(row[`n_c${c}`] ?? 0), counts };
     });
     return this.buildSlices(data, resultCodes);
