@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
-import { runAggregation, prepareDateLayout } from "../lib/duckdbBridge";
+import { runAggregation } from "../lib/duckdbBridge";
 import { filterLayout, buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
-import type { Layout } from "../lib/layout";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
 import type { CsvData, LayoutData } from "../lib/types";
@@ -15,38 +14,26 @@ interface AggregationScreenProps {
 }
 
 export default function AggregationScreen({ csv, layout }: AggregationScreenProps) {
-  const [preparedLayout, setPreparedLayout] = useState<Layout | null>(null);
-  const filtered = preparedLayout ? filterLayout(csv.headers, preparedLayout) : [];
+  const filtered = filterLayout(csv.headers, layout.layout);
   const questions = buildQuestions(filtered);
   const weightCol = findWeightColumn(layout.layout);
+  const dateWarnings = layout.dateWarnings ?? [];
 
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [dateWarnings, setDateWarnings] = useState<string[]>([]);
   const [aggCtx, setAggCtx] = useState<AggregationContextValue | null>(null);
-
-  useEffect(() => {
-    prepareDateLayout(layout.layout)
-      .then(({ layout: prepared, warnings }) => {
-        setPreparedLayout(prepared);
-        setDateWarnings(warnings);
-      })
-      .catch((e) => {
-        setErrorMsg(t("error.date.prepare", { msg: (e as Error).message }));
-      });
-  }, [layout]);
 
   const didAutoRun = useRef(false);
   useEffect(() => {
-    if (preparedLayout && !didAutoRun.current) {
+    if (!didAutoRun.current) {
       didAutoRun.current = true;
       const sel: Record<string, boolean> = {};
       questions.forEach((q) => (sel[q.code] = false));
       setCrossSelected(sel);
       handleRunAggregation();
     }
-  }, [preparedLayout]);
+  }, []);
 
   async function handleRunAggregation(): Promise<void> {
     setErrorMsg("");
