@@ -63,9 +63,7 @@ export default function ResultView() {
           <ResultCard
             key={questionCode}
             tally={gtTally}
-            extraClass={
-              viewMode === "table" && crossTallies.length > 0 ? "overflow-x-auto" : undefined
-            }
+            extraClass={crossTallies.length > 0 ? "overflow-x-auto" : undefined}
           >
             {viewMode === "chart" ? (
               <ChartCardBody
