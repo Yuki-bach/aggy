@@ -7,7 +7,7 @@
  */
 
 import { createRequire } from "node:module";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
@@ -191,6 +191,17 @@ async function main(): Promise<void> {
   }
 
   console.log("=".repeat(80));
+
+  // Write JSON for github-action-benchmark (customSmallerIsBetter format)
+  if (process.env.BENCH_OUTPUT) {
+    const benchmarkEntries = results.map((r) => ({
+      name: `${r.pattern} (${r.rows} rows, cross=${r.cross})`,
+      unit: "ms",
+      value: Math.round(r.medianMs * 10) / 10,
+    }));
+    writeFileSync(process.env.BENCH_OUTPUT, JSON.stringify(benchmarkEntries, null, 2));
+    console.log(`\nJSON results written to ${process.env.BENCH_OUTPUT}`);
+  }
 }
 
 function padEnd(s: string, len: number): string {
