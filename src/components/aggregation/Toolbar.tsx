@@ -1,6 +1,6 @@
 import { t } from "../../lib/i18n";
 import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfig";
-import type { ChartType } from "./ChartContent";
+import type { ChartType } from "./ChartCardBody";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { useAggregation } from "./AggregationContext";
 import { ExportMenu } from "./ExportMenu";

@@ -1,62 +1,24 @@
-/** Chart content: grid layout + individual chart cards */
-
 import { useRef, useEffect } from "preact/hooks";
 import type { Tally } from "../../lib/agg/types";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
-import { useAggregation } from "./AggregationContext";
-import { ResultCard } from "./ResultCard";
 
 import type { ChartConfiguration } from "chart.js";
 
 export type ChartType = "bar-h" | "bar-v" | "obi";
 
-interface ChartContentProps {
-  saChartType: ChartType;
-  maChartType: ChartType;
-  paletteId: PaletteId;
-}
-
-export function ChartContent({ saChartType, maChartType, paletteId }: ChartContentProps) {
-  const { tallies } = useAggregation();
-  const hasCross = tallies.some((t) => t.by !== null);
-
-  // Group tallies by question
-  const questionCodes = [...new Set(tallies.map((t) => t.question))];
-
-  return (
-    <div
-      class={
-        hasCross
-          ? "grid grid-cols-1 gap-6"
-          : "grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-6"
-      }
-    >
-      {questionCodes.map((qCode) => {
-        const gtTally = tallies.find((t) => t.question === qCode && t.by === null)!;
-        const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== null);
-
-        return (
-          <ChartCard
-            key={qCode}
-            gtTally={gtTally}
-            crossTallies={crossTallies}
-            gtChartType={gtTally.type === "SA" ? saChartType : maChartType}
-            paletteId={paletteId}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-interface ChartCardProps {
+interface ChartCardBodyProps {
   gtTally: Tally;
   crossTallies: Tally[];
   gtChartType: ChartType;
   paletteId: PaletteId;
 }
 
-function ChartCard({ gtTally, crossTallies, gtChartType, paletteId }: ChartCardProps) {
+export function ChartCardBody({
+  gtTally,
+  crossTallies,
+  gtChartType,
+  paletteId,
+}: ChartCardBodyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -89,11 +51,9 @@ function ChartCard({ gtTally, crossTallies, gtChartType, paletteId }: ChartCardP
   }, [gtTally, crossTallies, gtChartType, paletteId]);
 
   return (
-    <ResultCard tally={gtTally}>
-      <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
-        <canvas ref={canvasRef} />
-      </div>
-    </ResultCard>
+    <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
+      <canvas ref={canvasRef} />
+    </div>
   );
 }
 
