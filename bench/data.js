@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1772851995653,
+  "lastUpdate": 1772860597457,
   "repoUrl": "https://github.com/Yuki-bach/aggy",
   "entries": {
     "Benchmark": [
@@ -221,6 +221,80 @@ window.BENCHMARK_DATA = {
           {
             "name": "ma-only (10000 rows, cross=MA×2)",
             "value": 1485.2,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56685372+Yuki-bach@users.noreply.github.com",
+            "name": "Yuki Ogawa",
+            "username": "Yuki-bach"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e85577792c06b45d39a94392e3c3f3a7d615a875",
+          "message": "Merge pull request #128 from Yuki-bach/refactor/move-prepare-date-layout-upstream\n\nrefactor: prepareDateLayoutをImportScreenの完了フローに移動",
+          "timestamp": "2026-03-07T14:15:54+09:00",
+          "tree_id": "6cdf3680983f197b85c72d5531201d83ee0c3d78",
+          "url": "https://github.com/Yuki-bach/aggy/commit/e85577792c06b45d39a94392e3c3f3a7d615a875"
+        },
+        "date": 1772860596773,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "rows (10000 rows, cross=none)",
+            "value": 131.8,
+            "unit": "ms"
+          },
+          {
+            "name": "rows (10000 rows, cross=SA×2)",
+            "value": 220.3,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, cross=none)",
+            "value": 445.2,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, cross=SA×2)",
+            "value": 1321.6,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, cross=none)",
+            "value": 288.1,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, cross=SA×2)",
+            "value": 1010.7,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, cross=none)",
+            "value": 107.4,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, cross=SA×2)",
+            "value": 432.7,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, cross=none)",
+            "value": 143.4,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, cross=MA×2)",
+            "value": 1450.4,
             "unit": "ms"
           }
         ]
