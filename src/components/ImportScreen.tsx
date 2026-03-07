@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "preact/compat";
 import { useCallback, useRef, useState } from "preact/hooks";
-import { parseLayout } from "../lib/layout";
+import { parseLayout, filterLayout } from "../lib/layout";
 import { loadCSV, prepareDateLayout } from "../lib/duckdbBridge";
 import { saveData, loadSaved } from "../lib/opfs";
 import { t } from "../lib/i18n";
@@ -196,7 +196,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         // OPFS save is best-effort
       }
     }
-    const { layout: prepared, warnings } = await prepareDateLayout(layout.layout);
+    const filtered = filterLayout(csv.headers, layout.layout);
+    const { layout: prepared, warnings } = await prepareDateLayout(filtered);
     onComplete(csv, { ...layout, layout: prepared, dateWarnings: warnings });
   }
 
