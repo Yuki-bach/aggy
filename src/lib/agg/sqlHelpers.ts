@@ -29,4 +29,4 @@ export function maNoneSelectedCondition(cols: string[]): string {
   return cols.map((c) => `"${esc(c)}" != 1`).join(" AND ");
 }
 /** No-answer marker */
-export const NA_VALUE = "N/A";
+export const NO_ANSWER_VALUE = "N/A";

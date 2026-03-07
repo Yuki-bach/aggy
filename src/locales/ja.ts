@@ -80,7 +80,7 @@ const ja: Record<string, string> = {
   "export.long.crossAxis": "クロス軸",
   "export.long.crossValue": "クロス値",
   "export.long.count": "度数",
-  "label.na": "無回答",
+  "label.noAnswer": "無回答",
 
   // Chart type
   "chart.barH": "横棒",
