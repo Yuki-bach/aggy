@@ -23,7 +23,7 @@ function formatLoadedInfo(csv: CsvData | null): string | null {
 }
 
 interface ImportScreenProps {
-  onComplete: (csv: CsvData, layout: LayoutData) => void;
+  onComplete: (csv: CsvData, layout: LayoutData, dateWarnings: string[]) => void;
 }
 
 const STEPS = [
@@ -198,7 +198,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
     }
     const filtered = filterLayout(csv.headers, layout.layout);
     const { layout: prepared, warnings } = await prepareDateLayout(filtered);
-    onComplete(csv, { ...layout, layout: prepared, dateWarnings: warnings });
+    onComplete(csv, { ...layout, layout: prepared }, warnings);
   }
 
   return (

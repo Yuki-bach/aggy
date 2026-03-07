@@ -11,12 +11,12 @@ import type { CsvData, LayoutData } from "../lib/types";
 interface AggregationScreenProps {
   csv: CsvData;
   layout: LayoutData;
+  dateWarnings: string[];
 }
 
-export default function AggregationScreen({ csv, layout }: AggregationScreenProps) {
+export default function AggregationScreen({ csv, layout, dateWarnings }: AggregationScreenProps) {
   const questions = buildQuestions(layout.layout);
   const weightCol = findWeightColumn(layout.layout);
-  const dateWarnings = layout.dateWarnings ?? [];
 
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
   const [weightEnabled, setWeightEnabled] = useState(true);
