@@ -10,7 +10,11 @@ import type { CsvData, LayoutData } from "./lib/types";
 export default function App() {
   const [screen, setScreen] = useState<"import" | "aggregation">("import");
   const [, setTick] = useState(0);
-  const [loadedData, setLoadedData] = useState<{ csv: CsvData; layout: LayoutData } | null>(null);
+  const [loadedData, setLoadedData] = useState<{
+    csv: CsvData;
+    layout: LayoutData;
+    dateWarnings: string[];
+  } | null>(null);
   const isImport = screen === "import";
 
   // Re-render on locale change
@@ -18,8 +22,8 @@ export default function App() {
     onLocaleChange(() => setTick((n) => n + 1));
   }, []);
 
-  const handleComplete = useCallback((csv: CsvData, layout: LayoutData) => {
-    setLoadedData({ csv, layout });
+  const handleComplete = useCallback((csv: CsvData, layout: LayoutData, dateWarnings: string[]) => {
+    setLoadedData({ csv, layout, dateWarnings });
     setScreen("aggregation");
   }, []);
 
@@ -41,7 +45,13 @@ export default function App() {
         {isImport ? (
           <ImportScreen onComplete={handleComplete} />
         ) : (
-          loadedData && <AggregationScreen csv={loadedData.csv} layout={loadedData.layout} />
+          loadedData && (
+            <AggregationScreen
+              csv={loadedData.csv}
+              layout={loadedData.layout}
+              dateWarnings={loadedData.dateWarnings}
+            />
+          )
         )}
       </main>
     </div>
