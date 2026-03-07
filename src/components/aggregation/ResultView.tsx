@@ -1,8 +1,12 @@
 import { useEffect, useState } from "preact/hooks";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
-import { ChartContent, type ChartType } from "./ChartContent";
-import { TableContent } from "./TableContent";
+import { ChartCardBody, type ChartType } from "./ChartCardBody";
+import { GtTable } from "./GtTable";
+import { CrossTable } from "./CrossTable";
+import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
+import { useAggregation } from "./AggregationContext";
+import { groupByQuestion, computeMaxPct } from "../../lib/agg/groupByQuestion";
 import type { PaletteId } from "../../lib/chartConfig";
 
 export default function ResultView() {
@@ -33,6 +37,16 @@ export default function ResultView() {
     onPaletteChange: setPaletteId,
   };
 
+  const { tallies, weightCol } = useAggregation();
+  const groups = groupByQuestion(tallies);
+  const hasCross = tallies.some((t) => t.by !== null);
+  const maxPct = computeMaxPct(tallies);
+
+  const minWidth = viewMode === "chart" ? "400px" : "360px";
+  const gridClass = hasCross
+    ? "grid grid-cols-1 gap-6"
+    : `grid grid-cols-[repeat(auto-fill,minmax(${minWidth},1fr))] gap-6`;
+
   return (
     <>
       <Toolbar currentViewMode={viewMode} callbacks={callbacks} />
@@ -44,11 +58,33 @@ export default function ResultView() {
         paletteId={paletteId}
         callbacks={callbacks}
       />
-      {viewMode === "chart" ? (
-        <ChartContent saChartType={saChartType} maChartType={maChartType} paletteId={paletteId} />
-      ) : (
-        <TableContent pctDirection={pctDirection} />
-      )}
+      <div class={gridClass}>
+        {groups.map(({ questionCode, gtTally, crossTallies }) => (
+          <ResultCard
+            key={questionCode}
+            tally={gtTally}
+            extraClass={crossTallies.length > 0 ? "overflow-x-auto" : undefined}
+          >
+            {viewMode === "chart" ? (
+              <ChartCardBody
+                gtTally={gtTally}
+                crossTallies={crossTallies}
+                gtChartType={gtTally.type === "SA" ? saChartType : maChartType}
+                paletteId={paletteId}
+              />
+            ) : crossTallies.length > 0 ? (
+              <CrossTable
+                gtTally={gtTally}
+                crossTallies={crossTallies}
+                pctDir={pctDirection}
+                weightCol={weightCol}
+              />
+            ) : (
+              <GtTable tally={gtTally} maxPct={maxPct} weightCol={weightCol} />
+            )}
+          </ResultCard>
+        ))}
+      </div>
       <AIBubble />
     </>
   );
