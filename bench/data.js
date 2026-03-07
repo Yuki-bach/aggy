@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1772849731718,
+  "lastUpdate": 1772851995653,
   "repoUrl": "https://github.com/Yuki-bach/aggy",
   "entries": {
     "Benchmark": [
@@ -147,6 +147,80 @@ window.BENCHMARK_DATA = {
           {
             "name": "ma-only (10000 rows, cross=MA×2)",
             "value": 1430.1,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56685372+Yuki-bach@users.noreply.github.com",
+            "name": "Yuki Ogawa",
+            "username": "Yuki-bach"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4695093df7e46a586901c9de5390b9d3fa7ce3a3",
+          "message": "Merge pull request #127 from Yuki-bach/refactor/invert-resultcard-ownership\n\nrefactor: ResultCardとTableContent/ChartContentの関係を逆転",
+          "timestamp": "2026-03-07T11:52:33+09:00",
+          "tree_id": "8a59a869b4332f2f9a1cf4a274b1b97643fb2885",
+          "url": "https://github.com/Yuki-bach/aggy/commit/4695093df7e46a586901c9de5390b9d3fa7ce3a3"
+        },
+        "date": 1772851995089,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "rows (10000 rows, cross=none)",
+            "value": 125.1,
+            "unit": "ms"
+          },
+          {
+            "name": "rows (10000 rows, cross=SA×2)",
+            "value": 331,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, cross=none)",
+            "value": 437.4,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, cross=SA×2)",
+            "value": 1355.4,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, cross=none)",
+            "value": 307.3,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, cross=SA×2)",
+            "value": 1030.6,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, cross=none)",
+            "value": 105.8,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, cross=SA×2)",
+            "value": 443,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, cross=none)",
+            "value": 144.9,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, cross=MA×2)",
+            "value": 1485.2,
             "unit": "ms"
           }
         ]
