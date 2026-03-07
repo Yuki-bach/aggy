@@ -72,6 +72,7 @@ export function buildQuestions(layout: Layout): Question[] {
       codes: (e.items ?? []).map((i) => i.code),
       label: e.label ?? e.key,
       labels: Object.fromEntries((e.items ?? []).map((i) => [i.code, i.label])),
+      crossable: true,
     }));
 }
 

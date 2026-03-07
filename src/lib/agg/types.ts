@@ -7,6 +7,7 @@ export interface Question {
   codes: string[];
   label: string;
   labels: Record<string, string>;
+  crossable: boolean;
 }
 
 export type AggInput = Pick<Question, "type" | "columns" | "codes">;

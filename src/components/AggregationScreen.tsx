@@ -86,7 +86,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
             aria-label={t("section.cross.label")}
           >
             <CrossConfig
-              questions={questions}
+              questions={questions.filter((q) => q.crossable)}
               crossSelected={crossSelected}
               onToggle={(key, checked) => setCrossSelected((prev) => ({ ...prev, [key]: checked }))}
             />
