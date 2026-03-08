@@ -3,7 +3,6 @@ import type { Tally } from "../../lib/agg/types";
 import { Toolbar, ViewOpts } from "./Toolbar";
 import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
-import { groupByQuestion, computeMaxPct } from "../../lib/agg/groupByQuestion";
 import type { PctDirection, ViewMode } from "./viewTypes";
 import type { ChartType } from "./ChartCardBody";
 import type { PaletteId } from "../../lib/chartConfig";
@@ -41,10 +40,16 @@ export default function ResultView({ tallies, weightCol }: ResultViewProps) {
     onPaletteChange: setPaletteId,
   };
 
-  const groups = groupByQuestion(tallies);
+  const questionCodes = [...new Set(tallies.map((t) => t.questionCode))];
   const hasCross = tallies.some((t) => t.by !== null);
 
-  const tableOpts = { pctDirection, maxPct: computeMaxPct(tallies) };
+  const maxPct = Math.max(
+    ...tallies
+      .filter((t) => t.by === null && t.type !== "NA")
+      .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct) ?? []),
+    0,
+  );
+  const tableOpts = { pctDirection, maxPct };
   const chartOpts = { saChartType, maChartType, paletteId };
 
   const minWidth = viewMode === "chart" ? "400px" : "360px";
@@ -68,10 +73,11 @@ export default function ResultView({ tallies, weightCol }: ResultViewProps) {
         callbacks={callbacks}
       />
       <div class={gridClass}>
-        {groups.map((group) => (
+        {questionCodes.map((q) => (
           <ResultCard
-            key={group.gtTally.questionCode}
-            group={group}
+            key={q}
+            gtTally={tallies.find((t) => t.questionCode === q && t.by === null)!}
+            crossTallies={tallies.filter((t) => t.questionCode === q && t.by !== null)}
             viewMode={viewMode}
             tableOpts={tableOpts}
             chartOpts={chartOpts}
