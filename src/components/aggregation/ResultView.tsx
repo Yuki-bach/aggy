@@ -38,7 +38,9 @@ export default function ResultView() {
   const { tallies, weightCol } = useAggregation();
   const groups = groupByQuestion(tallies);
   const hasCross = tallies.some((t) => t.by !== null);
-  const maxPct = computeMaxPct(tallies);
+
+  const tableOpts = { pctDirection, maxPct: computeMaxPct(tallies) };
+  const chartOpts = { saChartType, maChartType, paletteId };
 
   const minWidth = viewMode === "chart" ? "400px" : "360px";
   const gridClass = hasCross
@@ -62,12 +64,9 @@ export default function ResultView() {
             key={group.questionCode}
             group={group}
             viewMode={viewMode}
-            maxPct={maxPct}
             weightCol={weightCol}
-            pctDirection={pctDirection}
-            saChartType={saChartType}
-            maChartType={maChartType}
-            paletteId={paletteId}
+            tableOpts={tableOpts}
+            chartOpts={chartOpts}
           />
         ))}
       </div>

@@ -9,27 +9,26 @@ import { NaChartCardBody } from "./NaChartCardBody";
 import { NaCrossTable } from "./NaCrossTable";
 import { NaGtTable } from "./NaGtTable";
 
-interface ResultCardProps {
-  group: QuestionGroup;
-  viewMode: ViewMode;
-  maxPct: number;
-  weightCol: string;
+export interface TableOpts {
   pctDirection: PctDirection;
+  maxPct: number;
+}
+
+export interface ChartOpts {
   saChartType: ChartType;
   maChartType: ChartType;
   paletteId: PaletteId;
 }
 
-export function ResultCard({
-  group,
-  viewMode,
-  maxPct,
-  weightCol,
-  pctDirection,
-  saChartType,
-  maChartType,
-  paletteId,
-}: ResultCardProps) {
+interface ResultCardProps {
+  group: QuestionGroup;
+  viewMode: ViewMode;
+  weightCol: string;
+  tableOpts: TableOpts;
+  chartOpts: ChartOpts;
+}
+
+export function ResultCard({ group, viewMode, weightCol, tableOpts, chartOpts }: ResultCardProps) {
   const { gtTally } = group;
   const hasCross = group.crossTallies.length > 0;
 
@@ -53,12 +52,9 @@ export function ResultCard({
       <CardBody
         group={group}
         viewMode={viewMode}
-        maxPct={maxPct}
         weightCol={weightCol}
-        pctDirection={pctDirection}
-        saChartType={saChartType}
-        maChartType={maChartType}
-        paletteId={paletteId}
+        tableOpts={tableOpts}
+        chartOpts={chartOpts}
       />
     </div>
   );
@@ -67,12 +63,9 @@ export function ResultCard({
 function CardBody({
   group,
   viewMode,
-  maxPct,
   weightCol,
-  pctDirection,
-  saChartType,
-  maChartType,
-  paletteId,
+  tableOpts,
+  chartOpts,
 }: Omit<ResultCardProps, never>) {
   if (group.type === "NA") {
     if (viewMode === "chart") {
@@ -80,7 +73,7 @@ function CardBody({
         <NaChartCardBody
           gtTally={group.gtTally}
           crossTallies={group.crossTallies}
-          paletteId={paletteId}
+          paletteId={chartOpts.paletteId}
         />
       );
     }
@@ -97,6 +90,7 @@ function CardBody({
   }
 
   if (viewMode === "chart") {
+    const { saChartType, maChartType, paletteId } = chartOpts;
     return (
       <ChartCardBody
         gtTally={group.gtTally}
@@ -111,10 +105,10 @@ function CardBody({
       <CrossTable
         gtTally={group.gtTally}
         crossTallies={group.crossTallies}
-        pctDir={pctDirection}
+        pctDir={tableOpts.pctDirection}
         weightCol={weightCol}
       />
     );
   }
-  return <GtTable tally={group.gtTally} maxPct={maxPct} weightCol={weightCol} />;
+  return <GtTable tally={group.gtTally} maxPct={tableOpts.maxPct} weightCol={weightCol} />;
 }
