@@ -1,4 +1,5 @@
 import type { NumericTally } from "../../lib/agg/types";
+import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
 
 interface NaCrossTableProps {
@@ -49,12 +50,7 @@ export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
               >
                 {group.axis.labels[slice.code!]}
                 <br />
-                <span class="text-muted text-xs font-normal">
-                  n=
-                  {Number.isInteger(slice.stats.n)
-                    ? slice.stats.n.toLocaleString()
-                    : slice.stats.n.toFixed(1)}
-                </span>
+                <span class="text-muted text-xs font-normal">n={formatN(slice.stats.n)}</span>
               </th>
             )),
           )}

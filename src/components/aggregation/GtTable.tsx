@@ -1,4 +1,5 @@
 import type { CategoricalTally } from "../../lib/agg/types";
+import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 interface GtTableProps {
@@ -26,9 +27,7 @@ export function GtTable({ tally, maxPct }: GtTableProps) {
         {tally.codes.map((code, i) => {
           const cell = slice.cells[i];
           const label = tally.labels[code];
-          const countStr = Number.isInteger(cell.count)
-            ? cell.count.toLocaleString()
-            : cell.count.toFixed(1);
+          const countStr = formatN(cell.count);
           const barWidth = ((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1);
 
           return (

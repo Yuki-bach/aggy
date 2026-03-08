@@ -1,6 +1,7 @@
 import type { CategoricalTally, Slice, Axis } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import type { PctDirection } from "./viewTypes";
+import { formatN } from "../../lib/format";
 import { Th, Td } from "./TableCells";
 
 interface CrossTableProps {
@@ -18,10 +19,6 @@ export function CrossTable({ gtTally, crossTallies, pctDir }: CrossTableProps) {
 
 function resolveAxisLabel(code: string, axis: Axis): string {
   return axis.labels[code];
-}
-
-function formatN(n: number): string {
-  return Number.isInteger(n) ? n.toLocaleString() : n.toFixed(1);
 }
 
 const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong";

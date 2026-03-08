@@ -7,16 +7,13 @@ import { NaChartCardBody } from "./NaChartCardBody";
 import { NaCrossTable } from "./NaCrossTable";
 import { NaGtTable } from "./NaGtTable";
 import type { ChartOpts, TableOpts, ViewMode } from "./viewTypes";
+import { formatN } from "../../lib/format";
 
 interface ResultCardProps {
   group: TallyGroup;
   viewMode: ViewMode;
   tableOpts: TableOpts;
   chartOpts: ChartOpts;
-}
-
-function formatN(n: number): string {
-  return Number.isInteger(n) ? n.toLocaleString() : n.toFixed(1);
 }
 
 export function ResultCard({ group, viewMode, tableOpts, chartOpts }: ResultCardProps) {
