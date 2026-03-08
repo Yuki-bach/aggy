@@ -10,7 +10,6 @@ import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
 import { useAggregation } from "./AggregationContext";
 import { groupByQuestion, computeMaxPct } from "../../lib/agg/groupByQuestion";
-import type { NumericTally } from "../../lib/agg/types";
 import type { PaletteId } from "../../lib/chartConfig";
 
 export default function ResultView() {
@@ -63,40 +62,40 @@ export default function ResultView() {
         callbacks={callbacks}
       />
       <div class={gridClass}>
-        {groups.map(({ questionCode, gtTally, crossTallies }) => (
+        {groups.map((group) => (
           <ResultCard
-            key={questionCode}
-            tally={gtTally}
-            extraClass={crossTallies.length > 0 ? "overflow-x-auto" : undefined}
+            key={group.questionCode}
+            tally={group.gtTally}
+            extraClass={group.crossTallies.length > 0 ? "overflow-x-auto" : undefined}
           >
-            {gtTally.type === "NA" ? (
+            {group.type === "NA" ? (
               viewMode === "chart" ? (
                 <NaChartCardBody
-                  gtTally={gtTally}
-                  crossTallies={crossTallies as NumericTally[]}
+                  gtTally={group.gtTally}
+                  crossTallies={group.crossTallies}
                   paletteId={paletteId}
                 />
-              ) : crossTallies.length > 0 ? (
-                <NaCrossTable gtTally={gtTally} crossTallies={crossTallies as NumericTally[]} />
+              ) : group.crossTallies.length > 0 ? (
+                <NaCrossTable gtTally={group.gtTally} crossTallies={group.crossTallies} />
               ) : (
-                <NaGtTable tally={gtTally} />
+                <NaGtTable tally={group.gtTally} />
               )
             ) : viewMode === "chart" ? (
               <ChartCardBody
-                gtTally={gtTally}
-                crossTallies={crossTallies as (typeof gtTally)[]}
-                gtChartType={gtTally.type === "SA" ? saChartType : maChartType}
+                gtTally={group.gtTally}
+                crossTallies={group.crossTallies}
+                gtChartType={group.gtTally.type === "SA" ? saChartType : maChartType}
                 paletteId={paletteId}
               />
-            ) : crossTallies.length > 0 ? (
+            ) : group.crossTallies.length > 0 ? (
               <CrossTable
-                gtTally={gtTally}
-                crossTallies={crossTallies as (typeof gtTally)[]}
+                gtTally={group.gtTally}
+                crossTallies={group.crossTallies}
                 pctDir={pctDirection}
                 weightCol={weightCol}
               />
             ) : (
-              <GtTable tally={gtTally} maxPct={maxPct} weightCol={weightCol} />
+              <GtTable tally={group.gtTally} maxPct={maxPct} weightCol={weightCol} />
             )}
           </ResultCard>
         ))}

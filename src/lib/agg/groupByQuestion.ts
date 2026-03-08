@@ -1,18 +1,42 @@
-import type { Tally, CategoricalTally } from "./types";
+import type { Tally, CategoricalTally, NumericTally } from "./types";
 
-export interface QuestionGroup {
+export interface CategoricalQuestionGroup {
+  type: "SA" | "MA";
   questionCode: string;
-  gtTally: Tally;
-  crossTallies: Tally[];
+  gtTally: CategoricalTally;
+  crossTallies: CategoricalTally[];
 }
+
+export interface NumericQuestionGroup {
+  type: "NA";
+  questionCode: string;
+  gtTally: NumericTally;
+  crossTallies: NumericTally[];
+}
+
+export type QuestionGroup = CategoricalQuestionGroup | NumericQuestionGroup;
 
 export function groupByQuestion(tallies: Tally[]): QuestionGroup[] {
   const questionCodes = [...new Set(tallies.map((t) => t.question))];
-  return questionCodes.map((qCode) => ({
-    questionCode: qCode,
-    gtTally: tallies.find((t) => t.question === qCode && t.by === null)!,
-    crossTallies: tallies.filter((t) => t.question === qCode && t.by !== null),
-  }));
+  return questionCodes.map((qCode) => {
+    const gtTally = tallies.find((t) => t.question === qCode && t.by === null)!;
+    const crossTallies = tallies.filter((t) => t.question === qCode && t.by !== null);
+    // 同一設問のtallyは同じtypeなので、gtTallyで判別して安全にnarrowする
+    if (gtTally.type === "NA") {
+      return {
+        type: "NA" as const,
+        questionCode: qCode,
+        gtTally,
+        crossTallies: crossTallies as NumericTally[],
+      };
+    }
+    return {
+      type: gtTally.type,
+      questionCode: qCode,
+      gtTally,
+      crossTallies: crossTallies as CategoricalTally[],
+    };
+  });
 }
 
 export function computeMaxPct(tallies: Tally[]): number {
