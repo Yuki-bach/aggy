@@ -1,4 +1,5 @@
-import type { QuestionGroup } from "../../lib/agg/groupByQuestion";
+import type { TallyGroup } from "../../lib/agg/groupByQuestion";
+import type { CategoricalTally, NumericTally } from "../../lib/agg/types";
 import { ChartCardBody } from "./ChartCardBody";
 import { CrossTable } from "./CrossTable";
 import { GtTable } from "./GtTable";
@@ -8,7 +9,7 @@ import { NaGtTable } from "./NaGtTable";
 import type { ChartOpts, TableOpts, ViewMode } from "./viewTypes";
 
 interface ResultCardProps {
-  group: QuestionGroup;
+  group: TallyGroup;
   viewMode: ViewMode;
   weightCol: string;
   tableOpts: TableOpts;
@@ -54,48 +55,44 @@ function CardBody({
   tableOpts,
   chartOpts,
 }: Omit<ResultCardProps, never>) {
-  if (group.type === "NA") {
+  const { gtTally, crossTallies } = group;
+
+  if (gtTally.type === "NA") {
+    // 同一設問内のtallyは同じtypeなのでキャスト安全
+    const crossNa = crossTallies as NumericTally[];
     if (viewMode === "chart") {
       return (
-        <NaChartCardBody
-          gtTally={group.gtTally}
-          crossTallies={group.crossTallies}
-          paletteId={chartOpts.paletteId}
-        />
+        <NaChartCardBody gtTally={gtTally} crossTallies={crossNa} paletteId={chartOpts.paletteId} />
       );
     }
-    if (group.crossTallies.length > 0) {
-      return (
-        <NaCrossTable
-          gtTally={group.gtTally}
-          crossTallies={group.crossTallies}
-          weightCol={weightCol}
-        />
-      );
+    if (crossNa.length > 0) {
+      return <NaCrossTable gtTally={gtTally} crossTallies={crossNa} weightCol={weightCol} />;
     }
-    return <NaGtTable tally={group.gtTally} />;
+    return <NaGtTable tally={gtTally} />;
   }
 
+  // SA | MA — 同一設問内のtallyは同じtypeなのでキャスト安全
+  const crossCat = crossTallies as CategoricalTally[];
   if (viewMode === "chart") {
     const { saChartType, maChartType, paletteId } = chartOpts;
     return (
       <ChartCardBody
-        gtTally={group.gtTally}
-        crossTallies={group.crossTallies}
-        gtChartType={group.gtTally.type === "SA" ? saChartType : maChartType}
+        gtTally={gtTally}
+        crossTallies={crossCat}
+        gtChartType={gtTally.type === "SA" ? saChartType : maChartType}
         paletteId={paletteId}
       />
     );
   }
-  if (group.crossTallies.length > 0) {
+  if (crossCat.length > 0) {
     return (
       <CrossTable
-        gtTally={group.gtTally}
-        crossTallies={group.crossTallies}
+        gtTally={gtTally}
+        crossTallies={crossCat}
         pctDir={tableOpts.pctDirection}
         weightCol={weightCol}
       />
     );
   }
-  return <GtTable tally={group.gtTally} maxPct={tableOpts.maxPct} weightCol={weightCol} />;
+  return <GtTable tally={gtTally} maxPct={tableOpts.maxPct} weightCol={weightCol} />;
 }
