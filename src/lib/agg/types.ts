@@ -1,7 +1,9 @@
 /** New aggregation type system */
 
+export type QuestionType = "SA" | "MA" | "NA";
+
 export interface Question {
-  type: "SA" | "MA" | "NA";
+  type: QuestionType;
   code: string;
   columns: string[];
   codes: string[];
@@ -47,7 +49,7 @@ export interface NaStats {
 
 /** 消費用フラット型 */
 export interface Tally {
-  type: "SA" | "MA" | "NA";
+  type: QuestionType;
   questionCode: string;
   label: string;
   by: Axis | null;

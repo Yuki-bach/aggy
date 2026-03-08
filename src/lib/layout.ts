@@ -1,4 +1,4 @@
-import type { Question } from "./agg/types";
+import type { Question, QuestionType } from "./agg/types";
 
 interface LayoutItem {
   code: string;
@@ -10,7 +10,7 @@ export type DateGranularity = "year" | "month" | "week" | "day";
 interface LayoutEntry {
   key: string;
   label?: string;
-  type: "SA" | "MA" | "NA" | "WEIGHT" | "DATE";
+  type: QuestionType | "WEIGHT" | "DATE";
   items?: LayoutItem[];
   granularity?: DateGranularity;
 }
