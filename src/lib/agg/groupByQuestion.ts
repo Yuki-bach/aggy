@@ -1,17 +1,15 @@
 import type { Tally, CategoricalTally } from "./types";
 
 export interface TallyGroup {
-  questionCode: string;
   gtTally: Tally;
   crossTallies: Tally[];
 }
 
 export function groupByQuestion(tallies: Tally[]): TallyGroup[] {
-  const questionCodes = [...new Set(tallies.map((t) => t.question))];
-  return questionCodes.map((qCode) => ({
-    questionCode: qCode,
-    gtTally: tallies.find((t) => t.question === qCode && t.by === null)!,
-    crossTallies: tallies.filter((t) => t.question === qCode && t.by !== null),
+  const questions = [...new Set(tallies.map((t) => t.question))];
+  return questions.map((q) => ({
+    gtTally: tallies.find((t) => t.question === q && t.by === null)!,
+    crossTallies: tallies.filter((t) => t.question === q && t.by !== null),
   }));
 }
 

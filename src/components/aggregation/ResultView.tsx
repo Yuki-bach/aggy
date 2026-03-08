@@ -70,7 +70,7 @@ export default function ResultView({ tallies, weightCol }: ResultViewProps) {
       <div class={gridClass}>
         {groups.map((group) => (
           <ResultCard
-            key={group.questionCode}
+            key={group.gtTally.question}
             group={group}
             viewMode={viewMode}
             weightCol={weightCol}
