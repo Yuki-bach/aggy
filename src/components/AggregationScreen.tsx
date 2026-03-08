@@ -63,21 +63,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
         onRun={() => handleRunAggregation()}
       />
 
-      {/* Right Panel */}
-      <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
-        {aggResult ? (
-          <div aria-live="polite">
-            <ResultView tallies={aggResult.tallies} weightCol={aggResult.weightCol} />
-          </div>
-        ) : (
-          <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
-            <span class="text-4xl" aria-hidden="true">
-              ⬛
-            </span>
-            <p class="text-base">{t("empty.text")}</p>
-          </div>
-        )}
-      </div>
+      <ResultView tallies={aggResult?.tallies ?? null} weightCol={aggResult?.weightCol ?? ""} />
     </>
   );
 }
