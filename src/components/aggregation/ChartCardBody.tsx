@@ -1,10 +1,9 @@
 import { useRef, useEffect } from "preact/hooks";
 import type { Tally } from "../../lib/agg/types";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
+import type { ChartType } from "./viewTypes";
 
 import type { ChartConfiguration } from "chart.js";
-
-export type ChartType = "bar-h" | "bar-v" | "obi";
 
 interface ChartCardBodyProps {
   gtTally: Tally;
