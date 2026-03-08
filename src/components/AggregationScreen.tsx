@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { Tally } from "../lib/agg/types";
-import ResultView from "./aggregation/ResultView";
+import ResultPanel from "./aggregation/ResultPanel";
 import SettingsPanel from "./aggregation/SettingsPanel";
 import { runAggregation } from "../lib/duckdbBridge";
 import { buildQuestions, findWeightColumn } from "../lib/layout";
@@ -63,7 +63,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
         onRun={() => handleRunAggregation()}
       />
 
-      <ResultView tallies={aggResult?.tallies ?? null} weightCol={aggResult?.weightCol ?? ""} />
+      <ResultPanel tallies={aggResult?.tallies ?? null} weightCol={aggResult?.weightCol ?? ""} />
     </>
   );
 }

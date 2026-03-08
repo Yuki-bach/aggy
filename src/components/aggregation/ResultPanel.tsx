@@ -8,12 +8,12 @@ import type { PctDirection, ViewMode } from "./viewTypes";
 import type { ChartType } from "./ChartCardBody";
 import type { PaletteId } from "../../lib/chartConfig";
 
-interface ResultViewProps {
+interface ResultPanelProps {
   tallies: Tally[] | null;
   weightCol: string;
 }
 
-export default function ResultView({ tallies, weightCol }: ResultViewProps) {
+export default function ResultPanel({ tallies, weightCol }: ResultPanelProps) {
   return (
     <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
       {tallies ? (
