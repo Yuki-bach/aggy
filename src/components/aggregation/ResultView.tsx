@@ -1,18 +1,19 @@
 import { useEffect, useState } from "preact/hooks";
-import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
-import { ChartCardBody, type ChartType } from "./ChartCardBody";
-import { GtTable } from "./GtTable";
-import { CrossTable } from "./CrossTable";
-import { NaGtTable } from "./NaGtTable";
-import { NaCrossTable } from "./NaCrossTable";
-import { NaChartCardBody } from "./NaChartCardBody";
+import type { Tally } from "../../lib/agg/types";
+import { Toolbar, ViewOpts } from "./Toolbar";
 import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
-import { useAggregation } from "./AggregationContext";
 import { groupByQuestion, computeMaxPct } from "../../lib/agg/groupByQuestion";
+import type { PctDirection, ViewMode } from "./viewTypes";
+import type { ChartType } from "./ChartCardBody";
 import type { PaletteId } from "../../lib/chartConfig";
 
-export default function ResultView() {
+interface ResultViewProps {
+  tallies: Tally[];
+  weightCol: string;
+}
+
+export default function ResultView({ tallies, weightCol }: ResultViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
@@ -40,10 +41,11 @@ export default function ResultView() {
     onPaletteChange: setPaletteId,
   };
 
-  const { tallies, weightCol } = useAggregation();
   const groups = groupByQuestion(tallies);
   const hasCross = tallies.some((t) => t.by !== null);
-  const maxPct = computeMaxPct(tallies);
+
+  const tableOpts = { pctDirection, maxPct: computeMaxPct(tallies) };
+  const chartOpts = { saChartType, maChartType, paletteId };
 
   const minWidth = viewMode === "chart" ? "400px" : "360px";
   const gridClass = hasCross
@@ -52,55 +54,31 @@ export default function ResultView() {
 
   return (
     <>
-      <Toolbar currentViewMode={viewMode} callbacks={callbacks} />
+      <Toolbar
+        tallies={tallies}
+        weightCol={weightCol}
+        currentViewMode={viewMode}
+        callbacks={callbacks}
+      />
       <ViewOpts
         currentViewMode={viewMode}
         currentPctDirection={pctDirection}
-        saChartType={saChartType}
-        maChartType={maChartType}
-        paletteId={paletteId}
+        hasCross={hasCross}
+        chartOpts={chartOpts}
         callbacks={callbacks}
       />
       <div class={gridClass}>
         {groups.map((group) => (
           <ResultCard
-            key={group.questionCode}
-            tally={group.gtTally}
-            extraClass={group.crossTallies.length > 0 ? "overflow-x-auto" : undefined}
-          >
-            {group.type === "NA" ? (
-              viewMode === "chart" ? (
-                <NaChartCardBody
-                  gtTally={group.gtTally}
-                  crossTallies={group.crossTallies}
-                  paletteId={paletteId}
-                />
-              ) : group.crossTallies.length > 0 ? (
-                <NaCrossTable gtTally={group.gtTally} crossTallies={group.crossTallies} />
-              ) : (
-                <NaGtTable tally={group.gtTally} />
-              )
-            ) : viewMode === "chart" ? (
-              <ChartCardBody
-                gtTally={group.gtTally}
-                crossTallies={group.crossTallies}
-                gtChartType={group.gtTally.type === "SA" ? saChartType : maChartType}
-                paletteId={paletteId}
-              />
-            ) : group.crossTallies.length > 0 ? (
-              <CrossTable
-                gtTally={group.gtTally}
-                crossTallies={group.crossTallies}
-                pctDir={pctDirection}
-                weightCol={weightCol}
-              />
-            ) : (
-              <GtTable tally={group.gtTally} maxPct={maxPct} weightCol={weightCol} />
-            )}
-          </ResultCard>
+            key={group.gtTally.questionCode}
+            group={group}
+            viewMode={viewMode}
+            tableOpts={tableOpts}
+            chartOpts={chartOpts}
+          />
         ))}
       </div>
-      <AIBubble />
+      <AIBubble tallies={tallies} weightCol={weightCol} />
     </>
   );
 }

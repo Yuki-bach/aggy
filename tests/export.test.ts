@@ -35,7 +35,7 @@ describe("buildExportGrids", () => {
     expect(grids).toHaveLength(2);
 
     const grid = grids[0];
-    expect(grid.question).toBe("q1");
+    expect(grid.questionCode).toBe("q1");
     expect(grid.type).toBe("SA");
     expect(grid.headers).toHaveLength(1);
     expect(grid.headers[0]).toEqual(["変数名", "種別", "選択肢", "n", "%"]);
@@ -84,7 +84,7 @@ describe("talliesToLongRows", () => {
 
   it("ラベルが解決される", () => {
     const labeled: Tally = {
-      question: "q_test",
+      questionCode: "q_test",
       type: "SA",
       label: "Test Q",
       labels: { "1": "はい", "2": "いいえ" },
@@ -114,7 +114,7 @@ describe("formatCSV", () => {
 
   it("ダブルクォートがエスケープされる", () => {
     const tally: Tally = {
-      question: "test",
+      questionCode: "test",
       type: "SA",
       label: "test",
       labels: { "1": 'value with "quotes"' },
@@ -169,7 +169,7 @@ describe("formatJSON", () => {
     expect(parsed.weightColumn).toBeNull();
     expect(Array.isArray(parsed.results)).toBe(true);
     expect(parsed.results).toHaveLength(gtTallies.length);
-    expect(parsed.results[0].question).toBe("q1");
+    expect(parsed.results[0].questionCode).toBe("q1");
     expect(parsed.results[0].type).toBe("SA");
     expect(Array.isArray(parsed.results[0].slices)).toBe(true);
     expect(Array.isArray(parsed.results[0].codes)).toBe(true);

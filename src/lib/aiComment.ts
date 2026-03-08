@@ -74,7 +74,7 @@ function summarizeResults(tallies: Tally[], weightCol: string, topN: number): st
   for (const tally of gtTallies) {
     if (tally.type === "NA") {
       const { stats } = tally.slices[0];
-      lines.push(`${tally.question}: ${tally.label} (NA, n=${stats.n})`);
+      lines.push(`${tally.questionCode}: ${tally.label} (NA, n=${stats.n})`);
       lines.push(
         `  mean=${stats.mean.toFixed(2)}, median=${stats.median.toFixed(2)}, sd=${stats.sd.toFixed(2)}`,
       );
@@ -84,7 +84,7 @@ function summarizeResults(tallies: Tally[], weightCol: string, topN: number): st
     const slice = tally.slices[0];
     if (!slice || tally.codes.length === 0) continue;
 
-    lines.push(`${tally.question}: ${tally.label} (${tally.type}, n=${slice.n})`);
+    lines.push(`${tally.questionCode}: ${tally.label} (${tally.type}, n=${slice.n})`);
 
     const withPct = tally.codes.map((code, i) => ({
       code,

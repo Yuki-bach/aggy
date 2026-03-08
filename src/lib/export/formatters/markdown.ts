@@ -19,7 +19,7 @@ function gridsToMarkdown(grids: ExportGrid[]): string {
 
   for (const grid of grids) {
     const lines: string[] = [];
-    lines.push(`### ${grid.question} (${grid.type})`);
+    lines.push(`### ${grid.questionCode} (${grid.type})`);
     lines.push("");
 
     // Use last header row as column names, first row (if cross) as context

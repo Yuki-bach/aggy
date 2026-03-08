@@ -1,11 +1,15 @@
 import { useState, useEffect } from "preact/hooks";
+import type { Tally } from "../../lib/agg/types";
 import { generateComment } from "../../lib/aiComment";
 import { t } from "../../lib/i18n";
 import { isAICommentEnabled } from "../header/SettingsModal";
-import { useAggregation } from "./AggregationContext";
 
-export function AIBubble() {
-  const { tallies, weightCol } = useAggregation();
+interface AIBubbleProps {
+  tallies: Tally[];
+  weightCol: string;
+}
+
+export function AIBubble({ tallies, weightCol }: AIBubbleProps) {
   const [comment, setComment] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(true);

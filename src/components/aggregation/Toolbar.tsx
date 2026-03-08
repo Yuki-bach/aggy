@@ -1,13 +1,11 @@
+import type { Tally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfig";
 import type { ChartType } from "./ChartCardBody";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
-import { useAggregation } from "./AggregationContext";
 import { ExportMenu } from "./ExportMenu";
 import { executeExport, type ExportAction } from "../../lib/export/export";
-
-export type ViewMode = "table" | "chart";
-export type PctDirection = "vertical" | "horizontal";
+import type { ChartOpts, PctDirection, ViewMode } from "./viewTypes";
 
 export interface ToolbarCallbacks {
   onViewModeChange: (mode: ViewMode) => void;
@@ -18,17 +16,18 @@ export interface ToolbarCallbacks {
 }
 
 interface ToolbarProps {
+  tallies: Tally[];
+  weightCol: string;
   currentViewMode: ViewMode;
   callbacks: ToolbarCallbacks;
 }
 
-export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
-  const { tallies, weightCol } = useAggregation();
+export function Toolbar({ tallies, weightCol, currentViewMode, callbacks }: ToolbarProps) {
   const weightText = weightCol
     ? t("result.weight.applied", { col: weightCol })
     : t("result.weight.none");
 
-  const questionCount = new Set(tallies.map((t) => t.question)).size;
+  const questionCount = new Set(tallies.map((t) => t.questionCode)).size;
 
   return (
     <div class="mb-6 flex items-center gap-4">
@@ -61,9 +60,8 @@ export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
 interface ViewOptsProps {
   currentViewMode: ViewMode;
   currentPctDirection: PctDirection;
-  saChartType: ChartType;
-  maChartType: ChartType;
-  paletteId: PaletteId;
+  hasCross: boolean;
+  chartOpts: ChartOpts;
   callbacks: Pick<
     ToolbarCallbacks,
     "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange" | "onPaletteChange"
@@ -73,13 +71,11 @@ interface ViewOptsProps {
 export function ViewOpts({
   currentViewMode,
   currentPctDirection,
-  saChartType,
-  maChartType,
-  paletteId,
+  hasCross,
+  chartOpts,
   callbacks,
 }: ViewOptsProps) {
-  const { tallies } = useAggregation();
-  const hasCross = tallies.some((t) => t.by !== null);
+  const { saChartType, maChartType, paletteId } = chartOpts;
 
   const showChart = currentViewMode === "chart";
   const showPctToggle = currentViewMode === "table" && hasCross;

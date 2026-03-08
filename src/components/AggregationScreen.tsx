@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
+import type { Tally } from "../lib/agg/types";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
-import { AggregationContext, type AggregationContextValue } from "./aggregation/AggregationContext";
 import { runAggregation } from "../lib/duckdbBridge";
 import { buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
 import { t } from "../lib/i18n";
@@ -21,7 +21,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [aggCtx, setAggCtx] = useState<AggregationContextValue | null>(null);
+  const [aggResult, setAggResult] = useState<{ tallies: Tally[]; weightCol: string } | null>(null);
 
   const didAutoRun = useRef(false);
   useEffect(() => {
@@ -42,10 +42,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
 
     try {
       const tallies = await runAggregation(questions, crossCols, wCol);
-      setAggCtx({
-        tallies,
-        weightCol: wCol,
-      });
+      setAggResult({ tallies, weightCol: wCol });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
     }
@@ -133,11 +130,9 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
 
       {/* Right Panel */}
       <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
-        {aggCtx ? (
+        {aggResult ? (
           <div aria-live="polite">
-            <AggregationContext.Provider value={aggCtx}>
-              <ResultView />
-            </AggregationContext.Provider>
+            <ResultView tallies={aggResult.tallies} weightCol={aggResult.weightCol} />
           </div>
         ) : (
           <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
