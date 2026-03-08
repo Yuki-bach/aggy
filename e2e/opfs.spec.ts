@@ -48,20 +48,22 @@ test.beforeEach(async ({ page }) => {
   await waitForWasmReady(page);
 });
 
-test("集計画面遷移後、履歴にエントリが追加される", async ({ page }) => {
-  // 初期状態では「履歴なし」が表示される
-  await expect(page.getByText("履歴なし")).toBeVisible();
-
-  // ファイルアップロード → 集計画面へ遷移（OPFS保存完了を待つ）
+/** アップロード → 集計画面遷移 → インポート画面に戻り、履歴が存在する状態にする */
+async function createHistoryEntry(page: import("@playwright/test").Page): Promise<void> {
   await uploadFiles(page);
   await proceedToAggregation(page);
   await expect(
     page.getByRole("button", { name: /集計を実行/ }),
   ).toBeVisible({ timeout: 30_000 });
-
-  // インポート画面に戻る
   await page.goto("/");
   await waitForWasmReady(page);
+}
+
+test("集計画面遷移後、履歴にエントリが追加される", async ({ page }) => {
+  // 初期状態では「履歴なし」が表示される
+  await expect(page.getByText("履歴なし")).toBeVisible();
+
+  await createHistoryEntry(page);
 
   // 履歴に test_data.csv のエントリが表示される
   await expect(
@@ -70,14 +72,7 @@ test("集計画面遷移後、履歴にエントリが追加される", async ({
 });
 
 test("履歴からデータを読み込み、集計画面に遷移できる", async ({ page }) => {
-  // 履歴を作成: アップロード → 集計画面 → インポート画面に戻る
-  await uploadFiles(page);
-  await proceedToAggregation(page);
-  await expect(
-    page.getByRole("button", { name: /集計を実行/ }),
-  ).toBeVisible({ timeout: 30_000 });
-  await page.goto("/");
-  await waitForWasmReady(page);
+  await createHistoryEntry(page);
 
   // 履歴エントリをクリック
   await page.getByRole("button", { name: /test_data\.csv/ }).first().click();
@@ -94,14 +89,7 @@ test("履歴からデータを読み込み、集計画面に遷移できる", as
 });
 
 test("履歴エントリを削除できる", async ({ page }) => {
-  // 履歴を作成: アップロード → 集計画面 → インポート画面に戻る
-  await uploadFiles(page);
-  await proceedToAggregation(page);
-  await expect(
-    page.getByRole("button", { name: /集計を実行/ }),
-  ).toBeVisible({ timeout: 30_000 });
-  await page.goto("/");
-  await waitForWasmReady(page);
+  await createHistoryEntry(page);
 
   // 削除ボタンをクリック
   await page.getByRole("button", { name: /test_data\.csv を削除/ }).click();
