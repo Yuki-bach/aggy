@@ -29,13 +29,7 @@ export function NaCrossTable({ gtTally, crossTallies, weightCol }: NaCrossTableP
       <thead>
         <tr>
           <th rowSpan={2} class="py-3 px-4" />
-          <th class={`${TH_BASE} text-center bg-gt-bg text-accent`}>
-            {t("table.total")}
-            <br />
-            <span class="text-muted text-xs font-normal">
-              n={weightCol ? gtStats.n.toFixed(1) : gtStats.n.toLocaleString()}
-            </span>
-          </th>
+          <th class={`${TH_BASE} text-center bg-gt-bg text-accent`}>{t("table.total")}</th>
           {crossGroups.map((group) => (
             <th
               key={group.axis.code}

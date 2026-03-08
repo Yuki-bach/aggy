@@ -62,8 +62,6 @@ function VerticalCrossTable({
           <th rowSpan={2} class="py-3 px-4" />
           <th colSpan={2} class={`${TH_BASE} text-center bg-gt-bg text-accent`}>
             {t("table.total")}
-            <br />
-            <span class="text-muted text-xs font-normal">n={formatN(gtSlice.n, weightCol)}</span>
           </th>
           {crossGroups.map((group) => (
             <th
@@ -150,21 +148,14 @@ function TransposedCrossTable({
       <thead>
         <tr>
           <th class="py-3 px-4" />
-          {codes.map((code, i) => {
-            const gtCell = gtSlice.cells[i];
-            return (
-              <th
-                key={code}
-                class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2`}
-              >
-                {gtTally.labels[code]}
-                <br />
-                <span class="text-muted text-xs font-normal">
-                  n={formatN(gtCell?.count ?? 0, weightCol)}
-                </span>
-              </th>
-            );
-          })}
+          {codes.map((code) => (
+            <th
+              key={code}
+              class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2`}
+            >
+              {gtTally.labels[code]}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
@@ -174,8 +165,6 @@ function TransposedCrossTable({
             class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-gt-bg text-accent`}
           >
             {t("table.total")}
-            <br />
-            <span class="text-muted text-xs font-normal">n={formatN(gtSlice.n, weightCol)}</span>
           </td>
           {codes.map((code, i) => {
             const cell = gtSlice.cells[i];
