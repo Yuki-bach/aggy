@@ -23,7 +23,7 @@ export interface Slice {
 }
 
 /** aggregate() の戻り値 — rawdata 由来のみ */
-export interface AggResult {
+export interface AggOutput {
   codes: string[];
   slices: Slice[];
 }
