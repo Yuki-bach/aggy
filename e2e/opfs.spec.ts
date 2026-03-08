@@ -1,8 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { waitForWasmReady, uploadFiles, proceedToAggregation } from "./helpers";
 
 /** OPFS が利用可能かチェックし、不可なら true を返す */
-async function isOpfsUnavailable(page: import("@playwright/test").Page): Promise<boolean> {
+async function isOpfsUnavailable(page: Page): Promise<boolean> {
   return page.evaluate(async () => {
     try {
       await navigator.storage.getDirectory();
@@ -14,7 +14,7 @@ async function isOpfsUnavailable(page: import("@playwright/test").Page): Promise
 }
 
 /** OPFS の aggy-data 内エントリをすべて削除 */
-async function clearOpfs(page: import("@playwright/test").Page): Promise<void> {
+async function clearOpfs(page: Page): Promise<void> {
   await page.evaluate(async () => {
     const root = await navigator.storage.getDirectory();
     let dir: FileSystemDirectoryHandle;
@@ -49,7 +49,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 /** アップロード → 集計画面遷移 → インポート画面に戻り、履歴が存在する状態にする */
-async function createHistoryEntry(page: import("@playwright/test").Page): Promise<void> {
+async function createHistoryEntry(page: Page): Promise<void> {
   await uploadFiles(page);
   await proceedToAggregation(page);
   await expect(
