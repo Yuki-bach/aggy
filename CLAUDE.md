@@ -34,3 +34,4 @@ pnpm bench:gen  # generate benchmark data
 - Module-level singleton state for infrastructure (`duckdbBridge`, `i18n`); UI state uses hooks + Context
 - File ordering: `imports → exports (Public API) → internal implementation`. Props interfaces stay with their exported component
 - DuckDB Wasm runs sequentially on a single Web Worker — never use `Promise.all` with `duckdbBridge` methods; call them with sequential `await`
+- Prefer functional style by default. Use classes when multiple functions need shared state to avoid props drilling (e.g. `aggregateGT` — bundle related data into a class and access it via methods)
