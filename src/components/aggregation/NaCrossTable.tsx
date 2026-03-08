@@ -4,7 +4,6 @@ import { t } from "../../lib/i18n";
 interface NaCrossTableProps {
   gtTally: NumericTally;
   crossTallies: NumericTally[];
-  weightCol: string;
 }
 
 const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
@@ -13,7 +12,7 @@ const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-bor
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
-export function NaCrossTable({ gtTally, crossTallies, weightCol }: NaCrossTableProps) {
+export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
   const gtStats = gtTally.slices[0].stats;
 
   const crossGroups = crossTallies.map((ct) => ({
@@ -51,7 +50,10 @@ export function NaCrossTable({ gtTally, crossTallies, weightCol }: NaCrossTableP
                 {group.axis.labels[slice.code!]}
                 <br />
                 <span class="text-muted text-xs font-normal">
-                  n={weightCol ? slice.stats.n.toFixed(1) : slice.stats.n.toLocaleString()}
+                  n=
+                  {Number.isInteger(slice.stats.n)
+                    ? slice.stats.n.toLocaleString()
+                    : slice.stats.n.toFixed(1)}
                 </span>
               </th>
             )),

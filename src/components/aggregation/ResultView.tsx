@@ -73,7 +73,6 @@ export default function ResultView({ tallies, weightCol }: ResultViewProps) {
             key={group.gtTally.questionCode}
             group={group}
             viewMode={viewMode}
-            weightCol={weightCol}
             tableOpts={tableOpts}
             chartOpts={chartOpts}
           />

@@ -7,24 +7,21 @@ interface CrossTableProps {
   gtTally: CategoricalTally;
   crossTallies: CategoricalTally[];
   pctDir: PctDirection;
-  weightCol: string;
 }
 
-export function CrossTable({ gtTally, crossTallies, pctDir, weightCol }: CrossTableProps) {
+export function CrossTable({ gtTally, crossTallies, pctDir }: CrossTableProps) {
   if (pctDir === "horizontal") {
-    return (
-      <TransposedCrossTable gtTally={gtTally} crossTallies={crossTallies} weightCol={weightCol} />
-    );
+    return <TransposedCrossTable gtTally={gtTally} crossTallies={crossTallies} />;
   }
-  return <VerticalCrossTable gtTally={gtTally} crossTallies={crossTallies} weightCol={weightCol} />;
+  return <VerticalCrossTable gtTally={gtTally} crossTallies={crossTallies} />;
 }
 
 function resolveAxisLabel(code: string, axis: Axis): string {
   return axis.labels[code];
 }
 
-function formatN(n: number, weightCol: string): string {
-  return weightCol ? n.toFixed(1) : n.toLocaleString();
+function formatN(n: number): string {
+  return Number.isInteger(n) ? n.toLocaleString() : n.toFixed(1);
 }
 
 const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong";
@@ -39,11 +36,9 @@ interface CrossGroup {
 function VerticalCrossTable({
   gtTally,
   crossTallies,
-  weightCol,
 }: {
   gtTally: CategoricalTally;
   crossTallies: CategoricalTally[];
-  weightCol: string;
 }) {
   const gtSlice = gtTally.slices[0];
   const codes = gtTally.codes;
@@ -84,7 +79,7 @@ function VerticalCrossTable({
               >
                 {resolveAxisLabel(slice.code!, group.axis)}
                 <br />
-                <span class="text-muted text-xs font-normal">n={formatN(slice.n, weightCol)}</span>
+                <span class="text-muted text-xs font-normal">n={formatN(slice.n)}</span>
               </th>
             )),
           )}
@@ -97,9 +92,7 @@ function VerticalCrossTable({
             <tr key={code}>
               <Td>{gtTally.labels[code]}</Td>
               <Td right mono>
-                {gtTally.type === "SA" && !weightCol
-                  ? gtCell.count.toLocaleString()
-                  : gtCell.count.toFixed(1)}
+                {formatN(gtCell.count)}
               </Td>
               <Td right mono class="text-muted">
                 {gtCell.pct.toFixed(1)}%
@@ -128,11 +121,9 @@ function VerticalCrossTable({
 function TransposedCrossTable({
   gtTally,
   crossTallies,
-  weightCol,
 }: {
   gtTally: CategoricalTally;
   crossTallies: CategoricalTally[];
-  weightCol: string;
 }) {
   const gtSlice = gtTally.slices[0];
   const codes = gtTally.codes;
@@ -193,7 +184,6 @@ function TransposedCrossTable({
                 slice={slice}
                 axis={group.axis}
                 codes={codes}
-                weightCol={weightCol}
               />
             ))}
           </>
@@ -203,17 +193,7 @@ function TransposedCrossTable({
   );
 }
 
-function TransposedSubRow({
-  slice,
-  axis,
-  codes,
-  weightCol,
-}: {
-  slice: Slice;
-  axis: Axis;
-  codes: string[];
-  weightCol: string;
-}) {
+function TransposedSubRow({ slice, axis, codes }: { slice: Slice; axis: Axis; codes: string[] }) {
   return (
     <tr>
       <td
@@ -221,7 +201,7 @@ function TransposedSubRow({
       >
         {resolveAxisLabel(slice.code!, axis)}
         <br />
-        <span class="text-muted text-xs font-normal">n={formatN(slice.n, weightCol)}</span>
+        <span class="text-muted text-xs font-normal">n={formatN(slice.n)}</span>
       </td>
       {codes.map((_code, i) => {
         const cell = slice.cells[i];

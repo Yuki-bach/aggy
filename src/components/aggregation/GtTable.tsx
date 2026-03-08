@@ -4,10 +4,9 @@ import { Th, Td } from "./TableCells";
 interface GtTableProps {
   tally: CategoricalTally;
   maxPct: number;
-  weightCol: string;
 }
 
-export function GtTable({ tally, maxPct, weightCol }: GtTableProps) {
+export function GtTable({ tally, maxPct }: GtTableProps) {
   const slice = tally.slices[0];
 
   return (
@@ -27,8 +26,9 @@ export function GtTable({ tally, maxPct, weightCol }: GtTableProps) {
         {tally.codes.map((code, i) => {
           const cell = slice.cells[i];
           const label = tally.labels[code];
-          const countStr =
-            tally.type === "SA" && !weightCol ? cell.count.toLocaleString() : cell.count.toFixed(1);
+          const countStr = Number.isInteger(cell.count)
+            ? cell.count.toLocaleString()
+            : cell.count.toFixed(1);
           const barWidth = ((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1);
 
           return (

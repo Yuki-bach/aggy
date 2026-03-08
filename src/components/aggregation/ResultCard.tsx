@@ -11,18 +11,20 @@ import type { ChartOpts, TableOpts, ViewMode } from "./viewTypes";
 interface ResultCardProps {
   group: TallyGroup;
   viewMode: ViewMode;
-  weightCol: string;
   tableOpts: TableOpts;
   chartOpts: ChartOpts;
 }
 
-export function ResultCard({ group, viewMode, weightCol, tableOpts, chartOpts }: ResultCardProps) {
+function formatN(n: number): string {
+  return Number.isInteger(n) ? n.toLocaleString() : n.toFixed(1);
+}
+
+export function ResultCard({ group, viewMode, tableOpts, chartOpts }: ResultCardProps) {
   const { gtTally } = group;
   const hasCross = group.crossTallies.length > 0;
 
   const gtN =
     gtTally.type === "NA" ? (gtTally.slices[0]?.stats.n ?? 0) : (gtTally.slices[0]?.n ?? 0);
-  const nLabel = weightCol ? `n=${gtN.toFixed(1)}` : `n=${gtN.toLocaleString()}`;
 
   return (
     <div
@@ -34,26 +36,14 @@ export function ResultCard({ group, viewMode, weightCol, tableOpts, chartOpts }:
           <span class="text-xs tracking-wide text-muted">{gtTally.questionCode}</span>
         </div>
         <span class="text-xs tracking-wide text-muted">{gtTally.type}</span>
-        <span class="ml-auto text-xs text-muted">{nLabel}</span>
+        <span class="ml-auto text-xs text-muted">n={formatN(gtN)}</span>
       </div>
-      <CardBody
-        group={group}
-        viewMode={viewMode}
-        weightCol={weightCol}
-        tableOpts={tableOpts}
-        chartOpts={chartOpts}
-      />
+      <CardBody group={group} viewMode={viewMode} tableOpts={tableOpts} chartOpts={chartOpts} />
     </div>
   );
 }
 
-function CardBody({
-  group,
-  viewMode,
-  weightCol,
-  tableOpts,
-  chartOpts,
-}: Omit<ResultCardProps, never>) {
+function CardBody({ group, viewMode, tableOpts, chartOpts }: ResultCardProps) {
   const { gtTally, crossTallies } = group;
 
   if (gtTally.type === "NA") {
@@ -65,7 +55,7 @@ function CardBody({
       );
     }
     if (crossNa.length > 0) {
-      return <NaCrossTable gtTally={gtTally} crossTallies={crossNa} weightCol={weightCol} />;
+      return <NaCrossTable gtTally={gtTally} crossTallies={crossNa} />;
     }
     return <NaGtTable tally={gtTally} />;
   }
@@ -84,14 +74,7 @@ function CardBody({
     );
   }
   if (crossCat.length > 0) {
-    return (
-      <CrossTable
-        gtTally={gtTally}
-        crossTallies={crossCat}
-        pctDir={tableOpts.pctDirection}
-        weightCol={weightCol}
-      />
-    );
+    return <CrossTable gtTally={gtTally} crossTallies={crossCat} pctDir={tableOpts.pctDirection} />;
   }
-  return <GtTable tally={gtTally} maxPct={tableOpts.maxPct} weightCol={weightCol} />;
+  return <GtTable tally={gtTally} maxPct={tableOpts.maxPct} />;
 }
