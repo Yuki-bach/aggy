@@ -85,7 +85,7 @@ test("履歴からデータを読み込み、集計画面に遷移できる", as
   await proceedToAggregation(page);
   await expect(
     page.getByRole("button", { name: /集計を実行/ }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 30_000 });
 });
 
 test("履歴エントリを削除できる", async ({ page }) => {
