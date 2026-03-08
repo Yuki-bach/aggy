@@ -3,8 +3,7 @@ import type { Tally } from "../../lib/agg/types";
 import { Toolbar, ViewOpts } from "./Toolbar";
 import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
-import type { PctDirection, ViewMode } from "./viewTypes";
-import type { ChartType } from "./ChartCardBody";
+import type { ChartType, PctDirection, ViewMode } from "./viewTypes";
 import type { PaletteId } from "../../lib/chartConfig";
 
 interface ResultViewProps {

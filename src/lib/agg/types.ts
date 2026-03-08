@@ -1,7 +1,9 @@
 /** New aggregation type system */
 
+export type QuestionType = "SA" | "MA" | "NA";
+
 export interface Question {
-  type: "SA" | "MA" | "NA";
+  type: QuestionType;
   code: string;
   columns: string[];
   codes: string[];
@@ -29,13 +31,6 @@ export interface AggOutput {
   slices: Slice[];
 }
 
-/** クロス軸情報 */
-export interface Axis {
-  code: string; // "q1"
-  label: string; // "性別"
-  labels: Record<string, string>; // { "1": "男性", ... }, NA 含む
-}
-
 export interface NaStats {
   n: number;
   mean: number;
@@ -47,10 +42,10 @@ export interface NaStats {
 
 /** 消費用フラット型 */
 export interface Tally {
-  type: "SA" | "MA" | "NA";
+  type: QuestionType;
   questionCode: string;
   label: string;
-  by: Axis | null;
+  by: { code: string; label: string; labels: Record<string, string> } | null;
   codes: string[];
   labels: Record<string, string>;
   slices: Slice[];
