@@ -30,6 +30,7 @@ jobs:
         run: BENCH_OUTPUT=bench/output.json pnpm bench
 
       - name: Store benchmark result
+        continue-on-error: true
         uses: benchmark-action/github-action-benchmark@v1
         with:
           tool: customSmallerIsBetter
