@@ -6,7 +6,7 @@ import type { Tally } from "../src/lib/agg/types";
 
 function makeTally(overrides: Partial<Tally> = {}): Tally {
   return {
-    question: "q1",
+    questionCode: "q1",
     type: "SA",
     label: "性別",
     labels: { "1": "男性", "2": "女性", "3": "その他" },
@@ -34,7 +34,7 @@ describe("buildPromptPayload", () => {
     const tally = makeTally();
     const payload = buildPromptPayload([tally], "");
 
-    // Tally { question:"q1", type:"SA", label:"性別",
+    // Tally { questionCode:"q1", type:"SA", label:"性別",
     //         codes:["1","2","3"], labels:{1:"男性",2:"女性",3:"その他"},
     //         slices:[{ n:100, cells:[{pct:50},{pct:30},{pct:20}] }] }
     //
@@ -52,7 +52,7 @@ describe("buildPromptPayload", () => {
   it("ウェイト付き+複数設問の変換全体像", () => {
     const q1 = makeTally();
     const q2 = makeTally({
-      question: "q2",
+      questionCode: "q2",
       type: "MA",
       label: "趣味",
       labels: { "1": "読書", "2": "映画", "3": "旅行", "4": "料理", "5": "運動", "6": "音楽" },
@@ -89,9 +89,9 @@ describe("buildPromptPayload", () => {
   });
 
   it("GT集計のみがプロンプトに含まれ、クロス集計は除外される", () => {
-    const gt = makeTally({ question: "q1", label: "性別" });
+    const gt = makeTally({ questionCode: "q1", label: "性別" });
     const cross = makeTally({
-      question: "q2",
+      questionCode: "q2",
       label: "年代",
       by: { code: "q1", label: "性別", labels: { "1": "男性" } },
     });
@@ -103,7 +103,7 @@ describe("buildPromptPayload", () => {
   });
 
   it("設問ヘッダに question, label, type, n が含まれる", () => {
-    const tally = makeTally({ question: "q1", label: "性別", type: "SA" });
+    const tally = makeTally({ questionCode: "q1", label: "性別", type: "SA" });
     const payload = buildPromptPayload([tally], "");
 
     expect(payload).toContain("q1: 性別 (SA, n=100)");
@@ -172,7 +172,7 @@ describe("buildPromptPayload", () => {
     // 大量の設問を用意
     const tallies = Array.from({ length: 50 }, (_, i) =>
       makeTally({
-        question: `q${i + 1}`,
+        questionCode: `q${i + 1}`,
         label: `設問${i + 1}の長いラベルテキスト`,
         codes: Array.from({ length: 20 }, (_, j) => String(j + 1)),
         labels: Object.fromEntries(

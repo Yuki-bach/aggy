@@ -23,7 +23,7 @@ export function ResultCard({ group, viewMode, weightCol, tableOpts, chartOpts }:
   const gtN =
     gtTally.type === "NA" ? (gtTally.slices[0]?.stats.n ?? 0) : (gtTally.slices[0]?.n ?? 0);
   const nLabel = weightCol ? `n=${gtN.toFixed(1)}` : `n=${gtN.toLocaleString()}`;
-  const hasLabel = gtTally.label !== gtTally.question;
+  const hasLabel = gtTally.label !== gtTally.questionCode;
 
   return (
     <div
@@ -32,7 +32,7 @@ export function ResultCard({ group, viewMode, weightCol, tableOpts, chartOpts }:
       <div class="flex items-baseline gap-3 border-b border-border p-4">
         <div class="flex min-w-0 flex-col gap-0.5">
           <span class="text-sm font-bold text-accent">{gtTally.label}</span>
-          {hasLabel && <span class="text-xs tracking-wide text-muted">{gtTally.question}</span>}
+          {hasLabel && <span class="text-xs tracking-wide text-muted">{gtTally.questionCode}</span>}
         </div>
         <span class="text-xs tracking-wide text-muted">{gtTally.type}</span>
         <span class="ml-auto text-xs text-muted">{nLabel}</span>

@@ -28,7 +28,7 @@ export function talliesToLongRows(tallies: Tally[]): string[][] {
         const { stats, freq } = slice;
         for (const f of freq) {
           rows.push([
-            tally.question,
+            tally.questionCode,
             "NA",
             String(f.value),
             crossAxis,
@@ -49,7 +49,7 @@ export function talliesToLongRows(tallies: Tally[]): string[][] {
         const code = tally.codes[i];
         const cell = slice.cells[i];
         rows.push([
-          tally.question,
+          tally.questionCode,
           tally.type,
           tally.labels[code],
           crossAxis,

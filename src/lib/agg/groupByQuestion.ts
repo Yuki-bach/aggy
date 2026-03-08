@@ -6,10 +6,10 @@ export interface TallyGroup {
 }
 
 export function groupByQuestion(tallies: Tally[]): TallyGroup[] {
-  const questions = [...new Set(tallies.map((t) => t.question))];
+  const questions = [...new Set(tallies.map((t) => t.questionCode))];
   return questions.map((q) => ({
-    gtTally: tallies.find((t) => t.question === q && t.by === null)!,
-    crossTallies: tallies.filter((t) => t.question === q && t.by !== null),
+    gtTally: tallies.find((t) => t.questionCode === q && t.by === null)!,
+    crossTallies: tallies.filter((t) => t.questionCode === q && t.by !== null),
   }));
 }
 

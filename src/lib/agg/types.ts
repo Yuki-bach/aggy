@@ -59,7 +59,7 @@ export interface NumericSlice {
 /** 消費用フラット型 — Discriminated Union */
 export interface CategoricalTally {
   type: "SA" | "MA";
-  question: string;
+  questionCode: string;
   label: string;
   by: Axis | null;
   codes: string[];
@@ -69,7 +69,7 @@ export interface CategoricalTally {
 
 export interface NumericTally {
   type: "NA";
-  question: string;
+  questionCode: string;
   label: string;
   by: Axis | null;
   slices: NumericSlice[];

@@ -52,7 +52,7 @@ function toCategoricalTally(
   }
 
   return {
-    question: question.code,
+    questionCode: question.code,
     type: question.type as "SA" | "MA",
     label: question.label,
     labels,
@@ -73,7 +73,7 @@ function toNaTally(
   }
   return {
     type: "NA",
-    question: question.code,
+    questionCode: question.code,
     label: question.label,
     by,
     slices,

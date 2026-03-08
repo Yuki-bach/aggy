@@ -2,7 +2,7 @@ import type { Tally, CategoricalTally, NumericTally } from "../../agg/types";
 import { t } from "../../i18n";
 
 export interface ExportGrid {
-  question: string;
+  questionCode: string;
   type: "SA" | "MA" | "NA";
   headers: string[][];
   rows: string[][];
@@ -46,28 +46,28 @@ function buildCategoricalGtGrid(tally: CategoricalTally): ExportGrid {
     const code = tally.codes[i];
     const cell = slice.cells[i];
     rows.push([
-      tally.question,
+      tally.questionCode,
       tally.type,
       resolveLabel(code, tally),
       cell.count.toFixed(1),
       cell.pct.toFixed(1),
     ]);
   }
-  rows.push([tally.question, tally.type, "n", slice.n.toFixed(1), ""]);
+  rows.push([tally.questionCode, tally.type, "n", slice.n.toFixed(1), ""]);
 
-  return { question: tally.question, type: tally.type, headers, rows };
+  return { questionCode: tally.questionCode, type: tally.type, headers, rows };
 }
 
 function buildNaGtGrid(tally: NumericTally): ExportGrid {
   const { stats } = tally.slices[0];
   const headers = [[t("export.header.variable"), t("export.header.type"), t("table.option"), ""]];
   const rows: string[][] = NA_STAT_KEYS.map((key) => [
-    tally.question,
+    tally.questionCode,
     "NA",
     t(`na.stat.${key}`),
     key === "n" ? stats.n.toFixed(1) : stats[key].toFixed(2),
   ]);
-  return { question: tally.question, type: "NA", headers, rows };
+  return { questionCode: tally.questionCode, type: "NA", headers, rows };
 }
 
 function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
@@ -76,16 +76,16 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
     return tallies.filter((t) => t.by === null).map((tally) => buildGtGrid(tally));
   }
 
-  const questionCodes = [...new Set(tallies.map((t) => t.question))];
+  const questionCodes = [...new Set(tallies.map((t) => t.questionCode))];
 
   // Find first categorical question for shared headers
   const firstCatQCode = questionCodes.find((qc) => {
-    const gt = tallies.find((t) => t.question === qc && t.by === null);
+    const gt = tallies.find((t) => t.questionCode === qc && t.by === null);
     return gt && gt.type !== "NA";
   });
 
   const crossTalliesForFirst = firstCatQCode
-    ? tallies.filter((t) => t.question === firstCatQCode && t.by !== null)
+    ? tallies.filter((t) => t.questionCode === firstCatQCode && t.by !== null)
     : [];
 
   // Build shared 2-row headers for categorical
@@ -110,8 +110,8 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
   const sharedHeaders = [headerRow1, headerRow2];
 
   return questionCodes.map((qCode) => {
-    const gtTally = tallies.find((t) => t.question === qCode && t.by === null)!;
-    const qCrossTallies = tallies.filter((t) => t.question === qCode && t.by !== null);
+    const gtTally = tallies.find((t) => t.questionCode === qCode && t.by === null)!;
+    const qCrossTallies = tallies.filter((t) => t.questionCode === qCode && t.by !== null);
 
     if (gtTally.type === "NA") {
       return buildNaCrossGrid(gtTally, qCrossTallies as NumericTally[]);
@@ -124,7 +124,7 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
       const code = gtTally.codes[i];
       const gtCell = gtSlice.cells[i];
       const dataRow = [
-        gtTally.question,
+        gtTally.questionCode,
         gtTally.type,
         resolveLabel(code, gtTally),
         gtCell.count.toFixed(1),
@@ -140,7 +140,7 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
       rows.push(dataRow);
     }
 
-    const nRow = [gtTally.question, gtTally.type, "n", gtSlice.n.toFixed(1), ""];
+    const nRow = [gtTally.questionCode, gtTally.type, "n", gtSlice.n.toFixed(1), ""];
     for (const crossTally of qCrossTallies) {
       if (crossTally.type === "NA") continue;
       for (const slice of crossTally.slices) {
@@ -149,7 +149,7 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
     }
     rows.push(nRow);
 
-    return { question: gtTally.question, type: gtTally.type, headers: sharedHeaders, rows };
+    return { questionCode: gtTally.questionCode, type: gtTally.type, headers: sharedHeaders, rows };
   });
 }
 
@@ -174,7 +174,7 @@ function buildNaCrossGrid(gtTally: NumericTally, crossTallies: NumericTally[]): 
 
   const rows: string[][] = NA_STAT_KEYS.map((key) => {
     const row = [
-      gtTally.question,
+      gtTally.questionCode,
       "NA",
       t(`na.stat.${key}`),
       key === "n" ? gtStats.n.toFixed(1) : gtStats[key].toFixed(2),
@@ -187,5 +187,10 @@ function buildNaCrossGrid(gtTally: NumericTally, crossTallies: NumericTally[]): 
     return row;
   });
 
-  return { question: gtTally.question, type: "NA", headers: [headerRow1, headerRow2], rows };
+  return {
+    questionCode: gtTally.questionCode,
+    type: "NA",
+    headers: [headerRow1, headerRow2],
+    rows,
+  };
 }
