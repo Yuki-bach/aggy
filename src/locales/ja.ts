@@ -82,6 +82,14 @@ const ja: Record<string, string> = {
   "export.long.count": "度数",
   "label.noAnswer": "無回答",
 
+  // NA (Numerical Answer)
+  "na.stat.n": "n",
+  "na.stat.mean": "平均",
+  "na.stat.median": "中央値",
+  "na.stat.sd": "標準偏差",
+  "na.stat.min": "最小",
+  "na.stat.max": "最大",
+
   // Chart type
   "chart.barH": "横棒",
   "chart.barV": "縦棒",

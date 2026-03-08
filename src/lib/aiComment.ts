@@ -72,6 +72,15 @@ function summarizeResults(tallies: Tally[], weightCol: string, topN: number): st
   const gtTallies = tallies.filter((t) => t.by === null);
 
   for (const tally of gtTallies) {
+    if (tally.type === "NA") {
+      const { stats } = tally.slices[0];
+      lines.push(`${tally.question}: ${tally.label} (NA, n=${stats.n})`);
+      lines.push(
+        `  mean=${stats.mean.toFixed(2)}, median=${stats.median.toFixed(2)}, sd=${stats.sd.toFixed(2)}`,
+      );
+      continue;
+    }
+
     const slice = tally.slices[0];
     if (!slice || tally.codes.length === 0) continue;
 

@@ -34,6 +34,11 @@
     ]
   },
   {
+    "key": "nps",
+    "label": "推奨度（NPS）",
+    "type": "NA"
+  },
+  {
     "key": "answer_date",
     "label": "回答日",
     "type": "DATE",

@@ -12,7 +12,8 @@ export function ResultCard({ tally, extraClass, children }: ResultCardProps) {
   const { weightCol } = useAggregation();
 
   const gtTally = tally.by === null ? tally : undefined;
-  const gtN = gtTally?.slices[0]?.n ?? 0;
+  const gtN =
+    gtTally?.type === "NA" ? (gtTally.slices[0]?.stats.n ?? 0) : (gtTally?.slices[0]?.n ?? 0);
   const nLabel = weightCol ? `n=${gtN.toFixed(1)}` : `n=${gtN.toLocaleString()}`;
 
   const hasLabel = tally.label !== tally.question;

@@ -1,8 +1,8 @@
-import type { Tally } from "../../lib/agg/types";
+import type { CategoricalTally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 interface GtTableProps {
-  tally: Tally;
+  tally: CategoricalTally;
   maxPct: number;
   weightCol: string;
 }

@@ -10,7 +10,7 @@ export type DateGranularity = "year" | "month" | "week" | "day";
 interface LayoutEntry {
   key: string;
   label?: string;
-  type: "SA" | "MA" | "WEIGHT" | "DATE";
+  type: "SA" | "MA" | "NA" | "WEIGHT" | "DATE";
   items?: LayoutItem[];
   granularity?: DateGranularity;
 }
@@ -48,7 +48,12 @@ export function filterLayout(headers: string[], layout: Layout): Layout {
   const filtered: Layout = [];
 
   for (const entry of layout) {
-    if (entry.type === "SA" || entry.type === "WEIGHT" || entry.type === "DATE") {
+    if (
+      entry.type === "SA" ||
+      entry.type === "NA" ||
+      entry.type === "WEIGHT" ||
+      entry.type === "DATE"
+    ) {
       if (headerSet.has(entry.key)) filtered.push(entry);
     } else if (entry.type === "MA" && entry.items) {
       const matchedItems = entry.items.filter((item) => headerSet.has(`${entry.key}_${item.code}`));
@@ -64,15 +69,27 @@ export function filterLayout(headers: string[], layout: Layout): Layout {
 /** Build Question[] from layout definition */
 export function buildQuestions(layout: Layout): Question[] {
   return layout
-    .filter((e) => e.type === "SA" || e.type === "MA")
-    .map((e) => ({
-      type: e.type as "SA" | "MA",
-      code: e.key,
-      columns: e.type === "SA" ? [e.key] : (e.items ?? []).map((i) => `${e.key}_${i.code}`),
-      codes: (e.items ?? []).map((i) => i.code),
-      label: e.label ?? e.key,
-      labels: Object.fromEntries((e.items ?? []).map((i) => [i.code, i.label])),
-    }));
+    .filter((e) => e.type === "SA" || e.type === "MA" || e.type === "NA")
+    .map((e) => {
+      if (e.type === "NA") {
+        return {
+          type: "NA" as const,
+          code: e.key,
+          columns: [e.key],
+          codes: [],
+          label: e.label ?? e.key,
+          labels: {},
+        };
+      }
+      return {
+        type: e.type as "SA" | "MA",
+        code: e.key,
+        columns: e.type === "SA" ? [e.key] : (e.items ?? []).map((i) => `${e.key}_${i.code}`),
+        codes: (e.items ?? []).map((i) => i.code),
+        label: e.label ?? e.key,
+        labels: Object.fromEntries((e.items ?? []).map((i) => [i.code, i.label])),
+      };
+    });
 }
 
 /** Find weight column name from layout, or empty string if none */

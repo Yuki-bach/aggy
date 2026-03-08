@@ -37,7 +37,7 @@
         },
         "type": {
           "type": "string",
-          "enum": ["SA", "MA", "WEIGHT", "DATE"],
+          "enum": ["SA", "MA", "NA", "WEIGHT", "DATE"],
           "description": "列の種別"
         },
         "granularity": {
@@ -71,6 +71,16 @@
           },
           "then": {
             "required": ["key", "type", "items"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "NA" } }
+          },
+          "then": {
+            "properties": {
+              "items": false
+            }
           }
         },
         {

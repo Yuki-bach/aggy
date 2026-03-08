@@ -22,6 +22,26 @@ export function talliesToLongRows(tallies: Tally[]): string[][] {
   for (const tally of tallies) {
     const crossAxis = tally.by === null ? total : tally.by.label;
 
+    if (tally.type === "NA") {
+      for (const slice of tally.slices) {
+        const crossValue = tally.by === null ? total : tally.by.labels[slice.code!];
+        const { stats, freq } = slice;
+        for (const f of freq) {
+          rows.push([
+            tally.question,
+            "NA",
+            String(f.value),
+            crossAxis,
+            crossValue,
+            String(stats.n),
+            String(f.count),
+            String(stats.n > 0 ? (f.count / stats.n) * 100 : 0),
+          ]);
+        }
+      }
+      continue;
+    }
+
     for (const slice of tally.slices) {
       const crossValue = tally.by === null ? total : tally.by.labels[slice.code!];
 

@@ -26,7 +26,7 @@ export async function validateData(
   // Detect layout entries whose columns are missing from CSV
   const droppedEntries: ValidationResult["droppedEntries"] = [];
   for (const entry of layout) {
-    if (entry.type === "SA" || entry.type === "WEIGHT") {
+    if (entry.type === "SA" || entry.type === "NA" || entry.type === "WEIGHT") {
       if (!headerSet.has(entry.key)) {
         droppedEntries.push({ key: entry.key, label: entry.label ?? entry.key, type: entry.type });
       }
