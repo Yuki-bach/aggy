@@ -44,6 +44,8 @@ async function queryStats(
   groupByCol?: string,
 ): Promise<NaStats> {
   let sql: string;
+  // NOTE: MEDIAN is unweighted even in weighted mode.
+  // DuckDB has no built-in weighted median; a custom implementation may be added in the future.
   if (weightCol) {
     const w = `"${esc(weightCol)}"`;
     sql = `
@@ -88,6 +90,7 @@ async function queryStatsGrouped(
 ): Promise<Map<string, NaStats>> {
   const w = weightCol ? `"${esc(weightCol)}"` : "";
   let sql: string;
+  // NOTE: MEDIAN is unweighted even in weighted mode (same as queryStats)
   if (weightCol) {
     sql = `
       SELECT
