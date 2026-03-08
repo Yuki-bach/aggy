@@ -31,13 +31,6 @@ export interface AggOutput {
   slices: Slice[];
 }
 
-/** クロス軸情報 */
-export interface Axis {
-  code: string; // "q1"
-  label: string; // "性別"
-  labels: Record<string, string>; // { "1": "男性", ... }, NA 含む
-}
-
 export interface NaStats {
   n: number;
   mean: number;
@@ -52,7 +45,7 @@ export interface Tally {
   type: QuestionType;
   questionCode: string;
   label: string;
-  by: Axis | null;
+  by: { code: string; label: string; labels: Record<string, string> } | null;
   codes: string[];
   labels: Record<string, string>;
   slices: Slice[];
