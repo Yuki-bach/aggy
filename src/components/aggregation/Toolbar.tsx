@@ -5,9 +5,7 @@ import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { useAggregation } from "./AggregationContext";
 import { ExportMenu } from "./ExportMenu";
 import { executeExport, type ExportAction } from "../../lib/export/export";
-
-export type ViewMode = "table" | "chart";
-export type PctDirection = "vertical" | "horizontal";
+import type { ChartOpts, PctDirection, ViewMode } from "./viewTypes";
 
 export interface ToolbarCallbacks {
   onViewModeChange: (mode: ViewMode) => void;
@@ -61,9 +59,7 @@ export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
 interface ViewOptsProps {
   currentViewMode: ViewMode;
   currentPctDirection: PctDirection;
-  saChartType: ChartType;
-  maChartType: ChartType;
-  paletteId: PaletteId;
+  chartOpts: ChartOpts;
   callbacks: Pick<
     ToolbarCallbacks,
     "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange" | "onPaletteChange"
@@ -73,11 +69,10 @@ interface ViewOptsProps {
 export function ViewOpts({
   currentViewMode,
   currentPctDirection,
-  saChartType,
-  maChartType,
-  paletteId,
+  chartOpts,
   callbacks,
 }: ViewOptsProps) {
+  const { saChartType, maChartType, paletteId } = chartOpts;
   const { tallies } = useAggregation();
   const hasCross = tallies.some((t) => t.by !== null);
 

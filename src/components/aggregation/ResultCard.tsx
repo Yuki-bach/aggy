@@ -1,24 +1,11 @@
 import type { QuestionGroup } from "../../lib/agg/groupByQuestion";
-import type { PaletteId } from "../../lib/chartConfig";
-import type { ChartType } from "./ChartCardBody";
-import type { PctDirection, ViewMode } from "./Toolbar";
 import { ChartCardBody } from "./ChartCardBody";
 import { CrossTable } from "./CrossTable";
 import { GtTable } from "./GtTable";
 import { NaChartCardBody } from "./NaChartCardBody";
 import { NaCrossTable } from "./NaCrossTable";
 import { NaGtTable } from "./NaGtTable";
-
-export interface TableOpts {
-  pctDirection: PctDirection;
-  maxPct: number;
-}
-
-export interface ChartOpts {
-  saChartType: ChartType;
-  maChartType: ChartType;
-  paletteId: PaletteId;
-}
+import type { ChartOpts, TableOpts, ViewMode } from "./viewTypes";
 
 interface ResultCardProps {
   group: QuestionGroup;

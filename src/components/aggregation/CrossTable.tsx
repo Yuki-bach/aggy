@@ -1,6 +1,6 @@
 import type { CategoricalTally, Slice, Axis } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
-import type { PctDirection } from "./Toolbar";
+import type { PctDirection } from "./viewTypes";
 import { Th, Td } from "./TableCells";
 
 interface CrossTableProps {

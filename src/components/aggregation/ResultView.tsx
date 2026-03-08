@@ -1,10 +1,11 @@
 import { useEffect, useState } from "preact/hooks";
-import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
-import type { ChartType } from "./ChartCardBody";
+import { Toolbar, ViewOpts } from "./Toolbar";
 import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
 import { useAggregation } from "./AggregationContext";
 import { groupByQuestion, computeMaxPct } from "../../lib/agg/groupByQuestion";
+import type { PctDirection, ViewMode } from "./viewTypes";
+import type { ChartType } from "./ChartCardBody";
 import type { PaletteId } from "../../lib/chartConfig";
 
 export default function ResultView() {
@@ -53,9 +54,7 @@ export default function ResultView() {
       <ViewOpts
         currentViewMode={viewMode}
         currentPctDirection={pctDirection}
-        saChartType={saChartType}
-        maChartType={maChartType}
-        paletteId={paletteId}
+        chartOpts={chartOpts}
         callbacks={callbacks}
       />
       <div class={gridClass}>
