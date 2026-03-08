@@ -1,8 +1,8 @@
+import type { Tally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfig";
 import type { ChartType } from "./ChartCardBody";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
-import { useAggregation } from "./AggregationContext";
 import { ExportMenu } from "./ExportMenu";
 import { executeExport, type ExportAction } from "../../lib/export/export";
 import type { ChartOpts, PctDirection, ViewMode } from "./viewTypes";
@@ -16,12 +16,13 @@ export interface ToolbarCallbacks {
 }
 
 interface ToolbarProps {
+  tallies: Tally[];
+  weightCol: string;
   currentViewMode: ViewMode;
   callbacks: ToolbarCallbacks;
 }
 
-export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
-  const { tallies, weightCol } = useAggregation();
+export function Toolbar({ tallies, weightCol, currentViewMode, callbacks }: ToolbarProps) {
   const weightText = weightCol
     ? t("result.weight.applied", { col: weightCol })
     : t("result.weight.none");
@@ -59,6 +60,7 @@ export function Toolbar({ currentViewMode, callbacks }: ToolbarProps) {
 interface ViewOptsProps {
   currentViewMode: ViewMode;
   currentPctDirection: PctDirection;
+  hasCross: boolean;
   chartOpts: ChartOpts;
   callbacks: Pick<
     ToolbarCallbacks,
@@ -69,12 +71,11 @@ interface ViewOptsProps {
 export function ViewOpts({
   currentViewMode,
   currentPctDirection,
+  hasCross,
   chartOpts,
   callbacks,
 }: ViewOptsProps) {
   const { saChartType, maChartType, paletteId } = chartOpts;
-  const { tallies } = useAggregation();
-  const hasCross = tallies.some((t) => t.by !== null);
 
   const showChart = currentViewMode === "chart";
   const showPctToggle = currentViewMode === "table" && hasCross;

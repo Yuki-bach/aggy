@@ -1,14 +1,19 @@
 import { useEffect, useState } from "preact/hooks";
+import type { Tally } from "../../lib/agg/types";
 import { Toolbar, ViewOpts } from "./Toolbar";
 import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
-import { useAggregation } from "./AggregationContext";
 import { groupByQuestion, computeMaxPct } from "../../lib/agg/groupByQuestion";
 import type { PctDirection, ViewMode } from "./viewTypes";
 import type { ChartType } from "./ChartCardBody";
 import type { PaletteId } from "../../lib/chartConfig";
 
-export default function ResultView() {
+interface ResultViewProps {
+  tallies: Tally[];
+  weightCol: string;
+}
+
+export default function ResultView({ tallies, weightCol }: ResultViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
@@ -36,7 +41,6 @@ export default function ResultView() {
     onPaletteChange: setPaletteId,
   };
 
-  const { tallies, weightCol } = useAggregation();
   const groups = groupByQuestion(tallies);
   const hasCross = tallies.some((t) => t.by !== null);
 
@@ -50,10 +54,16 @@ export default function ResultView() {
 
   return (
     <>
-      <Toolbar currentViewMode={viewMode} callbacks={callbacks} />
+      <Toolbar
+        tallies={tallies}
+        weightCol={weightCol}
+        currentViewMode={viewMode}
+        callbacks={callbacks}
+      />
       <ViewOpts
         currentViewMode={viewMode}
         currentPctDirection={pctDirection}
+        hasCross={hasCross}
         chartOpts={chartOpts}
         callbacks={callbacks}
       />
@@ -69,7 +79,7 @@ export default function ResultView() {
           />
         ))}
       </div>
-      <AIBubble />
+      <AIBubble tallies={tallies} weightCol={weightCol} />
     </>
   );
 }
