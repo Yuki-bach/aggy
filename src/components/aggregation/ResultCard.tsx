@@ -1,4 +1,4 @@
-import type { TallyGroup } from "../../lib/agg/groupByQuestion";
+import type { Tally } from "../../lib/agg/types";
 import { ChartCardBody } from "./ChartCardBody";
 import { CrossTable } from "./CrossTable";
 import { GtTable } from "./GtTable";
@@ -9,15 +9,21 @@ import type { ChartOpts, TableOpts, ViewMode } from "./viewTypes";
 import { formatN } from "../../lib/format";
 
 interface ResultCardProps {
-  group: TallyGroup;
+  gtTally: Tally;
+  crossTallies: Tally[];
   viewMode: ViewMode;
   tableOpts: TableOpts;
   chartOpts: ChartOpts;
 }
 
-export function ResultCard({ group, viewMode, tableOpts, chartOpts }: ResultCardProps) {
-  const { gtTally } = group;
-  const hasCross = group.crossTallies.length > 0;
+export function ResultCard({
+  gtTally,
+  crossTallies,
+  viewMode,
+  tableOpts,
+  chartOpts,
+}: ResultCardProps) {
+  const hasCross = crossTallies.length > 0;
 
   const gtN = gtTally.slices[0]?.n ?? 0;
 
@@ -33,14 +39,18 @@ export function ResultCard({ group, viewMode, tableOpts, chartOpts }: ResultCard
         <span class="text-xs tracking-wide text-muted">{gtTally.type}</span>
         <span class="ml-auto text-xs text-muted">n={formatN(gtN)}</span>
       </div>
-      <CardBody group={group} viewMode={viewMode} tableOpts={tableOpts} chartOpts={chartOpts} />
+      <CardBody
+        gtTally={gtTally}
+        crossTallies={crossTallies}
+        viewMode={viewMode}
+        tableOpts={tableOpts}
+        chartOpts={chartOpts}
+      />
     </div>
   );
 }
 
-function CardBody({ group, viewMode, tableOpts, chartOpts }: ResultCardProps) {
-  const { gtTally, crossTallies } = group;
-
+function CardBody({ gtTally, crossTallies, viewMode, tableOpts, chartOpts }: ResultCardProps) {
   if (gtTally.type === "NA") {
     if (viewMode === "chart") {
       return (
