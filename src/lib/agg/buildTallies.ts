@@ -1,7 +1,7 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type {
   Question,
-  AggResult,
+  AggOutput,
   Tally,
   CategoricalTally,
   NumericTally,
@@ -43,7 +43,7 @@ export async function buildTallies(
 
 function toCategoricalTally(
   question: Question,
-  aggResult: AggResult,
+  aggResult: AggOutput,
   byQuestion?: Question,
 ): CategoricalTally {
   const labels: Record<string, string> = { ...question.labels };
@@ -80,7 +80,7 @@ function toNaTally(
   };
 }
 
-function buildAxis(aggResult: AggResult, byQuestion?: Question): Axis | null {
+function buildAxis(aggResult: AggOutput, byQuestion?: Question): Axis | null {
   if (!byQuestion) return null;
   const axisLabels: Record<string, string> = { ...byQuestion.labels };
   const hasNoAnswer = aggResult.slices.some((s) => s.code === NO_ANSWER_VALUE);

@@ -1,7 +1,7 @@
 /** GT (Grand Total) aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggInput, AggResult } from "./types";
+import type { AggInput, AggOutput } from "./types";
 import {
   esc,
   weightExpr,
@@ -16,7 +16,7 @@ export async function aggregateGt(
   conn: duckdb.AsyncDuckDBConnection,
   question: AggInput,
   weightCol: string,
-): Promise<AggResult> {
+): Promise<AggOutput> {
   const gt = new GtAggregator(conn, weightCol);
   return question.type === "SA"
     ? gt.aggregateSA(question.columns[0], question.codes)
@@ -29,7 +29,7 @@ class GtAggregator {
     private weightCol: string,
   ) {}
 
-  async aggregateSA(column: string, codes: string[]): Promise<AggResult> {
+  async aggregateSA(column: string, codes: string[]): Promise<AggOutput> {
     const wExpr = weightExpr(this.weightCol);
     const sql = `
       SELECT
@@ -55,7 +55,7 @@ class GtAggregator {
     return { codes, slices: [{ code: null, n, cells }] };
   }
 
-  async aggregateMA(columns: string[], codes: string[]): Promise<AggResult> {
+  async aggregateMA(columns: string[], codes: string[]): Promise<AggOutput> {
     const selectClauses = columns.map((col, i) => {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });

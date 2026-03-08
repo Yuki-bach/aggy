@@ -1,7 +1,7 @@
 /** Cross-tabulation aggregation — one cross axis at a time */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggInput, AggResult } from "./types";
+import type { AggInput, AggOutput } from "./types";
 import {
   esc,
   weightExpr,
@@ -23,7 +23,7 @@ export async function aggregateCross(
   question: AggInput,
   by: AggInput,
   weightCol: string,
-): Promise<AggResult> {
+): Promise<AggOutput> {
   const ca = new CrossAggregator(conn, weightCol, by);
   const isMainSa = question.type === "SA";
   const isCrossSa = by.type === "SA";
@@ -43,7 +43,7 @@ class CrossAggregator {
 
   // ── SA main × SA cross ──
 
-  async saSA(column: string, codes: string[]): Promise<AggResult> {
+  async saSA(column: string, codes: string[]): Promise<AggOutput> {
     const crossCol = this.crossQ.columns[0];
     const crossValues = this.crossQ.codes;
     const wExpr = weightExpr(this.weightCol);
@@ -88,7 +88,7 @@ class CrossAggregator {
 
   // ── SA main × MA cross ──
 
-  async saMA(column: string, codes: string[]): Promise<AggResult> {
+  async saMA(column: string, codes: string[]): Promise<AggOutput> {
     const selectClauses = this.crossQ.columns.map(
       (maCol, i) => `${maWeightedCountExpr(maCol, this.weightCol)} AS c${i}`,
     );
@@ -126,7 +126,7 @@ class CrossAggregator {
 
   // ── MA main × SA cross ──
 
-  async maSA(columns: string[], codes: string[]): Promise<AggResult> {
+  async maSA(columns: string[], codes: string[]): Promise<AggOutput> {
     const crossCol = this.crossQ.columns[0];
     const crossValues = this.crossQ.codes;
     const wExpr = weightExpr(this.weightCol);
@@ -176,7 +176,7 @@ class CrossAggregator {
 
   // ── shared slice builder ──
 
-  private buildSlices(data: CrossSliceData[], codes: string[]): AggResult {
+  private buildSlices(data: CrossSliceData[], codes: string[]): AggOutput {
     const slices = data.map(({ code, n, counts }) => ({
       code,
       n,
@@ -190,7 +190,7 @@ class CrossAggregator {
 
   // ── MA main × MA cross ──
 
-  async maMA(columns: string[], codes: string[]): Promise<AggResult> {
+  async maMA(columns: string[], codes: string[]): Promise<AggOutput> {
     const shownCond = maShownCondition(columns);
 
     const selectClauses: string[] = [];

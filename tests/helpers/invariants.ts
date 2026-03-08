@@ -1,8 +1,8 @@
 import { expect } from "vitest";
-import type { AggResult } from "../../src/lib/agg/types";
+import type { AggOutput } from "../../src/lib/agg/types";
 
 export function assertGtInvariants(
-  result: AggResult,
+  result: AggOutput,
   type: "SA" | "MA",
 ): void {
   expect(result.slices).toHaveLength(1);
@@ -34,7 +34,7 @@ export function assertGtInvariants(
 }
 
 export function assertCrossInvariants(
-  result: AggResult,
+  result: AggOutput,
   type: "SA" | "MA",
   expectedSliceCount: number,
 ): void {
