@@ -99,13 +99,12 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
   const headerRow2 = ["", "", "", "", ""];
 
   for (const crossTally of crossTalliesForFirst) {
+    if (crossTally.type === "NA") continue;
     const axis = crossTally.by!;
     for (const slice of crossTally.slices) {
       headerRow1.push("");
-      if (crossTally.type !== "NA") {
-        const sliceLabel = axis.labels[slice.code!];
-        headerRow2.push(`${sliceLabel}(n=${(slice as { n: number }).n.toFixed(1)})`);
-      }
+      const sliceLabel = axis.labels[slice.code!];
+      headerRow2.push(`${sliceLabel}(n=${slice.n.toFixed(1)})`);
     }
   }
   const sharedHeaders = [headerRow1, headerRow2];
@@ -145,7 +144,7 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
     for (const crossTally of qCrossTallies) {
       if (crossTally.type === "NA") continue;
       for (const slice of crossTally.slices) {
-        nRow.push((slice as { n: number }).n.toFixed(1));
+        nRow.push(slice.n.toFixed(1));
       }
     }
     rows.push(nRow);
