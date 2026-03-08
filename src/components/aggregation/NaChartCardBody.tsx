@@ -1,12 +1,12 @@
 import { useRef, useEffect } from "preact/hooks";
-import type { NumericTally } from "../../lib/agg/types";
+import type { Tally } from "../../lib/agg/types";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
 import { t } from "../../lib/i18n";
 import type { ChartConfiguration } from "chart.js";
 
 interface NaChartCardBodyProps {
-  gtTally: NumericTally;
-  crossTallies: NumericTally[];
+  gtTally: Tally;
+  crossTallies: Tally[];
   paletteId: PaletteId;
 }
 
@@ -43,13 +43,14 @@ export function NaChartCardBody({ gtTally, crossTallies, paletteId }: NaChartCar
 
 function buildFreqChart(
   canvas: HTMLCanvasElement,
-  tally: NumericTally,
+  tally: Tally,
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,
 ): Chart {
-  const { freq, stats } = tally.slices[0];
-  const labels = freq.map((f) => String(f.value));
-  const data = freq.map((f) => f.count);
+  const slice = tally.slices[0];
+  const stats = slice.stats!;
+  const labels = tally.codes;
+  const data = slice.cells.map((c) => c.count);
 
   return new Chart(canvas, {
     type: "bar",
@@ -98,8 +99,8 @@ function buildFreqChart(
 
 function buildMeanComparisonChart(
   canvas: HTMLCanvasElement,
-  _gtTally: NumericTally,
-  crossTallies: NumericTally[],
+  _gtTally: Tally,
+  crossTallies: Tally[],
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,
 ): Chart {
@@ -107,7 +108,7 @@ function buildMeanComparisonChart(
     const axis = ct.by!;
     return ct.slices.map((s) => ({
       label: axis.labels[s.code!],
-      stats: s.stats,
+      stats: s.stats!,
     }));
   });
 

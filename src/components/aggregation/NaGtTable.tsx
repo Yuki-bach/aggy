@@ -1,15 +1,15 @@
-import type { NumericTally } from "../../lib/agg/types";
+import type { Tally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 
 interface NaGtTableProps {
-  tally: NumericTally;
+  tally: Tally;
 }
 
 const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
 
 export function NaGtTable({ tally }: NaGtTableProps) {
-  const { stats } = tally.slices[0];
+  const stats = tally.slices[0].stats!;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums">

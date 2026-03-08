@@ -1,9 +1,9 @@
-import type { CategoricalTally } from "../../lib/agg/types";
+import type { Tally } from "../../lib/agg/types";
 import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 interface GtTableProps {
-  tally: CategoricalTally;
+  tally: Tally;
   maxPct: number;
 }
 

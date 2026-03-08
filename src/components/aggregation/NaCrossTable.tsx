@@ -1,10 +1,10 @@
-import type { NumericTally } from "../../lib/agg/types";
+import type { Tally } from "../../lib/agg/types";
 import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
 
 interface NaCrossTableProps {
-  gtTally: NumericTally;
-  crossTallies: NumericTally[];
+  gtTally: Tally;
+  crossTallies: Tally[];
 }
 
 const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
@@ -14,7 +14,7 @@ const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
 export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
-  const gtStats = gtTally.slices[0].stats;
+  const gtStats = gtTally.slices[0].stats!;
 
   const crossGroups = crossTallies.map((ct) => ({
     axis: ct.by!,
@@ -50,7 +50,7 @@ export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
               >
                 {group.axis.labels[slice.code!]}
                 <br />
-                <span class="text-muted text-xs font-normal">n={formatN(slice.stats.n)}</span>
+                <span class="text-muted text-xs font-normal">n={formatN(slice.n)}</span>
               </th>
             )),
           )}
@@ -67,7 +67,7 @@ export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
                   key={`${group.axis.code}-${slice.code}`}
                   class={`${TD_BASE} ${MONO} text-accent2 border-l border-l-row-border ${hasMultipleAxes && si === 0 && gi > 0 ? "border-l-2 border-l-border-strong" : ""}`}
                 >
-                  {formatStat(key, slice.stats[key])}
+                  {formatStat(key, slice.stats![key])}
                 </td>
               )),
             )}

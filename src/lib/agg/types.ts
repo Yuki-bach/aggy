@@ -20,6 +20,7 @@ export interface Slice {
   code: string | null;
   n: number;
   cells: Cell[];
+  stats?: NaStats;
 }
 
 /** aggregate() の戻り値 — rawdata 由来のみ */
@@ -35,12 +36,6 @@ export interface Axis {
   labels: Record<string, string>; // { "1": "男性", ... }, NA 含む
 }
 
-/** NA (Numerical Answer) 用の型 */
-export interface ValueCount {
-  value: number;
-  count: number;
-}
-
 export interface NaStats {
   n: number;
   mean: number;
@@ -50,15 +45,9 @@ export interface NaStats {
   max: number;
 }
 
-export interface NumericSlice {
-  code: string | null;
-  freq: ValueCount[];
-  stats: NaStats;
-}
-
-/** 消費用フラット型 — Discriminated Union */
-export interface CategoricalTally {
-  type: "SA" | "MA";
+/** 消費用フラット型 */
+export interface Tally {
+  type: "SA" | "MA" | "NA";
   questionCode: string;
   label: string;
   by: Axis | null;
@@ -66,13 +55,3 @@ export interface CategoricalTally {
   labels: Record<string, string>;
   slices: Slice[];
 }
-
-export interface NumericTally {
-  type: "NA";
-  questionCode: string;
-  label: string;
-  by: Axis | null;
-  slices: NumericSlice[];
-}
-
-export type Tally = CategoricalTally | NumericTally;

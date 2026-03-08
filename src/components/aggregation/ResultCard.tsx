@@ -1,5 +1,4 @@
 import type { TallyGroup } from "../../lib/agg/groupByQuestion";
-import type { CategoricalTally, NumericTally } from "../../lib/agg/types";
 import { ChartCardBody } from "./ChartCardBody";
 import { CrossTable } from "./CrossTable";
 import { GtTable } from "./GtTable";
@@ -20,8 +19,7 @@ export function ResultCard({ group, viewMode, tableOpts, chartOpts }: ResultCard
   const { gtTally } = group;
   const hasCross = group.crossTallies.length > 0;
 
-  const gtN =
-    gtTally.type === "NA" ? (gtTally.slices[0]?.stats.n ?? 0) : (gtTally.slices[0]?.n ?? 0);
+  const gtN = gtTally.slices[0]?.n ?? 0;
 
   return (
     <div
@@ -44,34 +42,37 @@ function CardBody({ group, viewMode, tableOpts, chartOpts }: ResultCardProps) {
   const { gtTally, crossTallies } = group;
 
   if (gtTally.type === "NA") {
-    // 同一設問内のtallyは同じtypeなのでキャスト安全
-    const crossNa = crossTallies as NumericTally[];
     if (viewMode === "chart") {
       return (
-        <NaChartCardBody gtTally={gtTally} crossTallies={crossNa} paletteId={chartOpts.paletteId} />
+        <NaChartCardBody
+          gtTally={gtTally}
+          crossTallies={crossTallies}
+          paletteId={chartOpts.paletteId}
+        />
       );
     }
-    if (crossNa.length > 0) {
-      return <NaCrossTable gtTally={gtTally} crossTallies={crossNa} />;
+    if (crossTallies.length > 0) {
+      return <NaCrossTable gtTally={gtTally} crossTallies={crossTallies} />;
     }
     return <NaGtTable tally={gtTally} />;
   }
 
-  // SA | MA — 同一設問内のtallyは同じtypeなのでキャスト安全
-  const crossCat = crossTallies as CategoricalTally[];
+  // SA | MA
   if (viewMode === "chart") {
     const { saChartType, maChartType, paletteId } = chartOpts;
     return (
       <ChartCardBody
         gtTally={gtTally}
-        crossTallies={crossCat}
+        crossTallies={crossTallies}
         gtChartType={gtTally.type === "SA" ? saChartType : maChartType}
         paletteId={paletteId}
       />
     );
   }
-  if (crossCat.length > 0) {
-    return <CrossTable gtTally={gtTally} crossTallies={crossCat} pctDir={tableOpts.pctDirection} />;
+  if (crossTallies.length > 0) {
+    return (
+      <CrossTable gtTally={gtTally} crossTallies={crossTallies} pctDir={tableOpts.pctDirection} />
+    );
   }
   return <GtTable tally={gtTally} maxPct={tableOpts.maxPct} />;
 }
