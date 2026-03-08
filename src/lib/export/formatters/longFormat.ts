@@ -25,17 +25,17 @@ export function talliesToLongRows(tallies: Tally[]): string[][] {
     if (tally.type === "NA") {
       for (const slice of tally.slices) {
         const crossValue = tally.by === null ? total : tally.by.labels[slice.code!];
-        const { stats } = slice;
-        for (const key of ["n", "mean", "median", "sd", "min", "max"] as const) {
+        const { stats, freq } = slice;
+        for (const f of freq) {
           rows.push([
             tally.question,
             "NA",
-            t(`na.stat.${key}`),
+            String(f.value),
             crossAxis,
             crossValue,
             String(stats.n),
-            String(stats[key]),
-            "",
+            String(f.count),
+            String(stats.n > 0 ? (f.count / stats.n) * 100 : 0),
           ]);
         }
       }
