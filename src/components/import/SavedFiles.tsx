@@ -2,8 +2,6 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { type SavedEntry, listSaved, deleteSaved } from "../../lib/opfs";
 import { t } from "../../lib/i18n";
 
-export type { SavedEntry };
-
 /** Trigger refresh from outside Preact (e.g. after saving to OPFS) */
 export function triggerSavedFilesRefresh(): void {
   for (const fn of listeners) fn();
