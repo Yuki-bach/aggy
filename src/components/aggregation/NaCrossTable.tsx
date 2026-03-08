@@ -1,10 +1,10 @@
 import type { NumericTally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
-import { useAggregation } from "./AggregationContext";
 
 interface NaCrossTableProps {
   gtTally: NumericTally;
   crossTallies: NumericTally[];
+  weightCol: string;
 }
 
 const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
@@ -13,8 +13,7 @@ const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-bor
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
-export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
-  const { weightCol } = useAggregation();
+export function NaCrossTable({ gtTally, crossTallies, weightCol }: NaCrossTableProps) {
   const gtStats = gtTally.slices[0].stats;
 
   const crossGroups = crossTallies.map((ct) => ({

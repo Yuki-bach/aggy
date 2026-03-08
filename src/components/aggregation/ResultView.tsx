@@ -1,11 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { Toolbar, ViewOpts, type PctDirection, type ViewMode } from "./Toolbar";
-import { ChartCardBody, type ChartType } from "./ChartCardBody";
-import { GtTable } from "./GtTable";
-import { CrossTable } from "./CrossTable";
-import { NaGtTable } from "./NaGtTable";
-import { NaCrossTable } from "./NaCrossTable";
-import { NaChartCardBody } from "./NaChartCardBody";
+import type { ChartType } from "./ChartCardBody";
 import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
 import { useAggregation } from "./AggregationContext";
@@ -65,39 +60,15 @@ export default function ResultView() {
         {groups.map((group) => (
           <ResultCard
             key={group.questionCode}
-            tally={group.gtTally}
-            extraClass={group.crossTallies.length > 0 ? "overflow-x-auto" : undefined}
-          >
-            {group.type === "NA" ? (
-              viewMode === "chart" ? (
-                <NaChartCardBody
-                  gtTally={group.gtTally}
-                  crossTallies={group.crossTallies}
-                  paletteId={paletteId}
-                />
-              ) : group.crossTallies.length > 0 ? (
-                <NaCrossTable gtTally={group.gtTally} crossTallies={group.crossTallies} />
-              ) : (
-                <NaGtTable tally={group.gtTally} />
-              )
-            ) : viewMode === "chart" ? (
-              <ChartCardBody
-                gtTally={group.gtTally}
-                crossTallies={group.crossTallies}
-                gtChartType={group.gtTally.type === "SA" ? saChartType : maChartType}
-                paletteId={paletteId}
-              />
-            ) : group.crossTallies.length > 0 ? (
-              <CrossTable
-                gtTally={group.gtTally}
-                crossTallies={group.crossTallies}
-                pctDir={pctDirection}
-                weightCol={weightCol}
-              />
-            ) : (
-              <GtTable tally={group.gtTally} maxPct={maxPct} weightCol={weightCol} />
-            )}
-          </ResultCard>
+            group={group}
+            viewMode={viewMode}
+            maxPct={maxPct}
+            weightCol={weightCol}
+            pctDirection={pctDirection}
+            saChartType={saChartType}
+            maChartType={maChartType}
+            paletteId={paletteId}
+          />
         ))}
       </div>
       <AIBubble />
