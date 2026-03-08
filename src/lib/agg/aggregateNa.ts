@@ -1,8 +1,13 @@
 /** NA (Numerical Answer) aggregation — GT and Cross */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggInput, NumericSlice, NaStats, ValueCount } from "./types";
+import type { AggInput, AggOutput, NaStats, Slice } from "./types";
 import { esc, maShownCondition } from "./sqlHelpers";
+
+interface ValueCount {
+  value: number;
+  count: number;
+}
 
 // ── GT ──
 
@@ -10,14 +15,15 @@ export async function aggregateNaGt(
   conn: duckdb.AsyncDuckDBConnection,
   column: string,
   weightCol: string,
-): Promise<NumericSlice> {
+): Promise<AggOutput> {
   const valExpr = `CAST("${esc(column)}" AS DOUBLE)`;
   const whereCond = `"${esc(column)}" IS NOT NULL AND TRY_CAST("${esc(column)}" AS DOUBLE) IS NOT NULL`;
 
   const stats = await queryStats(conn, valExpr, whereCond, weightCol);
   const freq = await queryFreq(conn, valExpr, whereCond, weightCol);
 
-  return { code: null, freq, stats };
+  const { codes, cells } = freqToCells(freq, stats.n);
+  return { codes, slices: [{ code: null, n: stats.n, cells, stats }] };
 }
 
 // ── Cross (NA × SA or NA × MA) ──
@@ -27,11 +33,49 @@ export async function aggregateNaCross(
   naColumn: string,
   crossQ: AggInput,
   weightCol: string,
-): Promise<NumericSlice[]> {
+): Promise<AggOutput> {
   if (crossQ.type === "SA") {
     return crossSA(conn, naColumn, crossQ.columns[0], crossQ.codes, weightCol);
   }
   return crossMA(conn, naColumn, crossQ.columns, crossQ.codes, weightCol);
+}
+
+// ── Helpers ──
+
+function freqToCells(
+  freq: ValueCount[],
+  n: number,
+): { codes: string[]; cells: import("./types").Cell[] } {
+  const codes = freq.map((f) => String(f.value));
+  const cells = freq.map((f) => ({
+    count: f.count,
+    pct: n > 0 ? (f.count / n) * 100 : 0,
+  }));
+  return { codes, cells };
+}
+
+/** Union all value keys across slices, returning sorted codes and aligned cells per slice */
+function alignSlices(sliceData: { code: string; freq: ValueCount[]; stats: NaStats }[]): {
+  codes: string[];
+  slices: Slice[];
+} {
+  const allValues = new Set<number>();
+  for (const s of sliceData) {
+    for (const f of s.freq) allValues.add(f.value);
+  }
+  const sortedValues = [...allValues].sort((a, b) => a - b);
+  const codes = sortedValues.map(String);
+
+  const slices: Slice[] = sliceData.map((s) => {
+    const freqMap = new Map(s.freq.map((f) => [f.value, f.count]));
+    const cells = sortedValues.map((v) => {
+      const count = freqMap.get(v) ?? 0;
+      return { count, pct: s.stats.n > 0 ? (count / s.stats.n) * 100 : 0 };
+    });
+    return { code: s.code, n: s.stats.n, cells, stats: s.stats };
+  });
+
+  return { codes, slices };
 }
 
 // ── Internal ──
@@ -196,18 +240,21 @@ async function crossSA(
   crossCol: string,
   crossCodes: string[],
   weightCol: string,
-): Promise<NumericSlice[]> {
+): Promise<AggOutput> {
   const valExpr = `CAST("${esc(naColumn)}" AS DOUBLE)`;
   const whereCond = `"${esc(naColumn)}" IS NOT NULL AND TRY_CAST("${esc(naColumn)}" AS DOUBLE) IS NOT NULL`;
 
   const statsMap = await queryStatsGrouped(conn, valExpr, whereCond, weightCol, crossCol);
   const freqMap = await queryFreqGrouped(conn, valExpr, whereCond, weightCol, crossCol);
 
-  return crossCodes.map((code) => ({
+  const emptyStats: NaStats = { n: 0, mean: 0, median: 0, sd: 0, min: 0, max: 0 };
+  const sliceData = crossCodes.map((code) => ({
     code,
-    stats: statsMap.get(code) ?? { n: 0, mean: 0, median: 0, sd: 0, min: 0, max: 0 },
+    stats: statsMap.get(code) ?? emptyStats,
     freq: freqMap.get(code) ?? [],
   }));
+
+  return alignSlices(sliceData);
 }
 
 // ── NA × MA cross ──
@@ -218,17 +265,18 @@ async function crossMA(
   maCols: string[],
   maCodes: string[],
   weightCol: string,
-): Promise<NumericSlice[]> {
+): Promise<AggOutput> {
   const valExpr = `CAST("${esc(naColumn)}" AS DOUBLE)`;
   const baseWhere = `"${esc(naColumn)}" IS NOT NULL AND TRY_CAST("${esc(naColumn)}" AS DOUBLE) IS NOT NULL AND (${maShownCondition(maCols)})`;
 
-  const slices: NumericSlice[] = [];
+  const sliceData: { code: string; freq: ValueCount[]; stats: NaStats }[] = [];
   for (let i = 0; i < maCols.length; i++) {
     const maCol = maCols[i];
     const whereCond = `${baseWhere} AND "${esc(maCol)}" = 1`;
     const stats = await queryStats(conn, valExpr, whereCond, weightCol);
     const freq = await queryFreq(conn, valExpr, whereCond, weightCol);
-    slices.push({ code: maCodes[i], stats, freq });
+    sliceData.push({ code: maCodes[i], stats, freq });
   }
-  return slices;
+
+  return alignSlices(sliceData);
 }

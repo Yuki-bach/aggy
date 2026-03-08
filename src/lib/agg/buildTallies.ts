@@ -1,13 +1,5 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type {
-  Question,
-  AggOutput,
-  Tally,
-  CategoricalTally,
-  NumericTally,
-  Axis,
-  NumericSlice,
-} from "./types";
+import type { Question, AggOutput, Tally, Axis } from "./types";
 import { aggregateGt } from "./aggregateGt";
 import { aggregateCross } from "./aggregateCross";
 import { aggregateNaGt, aggregateNaCross } from "./aggregateNa";
@@ -23,60 +15,46 @@ export async function buildTallies(
   const tallies: Tally[] = [];
   for (const q of questions) {
     if (q.type === "NA") {
-      const gtSlice = await aggregateNaGt(conn, q.columns[0], weightCol);
-      tallies.push(toNaTally(q, [gtSlice]));
+      const gtResult = await aggregateNaGt(conn, q.columns[0], weightCol);
+      tallies.push(toTally(q, gtResult));
       for (const cross of crossCols) {
-        const crossSlices = await aggregateNaCross(conn, q.columns[0], cross, weightCol);
-        tallies.push(toNaTally(q, crossSlices, cross));
+        const crossResult = await aggregateNaCross(conn, q.columns[0], cross, weightCol);
+        tallies.push(toTally(q, crossResult, cross));
       }
     } else {
       const gtResult = await aggregateGt(conn, q, weightCol);
-      tallies.push(toCategoricalTally(q, gtResult));
+      tallies.push(toTally(q, gtResult));
       for (const cross of crossCols) {
         const crossResult = await aggregateCross(conn, q, cross, weightCol);
-        tallies.push(toCategoricalTally(q, crossResult, cross));
+        tallies.push(toTally(q, crossResult, cross));
       }
     }
   }
   return tallies;
 }
 
-function toCategoricalTally(
-  question: Question,
-  aggResult: AggOutput,
-  byQuestion?: Question,
-): CategoricalTally {
+function toTally(question: Question, aggResult: AggOutput, byQuestion?: Question): Tally {
   const labels: Record<string, string> = { ...question.labels };
+
+  if (question.type === "NA") {
+    // NA: self-labeling (value string as label)
+    for (const code of aggResult.codes) {
+      labels[code] = code;
+    }
+  }
+
   if (aggResult.codes.includes(NO_ANSWER_VALUE)) {
     labels[NO_ANSWER_VALUE] = t("label.noAnswer");
   }
 
   return {
     questionCode: question.code,
-    type: question.type as "SA" | "MA",
+    type: question.type,
     label: question.label,
     labels,
     codes: aggResult.codes,
     by: buildAxis(aggResult, byQuestion),
     slices: aggResult.slices,
-  };
-}
-
-function toNaTally(
-  question: Question,
-  slices: NumericSlice[],
-  byQuestion?: Question,
-): NumericTally {
-  let by: Axis | null = null;
-  if (byQuestion) {
-    by = { code: byQuestion.code, label: byQuestion.label, labels: { ...byQuestion.labels } };
-  }
-  return {
-    type: "NA",
-    questionCode: question.code,
-    label: question.label,
-    by,
-    slices,
   };
 }
 

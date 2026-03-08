@@ -1,4 +1,4 @@
-import type { Tally, CategoricalTally, NumericTally } from "../../agg/types";
+import type { Tally } from "../../agg/types";
 import { t } from "../../i18n";
 
 export interface ExportGrid {
@@ -20,7 +20,7 @@ export function buildExportGrids(tallies: Tally[]): ExportGrid[] {
 
 // ─── Internal ───────────────────────────────────────────────
 
-function resolveLabel(code: string, tally: CategoricalTally): string {
+function resolveLabel(code: string, tally: Tally): string {
   return tally.labels[code];
 }
 
@@ -29,7 +29,7 @@ function buildGtGrid(tally: Tally): ExportGrid {
   return buildCategoricalGtGrid(tally);
 }
 
-function buildCategoricalGtGrid(tally: CategoricalTally): ExportGrid {
+function buildCategoricalGtGrid(tally: Tally): ExportGrid {
   const slice = tally.slices[0];
   const headers = [
     [
@@ -58,8 +58,8 @@ function buildCategoricalGtGrid(tally: CategoricalTally): ExportGrid {
   return { questionCode: tally.questionCode, type: tally.type, headers, rows };
 }
 
-function buildNaGtGrid(tally: NumericTally): ExportGrid {
-  const { stats } = tally.slices[0];
+function buildNaGtGrid(tally: Tally): ExportGrid {
+  const stats = tally.slices[0].stats!;
   const headers = [[t("export.header.variable"), t("export.header.type"), t("table.option"), ""]];
   const rows: string[][] = NA_STAT_KEYS.map((key) => [
     tally.questionCode,
@@ -114,7 +114,7 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
     const qCrossTallies = tallies.filter((t) => t.questionCode === qCode && t.by !== null);
 
     if (gtTally.type === "NA") {
-      return buildNaCrossGrid(gtTally, qCrossTallies as NumericTally[]);
+      return buildNaCrossGrid(gtTally, qCrossTallies);
     }
 
     const gtSlice = gtTally.slices[0];
@@ -153,8 +153,8 @@ function buildCrossGrids(tallies: Tally[]): ExportGrid[] {
   });
 }
 
-function buildNaCrossGrid(gtTally: NumericTally, crossTallies: NumericTally[]): ExportGrid {
-  const gtStats = gtTally.slices[0].stats;
+function buildNaCrossGrid(gtTally: Tally, crossTallies: Tally[]): ExportGrid {
+  const gtStats = gtTally.slices[0].stats!;
 
   const headerRow1 = [
     t("export.header.variable"),
@@ -181,7 +181,7 @@ function buildNaCrossGrid(gtTally: NumericTally, crossTallies: NumericTally[]): 
     ];
     for (const ct of crossTallies) {
       for (const slice of ct.slices) {
-        row.push(key === "n" ? slice.stats.n.toFixed(1) : slice.stats[key].toFixed(2));
+        row.push(key === "n" ? slice.stats!.n.toFixed(1) : slice.stats![key].toFixed(2));
       }
     }
     return row;

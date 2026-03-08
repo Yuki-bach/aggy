@@ -1,12 +1,12 @@
-import type { CategoricalTally, Slice, Axis } from "../../lib/agg/types";
+import type { Tally, Slice, Axis } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import type { PctDirection } from "./viewTypes";
 import { formatN } from "../../lib/format";
 import { Th, Td } from "./TableCells";
 
 interface CrossTableProps {
-  gtTally: CategoricalTally;
-  crossTallies: CategoricalTally[];
+  gtTally: Tally;
+  crossTallies: Tally[];
   pctDir: PctDirection;
 }
 
@@ -27,16 +27,10 @@ const MONO = "text-right tabular-nums font-mono";
 
 interface CrossGroup {
   axis: Axis;
-  tally: CategoricalTally;
+  tally: Tally;
 }
 
-function VerticalCrossTable({
-  gtTally,
-  crossTallies,
-}: {
-  gtTally: CategoricalTally;
-  crossTallies: CategoricalTally[];
-}) {
+function VerticalCrossTable({ gtTally, crossTallies }: { gtTally: Tally; crossTallies: Tally[] }) {
   const gtSlice = gtTally.slices[0];
   const codes = gtTally.codes;
 
@@ -119,8 +113,8 @@ function TransposedCrossTable({
   gtTally,
   crossTallies,
 }: {
-  gtTally: CategoricalTally;
-  crossTallies: CategoricalTally[];
+  gtTally: Tally;
+  crossTallies: Tally[];
 }) {
   const gtSlice = gtTally.slices[0];
   const codes = gtTally.codes;
