@@ -92,12 +92,12 @@ function MatrixCategoricalGtTable({ items }: { items: MatrixChild[] }) {
       <thead>
         <tr>
           <Th></Th>
+          <Th right>n</Th>
           {codes.map((code) => (
             <Th key={code} right>
               {firstTally.labels[code]}
             </Th>
           ))}
-          <Th right>n</Th>
         </tr>
       </thead>
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
@@ -106,6 +106,9 @@ function MatrixCategoricalGtTable({ items }: { items: MatrixChild[] }) {
           return (
             <tr key={gtTally.questionCode}>
               <Td>{gtTally.label}</Td>
+              <Td right mono>
+                {formatN(slice.n)}
+              </Td>
               {codes.map((code, i) => {
                 const cell = slice.cells[i];
                 return (
@@ -114,9 +117,6 @@ function MatrixCategoricalGtTable({ items }: { items: MatrixChild[] }) {
                   </Td>
                 );
               })}
-              <Td right mono>
-                {formatN(slice.n)}
-              </Td>
             </tr>
           );
         })}
