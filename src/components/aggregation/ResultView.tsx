@@ -107,7 +107,7 @@ export default function ResultView({ tallies, weightCol, matrixGroups }: ResultV
         {renderItems.map((item) => {
           if (item.kind === "matrix") {
             const { group } = item;
-            const children = group.questionCodes
+            const matrixItems = group.questionCodes
               .map((qc) => ({
                 gtTally: tallies.find((t) => t.questionCode === qc && t.by === null)!,
                 crossTallies: tallies.filter((t) => t.questionCode === qc && t.by !== null),
@@ -118,7 +118,7 @@ export default function ResultView({ tallies, weightCol, matrixGroups }: ResultV
                 key={group.matrixKey}
                 matrixKey={group.matrixKey}
                 matrixLabel={group.matrixLabel}
-                children={children}
+                items={matrixItems}
                 viewMode={viewMode}
                 tableOpts={tableOpts}
                 chartOpts={chartOpts}

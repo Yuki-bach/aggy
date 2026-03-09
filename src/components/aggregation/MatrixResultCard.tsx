@@ -16,7 +16,7 @@ interface MatrixChild {
 interface MatrixResultCardProps {
   matrixKey: string;
   matrixLabel: string;
-  children: MatrixChild[];
+  items: MatrixChild[];
   viewMode: ViewMode;
   tableOpts: TableOpts;
   chartOpts: ChartOpts;
@@ -25,15 +25,15 @@ interface MatrixResultCardProps {
 export function MatrixResultCard({
   matrixKey,
   matrixLabel,
-  children,
+  items,
   viewMode,
   tableOpts,
   chartOpts,
 }: MatrixResultCardProps) {
-  if (children.length === 0) return null;
+  if (items.length === 0) return null;
 
-  const firstType = children[0].gtTally.type;
-  const hasCross = children.some((c) => c.crossTallies.length > 0);
+  const firstType = items[0].gtTally.type;
+  const hasCross = items.some((c) => c.crossTallies.length > 0);
 
   return (
     <div
@@ -47,7 +47,7 @@ export function MatrixResultCard({
         <span class="text-xs tracking-wide text-muted">{firstType} MATRIX</span>
       </div>
       <MatrixCardBody
-        children={children}
+        items={items}
         viewMode={viewMode}
         tableOpts={tableOpts}
         chartOpts={chartOpts}
@@ -57,34 +57,34 @@ export function MatrixResultCard({
 }
 
 function MatrixCardBody({
-  children,
+  items,
   viewMode,
   tableOpts,
   chartOpts,
 }: Omit<MatrixResultCardProps, "matrixKey" | "matrixLabel">) {
-  const firstType = children[0].gtTally.type;
-  const hasCross = children.some((c) => c.crossTallies.length > 0);
+  const firstType = items[0].gtTally.type;
+  const hasCross = items.some((c) => c.crossTallies.length > 0);
 
   if (viewMode === "chart") {
-    return <MatrixChartBody children={children} chartOpts={chartOpts} />;
+    return <MatrixChartBody items={items} chartOpts={chartOpts} />;
   }
 
   if (hasCross) {
-    return <MatrixCrossBody children={children} tableOpts={tableOpts} />;
+    return <MatrixCrossBody items={items} tableOpts={tableOpts} />;
   }
 
   // GT table mode
   if (firstType === "NA") {
-    return <MatrixNaGtTable children={children} />;
+    return <MatrixNaGtTable items={items} />;
   }
-  return <MatrixCategoricalGtTable children={children} />;
+  return <MatrixCategoricalGtTable items={items} />;
 }
 
 // ─── GT: SA/MA matrix table ──────────────────────────────────
 
-function MatrixCategoricalGtTable({ children }: { children: MatrixChild[] }) {
+function MatrixCategoricalGtTable({ items }: { items: MatrixChild[] }) {
   // All children share the same codes/labels (common options)
-  const firstTally = children[0].gtTally;
+  const firstTally = items[0].gtTally;
   const codes = firstTally.codes;
 
   return (
@@ -101,7 +101,7 @@ function MatrixCategoricalGtTable({ children }: { children: MatrixChild[] }) {
         </tr>
       </thead>
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
-        {children.map(({ gtTally }) => {
+        {items.map(({ gtTally }) => {
           const slice = gtTally.slices[0];
           return (
             <tr key={gtTally.questionCode}>
@@ -129,7 +129,7 @@ function MatrixCategoricalGtTable({ children }: { children: MatrixChild[] }) {
 
 const NA_STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
 
-function MatrixNaGtTable({ children }: { children: MatrixChild[] }) {
+function MatrixNaGtTable({ items }: { items: MatrixChild[] }) {
   return (
     <table class="w-full border-collapse text-sm tabular-nums">
       <thead>
@@ -143,7 +143,7 @@ function MatrixNaGtTable({ children }: { children: MatrixChild[] }) {
         </tr>
       </thead>
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
-        {children.map(({ gtTally }) => {
+        {items.map(({ gtTally }) => {
           const stats = gtTally.slices[0].stats!;
           return (
             <tr key={gtTally.questionCode}>
@@ -163,16 +163,10 @@ function MatrixNaGtTable({ children }: { children: MatrixChild[] }) {
 
 // ─── Cross: per-child tables ─────────────────────────────────
 
-function MatrixCrossBody({
-  children,
-  tableOpts,
-}: {
-  children: MatrixChild[];
-  tableOpts: TableOpts;
-}) {
+function MatrixCrossBody({ items, tableOpts }: { items: MatrixChild[]; tableOpts: TableOpts }) {
   return (
     <div class="divide-y divide-border">
-      {children.map(({ gtTally, crossTallies }) => (
+      {items.map(({ gtTally, crossTallies }) => (
         <div key={gtTally.questionCode}>
           <div class="bg-surface2 px-4 py-2 text-xs font-bold text-muted">
             {gtTally.label}
@@ -195,16 +189,10 @@ function MatrixCrossBody({
 
 // ─── Chart: per-child charts ─────────────────────────────────
 
-function MatrixChartBody({
-  children,
-  chartOpts,
-}: {
-  children: MatrixChild[];
-  chartOpts: ChartOpts;
-}) {
+function MatrixChartBody({ items, chartOpts }: { items: MatrixChild[]; chartOpts: ChartOpts }) {
   return (
     <div class="divide-y divide-border">
-      {children.map(({ gtTally, crossTallies }) => (
+      {items.map(({ gtTally, crossTallies }) => (
         <div key={gtTally.questionCode}>
           <div class="bg-surface2 px-4 py-2 text-xs font-bold text-muted">
             {gtTally.label}
