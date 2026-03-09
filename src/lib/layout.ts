@@ -127,7 +127,7 @@ export function buildMatrixGroups(layout: Layout): MatrixGroup[] {
     .filter((e) => e.type === "MATRIX")
     .map((p) => ({
       matrixKey: p.key,
-      matrixLabel: p.label!,
+      matrixLabel: p.label ?? p.key,
       questionCodes: layout.filter((e) => e.matrixKey === p.key).map((e) => e.key),
     }));
 }
