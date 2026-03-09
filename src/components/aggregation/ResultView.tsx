@@ -1,7 +1,9 @@
 import { useEffect, useState } from "preact/hooks";
 import type { Tally } from "../../lib/agg/types";
+import type { MatrixGroup } from "../../lib/layout";
 import { Toolbar, ViewOpts } from "./Toolbar";
 import { ResultCard } from "./ResultCard";
+import { MatrixResultCard } from "./MatrixResultCard";
 import { AIBubble } from "./AIBubble";
 import type { ChartType, PctDirection, ViewMode } from "./viewTypes";
 import type { PaletteId } from "../../lib/chartConfig";
@@ -9,9 +11,10 @@ import type { PaletteId } from "../../lib/chartConfig";
 interface ResultViewProps {
   tallies: Tally[];
   weightCol: string;
+  matrixGroups: MatrixGroup[];
 }
 
-export default function ResultView({ tallies, weightCol }: ResultViewProps) {
+export default function ResultView({ tallies, weightCol, matrixGroups }: ResultViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
@@ -51,6 +54,35 @@ export default function ResultView({ tallies, weightCol }: ResultViewProps) {
   const tableOpts = { pctDirection, maxPct };
   const chartOpts = { saChartType, maChartType, paletteId };
 
+  // Build reverse map: questionCode → matrixKey
+  const codeToMatrix = new Map<string, string>();
+  for (const mg of matrixGroups) {
+    for (const qc of mg.questionCodes) {
+      codeToMatrix.set(qc, mg.matrixKey);
+    }
+  }
+
+  // Build render items: group matrix children, preserve order
+  type RenderItem =
+    | { kind: "single"; questionCode: string }
+    | { kind: "matrix"; group: MatrixGroup };
+  const rendered = new Set<string>();
+  const renderItems: RenderItem[] = [];
+
+  for (const qc of questionCodes) {
+    if (rendered.has(qc)) continue;
+    const mk = codeToMatrix.get(qc);
+    if (mk) {
+      const group = matrixGroups.find((g) => g.matrixKey === mk)!;
+      // Mark all children as rendered
+      for (const c of group.questionCodes) rendered.add(c);
+      renderItems.push({ kind: "matrix", group });
+    } else {
+      rendered.add(qc);
+      renderItems.push({ kind: "single", questionCode: qc });
+    }
+  }
+
   const minWidth = viewMode === "chart" ? "400px" : "360px";
   const gridClass = hasCross
     ? "grid grid-cols-1 gap-6"
@@ -72,16 +104,39 @@ export default function ResultView({ tallies, weightCol }: ResultViewProps) {
         callbacks={callbacks}
       />
       <div class={gridClass}>
-        {questionCodes.map((q) => (
-          <ResultCard
-            key={q}
-            gtTally={tallies.find((t) => t.questionCode === q && t.by === null)!}
-            crossTallies={tallies.filter((t) => t.questionCode === q && t.by !== null)}
-            viewMode={viewMode}
-            tableOpts={tableOpts}
-            chartOpts={chartOpts}
-          />
-        ))}
+        {renderItems.map((item) => {
+          if (item.kind === "matrix") {
+            const { group } = item;
+            const matrixItems = group.questionCodes
+              .map((qc) => ({
+                gtTally: tallies.find((t) => t.questionCode === qc && t.by === null)!,
+                crossTallies: tallies.filter((t) => t.questionCode === qc && t.by !== null),
+              }))
+              .filter((c) => c.gtTally);
+            return (
+              <MatrixResultCard
+                key={group.matrixKey}
+                matrixKey={group.matrixKey}
+                matrixLabel={group.matrixLabel}
+                items={matrixItems}
+                viewMode={viewMode}
+                tableOpts={tableOpts}
+                chartOpts={chartOpts}
+              />
+            );
+          }
+          const q = item.questionCode;
+          return (
+            <ResultCard
+              key={q}
+              gtTally={tallies.find((t) => t.questionCode === q && t.by === null)!}
+              crossTallies={tallies.filter((t) => t.questionCode === q && t.by !== null)}
+              viewMode={viewMode}
+              tableOpts={tableOpts}
+              chartOpts={chartOpts}
+            />
+          );
+        })}
       </div>
       <AIBubble tallies={tallies} weightCol={weightCol} />
     </>

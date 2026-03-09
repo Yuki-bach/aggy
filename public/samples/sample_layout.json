@@ -34,6 +34,67 @@
     ]
   },
   {
+    "key": "q4",
+    "label": "サービス別満足度",
+    "type": "MATRIX"
+  },
+  {
+    "key": "q4_1",
+    "label": "サービスA",
+    "type": "SA",
+    "matrixKey": "q4",
+    "items": [
+      { "code": "1", "label": "満足" },
+      { "code": "2", "label": "普通" },
+      { "code": "3", "label": "不満" }
+    ]
+  },
+  {
+    "key": "q4_2",
+    "label": "サービスB",
+    "type": "SA",
+    "matrixKey": "q4",
+    "items": [
+      { "code": "1", "label": "満足" },
+      { "code": "2", "label": "普通" },
+      { "code": "3", "label": "不満" }
+    ]
+  },
+  {
+    "key": "q4_3",
+    "label": "サービスC",
+    "type": "SA",
+    "matrixKey": "q4",
+    "items": [
+      { "code": "1", "label": "満足" },
+      { "code": "2", "label": "普通" },
+      { "code": "3", "label": "不満" }
+    ]
+  },
+  {
+    "key": "q5",
+    "label": "サービス別評価スコア",
+    "type": "MATRIX"
+  },
+  {
+    "key": "q5_1",
+    "label": "サービスA",
+    "type": "NA",
+    "matrixKey": "q5"
+  },
+  {
+    "key": "q5_2",
+    "label": "サービスB",
+    "type": "NA",
+    "matrixKey": "q5"
+  },
+  {
+    "key": "q5_3",
+    "label": "サービスC",
+    "type": "NA",
+    "matrixKey": "q5"
+  },
+  {
     "key": "nps",
     "label": "推奨度（NPS）",
     "type": "NA"

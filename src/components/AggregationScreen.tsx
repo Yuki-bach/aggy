@@ -3,7 +3,12 @@ import type { Tally } from "../lib/agg/types";
 import CrossConfig from "./aggregation/CrossConfig";
 import ResultView from "./aggregation/ResultView";
 import { runAggregation } from "../lib/duckdbBridge";
-import { buildQuestions, findWeightColumn, countLayoutColumns } from "../lib/layout";
+import {
+  buildQuestions,
+  findWeightColumn,
+  countLayoutColumns,
+  buildMatrixGroups,
+} from "../lib/layout";
 import { t } from "../lib/i18n";
 import { ToggleButton, ToggleGroup } from "./shared/ToggleButton";
 import type { CsvData, LayoutData } from "../lib/types";
@@ -17,6 +22,7 @@ interface AggregationScreenProps {
 export default function AggregationScreen({ csv, layout, dateWarnings }: AggregationScreenProps) {
   const questions = buildQuestions(layout.layout);
   const weightCol = findWeightColumn(layout.layout);
+  const matrixGroups = buildMatrixGroups(layout.layout);
 
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
   const [weightEnabled, setWeightEnabled] = useState(true);
@@ -132,7 +138,11 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
       <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
         {aggResult ? (
           <div aria-live="polite">
-            <ResultView tallies={aggResult.tallies} weightCol={aggResult.weightCol} />
+            <ResultView
+              tallies={aggResult.tallies}
+              weightCol={aggResult.weightCol}
+              matrixGroups={matrixGroups}
+            />
           </div>
         ) : (
           <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">

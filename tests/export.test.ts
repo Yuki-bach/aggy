@@ -45,6 +45,37 @@ describe("buildExportGrids", () => {
     expect(grid.rows[4][2]).toBe("n");
   });
 
+  it("マトリクスtalliesが1グリッドにまとまる", () => {
+    const matrixTallies: Tally[] = [
+      {
+        questionCode: "q3_1",
+        type: "SA",
+        label: "商品A",
+        labels: { "1": "満足", "2": "不満" },
+        codes: ["1", "2"],
+        by: null,
+        slices: [{ code: null, n: 100, cells: [{ count: 60, pct: 60 }, { count: 40, pct: 40 }] }],
+      },
+      {
+        questionCode: "q3_2",
+        type: "SA",
+        label: "商品B",
+        labels: { "1": "満足", "2": "不満" },
+        codes: ["1", "2"],
+        by: null,
+        slices: [{ code: null, n: 100, cells: [{ count: 45, pct: 45 }, { count: 55, pct: 55 }] }],
+      },
+    ];
+    const matrixGroups = [
+      { matrixKey: "q3", matrixLabel: "満足度マトリクス", questionCodes: ["q3_1", "q3_2"] },
+    ];
+    const grids = buildExportGrids(matrixTallies, matrixGroups);
+    expect(grids).toHaveLength(1);
+    expect(grids[0].questionCode).toBe("q3");
+    // 2 options + n行 per child = 3 * 2 = 6 rows
+    expect(grids[0].rows).toHaveLength(6);
+  });
+
   it("クロス結果からヘッダー2行のグリッドを生成する", () => {
     const grids = buildExportGrids(crossTallies);
     expect(grids).toHaveLength(1);
