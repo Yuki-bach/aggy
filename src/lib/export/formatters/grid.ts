@@ -1,4 +1,5 @@
 import type { QuestionType, Tally } from "../../agg/types";
+import type { MatrixGroup } from "../../layout";
 import { t } from "../../i18n";
 
 export interface ExportGrid {
@@ -10,12 +11,90 @@ export interface ExportGrid {
 
 const NA_STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
 
-export function buildExportGrids(tallies: Tally[]): ExportGrid[] {
+export function buildExportGrids(tallies: Tally[], matrixGroups: MatrixGroup[] = []): ExportGrid[] {
   const hasCross = tallies.some((t) => t.by !== null);
   if (hasCross) {
     return buildCrossGrids(tallies);
   }
-  return tallies.filter((t) => t.by === null).map((tally) => buildGtGrid(tally));
+  return buildGtGrids(tallies, matrixGroups);
+}
+
+function buildGtGrids(tallies: Tally[], matrixGroups: MatrixGroup[]): ExportGrid[] {
+  const gtTallies = tallies.filter((t) => t.by === null);
+  const rendered = new Set<string>();
+  const grids: ExportGrid[] = [];
+
+  for (const tally of gtTallies) {
+    if (rendered.has(tally.questionCode)) continue;
+
+    const mg = matrixGroups.find((g) => g.questionCodes.includes(tally.questionCode));
+    if (mg) {
+      for (const qc of mg.questionCodes) rendered.add(qc);
+      const childTallies = mg.questionCodes
+        .map((qc) => gtTallies.find((t) => t.questionCode === qc))
+        .filter((t): t is Tally => t !== undefined);
+      grids.push(buildMatrixGtGrid(mg, childTallies));
+    } else {
+      rendered.add(tally.questionCode);
+      grids.push(buildGtGrid(tally));
+    }
+  }
+  return grids;
+}
+
+function buildMatrixGtGrid(mg: MatrixGroup, tallies: Tally[]): ExportGrid {
+  if (tallies[0].type === "NA") return buildMatrixNaGtGrid(mg, tallies);
+  return buildMatrixCategoricalGtGrid(mg, tallies);
+}
+
+function buildMatrixCategoricalGtGrid(mg: MatrixGroup, tallies: Tally[]): ExportGrid {
+  const headers = [
+    [
+      t("export.header.variable"),
+      t("export.header.type"),
+      t("export.header.option"),
+      t("export.header.n"),
+      t("export.header.pct"),
+    ],
+  ];
+  const rows: string[][] = [];
+
+  for (const tally of tallies) {
+    const slice = tally.slices[0];
+    for (let i = 0; i < tally.codes.length; i++) {
+      const code = tally.codes[i];
+      const cell = slice.cells[i];
+      rows.push([
+        tally.questionCode,
+        tally.type,
+        resolveLabel(code, tally),
+        cell.count.toFixed(1),
+        cell.pct.toFixed(1),
+      ]);
+    }
+    rows.push([tally.questionCode, tally.type, "n", slice.n.toFixed(1), ""]);
+  }
+
+  return { questionCode: mg.matrixKey, type: tallies[0].type, headers, rows };
+}
+
+function buildMatrixNaGtGrid(mg: MatrixGroup, tallies: Tally[]): ExportGrid {
+  const headers = [[t("export.header.variable"), t("export.header.type"), t("table.option"), ""]];
+  const rows: string[][] = [];
+
+  for (const tally of tallies) {
+    const stats = tally.slices[0].stats!;
+    for (const key of NA_STAT_KEYS) {
+      rows.push([
+        tally.questionCode,
+        "NA",
+        t(`na.stat.${key}`),
+        key === "n" ? stats.n.toFixed(1) : stats[key].toFixed(2),
+      ]);
+    }
+  }
+
+  return { questionCode: mg.matrixKey, type: "NA", headers, rows };
 }
 
 // ─── Internal ───────────────────────────────────────────────

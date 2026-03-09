@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { filterLayout, buildQuestions } from "../src/lib/layout";
+import {
+  filterLayout,
+  buildQuestions,
+  parseLayout,
+  buildMatrixGroups,
+  countLayoutColumns,
+} from "../src/lib/layout";
 import type { Layout } from "../src/lib/layout";
 
 const layout: Layout = [
@@ -130,5 +136,97 @@ describe("buildQuestions", () => {
       label: "NPS",
       labels: {},
     });
+  });
+});
+
+// ─── MATRIX tests ───────────────────────────────────────────
+
+const matrixLayout: Layout = [
+  { key: "q3", label: "満足度マトリクス", type: "MATRIX" },
+  {
+    key: "q3_1",
+    label: "商品A",
+    type: "SA",
+    matrixKey: "q3",
+    items: [
+      { code: "1", label: "満足" },
+      { code: "2", label: "不満" },
+    ],
+  },
+  {
+    key: "q3_2",
+    label: "商品B",
+    type: "SA",
+    matrixKey: "q3",
+    items: [
+      { code: "1", label: "満足" },
+      { code: "2", label: "不満" },
+    ],
+  },
+  { key: "q1", label: "Gender", type: "SA", items: [{ code: "1", label: "Male" }] },
+];
+
+describe("parseLayout — MATRIX", () => {
+  it("parses MATRIX + children successfully", () => {
+    const json = JSON.stringify(matrixLayout);
+    const result = parseLayout(json);
+    expect(result).toHaveLength(4);
+    expect(result[0].type).toBe("MATRIX");
+    expect(result[1].matrixKey).toBe("q3");
+  });
+
+  it("throws when matrixKey references non-existent MATRIX parent", () => {
+    const bad = JSON.stringify([
+      { key: "q1", label: "X", type: "SA", matrixKey: "nonexistent", items: [] },
+    ]);
+    expect(() => parseLayout(bad)).toThrow("matrixKey");
+  });
+});
+
+describe("filterLayout — MATRIX", () => {
+  it("keeps MATRIX parent when children survive", () => {
+    const headers = ["q3_1", "q3_2", "q1"];
+    const filtered = filterLayout(headers, matrixLayout);
+    expect(filtered.map((e) => e.key)).toEqual(["q3", "q3_1", "q3_2", "q1"]);
+  });
+
+  it("removes orphan MATRIX parent when all children are excluded", () => {
+    const headers = ["q1"];
+    const filtered = filterLayout(headers, matrixLayout);
+    expect(filtered.map((e) => e.key)).toEqual(["q1"]);
+  });
+});
+
+describe("buildQuestions — MATRIX", () => {
+  it("skips MATRIX parent and adds matrixKey to children", () => {
+    const questions = buildQuestions(matrixLayout);
+    expect(questions.map((q) => q.code)).toEqual(["q3_1", "q3_2", "q1"]);
+    expect(questions[0].matrixKey).toBe("q3");
+    expect(questions[1].matrixKey).toBe("q3");
+    expect(questions[2].matrixKey).toBeUndefined();
+  });
+});
+
+describe("buildMatrixGroups", () => {
+  it("builds correct structure from layout", () => {
+    const groups = buildMatrixGroups(matrixLayout);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toEqual({
+      matrixKey: "q3",
+      matrixLabel: "満足度マトリクス",
+      questionCodes: ["q3_1", "q3_2"],
+    });
+  });
+
+  it("returns empty array when no MATRIX entries exist", () => {
+    expect(buildMatrixGroups(layout)).toEqual([]);
+  });
+});
+
+describe("countLayoutColumns — MATRIX", () => {
+  it("counts MATRIX as 0 columns", () => {
+    const count = countLayoutColumns(matrixLayout);
+    // q3: 0, q3_1: 1, q3_2: 1, q1: 1 = 3
+    expect(count).toBe(3);
   });
 });

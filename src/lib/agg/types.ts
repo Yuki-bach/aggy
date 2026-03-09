@@ -9,6 +9,7 @@ export interface Question {
   codes: string[];
   label: string;
   labels: Record<string, string>;
+  matrixKey?: string;
 }
 
 export type AggInput = Pick<Question, "type" | "columns" | "codes">;
