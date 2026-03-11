@@ -133,7 +133,7 @@ const ja: Record<string, string> = {
   "gs.section1.p1":
     "本ツールでは、アンケートの<strong>ローデータファイル</strong>（CSV）と<strong>レイアウトファイル</strong>（JSON）の2つを読み込んで集計を行います。",
   "gs.section1.p2":
-    "ファイルの変換・整形は<strong>ユーザーご自身</strong>で行ってください。<br>専用の <strong>Agent Skill</strong> を用意していますので、お使いのAIツールに変換作業を任せることができます。",
+    "ファイルの変換・整形は<strong>ユーザーご自身</strong>で行ってください。<br>専用の <strong>Agent Skill</strong> も準備中です。公開後はお使いのAIツールに変換作業を任せることができるようになります。",
   "gs.section1.sample": "まずは<strong>サンプルファイル</strong>で試してみましょう：",
   "gs.section1.sampleCsv": "サンプルローデータ",
   "gs.section1.sampleLayout": "サンプルレイアウト",

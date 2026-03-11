@@ -133,7 +133,7 @@ const en: Record<string, string> = {
   "gs.section1.p1":
     "This tool reads a <strong>raw data file</strong> (CSV) and a <strong>layout file</strong> (JSON) to perform aggregation.",
   "gs.section1.p2":
-    "Please prepare and format the files yourself.<br>We provide a dedicated <strong>Agent Skill</strong> so you can delegate the conversion to your AI tool.",
+    "Please prepare and format the files yourself.<br>A dedicated <strong>Agent Skill</strong> is coming soon — once available, you can delegate the conversion to your AI tool.",
   "gs.section1.sample": "Try it out with <strong>sample files</strong> first:",
   "gs.section1.sampleCsv": "Sample Raw Data",
   "gs.section1.sampleLayout": "Sample Layout",
