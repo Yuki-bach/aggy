@@ -8,7 +8,7 @@ import { NaGtTable } from "./NaGtTable";
 import type { ChartOpts, TableOpts, ViewMode } from "./viewTypes";
 import { formatN } from "../../lib/format";
 
-interface ResultCardProps {
+interface TallyCardProps {
   gtTally: Tally;
   crossTallies: Tally[];
   viewMode: ViewMode;
@@ -16,13 +16,13 @@ interface ResultCardProps {
   chartOpts: ChartOpts;
 }
 
-export function ResultCard({
+export function TallyCard({
   gtTally,
   crossTallies,
   viewMode,
   tableOpts,
   chartOpts,
-}: ResultCardProps) {
+}: TallyCardProps) {
   const hasCross = crossTallies.length > 0;
 
   const gtN = gtTally.slices[0]?.n ?? 0;
@@ -50,7 +50,7 @@ export function ResultCard({
   );
 }
 
-function CardBody({ gtTally, crossTallies, viewMode, tableOpts, chartOpts }: ResultCardProps) {
+function CardBody({ gtTally, crossTallies, viewMode, tableOpts, chartOpts }: TallyCardProps) {
   if (gtTally.type === "NA") {
     if (viewMode === "chart") {
       return (

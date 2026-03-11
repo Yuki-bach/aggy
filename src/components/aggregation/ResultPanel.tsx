@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import type { Tally } from "../../lib/agg/types";
 import { Toolbar, ViewOpts } from "./Toolbar";
-import { ResultCard } from "./ResultCard";
+import { TallyCard } from "./TallyCard";
 import { AIBubble } from "./AIBubble";
 import { t } from "../../lib/i18n";
 import type { ChartType, PctDirection, ViewMode } from "./viewTypes";
@@ -93,7 +93,7 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
       />
       <div class={gridClass}>
         {questionCodes.map((q) => (
-          <ResultCard
+          <TallyCard
             key={q}
             gtTally={tallies.find((t) => t.questionCode === q && t.by === null)!}
             crossTallies={tallies.filter((t) => t.questionCode === q && t.by !== null)}
