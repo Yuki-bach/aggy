@@ -1,6 +1,6 @@
 const en: Record<string, string> = {
   // Header
-  "header.subtitle": "SURVEY AGGREGATOR v0.1",
+  "header.subtitle": "SURVEY AGGREGATOR β",
   "header.settings": "Open settings",
   "header.back": "Back to data import",
 

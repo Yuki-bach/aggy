@@ -1,6 +1,6 @@
 const ja: Record<string, string> = {
   // Header
-  "header.subtitle": "アンケート集計ツール v0.1",
+  "header.subtitle": "アンケート集計ツール β",
   "header.settings": "設定を開く",
   "header.back": "データ読み込みに戻る",
 
