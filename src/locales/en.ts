@@ -148,7 +148,8 @@ const en: Record<string, string> = {
   "gs.ok": "Get Started",
 
   // Help button
-  "help.label": "User Guide",
+  "help.label": "Open user guide",
+  "help.button": "Guide",
 
   // Settings modal
   "settings.title": "Settings",

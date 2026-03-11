@@ -148,7 +148,8 @@ const ja: Record<string, string> = {
   "gs.ok": "はじめる",
 
   // Help button
-  "help.label": "使い方ガイド",
+  "help.label": "使い方ガイドを開く",
+  "help.button": "使い方",
 
   // Settings modal
   "settings.title": "設定",
