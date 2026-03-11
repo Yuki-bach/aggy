@@ -1,17 +1,37 @@
 import { useEffect, useState } from "preact/hooks";
 import type { Tally } from "../../lib/agg/types";
 import { Toolbar, ViewOpts } from "./Toolbar";
-import { ResultCard } from "./ResultCard";
+import { TallyCard } from "./TallyCard";
 import { AIBubble } from "./AIBubble";
+import { t } from "../../lib/i18n";
 import type { ChartType, PctDirection, ViewMode } from "./viewTypes";
 import type { PaletteId } from "../../lib/chartConfig";
 
-interface ResultViewProps {
-  tallies: Tally[];
+interface ResultPanelProps {
+  tallies: Tally[] | null;
   weightCol: string;
 }
 
-export default function ResultView({ tallies, weightCol }: ResultViewProps) {
+export default function ResultPanel({ tallies, weightCol }: ResultPanelProps) {
+  return (
+    <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
+      {tallies ? (
+        <div aria-live="polite">
+          <ResultContent tallies={tallies} weightCol={weightCol} />
+        </div>
+      ) : (
+        <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
+          <span class="text-4xl" aria-hidden="true">
+            ⬛
+          </span>
+          <p class="text-base">{t("empty.text")}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: string }) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
@@ -73,7 +93,7 @@ export default function ResultView({ tallies, weightCol }: ResultViewProps) {
       />
       <div class={gridClass}>
         {questionCodes.map((q) => (
-          <ResultCard
+          <TallyCard
             key={q}
             gtTally={tallies.find((t) => t.questionCode === q && t.by === null)!}
             crossTallies={tallies.filter((t) => t.questionCode === q && t.by !== null)}
