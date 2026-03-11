@@ -1,6 +1,6 @@
 import type { PaletteId } from "../../lib/chartConfig";
-import type { ChartType } from "./ChartCardBody";
 
+export type ChartType = "bar-h" | "bar-v" | "obi";
 export type ViewMode = "table" | "chart";
 export type PctDirection = "vertical" | "horizontal";
 

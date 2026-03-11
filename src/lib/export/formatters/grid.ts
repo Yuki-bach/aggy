@@ -1,9 +1,9 @@
-import type { Tally } from "../../agg/types";
+import type { QuestionType, Tally } from "../../agg/types";
 import { t } from "../../i18n";
 
 export interface ExportGrid {
   questionCode: string;
-  type: "SA" | "MA" | "NA";
+  type: QuestionType;
   headers: string[][];
   rows: string[][];
 }

@@ -1,11 +1,10 @@
 import type { Tally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfig";
-import type { ChartType } from "./ChartCardBody";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { ExportMenu } from "./ExportMenu";
 import { executeExport, type ExportAction } from "../../lib/export/export";
-import type { ChartOpts, PctDirection, ViewMode } from "./viewTypes";
+import type { ChartOpts, ChartType, PctDirection, ViewMode } from "./viewTypes";
 
 export interface ToolbarCallbacks {
   onViewModeChange: (mode: ViewMode) => void;

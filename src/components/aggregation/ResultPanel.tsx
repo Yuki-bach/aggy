@@ -4,8 +4,7 @@ import { Toolbar, ViewOpts } from "./Toolbar";
 import { ResultCard } from "./ResultCard";
 import { AIBubble } from "./AIBubble";
 import { t } from "../../lib/i18n";
-import type { PctDirection, ViewMode } from "./viewTypes";
-import type { ChartType } from "./ChartCardBody";
+import type { ChartType, PctDirection, ViewMode } from "./viewTypes";
 import type { PaletteId } from "../../lib/chartConfig";
 
 interface ResultPanelProps {
