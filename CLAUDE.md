@@ -29,7 +29,7 @@ pnpm bench:gen  # generate benchmark data
 
 ## Conventions
 
-- Data format conventions: see `docs/data-preparation-guide.md`
+- Data format conventions: see `.claude/skills/aggy-import/references/data-preparation-guide.md`
 - Component files: PascalCase `.tsx`; lib files: camelCase `.ts`
 - Module-level singleton state for infrastructure (`duckdbBridge`, `i18n`); UI state uses hooks + Context
 - File ordering: `imports → exports (Public API) → internal implementation`. Props interfaces stay with their exported component
