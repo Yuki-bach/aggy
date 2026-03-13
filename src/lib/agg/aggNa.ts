@@ -11,7 +11,7 @@ interface ValueCount {
 
 // ── GT ──
 
-export async function aggregateNaGt(
+export async function aggNaTotals(
   conn: duckdb.AsyncDuckDBConnection,
   column: string,
   weightCol: string,
@@ -28,7 +28,7 @@ export async function aggregateNaGt(
 
 // ── Cross (NA × SA or NA × MA) ──
 
-export async function aggregateNaCross(
+export async function aggNaCrossTab(
   conn: duckdb.AsyncDuckDBConnection,
   naColumn: string,
   crossQ: AggInput,

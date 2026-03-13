@@ -2,7 +2,7 @@ import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, AggOutput, Tally } from "./types";
 import { aggTotals } from "./aggTotals";
 import { aggCrossTab } from "./aggCrossTab";
-import { aggregateNaGt, aggregateNaCross } from "./aggregateNa";
+import { aggNaTotals, aggNaCrossTab } from "./aggNa";
 import { NO_ANSWER_VALUE } from "./sqlHelpers";
 import { t } from "../i18n";
 
@@ -15,10 +15,10 @@ export async function buildTallies(
   const tallies: Tally[] = [];
   for (const q of questions) {
     if (q.type === "NA") {
-      const gtResult = await aggregateNaGt(conn, q.columns[0], weightCol);
+      const gtResult = await aggNaTotals(conn, q.columns[0], weightCol);
       tallies.push(toTally(q, gtResult));
       for (const cross of crossCols) {
-        const crossResult = await aggregateNaCross(conn, q.columns[0], cross, weightCol);
+        const crossResult = await aggNaCrossTab(conn, q.columns[0], cross, weightCol);
         tallies.push(toTally(q, crossResult, cross));
       }
     } else {
