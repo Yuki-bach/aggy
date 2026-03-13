@@ -17,10 +17,10 @@ export async function aggTotals(
   question: AggInput,
   weightCol: string,
 ): Promise<AggOutput> {
-  const gt = new TotalsAggregator(conn, weightCol);
+  const totals = new TotalsAggregator(conn, weightCol);
   return question.type === "SA"
-    ? gt.aggregateSA(question.columns[0], question.codes)
-    : gt.aggregateMA(question.columns, question.codes);
+    ? totals.aggregateSA(question.columns[0], question.codes)
+    : totals.aggregateMA(question.columns, question.codes);
 }
 
 class TotalsAggregator {
