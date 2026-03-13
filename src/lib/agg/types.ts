@@ -11,7 +11,7 @@ export interface Question {
   labels: Record<string, string>;
 }
 
-export type AggInput = Pick<Question, "type" | "columns" | "codes">;
+export type Shape = Pick<Question, "type" | "columns" | "codes">;
 
 export type Axis = Pick<Question, "code" | "label" | "labels">;
 

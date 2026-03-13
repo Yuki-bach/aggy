@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseLayout, buildQuestions, findWeightColumn } from "../../src/lib/layout";
-import type { AggInput, Question } from "../../src/lib/agg/types";
+import type { Shape, Question } from "../../src/lib/agg/types";
 
 const layoutPath = resolve(import.meta.dirname!, "../../testdata/test_layout.json");
 const layout = parseLayout(readFileSync(layoutPath, "utf-8"));
 const questions = buildQuestions(layout);
 
-export function getAggInput(code: string): AggInput {
+export function getShape(code: string): Shape {
   const q = questions.find((q) => q.code === code);
   if (!q) throw new Error(`Question "${code}" not found in test_layout.json`);
   const { type, columns, codes } = q;

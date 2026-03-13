@@ -1,7 +1,7 @@
 /** NA (Numerical Answer) aggregation — GT and Cross */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggInput, AggOutput, NaStats, Slice } from "./types";
+import type { Shape, AggOutput, NaStats, Slice } from "./types";
 import { esc, maShownCondition } from "./sqlHelpers";
 
 interface ValueCount {
@@ -31,13 +31,13 @@ export async function aggNaTotals(
 export async function aggNaCrossTab(
   conn: duckdb.AsyncDuckDBConnection,
   naColumn: string,
-  axisQuestion: AggInput,
+  axisShape: Shape,
   weightCol: string,
 ): Promise<AggOutput> {
-  if (axisQuestion.type === "SA") {
-    return crossSA(conn, naColumn, axisQuestion.columns[0], axisQuestion.codes, weightCol);
+  if (axisShape.type === "SA") {
+    return crossSA(conn, naColumn, axisShape.columns[0], axisShape.codes, weightCol);
   }
-  return crossMA(conn, naColumn, axisQuestion.columns, axisQuestion.codes, weightCol);
+  return crossMA(conn, naColumn, axisShape.columns, axisShape.codes, weightCol);
 }
 
 // ── Helpers ──

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggTotals } from "../src/lib/agg/aggTotals";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { buildCSV } from "./helpers/csv";
-import type { AggInput } from "../src/lib/agg/types";
+import type { Shape } from "../src/lib/agg/types";
 
 beforeAll(async () => {
   await setupDuckDB();
@@ -19,7 +19,7 @@ describe("aggTotalsEdge - SA", () => {
         [1, 1], [2, 1], [3, 1], [4, 1], [5, 1],
       ]),
     );
-    const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
+    const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
     const result = await aggTotals(getConn(), input, "");
 
     const slice = result.slices[0];
@@ -36,7 +36,7 @@ describe("aggTotalsEdge - SA", () => {
         [1, null], [2, null], [3, null],
       ]),
     );
-    const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1"] };
+    const input: Shape = { type: "SA", columns: ["q1"], codes: ["1"] };
     const result = await aggTotals(getConn(), input, "");
 
     expect(result.slices[0].n).toBe(0);
@@ -44,7 +44,7 @@ describe("aggTotalsEdge - SA", () => {
 
   it("1行のみ → n=1, count=1", async () => {
     await loadCSV(buildCSV(["id", "q1"], [[1, 2]]));
-    const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
+    const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
     const result = await aggTotals(getConn(), input, "");
 
     expect(result.slices[0].n).toBe(1);
@@ -58,7 +58,7 @@ describe("aggTotalsEdge - SA", () => {
         [1, 1], [2, 1], [3, 1],
       ]),
     );
-    const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2", "3"] };
+    const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2", "3"] };
     const result = await aggTotals(getConn(), input, "");
 
     expect(result.slices[0].cells[0].count).toBe(3);
@@ -74,7 +74,7 @@ describe("aggTotalsEdge - SA", () => {
         [3, 1.0, 2],
       ]),
     );
-    const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
+    const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
     const result = await aggTotals(getConn(), input, "weight");
 
     expect(result.slices[0].n).toBeCloseTo(2.0, 3);
@@ -88,7 +88,7 @@ describe("aggTotalsEdge - SA", () => {
         [1, 1, 1], [2, 1, 2], [3, 1, 1], [4, 1, 3], [5, 1, 2],
       ]),
     );
-    const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2", "3"] };
+    const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2", "3"] };
     const unweighted = await aggTotals(getConn(), input, "");
     const weighted = await aggTotals(getConn(), input, "weight");
 
@@ -108,7 +108,7 @@ describe("aggTotalsEdge - MA", () => {
         [3, 1, 0],
       ]),
     );
-    const input: AggInput = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
+    const input: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
     const result = await aggTotals(getConn(), input, "");
 
     // shown行は行3のみ → n=1
@@ -125,7 +125,7 @@ describe("aggTotalsEdge - MA", () => {
         [3, 0, 0],
       ]),
     );
-    const input: AggInput = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
+    const input: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
     const result = await aggTotals(getConn(), input, "");
 
     expect(result.slices[0].n).toBe(3);

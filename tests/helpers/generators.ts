@@ -1,4 +1,4 @@
-import type { AggInput } from "../../src/lib/agg/types";
+import type { Shape } from "../../src/lib/agg/types";
 import { buildCSV } from "./csv";
 
 export class Rng {
@@ -35,21 +35,21 @@ interface DatasetOpts {
 
 interface SADataset {
   csv: string;
-  aggInput: AggInput;
+  shape: Shape;
   weightCol: string;
 }
 
 interface MADataset {
   csv: string;
-  aggInput: AggInput;
+  shape: Shape;
   weightCol: string;
 }
 
 interface CrossDataset {
   csv: string;
-  saInput: AggInput;
-  sa2Input: AggInput;
-  maInput: AggInput;
+  saInput: Shape;
+  sa2Input: Shape;
+  maInput: Shape;
   weightCol: string;
 }
 
@@ -73,7 +73,7 @@ export function generateSADataset(opts: DatasetOpts): SADataset {
 
   return {
     csv: buildCSV(headers, rows),
-    aggInput: { type: "SA", columns: ["q_sa"], codes },
+    shape: { type: "SA", columns: ["q_sa"], codes },
     weightCol: weighted ? "weight" : "",
   };
 }
@@ -107,7 +107,7 @@ export function generateMADataset(opts: DatasetOpts): MADataset {
 
   return {
     csv: buildCSV(headers, rows),
-    aggInput: { type: "MA", columns, codes },
+    shape: { type: "MA", columns, codes },
     weightCol: weighted ? "weight" : "",
   };
 }

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
-import { getAggInput, weightColumn } from "./helpers/fixtures";
+import { getShape, weightColumn } from "./helpers/fixtures";
 import { buildCSV } from "./helpers/csv";
-import type { AggInput } from "../src/lib/agg/types";
+import type { Shape } from "../src/lib/agg/types";
 
 beforeAll(async () => {
   await setupDuckDB();
@@ -13,9 +13,9 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-const q1 = getAggInput("q1");
-const q2 = getAggInput("q2");
-const q3 = getAggInput("q3");
+const q1 = getShape("q1");
+const q2 = getShape("q2");
+const q3 = getShape("q3");
 
 function sliceCounts(
   result: { slices: { code: string | null; cells: { count: number }[] }[] },
@@ -189,8 +189,8 @@ describe("aggCrossTabEdge - エッジケース", () => {
         [3, 1, 5],
       ]),
     );
-    const mainInput: AggInput = { type: "SA", columns: ["main"], codes: ["1", "2"] };
-    const crossInput: AggInput = { type: "SA", columns: ["cross"], codes: ["5"] };
+    const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
+    const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["5"] };
     const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
 
     expect(result.slices).toHaveLength(1);
@@ -206,8 +206,8 @@ describe("aggCrossTabEdge - エッジケース", () => {
         [3, null, 1],
       ]),
     );
-    const mainInput: AggInput = { type: "SA", columns: ["main"], codes: ["1"] };
-    const crossInput: AggInput = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
+    const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1"] };
+    const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
     const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
 
     for (const slice of result.slices) {
@@ -217,8 +217,8 @@ describe("aggCrossTabEdge - エッジケース", () => {
 
   it("1行のみのクロス", async () => {
     await loadCSV(buildCSV(["id", "main", "cross"], [[1, 2, 3]]));
-    const mainInput: AggInput = { type: "SA", columns: ["main"], codes: ["1", "2"] };
-    const crossInput: AggInput = { type: "SA", columns: ["cross"], codes: ["3", "4"] };
+    const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
+    const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["3", "4"] };
     const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
 
     expect(sliceCounts(result, "3")).toEqual([0, 1]);

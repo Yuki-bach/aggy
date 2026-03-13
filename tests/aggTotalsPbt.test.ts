@@ -24,7 +24,7 @@ describe("PBT - aggTotals SA 重みなし", () => {
     it(`seed=${seed}, rows=${rowCount(seed)}`, async () => {
       const ds = generateSADataset({ seed, rowCount: rowCount(seed) });
       await loadCSV(ds.csv);
-      const result = await aggTotals(getConn(), ds.aggInput, "");
+      const result = await aggTotals(getConn(), ds.shape, "");
       assertGtInvariants(result, "SA");
     });
   }
@@ -35,7 +35,7 @@ describe("PBT - aggTotals SA 重みあり", () => {
     it(`seed=${seed}, rows=${rowCount(seed)}`, async () => {
       const ds = generateSADataset({ seed, rowCount: rowCount(seed), weighted: true });
       await loadCSV(ds.csv);
-      const result = await aggTotals(getConn(), ds.aggInput, ds.weightCol);
+      const result = await aggTotals(getConn(), ds.shape, ds.weightCol);
       assertGtInvariants(result, "SA");
     });
   }
@@ -46,7 +46,7 @@ describe("PBT - aggTotals MA 重みなし", () => {
     it(`seed=${seed}, rows=${rowCount(seed)}`, async () => {
       const ds = generateMADataset({ seed, rowCount: rowCount(seed) });
       await loadCSV(ds.csv);
-      const result = await aggTotals(getConn(), ds.aggInput, "");
+      const result = await aggTotals(getConn(), ds.shape, "");
       assertGtInvariants(result, "MA");
     });
   }
@@ -57,7 +57,7 @@ describe("PBT - aggTotals MA 重みあり", () => {
     it(`seed=${seed}, rows=${rowCount(seed)}`, async () => {
       const ds = generateMADataset({ seed, rowCount: rowCount(seed), weighted: true });
       await loadCSV(ds.csv);
-      const result = await aggTotals(getConn(), ds.aggInput, ds.weightCol);
+      const result = await aggTotals(getConn(), ds.shape, ds.weightCol);
       assertGtInvariants(result, "MA");
     });
   }

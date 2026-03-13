@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggregateNaGt, aggregateNaCross } from "../src/lib/agg/aggregateNa";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
-import type { AggInput } from "../src/lib/agg/types";
+import type { Shape } from "../src/lib/agg/types";
 
 // Test CSV with a numeric column (score: 0-10 NPS-like)
 const CSV = `id,weight,q1,score
@@ -17,7 +17,7 @@ const CSV = `id,weight,q1,score
 10,1.0,2,
 `;
 
-const crossSA: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
+const crossSA: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
 
 beforeAll(async () => {
   await setupDuckDB();
