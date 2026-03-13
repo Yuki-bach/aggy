@@ -1,5 +1,5 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Question, AggOutput, Tally } from "./types";
+import type { Question, AggOutput, Axis, Tally } from "./types";
 import { aggTotals } from "./aggTotals";
 import { aggCrossTab } from "./aggCrossTab";
 import { aggNaTotals, aggNaCrossTab } from "./aggNa";
@@ -58,7 +58,7 @@ function toTally(question: Question, aggOutput: AggOutput, axisQuestion?: Questi
   };
 }
 
-function buildAxis(aggOutput: AggOutput, axisQuestion?: Question): Tally["by"] {
+function buildAxis(aggOutput: AggOutput, axisQuestion?: Question): Axis | null {
   if (!axisQuestion) return null;
   const axisLabels: Record<string, string> = { ...axisQuestion.labels };
   const hasNoAnswer = aggOutput.slices.some((s) => s.code === NO_ANSWER_VALUE);
