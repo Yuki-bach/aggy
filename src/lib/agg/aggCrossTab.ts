@@ -18,13 +18,13 @@ type CrossSliceData = {
   counts: number[];
 };
 
-export async function aggregateCross(
+export async function aggCrossTab(
   conn: duckdb.AsyncDuckDBConnection,
   question: AggInput,
   by: AggInput,
   weightCol: string,
 ): Promise<AggOutput> {
-  const ca = new CrossAggregator(conn, weightCol, by);
+  const ca = new CrossTabAggregator(conn, weightCol, by);
   const isMainSa = question.type === "SA";
   const isCrossSa = by.type === "SA";
 
@@ -34,7 +34,7 @@ export async function aggregateCross(
   return ca.maMA(question.columns, question.codes);
 }
 
-class CrossAggregator {
+class CrossTabAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,

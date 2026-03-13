@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { aggregateCross } from "../src/lib/agg/aggregateCross";
+import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { getAggInput, weightColumn } from "./helpers/fixtures";
 import { buildCSV } from "./helpers/csv";
@@ -40,9 +40,9 @@ function sliceN(
 // 11:w=1.0 12:w=0.8 13:w=1.1 14:w=1.0
 // ============================================================
 
-describe("aggregateCrossEdge - 重みつき手計算", () => {
+describe("aggCrossTabEdge - 重みつき手計算", () => {
   it("SA×SA weighted: q2 × q1", async () => {
-    const result = await aggregateCross(getConn(), q2, q1, weightColumn);
+    const result = await aggCrossTab(getConn(), q2, q1, weightColumn);
 
     // slice "1" (q1=1): q2有効かつq1=1 → 行1,3,5,7,10 (行12:q2=NULL除外)
     //   n = 1.2+1.5+1.1+1.3+1.0 = 6.1
@@ -59,7 +59,7 @@ describe("aggregateCrossEdge - 重みつき手計算", () => {
   });
 
   it("MA×SA weighted: q3 × q1", async () => {
-    const result = await aggregateCross(getConn(), q3, q1, weightColumn);
+    const result = await aggCrossTab(getConn(), q3, q1, weightColumn);
 
     // slice "1" (q1=1): q3 shown かつ q1=1 → 行1,3,5,7,10,12
     //   n = 1.2+1.5+1.1+1.3+1.0+0.8 = 6.9
@@ -76,7 +76,7 @@ describe("aggregateCrossEdge - 重みつき手計算", () => {
   });
 
   it("SA×MA weighted: q1 × q3", async () => {
-    const result = await aggregateCross(getConn(), q1, q3, weightColumn);
+    const result = await aggCrossTab(getConn(), q1, q3, weightColumn);
 
     // slice "1" (q3_1=1): q1有効(非NULL)かつq3_1=1 → 行1,3,4,6,8,9
     //   各行weight: 1.2+1.5+0.8+1.0+0.7+1.4 = 6.6
@@ -93,7 +93,7 @@ describe("aggregateCrossEdge - 重みつき手計算", () => {
   });
 
   it("MA×MA weighted: q3 × q3", async () => {
-    const result = await aggregateCross(getConn(), q3, q3, weightColumn);
+    const result = await aggCrossTab(getConn(), q3, q3, weightColumn);
 
     // slice "1" (q3_1=1): q3 shown かつ q3_1=1 → 行1,3,4,6,8,9,14
     //   n = 1.2+1.5+0.8+1.0+0.7+1.4+1.0 = 7.6
@@ -112,9 +112,9 @@ describe("aggregateCrossEdge - 重みつき手計算", () => {
 // 全スライス網羅（test_data.csv 重みなし）
 // ============================================================
 
-describe("aggregateCrossEdge - 全スライス網羅", () => {
+describe("aggCrossTabEdge - 全スライス網羅", () => {
   it("SA×SA: q2 × q1 → 全4スライス", async () => {
-    const result = await aggregateCross(getConn(), q2, q1, "");
+    const result = await aggCrossTab(getConn(), q2, q1, "");
 
     // q1 codes: ["1","2","3","99"]
     expect(result.slices).toHaveLength(4);
@@ -133,7 +133,7 @@ describe("aggregateCrossEdge - 全スライス網羅", () => {
   });
 
   it("MA×SA: q3 × q1 → 全4スライス", async () => {
-    const result = await aggregateCross(getConn(), q3, q1, "");
+    const result = await aggCrossTab(getConn(), q3, q1, "");
 
     expect(result.slices).toHaveLength(4);
 
@@ -151,7 +151,7 @@ describe("aggregateCrossEdge - 全スライス網羅", () => {
   });
 
   it("SA×MA: q1 × q3 → 全3スライス", async () => {
-    const result = await aggregateCross(getConn(), q1, q3, "");
+    const result = await aggCrossTab(getConn(), q1, q3, "");
 
     // q3 codes: ["1","2","3"]
     expect(result.slices).toHaveLength(3);
@@ -166,7 +166,7 @@ describe("aggregateCrossEdge - 全スライス網羅", () => {
   });
 
   it("MA×MA: q3 × q3 → 全3スライス", async () => {
-    const result = await aggregateCross(getConn(), q3, q3, "");
+    const result = await aggCrossTab(getConn(), q3, q3, "");
 
     expect(result.slices).toHaveLength(3);
 
@@ -180,7 +180,7 @@ describe("aggregateCrossEdge - 全スライス網羅", () => {
 // エッジケース（動的CSV）
 // ============================================================
 
-describe("aggregateCrossEdge - エッジケース", () => {
+describe("aggCrossTabEdge - エッジケース", () => {
   it("クロス軸が1値のみ → スライス1個", async () => {
     await loadCSV(
       buildCSV(["id", "main", "cross"], [
@@ -191,7 +191,7 @@ describe("aggregateCrossEdge - エッジケース", () => {
     );
     const mainInput: AggInput = { type: "SA", columns: ["main"], codes: ["1", "2"] };
     const crossInput: AggInput = { type: "SA", columns: ["cross"], codes: ["5"] };
-    const result = await aggregateCross(getConn(), mainInput, crossInput, "");
+    const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
 
     expect(result.slices).toHaveLength(1);
     expect(result.slices[0].code).toBe("5");
@@ -208,7 +208,7 @@ describe("aggregateCrossEdge - エッジケース", () => {
     );
     const mainInput: AggInput = { type: "SA", columns: ["main"], codes: ["1"] };
     const crossInput: AggInput = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
-    const result = await aggregateCross(getConn(), mainInput, crossInput, "");
+    const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
 
     for (const slice of result.slices) {
       expect(slice.n).toBe(0);
@@ -219,7 +219,7 @@ describe("aggregateCrossEdge - エッジケース", () => {
     await loadCSV(buildCSV(["id", "main", "cross"], [[1, 2, 3]]));
     const mainInput: AggInput = { type: "SA", columns: ["main"], codes: ["1", "2"] };
     const crossInput: AggInput = { type: "SA", columns: ["cross"], codes: ["3", "4"] };
-    const result = await aggregateCross(getConn(), mainInput, crossInput, "");
+    const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
 
     expect(sliceCounts(result, "3")).toEqual([0, 1]);
     expect(sliceCounts(result, "4")).toEqual([0, 0]);

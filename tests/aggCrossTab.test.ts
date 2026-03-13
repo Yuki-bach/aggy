@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { aggregateCross } from "../src/lib/agg/aggregateCross";
+import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
 import { getAggInput } from "./helpers/fixtures";
 
@@ -43,10 +43,10 @@ function sliceCounts(result: { codes: string[]; slices: { code: string | null; c
 // 14: id=14, w=1.0, q1=NULL,q2=1,   q3_1=1, q3_2=0, q3_3=1
 // ============================================================
 
-describe("aggregateCross - 重みなし", () => {
+describe("aggCrossTab - 重みなし", () => {
   describe("SA × SA クロス集計", () => {
     it("q2 を q1 でクロスした結果が正しい", async () => {
-      const result = await aggregateCross(getConn(), q2, q1, "");
+      const result = await aggCrossTab(getConn(), q2, q1, "");
 
       // q2有効行(IS NOT NULL): 行1-11,13,14 = 13行 (行12=NULL除外)
       // slice "1" = q1=1 かつ q2有効: 行1,3,5,7,10 = 5行
@@ -57,7 +57,7 @@ describe("aggregateCross - 重みなし", () => {
 
   describe("SA × MA クロス集計", () => {
     it("q1 を q3 でクロスした結果が正しい", async () => {
-      const result = await aggregateCross(getConn(), q1, q3, "");
+      const result = await aggCrossTab(getConn(), q1, q3, "");
 
       // slice "1" = q3_1='1' の行: 1,3,4,6,8,9,14
       //   q1有効(非NULL)かつq3_1='1': 行1,3,4,6,8,9 (行14はq1=NULL)
@@ -68,7 +68,7 @@ describe("aggregateCross - 重みなし", () => {
 
   describe("MA × SA クロス集計", () => {
     it("q3 を q1 でクロスした結果が正しい", async () => {
-      const result = await aggregateCross(getConn(), q3, q1, "");
+      const result = await aggCrossTab(getConn(), q3, q1, "");
 
       expect(result.codes).toEqual(["1", "2", "3", "N/A"]);
 
@@ -81,7 +81,7 @@ describe("aggregateCross - 重みなし", () => {
 
   describe("MA × MA クロス集計", () => {
     it("q3 を自身でクロスした結果が正しい", async () => {
-      const result = await aggregateCross(getConn(), q3, q3, "");
+      const result = await aggCrossTab(getConn(), q3, q3, "");
 
       // MA×MA自身クロスではN/Aなし（cross側カラム=1の行のみがスライス対象）
       // slice "1" = q3_1='1' の行: 1,3,4,6,8,9,14

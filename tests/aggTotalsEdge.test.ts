@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { aggregateGt } from "../src/lib/agg/aggregateGt";
+import { aggTotals } from "../src/lib/agg/aggTotals";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { buildCSV } from "./helpers/csv";
 import type { AggInput } from "../src/lib/agg/types";
@@ -12,7 +12,7 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-describe("aggregateGtEdge - SA", () => {
+describe("aggTotalsEdge - SA", () => {
   it("全行同値 → count=5, pct=100", async () => {
     await loadCSV(
       buildCSV(["id", "q1"], [
@@ -20,7 +20,7 @@ describe("aggregateGtEdge - SA", () => {
       ]),
     );
     const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
-    const result = await aggregateGt(getConn(), input, "");
+    const result = await aggTotals(getConn(), input, "");
 
     const slice = result.slices[0];
     expect(slice.n).toBe(5);
@@ -37,7 +37,7 @@ describe("aggregateGtEdge - SA", () => {
       ]),
     );
     const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1"] };
-    const result = await aggregateGt(getConn(), input, "");
+    const result = await aggTotals(getConn(), input, "");
 
     expect(result.slices[0].n).toBe(0);
   });
@@ -45,7 +45,7 @@ describe("aggregateGtEdge - SA", () => {
   it("1行のみ → n=1, count=1", async () => {
     await loadCSV(buildCSV(["id", "q1"], [[1, 2]]));
     const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
-    const result = await aggregateGt(getConn(), input, "");
+    const result = await aggTotals(getConn(), input, "");
 
     expect(result.slices[0].n).toBe(1);
     expect(result.slices[0].cells[1].count).toBe(1);
@@ -59,7 +59,7 @@ describe("aggregateGtEdge - SA", () => {
       ]),
     );
     const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2", "3"] };
-    const result = await aggregateGt(getConn(), input, "");
+    const result = await aggTotals(getConn(), input, "");
 
     expect(result.slices[0].cells[0].count).toBe(3);
     expect(result.slices[0].cells[1].count).toBe(0);
@@ -75,7 +75,7 @@ describe("aggregateGtEdge - SA", () => {
       ]),
     );
     const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
-    const result = await aggregateGt(getConn(), input, "weight");
+    const result = await aggTotals(getConn(), input, "weight");
 
     expect(result.slices[0].n).toBeCloseTo(2.0, 3);
     expect(result.slices[0].cells[0].count).toBeCloseTo(1.0, 3);
@@ -89,8 +89,8 @@ describe("aggregateGtEdge - SA", () => {
       ]),
     );
     const input: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2", "3"] };
-    const unweighted = await aggregateGt(getConn(), input, "");
-    const weighted = await aggregateGt(getConn(), input, "weight");
+    const unweighted = await aggTotals(getConn(), input, "");
+    const weighted = await aggTotals(getConn(), input, "weight");
 
     const uwCounts = unweighted.slices[0].cells.map((c) => c.count);
     const wCounts = weighted.slices[0].cells.map((c) => c.count);
@@ -98,7 +98,7 @@ describe("aggregateGtEdge - SA", () => {
   });
 });
 
-describe("aggregateGtEdge - MA", () => {
+describe("aggTotalsEdge - MA", () => {
   it("NULL行はshownから除外される → nに寄与しない", async () => {
     // 型推論のため非NULLの行を含む。NULL行のみがshown=falseで除外される
     await loadCSV(
@@ -109,7 +109,7 @@ describe("aggregateGtEdge - MA", () => {
       ]),
     );
     const input: AggInput = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
-    const result = await aggregateGt(getConn(), input, "");
+    const result = await aggTotals(getConn(), input, "");
 
     // shown行は行3のみ → n=1
     expect(result.slices[0].n).toBe(1);
@@ -126,7 +126,7 @@ describe("aggregateGtEdge - MA", () => {
       ]),
     );
     const input: AggInput = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
-    const result = await aggregateGt(getConn(), input, "");
+    const result = await aggTotals(getConn(), input, "");
 
     expect(result.slices[0].n).toBe(3);
     expect(result.slices[0].cells[0].count).toBe(0);
