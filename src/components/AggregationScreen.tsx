@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import type { Tally } from "../lib/agg/types";
 import ResultPanel from "./aggregation/ResultPanel";
 import SettingsPanel from "./aggregation/SettingsPanel";
-import { runAggregation } from "../lib/duckdbBridge";
+import { runAggregation } from "../lib/duckdb";
 import { buildQuestions, findWeightColumn } from "../lib/layout";
 import { t } from "../lib/i18n";
 import type { CsvData, LayoutData } from "../lib/types";

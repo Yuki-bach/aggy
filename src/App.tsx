@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { initDuckDB } from "./lib/duckdbBridge";
+import { initDuckDB } from "./lib/duckdb";
 import { initTheme } from "./components/header/SettingsModal";
 import Header from "./components/Header";
 import ImportScreen from "./components/ImportScreen";

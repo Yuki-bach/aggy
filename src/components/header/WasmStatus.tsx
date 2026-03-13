@@ -1,18 +1,17 @@
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
+import { setStatusListener, type DuckStatus } from "../../lib/duckdb";
 import { t } from "../../lib/i18n";
 
-export function setWasmStatus(s: DotStatus, label?: string): void {
-  rerender?.(s, label);
-}
-
 export default function WasmStatus() {
-  const [status, setStatus] = useState<DotStatus>("loading");
+  const [status, setStatus] = useState<DuckStatus>("loading");
   const [label, setLabel] = useState<string>(t("wasm.loading"));
 
-  rerender = (s, l) => {
-    setStatus(s);
-    if (l !== undefined) setLabel(l);
-  };
+  useEffect(() => {
+    setStatusListener((s, l) => {
+      setStatus(s);
+      if (l !== undefined) setLabel(l);
+    });
+  }, []);
 
   return (
     <div
@@ -31,12 +30,8 @@ export default function WasmStatus() {
 
 // ─── Internal ───────────────────────────────────────────────
 
-type DotStatus = "loading" | "ready" | "error";
-
-const STATUS_CLASSES: Record<DotStatus, string> = {
+const STATUS_CLASSES: Record<DuckStatus, string> = {
   loading: "bg-[var(--color-warning-700)] animate-[pulse_1s_infinite]",
   ready: "bg-[var(--color-success-700)]",
   error: "bg-danger",
 };
-
-let rerender: ((s: DotStatus, label?: string) => void) | null = null;
