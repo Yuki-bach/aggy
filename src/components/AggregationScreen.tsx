@@ -20,7 +20,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [aggResult, setAggResult] = useState<{ tallies: Tally[]; weightCol: string } | null>(null);
+  const [tallies, setTallies] = useState<Tally[] | null>(null);
 
   const didAutoRun = useRef(false);
   useEffect(() => {
@@ -40,8 +40,8 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
     const crossQuestions = questions.filter((q) => crossSelected[q.code]);
 
     try {
-      const tallies = await runAggregation(questions, crossQuestions, wCol);
-      setAggResult({ tallies, weightCol: wCol });
+      const result = await runAggregation(questions, crossQuestions, wCol);
+      setTallies(result);
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
     }
@@ -63,7 +63,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
         onRun={() => handleRunAggregation()}
       />
 
-      <ResultPanel tallies={aggResult?.tallies ?? null} weightCol={aggResult?.weightCol ?? ""} />
+      <ResultPanel tallies={tallies} weightCol={weightEnabled ? weightCol : ""} />
     </>
   );
 }
