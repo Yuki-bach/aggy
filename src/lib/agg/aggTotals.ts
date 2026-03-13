@@ -1,7 +1,7 @@
 /** Totals aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggInput, AggOutput } from "./types";
+import type { Shape, AggOutput } from "./types";
 import {
   esc,
   weightExpr,
@@ -14,13 +14,13 @@ import {
 
 export async function aggTotals(
   conn: duckdb.AsyncDuckDBConnection,
-  question: AggInput,
+  shape: Shape,
   weightCol: string,
 ): Promise<AggOutput> {
-  const gt = new TotalsAggregator(conn, weightCol);
-  return question.type === "SA"
-    ? gt.aggregateSA(question.columns[0], question.codes)
-    : gt.aggregateMA(question.columns, question.codes);
+  const totals = new TotalsAggregator(conn, weightCol);
+  return shape.type === "SA"
+    ? totals.aggregateSA(shape.columns[0], shape.codes)
+    : totals.aggregateMA(shape.columns, shape.codes);
 }
 
 class TotalsAggregator {

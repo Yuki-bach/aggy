@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
-import { getAggInput } from "./helpers/fixtures";
+import { getShape } from "./helpers/fixtures";
 
 beforeAll(async () => {
   await setupDuckDB();
@@ -11,9 +11,9 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-const q1 = getAggInput("q1");
-const q2 = getAggInput("q2");
-const q3 = getAggInput("q3");
+const q1 = getShape("q1");
+const q2 = getShape("q2");
+const q3 = getShape("q3");
 
 /** スライスのcounts配列を取得 */
 function sliceCounts(result: { codes: string[]; slices: { code: string | null; cells: { count: number }[] }[] }, sliceCode: string): number[] {

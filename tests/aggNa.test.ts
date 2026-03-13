@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { aggregateNaGt, aggregateNaCross } from "../src/lib/agg/aggregateNa";
+import { aggNaTotals, aggNaCrossTab } from "../src/lib/agg/aggNa";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
-import type { AggInput } from "../src/lib/agg/types";
+import type { Shape } from "../src/lib/agg/types";
 
 // Test CSV with a numeric column (score: 0-10 NPS-like)
 const CSV = `id,weight,q1,score
@@ -17,7 +17,7 @@ const CSV = `id,weight,q1,score
 10,1.0,2,
 `;
 
-const crossSA: AggInput = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
+const crossSA: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
 
 beforeAll(async () => {
   await setupDuckDB();
@@ -28,9 +28,9 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-describe("aggregateNaGt - unweighted", () => {
+describe("aggNaTotals - unweighted", () => {
   it("returns correct stats for score column", async () => {
-    const result = await aggregateNaGt(getConn(), "score", "");
+    const result = await aggNaTotals(getConn(), "score", "");
 
     expect(result.slices).toHaveLength(1);
     const slice = result.slices[0];
@@ -47,7 +47,7 @@ describe("aggregateNaGt - unweighted", () => {
   });
 
   it("returns correct frequency distribution as codes/cells", async () => {
-    const result = await aggregateNaGt(getConn(), "score", "");
+    const result = await aggNaTotals(getConn(), "score", "");
 
     // Unique values: 3,4,5,6,7,8,9,10
     expect(result.codes).toEqual(["3", "4", "5", "6", "7", "8", "9", "10"]);
@@ -65,9 +65,9 @@ describe("aggregateNaGt - unweighted", () => {
   });
 });
 
-describe("aggregateNaGt - weighted", () => {
+describe("aggNaTotals - weighted", () => {
   it("returns weighted stats", async () => {
-    const result = await aggregateNaGt(getConn(), "score", "weight");
+    const result = await aggNaTotals(getConn(), "score", "weight");
 
     const slice = result.slices[0];
     // Weighted n = sum of weights for valid score rows
@@ -81,9 +81,9 @@ describe("aggregateNaGt - weighted", () => {
   });
 });
 
-describe("aggregateNaCross - NA × SA", () => {
+describe("aggNaCrossTab - NA × SA", () => {
   it("returns slices grouped by cross column", async () => {
-    const result = await aggregateNaCross(getConn(), "score", crossSA, "");
+    const result = await aggNaCrossTab(getConn(), "score", crossSA, "");
 
     expect(result.slices).toHaveLength(2);
     expect(result.slices[0].code).toBe("1");
@@ -100,7 +100,7 @@ describe("aggregateNaCross - NA × SA", () => {
   });
 
   it("returns aligned codes and cells per cross segment", async () => {
-    const result = await aggregateNaCross(getConn(), "score", crossSA, "");
+    const result = await aggNaCrossTab(getConn(), "score", crossSA, "");
 
     // All unique values across both segments: 3,4,5,6,7,8,9,10
     expect(result.codes).toEqual(["3", "4", "5", "6", "7", "8", "9", "10"]);

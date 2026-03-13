@@ -1,7 +1,7 @@
 /** NA (Numerical Answer) aggregation — GT and Cross */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { AggInput, AggOutput, NaStats, Slice } from "./types";
+import type { Shape, AggOutput, NaStats, Slice } from "./types";
 import { esc, maShownCondition } from "./sqlHelpers";
 
 interface ValueCount {
@@ -11,7 +11,7 @@ interface ValueCount {
 
 // ── GT ──
 
-export async function aggregateNaGt(
+export async function aggNaTotals(
   conn: duckdb.AsyncDuckDBConnection,
   column: string,
   weightCol: string,
@@ -28,16 +28,16 @@ export async function aggregateNaGt(
 
 // ── Cross (NA × SA or NA × MA) ──
 
-export async function aggregateNaCross(
+export async function aggNaCrossTab(
   conn: duckdb.AsyncDuckDBConnection,
   naColumn: string,
-  crossQ: AggInput,
+  axisShape: Shape,
   weightCol: string,
 ): Promise<AggOutput> {
-  if (crossQ.type === "SA") {
-    return crossSA(conn, naColumn, crossQ.columns[0], crossQ.codes, weightCol);
+  if (axisShape.type === "SA") {
+    return naCrossSA(conn, naColumn, axisShape.columns[0], axisShape.codes, weightCol);
   }
-  return crossMA(conn, naColumn, crossQ.columns, crossQ.codes, weightCol);
+  return naCrossMA(conn, naColumn, axisShape.columns, axisShape.codes, weightCol);
 }
 
 // ── Helpers ──
@@ -234,7 +234,7 @@ function toStats(row: Record<string, unknown>): NaStats {
 
 // ── NA × SA cross ──
 
-async function crossSA(
+async function naCrossSA(
   conn: duckdb.AsyncDuckDBConnection,
   naColumn: string,
   crossCol: string,
@@ -259,7 +259,7 @@ async function crossSA(
 
 // ── NA × MA cross ──
 
-async function crossMA(
+async function naCrossMA(
   conn: duckdb.AsyncDuckDBConnection,
   naColumn: string,
   maCols: string[],

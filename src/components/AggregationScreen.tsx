@@ -37,10 +37,10 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
     setErrorMsg("");
 
     const wCol = weightEnabled ? weightCol : "";
-    const crossCols = questions.filter((q) => crossSelected[q.code]);
+    const crossQuestions = questions.filter((q) => crossSelected[q.code]);
 
     try {
-      const tallies = await runAggregation(questions, crossCols, wCol);
+      const tallies = await runAggregation(questions, crossQuestions, wCol);
       setAggResult({ tallies, weightCol: wCol });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));

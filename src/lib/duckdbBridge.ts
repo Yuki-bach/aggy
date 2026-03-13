@@ -76,11 +76,11 @@ export async function runValidation(headers: string[], layout: Layout): Promise<
 /** Execute aggregation for all question × axis combinations */
 export async function runAggregation(
   questions: Question[],
-  crossCols: Question[],
+  crossQuestions: Question[],
   weightCol: string,
 ): Promise<Tally[]> {
   const c = await getConnection();
-  return buildTallies(c, questions, crossCols, weightCol);
+  return buildTallies(c, questions, crossQuestions, weightCol);
 }
 
 /** Prepare DATE columns in layout (convert to SA with auto-generated items) */

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { aggTotals } from "../src/lib/agg/aggTotals";
 import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
-import { getAggInput } from "./helpers/fixtures";
+import { getShape } from "./helpers/fixtures";
 
 beforeAll(async () => {
   await setupDuckDB();
@@ -11,8 +11,8 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-const q1 = getAggInput("q1");
-const q3 = getAggInput("q3");
+const q1 = getShape("q1");
+const q3 = getShape("q3");
 
 // ============================================================
 // テストデータ (testdata/test_data.csv) 14行

@@ -11,7 +11,9 @@ export interface Question {
   labels: Record<string, string>;
 }
 
-export type AggInput = Pick<Question, "type" | "columns" | "codes">;
+export type Shape = Pick<Question, "type" | "columns" | "codes">;
+
+export type Axis = Pick<Question, "code" | "label" | "labels">;
 
 export interface Cell {
   count: number;
@@ -45,7 +47,7 @@ export interface Tally {
   type: QuestionType;
   questionCode: string;
   label: string;
-  by: { code: string; label: string; labels: Record<string, string> } | null;
+  by: Axis | null;
   codes: string[];
   labels: Record<string, string>;
   slices: Slice[];
