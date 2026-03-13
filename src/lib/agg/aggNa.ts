@@ -31,13 +31,13 @@ export async function aggNaTotals(
 export async function aggNaCrossTab(
   conn: duckdb.AsyncDuckDBConnection,
   naColumn: string,
-  crossQ: AggInput,
+  axisQuestion: AggInput,
   weightCol: string,
 ): Promise<AggOutput> {
-  if (crossQ.type === "SA") {
-    return crossSA(conn, naColumn, crossQ.columns[0], crossQ.codes, weightCol);
+  if (axisQuestion.type === "SA") {
+    return crossSA(conn, naColumn, axisQuestion.columns[0], axisQuestion.codes, weightCol);
   }
-  return crossMA(conn, naColumn, crossQ.columns, crossQ.codes, weightCol);
+  return crossMA(conn, naColumn, axisQuestion.columns, axisQuestion.codes, weightCol);
 }
 
 // ── Helpers ──

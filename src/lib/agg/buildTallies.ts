@@ -17,23 +17,23 @@ export async function buildTallies(
     if (q.type === "NA") {
       const gtOutput = await aggNaTotals(conn, q.columns[0], weightCol);
       tallies.push(toTally(q, gtOutput));
-      for (const cross of crossQuestions) {
-        const crossOutput = await aggNaCrossTab(conn, q.columns[0], cross, weightCol);
-        tallies.push(toTally(q, crossOutput, cross));
+      for (const axisQuestion of crossQuestions) {
+        const crossOutput = await aggNaCrossTab(conn, q.columns[0], axisQuestion, weightCol);
+        tallies.push(toTally(q, crossOutput, axisQuestion));
       }
     } else {
       const gtOutput = await aggTotals(conn, q, weightCol);
       tallies.push(toTally(q, gtOutput));
-      for (const cross of crossQuestions) {
-        const crossOutput = await aggCrossTab(conn, q, cross, weightCol);
-        tallies.push(toTally(q, crossOutput, cross));
+      for (const axisQuestion of crossQuestions) {
+        const crossOutput = await aggCrossTab(conn, q, axisQuestion, weightCol);
+        tallies.push(toTally(q, crossOutput, axisQuestion));
       }
     }
   }
   return tallies;
 }
 
-function toTally(question: Question, aggOutput: AggOutput, byQuestion?: Question): Tally {
+function toTally(question: Question, aggOutput: AggOutput, axisQuestion?: Question): Tally {
   const labels: Record<string, string> = { ...question.labels };
 
   if (question.type === "NA") {
@@ -53,17 +53,17 @@ function toTally(question: Question, aggOutput: AggOutput, byQuestion?: Question
     label: question.label,
     labels,
     codes: aggOutput.codes,
-    by: buildAxis(aggOutput, byQuestion),
+    by: buildAxis(aggOutput, axisQuestion),
     slices: aggOutput.slices,
   };
 }
 
-function buildAxis(aggOutput: AggOutput, byQuestion?: Question): Tally["by"] {
-  if (!byQuestion) return null;
-  const axisLabels: Record<string, string> = { ...byQuestion.labels };
+function buildAxis(aggOutput: AggOutput, axisQuestion?: Question): Tally["by"] {
+  if (!axisQuestion) return null;
+  const axisLabels: Record<string, string> = { ...axisQuestion.labels };
   const hasNoAnswer = aggOutput.slices.some((s) => s.code === NO_ANSWER_VALUE);
   if (hasNoAnswer) {
     axisLabels[NO_ANSWER_VALUE] = t("label.noAnswer");
   }
-  return { code: byQuestion.code, label: byQuestion.label, labels: axisLabels };
+  return { code: axisQuestion.code, label: axisQuestion.label, labels: axisLabels };
 }

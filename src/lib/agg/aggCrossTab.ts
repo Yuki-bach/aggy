@@ -21,12 +21,12 @@ type CrossSliceData = {
 export async function aggCrossTab(
   conn: duckdb.AsyncDuckDBConnection,
   question: AggInput,
-  by: AggInput,
+  axisQuestion: AggInput,
   weightCol: string,
 ): Promise<AggOutput> {
-  const ca = new CrossTabAggregator(conn, weightCol, by);
+  const ca = new CrossTabAggregator(conn, weightCol, axisQuestion);
   const isMainSa = question.type === "SA";
-  const isCrossSa = by.type === "SA";
+  const isCrossSa = axisQuestion.type === "SA";
 
   if (isMainSa && isCrossSa) return ca.saSA(question.columns[0], question.codes);
   if (isMainSa && !isCrossSa) return ca.saMA(question.columns[0], question.codes);
@@ -38,14 +38,14 @@ class CrossTabAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
-    private crossQ: AggInput,
+    private axisQuestion: AggInput,
   ) {}
 
   // ── SA main × SA cross ──
 
   async saSA(column: string, codes: string[]): Promise<AggOutput> {
-    const crossCol = this.crossQ.columns[0];
-    const crossValues = this.crossQ.codes;
+    const crossCol = this.axisQuestion.columns[0];
+    const crossValues = this.axisQuestion.codes;
     const wExpr = weightExpr(this.weightCol);
 
     const sql = `
@@ -89,7 +89,7 @@ class CrossTabAggregator {
   // ── SA main × MA cross ──
 
   async saMA(column: string, codes: string[]): Promise<AggOutput> {
-    const selectClauses = this.crossQ.columns.map(
+    const selectClauses = this.axisQuestion.columns.map(
       (maCol, i) => `${maWeightedCountExpr(maCol, this.weightCol)} AS c${i}`,
     );
 
@@ -105,18 +105,18 @@ class CrossTabAggregator {
     const result = await this.conn.query(sql);
     const rowData = new Map<string, number[]>();
     for (const r of result.toArray()) {
-      const counts = this.crossQ.columns.map((_, i) => Number(r[`c${i}`] ?? 0));
+      const counts = this.axisQuestion.columns.map((_, i) => Number(r[`c${i}`] ?? 0));
       rowData.set(String(r.mv), counts);
     }
 
     // n for each cross MA column = sum of that column across all main codes
-    const nArr = this.crossQ.columns.map((_, ci) => {
+    const nArr = this.axisQuestion.columns.map((_, ci) => {
       let total = 0;
       for (const counts of rowData.values()) total += counts[ci];
       return total;
     });
 
-    const data: CrossSliceData[] = this.crossQ.codes.map((crossCode, ci) => ({
+    const data: CrossSliceData[] = this.axisQuestion.codes.map((crossCode, ci) => ({
       code: crossCode,
       n: nArr[ci],
       counts: codes.map((code) => rowData.get(code)?.[ci] ?? 0),
@@ -127,8 +127,8 @@ class CrossTabAggregator {
   // ── MA main × SA cross ──
 
   async maSA(columns: string[], codes: string[]): Promise<AggOutput> {
-    const crossCol = this.crossQ.columns[0];
-    const crossValues = this.crossQ.codes;
+    const crossCol = this.axisQuestion.columns[0];
+    const crossValues = this.axisQuestion.codes;
     const wExpr = weightExpr(this.weightCol);
 
     const selectClauses = columns.map(
@@ -195,24 +195,24 @@ class CrossTabAggregator {
 
     const selectClauses: string[] = [];
     for (let r = 0; r < columns.length; r++) {
-      for (let c = 0; c < this.crossQ.columns.length; c++) {
+      for (let c = 0; c < this.axisQuestion.columns.length; c++) {
         const expr = this.weightCol
-          ? `SUM("${esc(columns[r])}" * "${esc(this.crossQ.columns[c])}" * "${esc(this.weightCol)}")`
-          : `SUM("${esc(columns[r])}" * "${esc(this.crossQ.columns[c])}")::DOUBLE`;
+          ? `SUM("${esc(columns[r])}" * "${esc(this.axisQuestion.columns[c])}" * "${esc(this.weightCol)}")`
+          : `SUM("${esc(columns[r])}" * "${esc(this.axisQuestion.columns[c])}")::DOUBLE`;
         selectClauses.push(`${expr} AS r${r}c${c}`);
       }
     }
 
     // No-answer × each cross MA column
     const naBase = `${maNoneSelectedCondition(columns)} AND (${shownCond})`;
-    for (let c = 0; c < this.crossQ.columns.length; c++) {
-      const naCondition = `${naBase} AND "${esc(this.crossQ.columns[c])}" = 1`;
+    for (let c = 0; c < this.axisQuestion.columns.length; c++) {
+      const naCondition = `${naBase} AND "${esc(this.axisQuestion.columns[c])}" = 1`;
       selectClauses.push(`${weightedCountExpr(naCondition, this.weightCol)} AS na_c${c}`);
     }
 
     // n for each cross MA column: cross col = 1 AND main shown
-    for (let c = 0; c < this.crossQ.columns.length; c++) {
-      const nCondition = `(${shownCond}) AND "${esc(this.crossQ.columns[c])}" = 1`;
+    for (let c = 0; c < this.axisQuestion.columns.length; c++) {
+      const nCondition = `(${shownCond}) AND "${esc(this.axisQuestion.columns[c])}" = 1`;
       selectClauses.push(`${weightedCountExpr(nCondition, this.weightCol)} AS n_c${c}`);
     }
 
@@ -220,9 +220,9 @@ class CrossTabAggregator {
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
 
-    const hasNoAnswer = this.crossQ.codes.some((_, c) => Number(row[`na_c${c}`] ?? 0) > 0);
+    const hasNoAnswer = this.axisQuestion.codes.some((_, c) => Number(row[`na_c${c}`] ?? 0) > 0);
     const resultCodes = hasNoAnswer ? [...codes, NO_ANSWER_VALUE] : codes;
-    const data: CrossSliceData[] = this.crossQ.codes.map((crossCode, c) => {
+    const data: CrossSliceData[] = this.axisQuestion.codes.map((crossCode, c) => {
       const counts = columns.map((_col, r) => Number(row[`r${r}c${c}`] ?? 0));
       if (hasNoAnswer) counts.push(Number(row[`na_c${c}`] ?? 0));
       return { code: crossCode, n: Number(row[`n_c${c}`] ?? 0), counts };
