@@ -1,7 +1,7 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, AggOutput, Tally } from "./types";
-import { aggregateGt } from "./aggregateGt";
-import { aggregateCross } from "./aggregateCross";
+import { aggTotals } from "./aggTotals";
+import { aggCrossTab } from "./aggCrossTab";
 import { aggregateNaGt, aggregateNaCross } from "./aggregateNa";
 import { NO_ANSWER_VALUE } from "./sqlHelpers";
 import { t } from "../i18n";
@@ -22,10 +22,10 @@ export async function buildTallies(
         tallies.push(toTally(q, crossResult, cross));
       }
     } else {
-      const gtResult = await aggregateGt(conn, q, weightCol);
+      const gtResult = await aggTotals(conn, q, weightCol);
       tallies.push(toTally(q, gtResult));
       for (const cross of crossCols) {
-        const crossResult = await aggregateCross(conn, q, cross, weightCol);
+        const crossResult = await aggCrossTab(conn, q, cross, weightCol);
         tallies.push(toTally(q, crossResult, cross));
       }
     }

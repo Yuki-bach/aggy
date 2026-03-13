@@ -1,4 +1,4 @@
-/** GT (Grand Total) aggregation — SA and MA */
+/** Totals aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { AggInput, AggOutput } from "./types";
@@ -12,18 +12,18 @@ import {
   NO_ANSWER_VALUE,
 } from "./sqlHelpers";
 
-export async function aggregateGt(
+export async function aggTotals(
   conn: duckdb.AsyncDuckDBConnection,
   question: AggInput,
   weightCol: string,
 ): Promise<AggOutput> {
-  const gt = new GtAggregator(conn, weightCol);
+  const gt = new TotalsAggregator(conn, weightCol);
   return question.type === "SA"
     ? gt.aggregateSA(question.columns[0], question.codes)
     : gt.aggregateMA(question.columns, question.codes);
 }
 
-class GtAggregator {
+class TotalsAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,
