@@ -40,8 +40,8 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
     const crossQuestions = questions.filter((q) => crossSelected[q.code]);
 
     try {
-      const result = await runAggregation(questions, crossQuestions, wCol);
-      setTallies(result);
+      const tallies = await runAggregation(questions, crossQuestions, wCol);
+      setTallies(tallies);
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
     }
