@@ -35,9 +35,9 @@ export async function aggNaCrossTab(
   weightCol: string,
 ): Promise<AggOutput> {
   if (axisShape.type === "SA") {
-    return crossSA(conn, naColumn, axisShape.columns[0], axisShape.codes, weightCol);
+    return naCrossSA(conn, naColumn, axisShape.columns[0], axisShape.codes, weightCol);
   }
-  return crossMA(conn, naColumn, axisShape.columns, axisShape.codes, weightCol);
+  return naCrossMA(conn, naColumn, axisShape.columns, axisShape.codes, weightCol);
 }
 
 // ── Helpers ──
@@ -234,7 +234,7 @@ function toStats(row: Record<string, unknown>): NaStats {
 
 // ── NA × SA cross ──
 
-async function crossSA(
+async function naCrossSA(
   conn: duckdb.AsyncDuckDBConnection,
   naColumn: string,
   crossCol: string,
@@ -259,7 +259,7 @@ async function crossSA(
 
 // ── NA × MA cross ──
 
-async function crossMA(
+async function naCrossMA(
   conn: duckdb.AsyncDuckDBConnection,
   naColumn: string,
   maCols: string[],
