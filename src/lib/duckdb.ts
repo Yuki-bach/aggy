@@ -3,15 +3,23 @@ import type { Question, Tally } from "./agg/types";
 import type { Layout } from "./layout";
 import { buildTallies } from "./agg/buildTallies";
 import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
-import { setWasmStatus } from "../components/header/WasmStatus";
 import { validateData, type ValidationResult } from "./validateData";
+
+export type DuckStatus = "loading" | "ready" | "error";
+export type StatusListener = (s: DuckStatus, label?: string) => void;
+
+let statusListener: StatusListener | null = null;
+
+export function setStatusListener(listener: StatusListener): void {
+  statusListener = listener;
+}
 
 export async function initDuckDB(): Promise<void> {
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
     try {
-      updateStatusUI("loading", "DuckDB 読み込み中...");
+      statusListener?.("loading", "DuckDB 読み込み中...");
 
       const BUNDLES: duckdb.DuckDBBundles = {
         mvp: {
@@ -34,10 +42,10 @@ export async function initDuckDB(): Promise<void> {
       await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
       status = "ready";
-      updateStatusUI("ready", "DuckDB Ready");
+      statusListener?.("ready", "DuckDB Ready");
     } catch (err) {
       status = "error";
-      updateStatusUI("error", `DuckDB エラー: ${(err as Error).message}`);
+      statusListener?.("error", `DuckDB エラー: ${(err as Error).message}`);
       throw err;
     }
   })();
@@ -93,16 +101,10 @@ export async function prepareDateLayout(layout: Layout): Promise<DatePreparation
 
 const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
 
-type DuckStatus = "loading" | "ready" | "error";
-
 let db: duckdb.AsyncDuckDB | null = null;
 let conn: duckdb.AsyncDuckDBConnection | null = null;
 let status: DuckStatus = "loading";
 let initPromise: Promise<void> | null = null;
-
-function updateStatusUI(s: DuckStatus, label?: string): void {
-  setWasmStatus(s, label);
-}
 
 async function getConnection(): Promise<duckdb.AsyncDuckDBConnection> {
   if (!db || status !== "ready") throw new Error("DuckDB is not ready");

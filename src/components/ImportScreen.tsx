@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "preact/compat";
 import { useCallback, useRef, useState } from "preact/hooks";
 import { parseLayout, filterLayout } from "../lib/layout";
-import { loadCSV, prepareDateLayout } from "../lib/duckdbBridge";
+import { loadCSV, prepareDateLayout } from "../lib/duckdb";
 import { saveData, loadSaved } from "../lib/opfs";
 import { t } from "../lib/i18n";
 

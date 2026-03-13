@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { t } from "../../lib/i18n";
-import { runValidation } from "../../lib/duckdbBridge";
+import { runValidation } from "../../lib/duckdb";
 import type { ValidationResult } from "../../lib/validateData";
 import type { CsvData, LayoutData } from "../../lib/types";
 
