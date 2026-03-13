@@ -9,7 +9,7 @@ import { t } from "../i18n";
 export async function buildTallies(
   conn: duckdb.AsyncDuckDBConnection,
   questions: Question[],
-  crossCols: Question[],
+  crossQuestions: Question[],
   weightCol: string,
 ): Promise<Tally[]> {
   const tallies: Tally[] = [];
@@ -17,14 +17,14 @@ export async function buildTallies(
     if (q.type === "NA") {
       const gtResult = await aggNaTotals(conn, q.columns[0], weightCol);
       tallies.push(toTally(q, gtResult));
-      for (const cross of crossCols) {
+      for (const cross of crossQuestions) {
         const crossResult = await aggNaCrossTab(conn, q.columns[0], cross, weightCol);
         tallies.push(toTally(q, crossResult, cross));
       }
     } else {
       const gtResult = await aggTotals(conn, q, weightCol);
       tallies.push(toTally(q, gtResult));
-      for (const cross of crossCols) {
+      for (const cross of crossQuestions) {
         const crossResult = await aggCrossTab(conn, q, cross, weightCol);
         tallies.push(toTally(q, crossResult, cross));
       }
