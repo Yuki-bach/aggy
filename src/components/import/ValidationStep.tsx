@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { t } from "../../lib/i18n";
 import { runValidation } from "../../lib/duckdb";
-import type { ValidationResult } from "../../lib/validateData";
+import type { Diagnostics } from "../../lib/validateCsv";
 import type { CsvData, LayoutData } from "../../lib/types";
 
 interface ValidationStepProps {
@@ -12,17 +12,17 @@ interface ValidationStepProps {
 }
 
 export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationStepProps) {
-  const [result, setResult] = useState<ValidationResult | null>(null);
+  const [diagnostics, setDiagnostics] = useState<Diagnostics | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    setResult(null);
+    setDiagnostics(null);
     setError(null);
 
     runValidation(csv.headers, layout.layout)
       .then((r) => {
-        if (!cancelled) setResult(r);
+        if (!cancelled) setDiagnostics(r);
       })
       .catch((e) => {
         if (!cancelled) setError((e as Error).message);
@@ -47,33 +47,45 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
     );
   }
 
-  if (!result) {
+  if (!diagnostics) {
     return <p class="py-4 text-center text-sm text-muted">{t("validation.running")}</p>;
   }
 
-  const hasUnknownCodes = result.unknownCodeErrors.length > 0;
-  const hasDropped = result.droppedEntries.length > 0;
-  const hasErrors = hasUnknownCodes;
+  const statusByType = new Map<string, "error" | "warn">();
+  for (const d of diagnostics) statusByType.set(d.type, d.severity);
+
+  const errors = diagnostics.filter((d) => d.severity === "error");
+  const warnings = diagnostics.filter((d) => d.severity === "warn");
 
   return (
     <div class="space-y-4">
       <h3 class="text-sm font-bold tracking-wider text-muted">{t("validation.title")}</h3>
 
       <ul class="space-y-2 text-sm">
-        <CheckItem label={t("validation.check.columns")} status={hasDropped ? "warn" : "ok"} />
-        <CheckItem label={t("validation.check.saCode")} status={hasUnknownCodes ? "error" : "ok"} />
+        <CheckItem
+          label={t("validation.check.columns")}
+          status={statusByType.get("dropped") ?? "ok"}
+        />
+        <CheckItem
+          label={t("validation.check.saCode")}
+          status={statusByType.get("unknownCode") ?? "ok"}
+        />
+        <CheckItem
+          label={t("validation.check.maValues")}
+          status={statusByType.get("invalidMAValue") ?? "ok"}
+        />
+        <CheckItem
+          label={t("validation.check.numeric")}
+          status={statusByType.get("nonNumeric") ?? "ok"}
+        />
       </ul>
 
-      {hasUnknownCodes && (
+      {errors.length > 0 && (
         <div class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
           <ul class="list-inside list-disc space-y-1">
-            {result.unknownCodeErrors.map((e) => (
-              <li key={e.key}>
-                {t("validation.unknownCodes", {
-                  key: e.key,
-                  label: e.label,
-                  codes: e.unknownCodes.join(", "),
-                })}
+            {errors.map((d) => (
+              <li key={`${d.type}-${d.key}`}>
+                {t(`validation.detail.${d.type}`, { key: d.key, label: d.label, ...d.params })}
               </li>
             ))}
           </ul>
@@ -81,16 +93,12 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
         </div>
       )}
 
-      {hasDropped && (
+      {warnings.length > 0 && (
         <div class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           <ul class="list-inside list-disc space-y-1">
-            {result.droppedEntries.map((e) => (
-              <li key={e.key}>
-                {t("validation.droppedEntries", {
-                  key: e.key,
-                  label: e.label,
-                  type: e.type,
-                })}
+            {warnings.map((d) => (
+              <li key={`${d.type}-${d.key}`}>
+                {t(`validation.detail.${d.type}`, { key: d.key, label: d.label, ...d.params })}
               </li>
             ))}
           </ul>
@@ -104,7 +112,7 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
         >
           {t("validation.back")}
         </button>
-        {!hasErrors && (
+        {errors.length === 0 && (
           <button
             class="cursor-pointer rounded-lg border-none bg-accent px-4 py-2 text-sm font-bold text-accent-contrast transition-colors hover:bg-accent-hover"
             onClick={onProceed}

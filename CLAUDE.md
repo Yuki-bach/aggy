@@ -24,8 +24,8 @@ pnpm bench:gen  # generate benchmark data
 
 ## Architecture
 
-- **`src/components/`** — UI: event handling and DOM rendering only
-- **`src/lib/`** — Pure logic (aggregation SQL, DuckDB bridge, layout parsing, pivot, export)
+- **`src/components/`** — UI: event handling, DOM rendering, and component-local helpers
+- **`src/lib/`** — Shared pure logic used by multiple modules (aggregation SQL, DuckDB bridge, layout parsing, pivot, export)
 
 ## Conventions
 

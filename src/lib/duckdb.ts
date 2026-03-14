@@ -3,7 +3,7 @@ import type { Question, Tally } from "./agg/types";
 import type { Layout } from "./layout";
 import { buildTallies } from "./agg/buildTallies";
 import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
-import { validateData, type ValidationResult } from "./validateData";
+import { validateCsv, type Diagnostics } from "./validateCsv";
 
 export type DuckStatus = "loading" | "ready" | "error";
 export type StatusListener = (s: DuckStatus, label: string) => void;
@@ -76,9 +76,9 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 }
 
 /** Validate CSV data against layout definition */
-export async function runValidation(headers: string[], layout: Layout): Promise<ValidationResult> {
+export async function runValidation(headers: string[], layout: Layout): Promise<Diagnostics> {
   const c = await getConnection();
-  return validateData(c, headers, layout);
+  return validateCsv(c, headers, layout);
 }
 
 /** Execute aggregation for all question × axis combinations */
