@@ -3,7 +3,7 @@ import type { Question, AggOutput, Axis, Tally } from "./types";
 import { aggGrandTotal } from "./aggGrandTotal";
 import { aggCrossTab } from "./aggCrossTab";
 import { aggNaGrandTotal, aggNaCrossTab } from "./aggNa";
-import { NO_ANSWER_VALUE } from "./sqlHelpers";
+import { NO_ANSWER_VALUE } from "./constants";
 import { t } from "../i18n";
 
 export async function buildTallies(

@@ -28,5 +28,3 @@ export function weightedCountExpr(condition: string, weightCol: string): string 
 export function maNoneSelectedCondition(cols: string[]): string {
   return cols.map((c) => `"${esc(c)}" != 1`).join(" AND ");
 }
-/** No-answer marker */
-export const NO_ANSWER_VALUE = "N/A";
