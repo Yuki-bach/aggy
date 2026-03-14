@@ -117,6 +117,22 @@ describe("aggGrandTotalEdge - MA", () => {
     expect(result.slices[0].cells[1].count).toBe(0); // q_2=0
   });
 
+  it("全行NULL → n=0, 全セル count=0", async () => {
+    await loadCSV(
+      buildCSV(["id", "q_1", "q_2"], [
+        [1, null, null],
+        [2, null, null],
+        [3, null, null],
+      ]),
+    );
+    const input: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
+    const result = await aggGrandTotal(getConn(), input, "");
+
+    expect(result.slices[0].n).toBe(0);
+    expect(result.slices[0].cells[0].count).toBe(0);
+    expect(result.slices[0].cells[1].count).toBe(0);
+  });
+
   it("全列0（shown but none selected） → N/A count=n", async () => {
     await loadCSV(
       buildCSV(["id", "q_1", "q_2"], [
