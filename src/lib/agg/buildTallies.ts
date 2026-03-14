@@ -53,13 +53,12 @@ function toTally(question: Question, aggOutput: AggOutput, axisQuestion?: Questi
     label: question.label,
     labels,
     codes: aggOutput.codes,
-    by: buildAxis(aggOutput, axisQuestion),
+    by: axisQuestion ? buildAxis(aggOutput, axisQuestion) : null,
     slices: aggOutput.slices,
   };
 }
 
-function buildAxis(aggOutput: AggOutput, axisQuestion?: Question): Axis | null {
-  if (!axisQuestion) return null;
+function buildAxis(aggOutput: AggOutput, axisQuestion: Question): Axis {
   const axisLabels: Record<string, string> = { ...axisQuestion.labels };
   const hasNoAnswer = aggOutput.slices.some((s) => s.code === NO_ANSWER_VALUE);
   if (hasNoAnswer) {
