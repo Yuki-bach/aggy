@@ -62,8 +62,9 @@ interface CrossDataset {
 
 export function generateSADataset(opts: DatasetOpts): SADataset {
   const rng = new Rng(opts.seed);
-  const codes = opts.codes ?? ["1", "2", "3"];
-  const nullRate = opts.nullRate ?? 0.1;
+  const codeCount = opts.codes?.length ?? rng.int(1, 8);
+  const codes = opts.codes ?? Array.from({ length: codeCount }, (_, i) => String(i + 1));
+  const nullRate = opts.nullRate ?? rng.next();
   const weighted = opts.weighted ?? false;
 
   const headers = ["id", ...(weighted ? ["weight"] : []), "q_sa"];
@@ -87,9 +88,9 @@ export function generateSADataset(opts: DatasetOpts): SADataset {
 
 export function generateMADataset(opts: DatasetOpts): MADataset {
   const rng = new Rng(opts.seed);
-  const codeCount = opts.codes?.length ?? 3;
+  const codeCount = opts.codes?.length ?? rng.int(1, 8);
   const codes = opts.codes ?? Array.from({ length: codeCount }, (_, i) => String(i + 1));
-  const nullRate = opts.nullRate ?? 0.1;
+  const nullRate = opts.nullRate ?? rng.next();
   const weighted = opts.weighted ?? false;
 
   const columns = codes.map((_, i) => `q_ma_${i + 1}`);
@@ -101,7 +102,8 @@ export function generateMADataset(opts: DatasetOpts): MADataset {
     if (weighted) {
       row.push(Math.round((0.5 + rng.next() * 1.5) * 10) / 10);
     }
-    if (rng.next() < nullRate) {
+    // 先頭行は必ず shown（DuckDB が列型を推論できるよう保証）
+    if (i > 1 && rng.next() < nullRate) {
       // not shown — all NULL
       for (let j = 0; j < codes.length; j++) row.push(null);
     } else {
@@ -127,7 +129,7 @@ interface NADataset {
 
 export function generateNADataset(opts: DatasetOpts): NADataset {
   const rng = new Rng(opts.seed);
-  const nullRate = opts.nullRate ?? 0.1;
+  const nullRate = opts.nullRate ?? rng.next();
   const weighted = opts.weighted ?? false;
 
   const headers = ["id", ...(weighted ? ["weight"] : []), "q_na"];
@@ -151,10 +153,13 @@ export function generateNADataset(opts: DatasetOpts): NADataset {
 
 export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
   const rng = new Rng(opts.seed);
-  const saCodes = ["1", "2", "3"];
-  const sa2Codes = ["1", "2", "3", "4"];
-  const maCodes = ["1", "2", "3"];
-  const nullRate = opts.nullRate ?? 0.1;
+  const saCount = rng.int(1, 6);
+  const saCodes = Array.from({ length: saCount }, (_, i) => String(i + 1));
+  const sa2Count = rng.int(1, 6);
+  const sa2Codes = Array.from({ length: sa2Count }, (_, i) => String(i + 1));
+  const maCount = rng.int(1, 6);
+  const maCodes = Array.from({ length: maCount }, (_, i) => String(i + 1));
+  const nullRate = opts.nullRate ?? rng.next();
   const weighted = opts.weighted ?? false;
 
   const maColumns = maCodes.map((_, i) => `q_ma_${i + 1}`);
@@ -175,8 +180,8 @@ export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
     // SA columns (independently generated)
     row.push(rng.next() < nullRate ? null : rng.pick(saCodes));
     row.push(rng.next() < nullRate ? null : rng.pick(sa2Codes));
-    // MA columns
-    if (rng.next() < nullRate) {
+    // MA columns（先頭行は必ず shown — DuckDB 型推論保証）
+    if (i > 1 && rng.next() < nullRate) {
       for (let j = 0; j < maCodes.length; j++) row.push(null);
     } else {
       for (let j = 0; j < maCodes.length; j++) {
