@@ -1,7 +1,7 @@
 import { describe, it, beforeAll, afterAll } from "vitest";
 import { aggGrandTotal } from "../src/lib/agg/aggGrandTotal";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
-import { generateSADataset, generateMADataset } from "./helpers/generators";
+import { generateSADataset, generateMADataset, SEEDS, rowCount } from "./helpers/generators";
 import { assertGrandTotalInvariants } from "./helpers/invariants";
 
 beforeAll(async () => {
@@ -11,13 +11,6 @@ beforeAll(async () => {
 afterAll(async () => {
   await teardownDuckDB();
 });
-
-const SEEDS = 50;
-const ROW_RANGE = { min: 50, max: 200 };
-
-function rowCount(seed: number): number {
-  return ROW_RANGE.min + ((seed * 17) % (ROW_RANGE.max - ROW_RANGE.min + 1));
-}
 
 describe("PBT - aggGrandTotal SA 重みなし", () => {
   for (let seed = 1; seed <= SEEDS; seed++) {
