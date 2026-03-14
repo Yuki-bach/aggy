@@ -36,12 +36,12 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
   async function handleRunAggregation(): Promise<void> {
     setErrorMsg("");
 
-    const wCol = weightEnabled ? weightCol : "";
+    const activeWeightCol = weightEnabled ? weightCol : "";
     const crossQuestions = questions.filter((q) => crossSelected[q.code]);
 
     try {
-      const tallies = await runAggregation(questions, crossQuestions, wCol);
-      setAggResult({ tallies, weightCol: wCol });
+      const tallies = await runAggregation(questions, crossQuestions, activeWeightCol);
+      setAggResult({ tallies, weightCol: activeWeightCol });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
     }

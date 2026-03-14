@@ -1,17 +1,17 @@
 import type { Tally, Slice } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
-import type { PctDirection } from "./viewTypes";
+import type { Basis } from "./viewTypes";
 import { formatN } from "../../lib/format";
 import { Th, Td } from "./TableCells";
 
 interface CrossTableProps {
   grandTotalTally: Tally;
   crossTallies: Tally[];
-  pctDir: PctDirection;
+  basis: Basis;
 }
 
-export function CrossTable({ grandTotalTally, crossTallies, pctDir }: CrossTableProps) {
-  if (pctDir === "horizontal") {
+export function CrossTable({ grandTotalTally, crossTallies, basis }: CrossTableProps) {
+  if (basis === "row") {
     return <TransposedCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;
   }
   return <VerticalCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;

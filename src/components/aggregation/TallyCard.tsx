@@ -90,7 +90,7 @@ function CardBody({
       <CrossTable
         grandTotalTally={grandTotalTally}
         crossTallies={crossTallies}
-        pctDir={tableOpts.pctDirection}
+        basis={tableOpts.basis}
       />
     );
   }

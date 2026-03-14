@@ -2,10 +2,10 @@ import type { PaletteId } from "../../lib/chartConfig";
 
 export type ChartType = "bar-h" | "bar-v" | "obi";
 export type ViewMode = "table" | "chart";
-export type PctDirection = "vertical" | "horizontal";
+export type Basis = "column" | "row";
 
 export interface TableOpts {
-  pctDirection: PctDirection;
+  basis: Basis;
   maxPct: number;
 }
 
