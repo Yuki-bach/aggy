@@ -4,7 +4,7 @@ import { Toolbar, ViewOpts } from "./Toolbar";
 import { TallyCard } from "./TallyCard";
 import { AIBubble } from "./AIBubble";
 import { t } from "../../lib/i18n";
-import type { ChartType, PctDirection, ViewMode } from "./viewTypes";
+import type { Basis, ChartType, ViewMode } from "./viewTypes";
 import type { PaletteId } from "../../lib/chartConfig";
 
 interface ResultPanelProps {
@@ -35,7 +35,7 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
-  const [pctDirection, setPctDirection] = useState<PctDirection>("vertical");
+  const [basis, setBasis] = useState<Basis>("column");
   const [paletteId, setPaletteId] = useState<PaletteId>("default");
   const [, setThemeTick] = useState(0);
 
@@ -55,7 +55,7 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
     onViewModeChange: setViewMode,
     onSaChartTypeChange: setSaChartType,
     onMaChartTypeChange: setMaChartType,
-    onPctDirectionChange: setPctDirection,
+    onBasisChange: setBasis,
     onPaletteChange: setPaletteId,
   };
 
@@ -68,7 +68,7 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
       .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct) ?? []),
     0,
   );
-  const tableOpts = { pctDirection, maxPct };
+  const tableOpts = { basis, maxPct };
   const chartOpts = { saChartType, maChartType, paletteId };
 
   const minWidth = viewMode === "chart" ? "400px" : "360px";
@@ -86,7 +86,7 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
       />
       <ViewOpts
         currentViewMode={viewMode}
-        currentPctDirection={pctDirection}
+        currentBasis={basis}
         hasCross={hasCross}
         chartOpts={chartOpts}
         callbacks={callbacks}

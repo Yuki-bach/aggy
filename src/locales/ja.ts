@@ -60,8 +60,8 @@ const ja: Record<string, string> = {
   "result.weight.none": "実数集計",
   "result.view.table": "テーブル",
   "result.view.chart": "チャート",
-  "result.pct.vertical": "縦%",
-  "result.pct.horizontal": "横%",
+  "result.pct.column": "縦%",
+  "result.pct.row": "横%",
   "result.csv.export": "全件CSV出力",
 
   // Export menu

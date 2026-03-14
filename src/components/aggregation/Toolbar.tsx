@@ -4,13 +4,13 @@ import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfi
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { ExportMenu } from "./ExportMenu";
 import { executeExport, type ExportAction } from "../../lib/export/export";
-import type { ChartOpts, ChartType, PctDirection, ViewMode } from "./viewTypes";
+import type { Basis, ChartOpts, ChartType, ViewMode } from "./viewTypes";
 
 export interface ToolbarCallbacks {
   onViewModeChange: (mode: ViewMode) => void;
   onSaChartTypeChange: (type: ChartType) => void;
   onMaChartTypeChange: (type: ChartType) => void;
-  onPctDirectionChange: (dir: PctDirection) => void;
+  onBasisChange: (basis: Basis) => void;
   onPaletteChange: (id: PaletteId) => void;
 }
 
@@ -58,18 +58,18 @@ export function Toolbar({ tallies, weightCol, currentViewMode, callbacks }: Tool
 
 interface ViewOptsProps {
   currentViewMode: ViewMode;
-  currentPctDirection: PctDirection;
+  currentBasis: Basis;
   hasCross: boolean;
   chartOpts: ChartOpts;
   callbacks: Pick<
     ToolbarCallbacks,
-    "onSaChartTypeChange" | "onMaChartTypeChange" | "onPctDirectionChange" | "onPaletteChange"
+    "onSaChartTypeChange" | "onMaChartTypeChange" | "onBasisChange" | "onPaletteChange"
   >;
 }
 
 export function ViewOpts({
   currentViewMode,
-  currentPctDirection,
+  currentBasis,
   hasCross,
   chartOpts,
   callbacks,
@@ -101,20 +101,16 @@ export function ViewOpts({
       {showPctToggle && (
         <ToggleGroup class="ml-auto">
           <ToggleButton
-            active={currentPctDirection === "vertical"}
-            onClick={() =>
-              currentPctDirection !== "vertical" && callbacks.onPctDirectionChange("vertical")
-            }
+            active={currentBasis === "column"}
+            onClick={() => currentBasis !== "column" && callbacks.onBasisChange("column")}
           >
-            {t("result.pct.vertical")}
+            {t("result.pct.column")}
           </ToggleButton>
           <ToggleButton
-            active={currentPctDirection === "horizontal"}
-            onClick={() =>
-              currentPctDirection !== "horizontal" && callbacks.onPctDirectionChange("horizontal")
-            }
+            active={currentBasis === "row"}
+            onClick={() => currentBasis !== "row" && callbacks.onBasisChange("row")}
           >
-            {t("result.pct.horizontal")}
+            {t("result.pct.row")}
           </ToggleButton>
         </ToggleGroup>
       )}

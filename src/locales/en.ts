@@ -60,8 +60,8 @@ const en: Record<string, string> = {
   "result.weight.none": "Unweighted",
   "result.view.table": "Table",
   "result.view.chart": "Chart",
-  "result.pct.vertical": "Col %",
-  "result.pct.horizontal": "Row %",
+  "result.pct.column": "Col %",
+  "result.pct.row": "Row %",
   "result.csv.export": "Export All CSV",
 
   // Export menu
