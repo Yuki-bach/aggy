@@ -59,3 +59,12 @@ function separatorRow(colCount: number): string {
 function escapeMarkdown(s: string): string {
   return s.replace(/\|/g, "\\|");
 }
+
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest;
+
+  test("escapeMarkdown: パイプ文字をエスケープする", () => {
+    expect(escapeMarkdown("a|b|c")).toBe("a\\|b\\|c");
+    expect(escapeMarkdown("no pipe")).toBe("no pipe");
+  });
+}

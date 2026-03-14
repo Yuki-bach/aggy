@@ -232,6 +232,45 @@ function toStats(row: Record<string, unknown>): NaStats {
   };
 }
 
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest;
+
+  test("freqToCells: pct を正しく算出し n=0 で 0 を返す", () => {
+    const freq = [
+      { value: 1, count: 3 },
+      { value: 2, count: 7 },
+    ];
+    const result = freqToCells(freq, 10);
+    expect(result.codes).toEqual(["1", "2"]);
+    expect(result.cells[0].pct).toBe(30);
+    expect(result.cells[1].pct).toBe(70);
+
+    const zero = freqToCells(freq, 0);
+    expect(zero.cells[0].pct).toBe(0);
+  });
+
+  test("alignSlices: スライス間で値の和集合をソート整列する", () => {
+    const stats = { n: 2, mean: 0, median: 0, sd: 0, min: 0, max: 0 };
+    const sliceData = [
+      { code: "A", freq: [{ value: 3, count: 1 }], stats },
+      { code: "B", freq: [{ value: 1, count: 2 }], stats },
+    ];
+    const result = alignSlices(sliceData);
+    expect(result.codes).toEqual(["1", "3"]);
+    expect(result.slices[0].cells[0].count).toBe(0); // A has no value=1
+    expect(result.slices[0].cells[1].count).toBe(1); // A has value=3
+    expect(result.slices[1].cells[0].count).toBe(2); // B has value=1
+  });
+
+  test("toStats: null/undefined → 0 にフォールバック", () => {
+    const result = toStats({ n: 5, mean: null, median: undefined });
+    expect(result.n).toBe(5);
+    expect(result.mean).toBe(0);
+    expect(result.median).toBe(0);
+    expect(result.min).toBe(0);
+  });
+}
+
 // ── NA × SA cross ──
 
 async function naCrossSA(

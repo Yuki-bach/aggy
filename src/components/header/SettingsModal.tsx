@@ -120,6 +120,32 @@ function getStoredTheme(): Theme {
   return "system";
 }
 
+if (import.meta.vitest) {
+  const { test, expect, vi } = import.meta.vitest;
+
+  test("getStoredTheme: 不正な値は system にフォールバック", () => {
+    const store = new Map<string, string>();
+    vi.stubGlobal(
+      "localStorage",
+      Object.assign(Object.create(null), {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => store.set(k, v),
+        removeItem: (k: string) => store.delete(k),
+      }),
+    );
+
+    expect(getStoredTheme()).toBe("system");
+
+    localStorage.setItem(THEME_KEY, "invalid");
+    expect(getStoredTheme()).toBe("system");
+
+    localStorage.setItem(THEME_KEY, "dark");
+    expect(getStoredTheme()).toBe("dark");
+
+    vi.unstubAllGlobals();
+  });
+}
+
 function SegmentControl({
   name,
   options,
