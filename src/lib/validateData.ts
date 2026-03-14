@@ -28,12 +28,12 @@ export async function validateData(
   for (const entry of layout) {
     if (entry.type === "SA" || entry.type === "NA" || entry.type === "WEIGHT") {
       if (!headerSet.has(entry.key)) {
-        droppedEntries.push({ key: entry.key, label: entry.label ?? entry.key, type: entry.type });
+        droppedEntries.push({ key: entry.key, label: entry.label, type: entry.type });
       }
-    } else if (entry.type === "MA" && entry.items) {
+    } else if (entry.type === "MA") {
       const hasAny = entry.items.some((item) => headerSet.has(`${entry.key}_${item.code}`));
       if (!hasAny) {
-        droppedEntries.push({ key: entry.key, label: entry.label ?? entry.key, type: entry.type });
+        droppedEntries.push({ key: entry.key, label: entry.label, type: entry.type });
       }
     }
   }
@@ -41,7 +41,7 @@ export async function validateData(
   // Check SA columns for undefined codes
   const unknownCodeErrors: UnknownCodeError[] = [];
   for (const entry of layout) {
-    if (entry.type !== "SA" || !entry.items || entry.items.length === 0) continue;
+    if (entry.type !== "SA") continue;
     if (!headerSet.has(entry.key)) continue; // column not in CSV, already reported as dropped
 
     const definedCodes = new Set(entry.items.map((i) => i.code));
@@ -61,7 +61,7 @@ export async function validateData(
     if (unknownCodes.length > 0) {
       unknownCodeErrors.push({
         key: entry.key,
-        label: entry.label ?? entry.key,
+        label: entry.label,
         unknownCodes: unknownCodes.sort(),
       });
     }

@@ -27,7 +27,7 @@ export async function prepareDateColumns(
       continue;
     }
 
-    const granularity = entry.granularity ?? "month";
+    const granularity = entry.granularity;
     const fmt = FORMAT_MAP[granularity];
     const col = esc(entry.key);
     const fmtCol = esc(`${entry.key}__${granularity}`);
@@ -42,7 +42,7 @@ export async function prepareDateColumns(
     );
     const failCount = Number(failResult.toArray()[0].n);
     if (failCount > 0) {
-      warnings.push(`${entry.label ?? entry.key}:${failCount}`);
+      warnings.push(`${entry.label}:${failCount}`);
     }
 
     const distinct = await conn.query(
@@ -52,7 +52,7 @@ export async function prepareDateColumns(
 
     result.push({
       key: `${entry.key}__${granularity}`,
-      label: entry.label ?? entry.key,
+      label: entry.label,
       type: "SA",
       items: values.map((v) => ({ code: v, label: v })),
     });
