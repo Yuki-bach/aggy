@@ -73,18 +73,13 @@ export function filterLayout(headers: string[], layout: Layout): Layout {
   const headerSet = new Set(headers);
   const filtered: Layout = [];
 
-  for (const entry of layout) {
-    if (
-      entry.type === "SA" ||
-      entry.type === "NA" ||
-      entry.type === "WEIGHT" ||
-      entry.type === "DATE"
-    ) {
-      if (headerSet.has(entry.key)) filtered.push(entry);
-    } else if (entry.type === "MA") {
-      const matchedItems = entry.items.filter((item) => headerSet.has(`${entry.key}_${item.code}`));
+  for (const q of layout) {
+    if (q.type === "SA" || q.type === "NA" || q.type === "WEIGHT" || q.type === "DATE") {
+      if (headerSet.has(q.key)) filtered.push(q);
+    } else if (q.type === "MA") {
+      const matchedItems = q.items.filter((item) => headerSet.has(`${q.key}_${item.code}`));
       if (matchedItems.length > 0) {
-        filtered.push({ ...entry, items: matchedItems });
+        filtered.push({ ...q, items: matchedItems });
       }
     }
   }
