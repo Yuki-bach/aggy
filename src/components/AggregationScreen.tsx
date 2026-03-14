@@ -5,15 +5,19 @@ import SettingsPanel from "./aggregation/SettingsPanel";
 import { runAggregation } from "../lib/duckdb";
 import { buildQuestions, findWeightColumn } from "../lib/layout";
 import { t } from "../lib/i18n";
-import type { CsvData, LayoutData } from "../lib/types";
+import type { RawData, LayoutData } from "../lib/types";
 
 interface AggregationScreenProps {
-  csv: CsvData;
+  rawData: RawData;
   layout: LayoutData;
   dateWarnings: string[];
 }
 
-export default function AggregationScreen({ csv, layout, dateWarnings }: AggregationScreenProps) {
+export default function AggregationScreen({
+  rawData,
+  layout,
+  dateWarnings,
+}: AggregationScreenProps) {
   const questions = buildQuestions(layout.layout);
   const weightCol = findWeightColumn(layout.layout);
 
@@ -50,7 +54,7 @@ export default function AggregationScreen({ csv, layout, dateWarnings }: Aggrega
   return (
     <>
       <SettingsPanel
-        csv={csv}
+        rawData={rawData}
         layout={layout}
         questions={questions}
         crossSelected={crossSelected}

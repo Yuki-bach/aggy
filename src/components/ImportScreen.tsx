@@ -8,21 +8,21 @@ import { t } from "../lib/i18n";
 import { FileUploadPanel } from "./import/FileUploadPanel";
 import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./import/SavedFiles";
 import { ValidationStep } from "./import/ValidationStep";
-import type { CsvData, LayoutData } from "../lib/types";
+import type { RawData, LayoutData } from "../lib/types";
 
 const GettingStartedModal = lazy(() =>
   import("./import/GettingStarted").then((m) => ({ default: m.GettingStartedModal })),
 );
 
-function formatLoadedInfo(csv: CsvData): string {
+function formatLoadedInfo(rawData: RawData): string {
   return t("summary.rows", {
-    rows: csv.rowCount.toLocaleString(),
-    cols: csv.headers.length,
+    rows: rawData.rowCount.toLocaleString(),
+    cols: rawData.headers.length,
   });
 }
 
 interface ImportScreenProps {
-  onComplete: (csv: CsvData, layout: LayoutData, dateWarnings: string[]) => void;
+  onComplete: (rawData: RawData, layout: LayoutData, dateWarnings: string[]) => void;
 }
 
 const STEPS = [
@@ -98,30 +98,34 @@ function HelpButton({ onClick }: { onClick: () => void }) {
 }
 
 export default function ImportScreen({ onComplete }: ImportScreenProps) {
-  const [csv, setCsv] = useState<CsvData | null>(null);
+  const [rawData, setRawData] = useState<RawData | null>(null);
   const [layout, setLayout] = useState<LayoutData | null>(null);
   const [step, setStep] = useState(1);
   const [gsOpen, setGsOpen] = useState(false);
 
   const loadedFromSavedRef = useRef(false);
   const opfsPayloadRef = useRef<{
-    csvText?: string;
-    csvFileName?: string;
+    rawDataText?: string;
+    rawDataFileName?: string;
     layoutJson?: string;
     layoutFileName?: string;
   }>({});
 
   const { entries, deleteEntry } = useSavedFiles();
 
-  const bothLoaded = csv !== null && layout !== null;
-  const loadedInfo = csv ? formatLoadedInfo(csv) : null;
+  const bothLoaded = rawData !== null && layout !== null;
+  const loadedInfo = rawData ? formatLoadedInfo(rawData) : null;
 
-  const handleCsvFile = useCallback(async (file: File) => {
+  const handleRawDataFile = useCallback(async (file: File) => {
     try {
       const text = await file.text();
       const result = await loadCSV(text);
-      opfsPayloadRef.current = { ...opfsPayloadRef.current, csvText: text, csvFileName: file.name };
-      setCsv({
+      opfsPayloadRef.current = {
+        ...opfsPayloadRef.current,
+        rawDataText: text,
+        rawDataFileName: file.name,
+      };
+      setRawData({
         fileName: file.name,
         headers: result.headers,
         rowCount: result.rowCount,
@@ -150,18 +154,18 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
   const handleLoadFromSaved = useCallback(async (folderId: string) => {
     try {
-      const { csvText, csvName, layoutJson, layoutName } = await loadSaved(folderId);
+      const { rawDataText, rawDataName, layoutJson, layoutName } = await loadSaved(folderId);
       const parsed = parseLayout(layoutJson);
-      const result = await loadCSV(csvText);
+      const result = await loadCSV(rawDataText);
 
       opfsPayloadRef.current = {
-        csvText,
-        csvFileName: csvName,
+        rawDataText,
+        rawDataFileName: rawDataName,
         layoutJson,
         layoutFileName: layoutName,
       };
-      setCsv({
-        fileName: csvName,
+      setRawData({
+        fileName: rawDataName,
         headers: result.headers,
         rowCount: result.rowCount,
       });
@@ -181,13 +185,13 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   }
 
   async function handleProceed(): Promise<void> {
-    if (!csv || !layout) return;
+    if (!rawData || !layout) return;
     const payload = opfsPayloadRef.current;
-    if (!loadedFromSavedRef.current && payload.csvText && payload.layoutJson) {
+    if (!loadedFromSavedRef.current && payload.rawDataText && payload.layoutJson) {
       try {
         await saveData(
-          payload.csvFileName!,
-          payload.csvText,
+          payload.rawDataFileName!,
+          payload.rawDataText,
           payload.layoutFileName!,
           payload.layoutJson,
         );
@@ -196,9 +200,9 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         // OPFS save is best-effort
       }
     }
-    const filtered = filterLayout(csv.headers, layout.layout);
+    const filtered = filterLayout(rawData.headers, layout.layout);
     const { layout: prepared, warnings } = await prepareDateLayout(filtered);
-    onComplete(csv, { ...layout, layout: prepared }, warnings);
+    onComplete(rawData, { ...layout, layout: prepared }, warnings);
   }
 
   return (
@@ -211,9 +215,9 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         {step === 1 && (
           <>
             <FileUploadPanel
-              csvFileName={csv?.fileName ?? null}
+              rawDataFileName={rawData?.fileName ?? null}
               layoutFileName={layout?.fileName ?? null}
-              onCsvFile={handleCsvFile}
+              onRawDataFile={handleRawDataFile}
               onLayoutFile={handleLayoutFile}
             />
 
@@ -243,9 +247,9 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
           </>
         )}
 
-        {step === 2 && csv && layout && (
+        {step === 2 && rawData && layout && (
           <ValidationStep
-            csv={csv}
+            rawData={rawData}
             layout={layout}
             onProceed={handleProceed}
             onBack={handleBackToUpload}
