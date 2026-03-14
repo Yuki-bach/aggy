@@ -6,7 +6,7 @@ import { prepareDateColumns, type DatePreparationResult } from "./datePreparatio
 import { validateData, type ValidationResult } from "./validateData";
 
 export type DuckStatus = "loading" | "ready" | "error";
-export type StatusListener = (s: DuckStatus, label?: string) => void;
+export type StatusListener = (s: DuckStatus, label: string) => void;
 
 let statusListener: StatusListener | null = null;
 
