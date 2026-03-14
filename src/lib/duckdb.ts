@@ -1,6 +1,7 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, Tally } from "./agg/types";
 import type { Layout } from "./layout";
+import { validateLayoutStructure, buildValidLayout } from "./layout";
 import { buildTallies } from "./agg/buildTallies";
 import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
 import { validateRawData, type Diagnostics } from "./validateRawData";
@@ -75,8 +76,12 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
   return { headers, rowCount };
 }
 
-/** Validate CSV data against layout definition */
-export async function runValidation(headers: string[], layout: Layout): Promise<Diagnostics> {
+/** Validate layout structure + CSV data against layout definition */
+export async function runValidation(rawJson: unknown[], headers: string[]): Promise<Diagnostics> {
+  const layoutDiags = validateLayoutStructure(rawJson);
+  if (layoutDiags.length > 0) return layoutDiags;
+
+  const layout = buildValidLayout(rawJson);
   const c = await getConnection();
   return validateRawData(c, headers, layout);
 }

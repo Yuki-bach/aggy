@@ -2,11 +2,13 @@ import type { Question } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import type { RawData, LayoutData } from "../../lib/types";
+import type { Layout } from "../../lib/layout";
 import { countLayoutColumns } from "../../lib/layout";
 
 interface SettingsPanelProps {
   rawData: RawData;
   layout: LayoutData;
+  preparedLayout: Layout;
   questions: Question[];
   crossSelected: Record<string, boolean>;
   onCrossToggle: (key: string, checked: boolean) => void;
@@ -21,6 +23,7 @@ interface SettingsPanelProps {
 export default function SettingsPanel({
   rawData,
   layout,
+  preparedLayout,
   questions,
   crossSelected,
   onCrossToggle,
@@ -49,7 +52,7 @@ export default function SettingsPanel({
             }}
             layout={{
               fileName: layout.fileName,
-              colCount: countLayoutColumns(layout.layout),
+              colCount: countLayoutColumns(preparedLayout),
             }}
           />
         </div>

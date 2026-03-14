@@ -20,7 +20,7 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
     setDiagnostics(null);
     setError(null);
 
-    runValidation(rawData.headers, layout.layout)
+    runValidation(layout.rawJson, rawData.headers)
       .then((r) => {
         if (!cancelled) setDiagnostics(r);
       })
@@ -62,6 +62,10 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
       <h3 class="text-sm font-bold tracking-wider text-muted">{t("validation.title")}</h3>
 
       <ul class="space-y-2 text-sm">
+        <CheckItem
+          label={t("validation.check.layoutStructure")}
+          status={statusByType.get("invalidLayout") ?? "ok"}
+        />
         <CheckItem
           label={t("validation.check.columns")}
           status={statusByType.get("dropped") ?? "ok"}

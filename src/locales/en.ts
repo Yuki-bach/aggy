@@ -18,6 +18,7 @@ const en: Record<string, string> = {
   // Validation step
   "validation.title": "Data Validation",
   "validation.running": "Validating...",
+  "validation.check.layoutStructure": "Layout JSON structure is valid",
   "validation.check.saCode": "SA column codes match layout definition",
   "validation.check.columns": "Layout-defined columns exist in CSV",
   "validation.check.maValues": "MA columns contain only 0/1",
@@ -25,6 +26,7 @@ const en: Record<string, string> = {
   "validation.ok": "OK",
   "validation.error": "Error",
   "validation.warn": "Warning",
+  "validation.detail.invalidLayout": "{key}: {reason}",
   "validation.detail.dropped": "{key} ({label}, {type}) not found in CSV",
   "validation.detail.unknownCode": "{key} ({label}) has undefined codes: {codes}",
   "validation.detail.invalidMAValue": "{key} ({label}) MA columns have non-0/1 values: {values}",

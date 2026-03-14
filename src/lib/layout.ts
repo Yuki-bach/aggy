@@ -1,4 +1,5 @@
 import type { Question } from "./agg/types";
+import type { Diagnostics } from "./validateRawData";
 
 export interface LayoutItem {
   code: string;
@@ -25,7 +26,8 @@ export type Layout = LayoutQuestion[];
 const VALID_TYPES = new Set(["SA", "MA", "NA", "WEIGHT", "DATE"]);
 const VALID_GRANULARITIES = new Set(["year", "month", "week", "day"]);
 
-export function parseLayout(jsonText: string): Layout {
+/** Parse JSON text into an unknown array. Throws only on JSON syntax errors or non-array input. */
+export function parseLayoutJson(jsonText: string): unknown[] {
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonText);
@@ -35,37 +37,112 @@ export function parseLayout(jsonText: string): Layout {
   if (!Array.isArray(parsed)) {
     throw new Error("レイアウトファイルはJSON配列である必要があります。");
   }
-  for (const entry of parsed as unknown[]) {
+  return parsed as unknown[];
+}
+
+/** Validate layout structure and return diagnostics (does not throw). */
+export function validateLayoutStructure(raw: unknown[]): Diagnostics {
+  const diagnostics: Diagnostics = [];
+
+  for (let i = 0; i < raw.length; i++) {
+    const entry = raw[i];
     if (typeof entry !== "object" || entry === null) {
-      throw new Error("各エントリはオブジェクトである必要があります。");
+      diagnostics.push({
+        key: `[${i}]`,
+        label: "",
+        severity: "error",
+        type: "invalidLayout",
+        params: { reason: "各エントリはオブジェクトである必要があります" },
+      });
+      continue;
     }
     const e = entry as Record<string, unknown>;
+    const key = typeof e["key"] === "string" ? e["key"] : `[${i}]`;
+
     if (typeof e["key"] !== "string") {
-      throw new Error('各エントリに "key"（文字列）が必要です。');
+      diagnostics.push({
+        key,
+        label: "",
+        severity: "error",
+        type: "invalidLayout",
+        params: { reason: '"key"（文字列）が必要です' },
+      });
+      continue;
     }
     if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) {
-      throw new Error(
-        `"${e["key"]}": "type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります。`,
-      );
+      diagnostics.push({
+        key,
+        label: "",
+        severity: "error",
+        type: "invalidLayout",
+        params: {
+          reason: `"type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります`,
+        },
+      });
+      continue;
     }
     if (typeof e["label"] !== "string") {
-      throw new Error(`"${e["key"]}": "label"（文字列）が必要です。`);
+      diagnostics.push({
+        key,
+        label: "",
+        severity: "error",
+        type: "invalidLayout",
+        params: { reason: '"label"（文字列）が必要です' },
+      });
+      continue;
     }
     const type = e["type"] as string;
     if (type === "SA" || type === "MA") {
       if (!Array.isArray(e["items"]) || e["items"].length === 0) {
-        throw new Error(`"${e["key"]}": ${type} には "items"（1件以上の配列）が必要です。`);
+        diagnostics.push({
+          key,
+          label: e["label"] as string,
+          severity: "error",
+          type: "invalidLayout",
+          params: { reason: `${type} には "items"（1件以上の配列）が必要です` },
+        });
+        continue;
       }
     }
     if (type === "DATE") {
       if (typeof e["granularity"] !== "string" || !VALID_GRANULARITIES.has(e["granularity"])) {
-        throw new Error(
-          `"${e["key"]}": DATE には "granularity"（${[...VALID_GRANULARITIES].join(", ")}）が必要です。`,
-        );
+        diagnostics.push({
+          key,
+          label: e["label"] as string,
+          severity: "error",
+          type: "invalidLayout",
+          params: {
+            reason: `DATE には "granularity"（${[...VALID_GRANULARITIES].join(", ")}）が必要です`,
+          },
+        });
+        continue;
       }
     }
   }
-  return parsed as Layout;
+
+  return diagnostics;
+}
+
+/** Build Layout from raw entries that pass structure validation. */
+export function buildValidLayout(raw: unknown[]): Layout {
+  const layout: Layout = [];
+  for (const entry of raw) {
+    if (typeof entry !== "object" || entry === null) continue;
+    const e = entry as Record<string, unknown>;
+    if (typeof e["key"] !== "string") continue;
+    if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) continue;
+    if (typeof e["label"] !== "string") continue;
+    const type = e["type"] as string;
+    if ((type === "SA" || type === "MA") && (!Array.isArray(e["items"]) || e["items"].length === 0))
+      continue;
+    if (
+      type === "DATE" &&
+      (typeof e["granularity"] !== "string" || !VALID_GRANULARITIES.has(e["granularity"]))
+    )
+      continue;
+    layout.push(entry as LayoutQuestion);
+  }
+  return layout;
 }
 
 /** Filter layout entries to only include columns present in CSV headers */
