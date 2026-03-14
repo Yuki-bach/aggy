@@ -142,6 +142,60 @@ export function generateNADataset(opts: DatasetOpts): NADataset {
   };
 }
 
+interface NACrossDataset {
+  csv: string;
+  naColumn: string;
+  saAxis: Shape;
+  maAxis: Shape;
+  weightCol: string;
+}
+
+export function generateNACrossDataset(opts: DatasetOpts): NACrossDataset {
+  const rng = new Rng(opts.seed);
+  const saCodes = ["1", "2", "3"];
+  const maCodes = ["1", "2", "3"];
+  const nullRate = opts.nullRate ?? 0.1;
+  const weighted = opts.weighted ?? false;
+
+  const maColumns = maCodes.map((_, i) => `q_ma_${i + 1}`);
+  const headers = [
+    "id",
+    ...(weighted ? ["weight"] : []),
+    "q_na",
+    "q_sa",
+    ...maColumns,
+  ];
+  const rows: (string | number | null)[][] = [];
+
+  for (let i = 1; i <= opts.rowCount; i++) {
+    const row: (string | number | null)[] = [i];
+    if (weighted) {
+      row.push(Math.round((0.5 + rng.next() * 1.5) * 10) / 10);
+    }
+    // NA column
+    row.push(rng.next() < nullRate ? null : rng.int(0, 10));
+    // SA column
+    row.push(rng.next() < nullRate ? null : rng.pick(saCodes));
+    // MA columns
+    if (rng.next() < nullRate) {
+      for (let j = 0; j < maCodes.length; j++) row.push(null);
+    } else {
+      for (let j = 0; j < maCodes.length; j++) {
+        row.push(rng.next() < 0.4 ? 1 : 0);
+      }
+    }
+    rows.push(row);
+  }
+
+  return {
+    csv: buildCSV(headers, rows),
+    naColumn: "q_na",
+    saAxis: { type: "SA", columns: ["q_sa"], codes: saCodes },
+    maAxis: { type: "MA", columns: maColumns, codes: maCodes },
+    weightCol: weighted ? "weight" : "",
+  };
+}
+
 export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
   const rng = new Rng(opts.seed);
   const saCodes = ["1", "2", "3"];
