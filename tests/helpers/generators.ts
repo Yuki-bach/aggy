@@ -153,6 +153,7 @@ export function generateNADataset(opts: DatasetOpts): NADataset {
 
 export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
   const rng = new Rng(opts.seed);
+  // クロス集計は組み合わせ爆発を避けるため上限6（GT系は8）
   const saCount = rng.int(1, 6);
   const saCodes = Array.from({ length: saCount }, (_, i) => String(i + 1));
   const sa2Count = rng.int(1, 6);
