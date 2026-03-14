@@ -1,7 +1,6 @@
 import type { Tally } from "../../lib/agg/types";
-import { formatN } from "../../lib/format";
+import { formatN, formatStat } from "../../lib/format";
 import { t } from "../../lib/i18n";
-import { formatStat } from "./NaGrandTotalTable";
 
 interface NaCrossTableProps {
   grandTotalTally: Tally;

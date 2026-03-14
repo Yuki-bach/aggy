@@ -10,7 +10,7 @@ export default defineConfig({
   },
   test: {
     pool: "forks",
-    exclude: ["e2e/**", "node_modules/**"],
+    exclude: ["e2e/**", "node_modules/**", ".claude/**"],
     includeSource: ["src/**/*.{ts,tsx}"],
   },
   server: {
