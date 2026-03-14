@@ -1,6 +1,13 @@
 import type { Shape } from "../../src/lib/agg/types";
 import { buildCSV } from "./csv";
 
+export const SEEDS = 50;
+const ROW_RANGE = { min: 50, max: 200 };
+
+export function rowCount(seed: number): number {
+  return ROW_RANGE.min + ((seed * 17) % (ROW_RANGE.max - ROW_RANGE.min + 1));
+}
+
 export class Rng {
   private state: number;
 
