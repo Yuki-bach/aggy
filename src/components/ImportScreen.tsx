@@ -14,8 +14,7 @@ const GettingStartedModal = lazy(() =>
   import("./import/GettingStarted").then((m) => ({ default: m.GettingStartedModal })),
 );
 
-function formatLoadedInfo(csv: CsvData | null): string | null {
-  if (!csv) return null;
+function formatLoadedInfo(csv: CsvData): string {
   return t("summary.rows", {
     rows: csv.rowCount.toLocaleString(),
     cols: csv.headers.length,
@@ -115,7 +114,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const { entries, deleteEntry } = useSavedFiles();
 
   const bothLoaded = csv !== null && layout !== null;
-  const loadedInfo = formatLoadedInfo(csv);
+  const loadedInfo = csv ? formatLoadedInfo(csv) : null;
 
   const handleCsvFile = useCallback(async (file: File) => {
     try {
