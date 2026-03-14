@@ -9,8 +9,8 @@ import {
   maWeightedCountExpr,
   maShownCondition,
   maNoneSelectedCondition,
-  NO_ANSWER_VALUE,
 } from "./sqlHelpers";
+import { NO_ANSWER_VALUE } from "./constants";
 
 type CrossSliceData = {
   code: string;
