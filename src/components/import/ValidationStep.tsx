@@ -1,17 +1,17 @@
 import { useEffect, useState } from "preact/hooks";
 import { t } from "../../lib/i18n";
 import { runValidation } from "../../lib/duckdb";
-import type { Diagnostics } from "../../lib/validateCsv";
-import type { CsvData, LayoutData } from "../../lib/types";
+import type { Diagnostics } from "../../lib/validateRawData";
+import type { RawData, LayoutData } from "../../lib/types";
 
 interface ValidationStepProps {
-  csv: CsvData;
+  rawData: RawData;
   layout: LayoutData;
   onProceed: () => void;
   onBack: () => void;
 }
 
-export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationStepProps) {
+export function ValidationStep({ rawData, layout, onProceed, onBack }: ValidationStepProps) {
   const [diagnostics, setDiagnostics] = useState<Diagnostics | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
     setDiagnostics(null);
     setError(null);
 
-    runValidation(csv.headers, layout.layout)
+    runValidation(rawData.headers, layout.layout)
       .then((r) => {
         if (!cancelled) setDiagnostics(r);
       })
@@ -31,7 +31,7 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
     return () => {
       cancelled = true;
     };
-  }, [csv, layout]);
+  }, [rawData, layout]);
 
   if (error) {
     return (

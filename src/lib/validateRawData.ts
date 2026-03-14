@@ -12,8 +12,8 @@ export interface Diagnostic {
 
 export type Diagnostics = Diagnostic[];
 
-/** Validate CSV data against layout definition */
-export async function validateCsv(
+/** Validate raw data against layout definition */
+export async function validateRawData(
   conn: duckdb.AsyncDuckDBConnection,
   headers: string[],
   layout: Layout,

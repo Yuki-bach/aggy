@@ -1,13 +1,13 @@
 export interface SavedEntry {
   folderId: string;
-  csvName: string;
+  rawDataName: string;
   layoutName: string;
   timestamp: number;
 }
 
 export async function saveData(
-  csvName: string,
-  csvText: string,
+  rawDataName: string,
+  rawDataText: string,
   layoutName: string,
   layoutJson: string,
 ): Promise<SavedEntry> {
@@ -16,17 +16,17 @@ export async function saveData(
   const dir = await getAggyDir();
   const folder = await dir.getDirectoryHandle(folderId, { create: true });
 
-  const csvHandle = await folder.getFileHandle(csvName, { create: true });
-  const csvW = await csvHandle.createWritable();
-  await csvW.write(csvText);
-  await csvW.close();
+  const rawDataHandle = await folder.getFileHandle(rawDataName, { create: true });
+  const rawDataW = await rawDataHandle.createWritable();
+  await rawDataW.write(rawDataText);
+  await rawDataW.close();
 
   const jsonHandle = await folder.getFileHandle(layoutName, { create: true });
   const jsonW = await jsonHandle.createWritable();
   await jsonW.write(layoutJson);
   await jsonW.close();
 
-  return { folderId, csvName, layoutName, timestamp: ts };
+  return { folderId, rawDataName, layoutName, timestamp: ts };
 }
 
 export async function listSaved(): Promise<SavedEntry[]> {
@@ -38,14 +38,14 @@ export async function listSaved(): Promise<SavedEntry[]> {
     const ts = Number(name);
     if (!Number.isFinite(ts)) continue;
 
-    let csvName = "";
+    let rawDataName = "";
     let layoutName = "";
     for await (const [fileName] of (handle as FileSystemDirectoryHandle).entries()) {
-      if (fileName.endsWith(".csv")) csvName = fileName;
+      if (fileName.endsWith(".csv")) rawDataName = fileName;
       else if (fileName.endsWith(".json")) layoutName = fileName;
     }
-    if (csvName && layoutName) {
-      entries.push({ folderId: name, csvName, layoutName, timestamp: ts });
+    if (rawDataName && layoutName) {
+      entries.push({ folderId: name, rawDataName, layoutName, timestamp: ts });
     }
   }
 
@@ -55,24 +55,24 @@ export async function listSaved(): Promise<SavedEntry[]> {
 
 export async function loadSaved(
   folderId: string,
-): Promise<{ csvText: string; csvName: string; layoutJson: string; layoutName: string }> {
+): Promise<{ rawDataText: string; rawDataName: string; layoutJson: string; layoutName: string }> {
   const dir = await getAggyDir();
   const folder = await dir.getDirectoryHandle(folderId);
 
-  let csvName = "";
+  let rawDataName = "";
   let layoutName = "";
   for await (const [fileName] of folder.entries()) {
-    if (fileName.endsWith(".csv")) csvName = fileName;
+    if (fileName.endsWith(".csv")) rawDataName = fileName;
     else if (fileName.endsWith(".json")) layoutName = fileName;
   }
-  if (!csvName || !layoutName) throw new Error("不完全な保存データです");
+  if (!rawDataName || !layoutName) throw new Error("不完全な保存データです");
 
-  const csvFile = await (await folder.getFileHandle(csvName)).getFile();
-  const csvText = await csvFile.text();
+  const rawDataFile = await (await folder.getFileHandle(rawDataName)).getFile();
+  const rawDataText = await rawDataFile.text();
   const jsonFile = await (await folder.getFileHandle(layoutName)).getFile();
   const layoutJson = await jsonFile.text();
 
-  return { csvText, csvName, layoutJson, layoutName };
+  return { rawDataText, rawDataName, layoutJson, layoutName };
 }
 
 export async function deleteSaved(folderId: string): Promise<void> {
