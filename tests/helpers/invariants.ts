@@ -33,6 +33,61 @@ export function assertGrandTotalInvariants(
   }
 }
 
+export function assertNaGrandTotalInvariants(result: AggOutput): void {
+  // 1. Single slice with code === null
+  expect(result.slices).toHaveLength(1);
+  const slice = result.slices[0];
+  expect(slice.code).toBeNull();
+
+  // 2. stats exists
+  expect(slice.stats).toBeDefined();
+  const stats = slice.stats!;
+
+  // 3. codes.length === cells.length
+  expect(result.codes.length).toBe(slice.cells.length);
+
+  // 4. Each cell.pct ≈ (cell.count / n) * 100
+  for (const cell of slice.cells) {
+    expect(cell.count).toBeGreaterThanOrEqual(0);
+    if (slice.n > 0) {
+      expect(cell.pct).toBeCloseTo((cell.count / slice.n) * 100, 3);
+    }
+  }
+
+  // 5. sum(cells.count) ≈ n (each numeric value counted once)
+  const sumCounts = slice.cells.reduce((s, c) => s + c.count, 0);
+  expect(sumCounts).toBeCloseTo(slice.n, 3);
+
+  // 6. sum(cells.pct) ≈ 100 (when n > 0)
+  if (slice.n > 0) {
+    const sumPct = slice.cells.reduce((s, c) => s + c.pct, 0);
+    expect(sumPct).toBeCloseTo(100, 3);
+  }
+
+  // 7. stats.min <= stats.mean <= stats.max (when n > 0)
+  if (slice.n > 0) {
+    expect(stats.min).toBeLessThanOrEqual(stats.mean + 1e-9);
+    expect(stats.mean).toBeLessThanOrEqual(stats.max + 1e-9);
+  }
+
+  // 8. stats.min <= stats.median <= stats.max (when n > 0)
+  if (slice.n > 0) {
+    expect(stats.min).toBeLessThanOrEqual(stats.median + 1e-9);
+    expect(stats.median).toBeLessThanOrEqual(stats.max + 1e-9);
+  }
+
+  // 9. stats.sd >= 0
+  expect(stats.sd).toBeGreaterThanOrEqual(0);
+
+  // 10. stats.n === slice.n
+  expect(stats.n).toBeCloseTo(slice.n, 3);
+
+  // 11. codes are sorted in numeric ascending order
+  for (let i = 1; i < result.codes.length; i++) {
+    expect(Number(result.codes[i])).toBeGreaterThanOrEqual(Number(result.codes[i - 1]));
+  }
+}
+
 export function assertCrossInvariants(
   result: AggOutput,
   type: "SA" | "MA",
