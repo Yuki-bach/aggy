@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1773498542139,
+  "lastUpdate": 1773498711990,
   "repoUrl": "https://github.com/Yuki-bach/aggy",
   "entries": {
     "Benchmark": [
@@ -2293,6 +2293,80 @@ window.BENCHMARK_DATA = {
           {
             "name": "ma-only (10000 rows, 502 cols, cross=MA×2)",
             "value": 1425.9,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56685372+Yuki-bach@users.noreply.github.com",
+            "name": "Yuki Ogawa",
+            "username": "Yuki-bach"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "58a7aa03471d8fde96d84e3b74c00ea5d676e6d5",
+          "message": "Merge pull request #163 from Yuki-bach/test/agg-na-grand-total-pbt\n\ntest: aggNaGrandTotal の PBT テストを追加",
+          "timestamp": "2026-03-14T23:31:18+09:00",
+          "tree_id": "e9b67a656f5c5b045dbf8e4269c58f09ff0e0db3",
+          "url": "https://github.com/Yuki-bach/aggy/commit/58a7aa03471d8fde96d84e3b74c00ea5d676e6d5"
+        },
+        "date": 1773498711588,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "rows (10000 rows, 62 cols, cross=none)",
+            "value": 54.9,
+            "unit": "ms"
+          },
+          {
+            "name": "rows (10000 rows, 62 cols, cross=SA×2)",
+            "value": 155.5,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, 602 cols, cross=none)",
+            "value": 291.7,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, 602 cols, cross=SA×2)",
+            "value": 911.7,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, 602 cols, cross=none)",
+            "value": 271,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, 602 cols, cross=SA×2)",
+            "value": 962.1,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, 102 cols, cross=none)",
+            "value": 97.9,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, 102 cols, cross=SA×2)",
+            "value": 413.2,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, 502 cols, cross=none)",
+            "value": 141.3,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, 502 cols, cross=MA×2)",
+            "value": 1431.8,
             "unit": "ms"
           }
         ]
