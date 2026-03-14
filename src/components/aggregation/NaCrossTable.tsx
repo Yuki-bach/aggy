@@ -3,7 +3,7 @@ import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
 
 interface NaCrossTableProps {
-  gtTally: Tally;
+  grandTotalTally: Tally;
   crossTallies: Tally[];
 }
 
@@ -13,8 +13,8 @@ const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-bor
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
-export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
-  const gtStats = gtTally.slices[0].stats!;
+export function NaCrossTable({ grandTotalTally, crossTallies }: NaCrossTableProps) {
+  const grandTotalStats = grandTotalTally.slices[0].stats!;
 
   const crossGroups = crossTallies.map((ct) => ({
     axis: ct.by!,
@@ -25,11 +25,13 @@ export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
-      <caption class="sr-only">{t("table.caption.cross", { question: gtTally.label })}</caption>
+      <caption class="sr-only">
+        {t("table.caption.cross", { question: grandTotalTally.label })}
+      </caption>
       <thead>
         <tr>
           <th rowSpan={2} class="py-3 px-4" />
-          <th class={`${TH_BASE} text-center bg-gt-bg text-accent`}>{t("table.total")}</th>
+          <th class={`${TH_BASE} text-center bg-grandTotal-bg text-accent`}>{t("table.total")}</th>
           {crossGroups.map((group) => (
             <th
               key={group.axis.code}
@@ -60,7 +62,9 @@ export function NaCrossTable({ gtTally, crossTallies }: NaCrossTableProps) {
         {STAT_KEYS.map((key) => (
           <tr key={key}>
             <td class={`${TD_BASE} text-left text-sm`}>{t(`na.stat.${key}`)}</td>
-            <td class={`${TD_BASE} ${MONO} text-accent`}>{formatStat(key, gtStats[key])}</td>
+            <td class={`${TD_BASE} ${MONO} text-accent`}>
+              {formatStat(key, grandTotalStats[key])}
+            </td>
             {crossGroups.map((group, gi) =>
               group.tally.slices.map((slice, si) => (
                 <td

@@ -95,7 +95,7 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
         {questionCodes.map((q) => (
           <TallyCard
             key={q}
-            gtTally={tallies.find((t) => t.questionCode === q && t.by === null)!}
+            grandTotalTally={tallies.find((t) => t.questionCode === q && t.by === null)!}
             crossTallies={tallies.filter((t) => t.questionCode === q && t.by !== null)}
             viewMode={viewMode}
             tableOpts={tableOpts}

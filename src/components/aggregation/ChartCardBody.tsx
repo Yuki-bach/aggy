@@ -6,16 +6,16 @@ import type { ChartType } from "./viewTypes";
 import type { ChartConfiguration } from "chart.js";
 
 interface ChartCardBodyProps {
-  gtTally: Tally;
+  grandTotalTally: Tally;
   crossTallies: Tally[];
-  gtChartType: ChartType;
+  grandTotalChartType: ChartType;
   paletteId: PaletteId;
 }
 
 export function ChartCardBody({
-  gtTally,
+  grandTotalTally,
   crossTallies,
-  gtChartType,
+  grandTotalChartType,
   paletteId,
 }: ChartCardBodyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,21 +33,27 @@ export function ChartCardBody({
     if (isCross) {
       chartRef.current = buildCrossChart(
         canvas,
-        gtTally,
+        grandTotalTally,
         crossTallies,
-        gtChartType,
+        grandTotalChartType,
         theme,
         paletteId,
       );
     } else {
-      chartRef.current = buildGtChart(canvas, gtTally, gtChartType, theme, paletteId);
+      chartRef.current = buildGrandTotalChart(
+        canvas,
+        grandTotalTally,
+        grandTotalChartType,
+        theme,
+        paletteId,
+      );
     }
 
     return () => {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [gtTally, crossTallies, gtChartType, paletteId]);
+  }, [grandTotalTally, crossTallies, grandTotalChartType, paletteId]);
 
   return (
     <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
@@ -60,7 +66,7 @@ function resolveLabel(code: string, tally: Tally): string {
   return tally.labels[code];
 }
 
-function buildGtChart(
+function buildGrandTotalChart(
   canvas: HTMLCanvasElement,
   tally: Tally,
   chartType: ChartType,
@@ -152,9 +158,9 @@ function buildGtChart(
 
 function buildCrossChart(
   canvas: HTMLCanvasElement,
-  gtTally: Tally,
+  grandTotalTally: Tally,
   crossTallies: Tally[],
-  gtChartType: ChartType,
+  grandTotalChartType: ChartType,
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,
 ): Chart {
@@ -167,10 +173,10 @@ function buildCrossChart(
     }));
   });
 
-  if (gtChartType === "obi") {
+  if (grandTotalChartType === "obi") {
     const subLabels = allSlices.map((s) => s.label);
-    const datasets = gtTally.codes.map((code, i) => ({
-      label: resolveLabel(code, gtTally),
+    const datasets = grandTotalTally.codes.map((code, i) => ({
+      label: resolveLabel(code, grandTotalTally),
       data: allSlices.map((s) => s.slice.cells[i]?.pct ?? 0),
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
@@ -204,12 +210,12 @@ function buildCrossChart(
     } as ChartConfiguration);
   }
 
-  const isHorizontal = gtChartType === "bar-h";
-  const labels = gtTally.codes.map((code) => resolveLabel(code, gtTally));
+  const isHorizontal = grandTotalChartType === "bar-h";
+  const labels = grandTotalTally.codes.map((code) => resolveLabel(code, grandTotalTally));
 
   const datasets = allSlices.map((s, i) => ({
     label: s.label,
-    data: gtTally.codes.map((_, ci) => s.slice.cells[ci]?.pct ?? 0),
+    data: grandTotalTally.codes.map((_, ci) => s.slice.cells[ci]?.pct ?? 0),
     backgroundColor: getSeriesColor(i, paletteId),
     borderRadius: 3,
     maxBarThickness: 40,

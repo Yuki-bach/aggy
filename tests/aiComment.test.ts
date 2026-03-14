@@ -89,14 +89,14 @@ describe("buildPromptPayload", () => {
   });
 
   it("GT集計のみがプロンプトに含まれ、クロス集計は除外される", () => {
-    const gt = makeTally({ questionCode: "q1", label: "性別" });
+    const grandTotal = makeTally({ questionCode: "q1", label: "性別" });
     const cross = makeTally({
       questionCode: "q2",
       label: "年代",
       by: { code: "q1", label: "性別", labels: { "1": "男性" } },
     });
 
-    const payload = buildPromptPayload([gt, cross], "");
+    const payload = buildPromptPayload([grandTotal, cross], "");
 
     expect(payload).toContain("q1");
     expect(payload).not.toContain("q2");

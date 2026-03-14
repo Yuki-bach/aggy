@@ -30,7 +30,7 @@ export function Toolbar({ tallies, weightCol, currentViewMode, callbacks }: Tool
 
   return (
     <div class="mb-6 flex items-center gap-4">
-      <h2 class="text-xl font-bold">{t("result.title.gt")}</h2>
+      <h2 class="text-xl font-bold">{t("result.title.grandTotal")}</h2>
       <span class="text-xs text-muted">
         {t("result.meta", { count: questionCount, weight: weightText })}
       </span>

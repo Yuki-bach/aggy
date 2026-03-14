@@ -1,15 +1,15 @@
 import type { Tally } from "../../lib/agg/types";
 import { ChartCardBody } from "./ChartCardBody";
 import { CrossTable } from "./CrossTable";
-import { GtTable } from "./GtTable";
+import { GrandTotalTable } from "./GrandTotalTable";
 import { NaChartCardBody } from "./NaChartCardBody";
 import { NaCrossTable } from "./NaCrossTable";
-import { NaGtTable } from "./NaGtTable";
+import { NaGrandTotalTable } from "./NaGrandTotalTable";
 import type { ChartOpts, TableOpts, ViewMode } from "./viewTypes";
 import { formatN } from "../../lib/format";
 
 interface TallyCardProps {
-  gtTally: Tally;
+  grandTotalTally: Tally;
   crossTallies: Tally[];
   viewMode: ViewMode;
   tableOpts: TableOpts;
@@ -17,7 +17,7 @@ interface TallyCardProps {
 }
 
 export function TallyCard({
-  gtTally,
+  grandTotalTally,
   crossTallies,
   viewMode,
   tableOpts,
@@ -25,7 +25,7 @@ export function TallyCard({
 }: TallyCardProps) {
   const hasCross = crossTallies.length > 0;
 
-  const gtN = gtTally.slices[0]?.n ?? 0;
+  const grandTotalN = grandTotalTally.slices[0]?.n ?? 0;
 
   return (
     <div
@@ -33,14 +33,14 @@ export function TallyCard({
     >
       <div class="flex items-baseline gap-3 border-b border-border p-4">
         <div class="flex min-w-0 flex-col gap-0.5">
-          <span class="text-sm font-bold text-accent">{gtTally.label}</span>
-          <span class="text-xs tracking-wide text-muted">{gtTally.questionCode}</span>
+          <span class="text-sm font-bold text-accent">{grandTotalTally.label}</span>
+          <span class="text-xs tracking-wide text-muted">{grandTotalTally.questionCode}</span>
         </div>
-        <span class="text-xs tracking-wide text-muted">{gtTally.type}</span>
-        <span class="ml-auto text-xs text-muted">n={formatN(gtN)}</span>
+        <span class="text-xs tracking-wide text-muted">{grandTotalTally.type}</span>
+        <span class="ml-auto text-xs text-muted">n={formatN(grandTotalN)}</span>
       </div>
       <CardBody
-        gtTally={gtTally}
+        grandTotalTally={grandTotalTally}
         crossTallies={crossTallies}
         viewMode={viewMode}
         tableOpts={tableOpts}
@@ -50,21 +50,27 @@ export function TallyCard({
   );
 }
 
-function CardBody({ gtTally, crossTallies, viewMode, tableOpts, chartOpts }: TallyCardProps) {
-  if (gtTally.type === "NA") {
+function CardBody({
+  grandTotalTally,
+  crossTallies,
+  viewMode,
+  tableOpts,
+  chartOpts,
+}: TallyCardProps) {
+  if (grandTotalTally.type === "NA") {
     if (viewMode === "chart") {
       return (
         <NaChartCardBody
-          gtTally={gtTally}
+          grandTotalTally={grandTotalTally}
           crossTallies={crossTallies}
           paletteId={chartOpts.paletteId}
         />
       );
     }
     if (crossTallies.length > 0) {
-      return <NaCrossTable gtTally={gtTally} crossTallies={crossTallies} />;
+      return <NaCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;
     }
-    return <NaGtTable tally={gtTally} />;
+    return <NaGrandTotalTable tally={grandTotalTally} />;
   }
 
   // SA | MA
@@ -72,17 +78,21 @@ function CardBody({ gtTally, crossTallies, viewMode, tableOpts, chartOpts }: Tal
     const { saChartType, maChartType, paletteId } = chartOpts;
     return (
       <ChartCardBody
-        gtTally={gtTally}
+        grandTotalTally={grandTotalTally}
         crossTallies={crossTallies}
-        gtChartType={gtTally.type === "SA" ? saChartType : maChartType}
+        grandTotalChartType={grandTotalTally.type === "SA" ? saChartType : maChartType}
         paletteId={paletteId}
       />
     );
   }
   if (crossTallies.length > 0) {
     return (
-      <CrossTable gtTally={gtTally} crossTallies={crossTallies} pctDir={tableOpts.pctDirection} />
+      <CrossTable
+        grandTotalTally={grandTotalTally}
+        crossTallies={crossTallies}
+        pctDir={tableOpts.pctDirection}
+      />
     );
   }
-  return <GtTable tally={gtTally} maxPct={tableOpts.maxPct} />;
+  return <GrandTotalTable tally={grandTotalTally} maxPct={tableOpts.maxPct} />;
 }

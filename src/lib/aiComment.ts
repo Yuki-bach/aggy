@@ -68,10 +68,10 @@ function summarizeResults(tallies: Tally[], weightCol: string, topN: number): st
     lines.push(t("ai.weight", { col: weightCol }));
   }
 
-  // Only use GT tallies
-  const gtTallies = tallies.filter((t) => t.by === null);
+  // Only use Grand Total tallies
+  const grandTotalTallies = tallies.filter((t) => t.by === null);
 
-  for (const tally of gtTallies) {
+  for (const tally of grandTotalTallies) {
     if (tally.type === "NA") {
       const stats = tally.slices[0].stats!;
       lines.push(`${tally.questionCode}: ${tally.label} (NA, n=${stats.n})`);

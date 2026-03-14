@@ -2,17 +2,17 @@ import type { Tally } from "../../lib/agg/types";
 import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
-interface GtTableProps {
+interface GrandTotalTableProps {
   tally: Tally;
   maxPct: number;
 }
 
-export function GtTable({ tally, maxPct }: GtTableProps) {
+export function GrandTotalTable({ tally, maxPct }: GrandTotalTableProps) {
   const slice = tally.slices[0];
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums">
-      <caption class="sr-only">{t("table.caption.gt", { question: tally.label })}</caption>
+      <caption class="sr-only">{t("table.caption.grandTotal", { question: tally.label })}</caption>
       <thead>
         <tr>
           <Th>{t("table.option")}</Th>
