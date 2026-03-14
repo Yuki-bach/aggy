@@ -9,7 +9,8 @@ export function weightExpr(weightCol: string): string {
 }
 
 export function maWeightedCountExpr(maCol: string, weightCol: string): string {
-  return weightCol ? `SUM("${esc(maCol)}" * "${esc(weightCol)}")` : `SUM("${esc(maCol)}")::DOUBLE`;
+  const col = `CAST("${esc(maCol)}" AS DOUBLE)`;
+  return weightCol ? `SUM(${col} * "${esc(weightCol)}")` : `SUM(${col})::DOUBLE`;
 }
 
 /** MA "shown" condition: at least one sub-column is non-NULL */

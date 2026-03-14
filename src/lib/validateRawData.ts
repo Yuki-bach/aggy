@@ -6,7 +6,7 @@ export interface Diagnostic {
   key: string;
   label: string;
   severity: "error" | "warn";
-  type: "dropped" | "unknownCode" | "invalidMAValue" | "nonNumeric" | "invalidLayout";
+  type: "dropped" | "unknownCode" | "invalidMAValue" | "nonNumeric" | "allNull" | "invalidLayout";
   params: Record<string, string>;
 }
 
@@ -34,6 +34,8 @@ export async function validateRawData(
     } else if (q.type === "MA") {
       const d = await checkMAValues(conn, q, headerSet);
       if (d) diagnostics.push(d);
+      const allNull = await checkMAAllNull(conn, q, headerSet);
+      if (allNull) diagnostics.push(allNull);
     } else if (q.type === "NA" || q.type === "WEIGHT") {
       const d = await checkNumeric(conn, q);
       if (d) diagnostics.push(d);
@@ -129,6 +131,33 @@ async function checkMAValues(
       severity: "error",
       type: "invalidMAValue",
       params: { values },
+    };
+  }
+  return null;
+}
+
+async function checkMAAllNull(
+  conn: duckdb.AsyncDuckDBConnection,
+  q: Extract<LayoutQuestion, { type: "MA" }>,
+  headerSet: Set<string>,
+): Promise<Diagnostic | null> {
+  const presentCols = q.items
+    .map((item) => `${q.key}_${item.code}`)
+    .filter((col) => headerSet.has(col));
+
+  if (presentCols.length === 0) return null;
+
+  const shownCondition = presentCols.map((c) => `"${esc(c)}" IS NOT NULL`).join(" OR ");
+  const result = await conn.query(`SELECT COUNT(*) AS n FROM survey WHERE ${shownCondition}`);
+  const count = Number(result.toArray()[0].n);
+
+  if (count === 0) {
+    return {
+      key: q.key,
+      label: q.label,
+      severity: "warn",
+      type: "allNull",
+      params: {},
     };
   }
   return null;
