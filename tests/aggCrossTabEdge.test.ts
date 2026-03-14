@@ -215,6 +215,66 @@ describe("aggCrossTabEdge - エッジケース", () => {
     }
   });
 
+  it("MA(main)全行NULL × SA(cross) → 各スライスn=0", async () => {
+    await loadCSV(
+      buildCSV(["id", "q_1", "q_2", "cross"], [
+        [1, null, null, 1],
+        [2, null, null, 2],
+        [3, null, null, 1],
+      ]),
+    );
+    const mainInput: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
+    const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
+    const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
+
+    for (const slice of result.slices) {
+      expect(slice.n).toBe(0);
+      for (const cell of slice.cells) {
+        expect(cell.count).toBe(0);
+      }
+    }
+  });
+
+  it("SA(main) × MA(cross)全行NULL → スライスなしまたは全n=0", async () => {
+    await loadCSV(
+      buildCSV(["id", "main", "q_1", "q_2"], [
+        [1, 1, null, null],
+        [2, 2, null, null],
+        [3, 1, null, null],
+      ]),
+    );
+    const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
+    const crossInput: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
+    const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
+
+    for (const slice of result.slices) {
+      expect(slice.n).toBe(0);
+      for (const cell of slice.cells) {
+        expect(cell.count).toBe(0);
+      }
+    }
+  });
+
+  it("MA(main) codes=1 × SA(cross) → 正常集計", async () => {
+    await loadCSV(
+      buildCSV(["id", "q_1", "cross"], [
+        [1, 1, 1],
+        [2, 0, 1],
+        [3, 1, 2],
+      ]),
+    );
+    const mainInput: Shape = { type: "MA", columns: ["q_1"], codes: ["1"] };
+    const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
+    const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
+
+    // slice "1": q_1=1 → 行1 = 1件, N/A → 行2 = 1件, n=2
+    expect(sliceN(result, "1")).toBe(2);
+    expect(sliceCounts(result, "1")[0]).toBe(1);
+    // slice "2": q_1=1 → 行3 = 1件, n=1
+    expect(sliceN(result, "2")).toBe(1);
+    expect(sliceCounts(result, "2")[0]).toBe(1);
+  });
+
   it("1行のみのクロス", async () => {
     await loadCSV(buildCSV(["id", "main", "cross"], [[1, 2, 3]]));
     const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
