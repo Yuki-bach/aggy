@@ -156,6 +156,14 @@ function buildGrandTotalChart(
   } as ChartConfiguration);
 }
 
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest;
+  test("resolveLabel: コードからラベルを引く", () => {
+    const mockTally = { labels: { "1": "はい", "2": "いいえ" } } as unknown as Tally;
+    expect(resolveLabel("1", mockTally)).toBe("はい");
+  });
+}
+
 function buildCrossChart(
   canvas: HTMLCanvasElement,
   grandTotalTally: Tally,

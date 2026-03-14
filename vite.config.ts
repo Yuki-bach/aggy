@@ -5,9 +5,13 @@ import preact from "@preact/preset-vite";
 
 export default defineConfig({
   plugins: [tailwindcss(), preact()],
+  define: {
+    "import.meta.vitest": "undefined",
+  },
   test: {
     pool: "forks",
     exclude: ["e2e/**", "node_modules/**"],
+    includeSource: ["src/**/*.{ts,tsx}"],
   },
   server: {
     headers: {

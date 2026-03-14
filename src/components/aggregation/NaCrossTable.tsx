@@ -1,6 +1,7 @@
 import type { Tally } from "../../lib/agg/types";
 import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
+import { formatStat } from "./NaGrandTotalTable";
 
 interface NaCrossTableProps {
   grandTotalTally: Tally;
@@ -80,9 +81,4 @@ export function NaCrossTable({ grandTotalTally, crossTallies }: NaCrossTableProp
       </tbody>
     </table>
   );
-}
-
-function formatStat(key: string, value: number): string {
-  if (key === "n") return value.toLocaleString();
-  return value.toFixed(2);
 }
