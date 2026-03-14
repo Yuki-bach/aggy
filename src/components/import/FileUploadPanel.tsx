@@ -2,16 +2,16 @@ import { t } from "../../lib/i18n";
 import { Dropzone } from "./Dropzone";
 
 interface FileUploadPanelProps {
-  csvFileName: string | null;
+  rawDataFileName: string | null;
   layoutFileName: string | null;
-  onCsvFile: (file: File) => void;
+  onRawDataFile: (file: File) => void;
   onLayoutFile: (file: File) => void;
 }
 
 export function FileUploadPanel({
-  csvFileName,
+  rawDataFileName,
   layoutFileName,
-  onCsvFile,
+  onRawDataFile,
   onLayoutFile,
 }: FileUploadPanelProps) {
   return (
@@ -21,8 +21,8 @@ export function FileUploadPanel({
           accept=".csv"
           icon={t("dropzone.csv.icon")}
           text={t("dropzone.csv.text")}
-          loadedFileName={csvFileName}
-          onFile={onCsvFile}
+          loadedFileName={rawDataFileName}
+          onFile={onRawDataFile}
         />
       </div>
       <div class="flex-1">

@@ -67,12 +67,12 @@ export function SavedFilesList({
               type="button"
               onClick={() => onSelectEntry(entry.folderId)}
             >
-              {entry.csvName} ({dateStr})
+              {entry.rawDataName} ({dateStr})
             </button>
             <button
               class="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center px-3 py-2 text-sm text-muted transition-colors hover:text-danger"
               type="button"
-              aria-label={t("saved.delete", { name: entry.csvName })}
+              aria-label={t("saved.delete", { name: entry.rawDataName })}
               onClick={async (e) => {
                 e.stopPropagation();
                 onDeleteEntry(entry.folderId);

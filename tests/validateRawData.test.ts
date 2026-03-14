@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { validateCsv, type Diagnostics } from "../src/lib/validateCsv";
+import { validateRawData, type Diagnostics } from "../src/lib/validateRawData";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import type { Layout } from "../src/lib/layout";
 
@@ -20,7 +20,7 @@ describe("validateData", () => {
       { type: "SA", key: "q1", label: "Q1", items: [{ code: "1", label: "A" }, { code: "2", label: "B" }] },
       { type: "MA", key: "q3", label: "Q3", items: [{ code: "1", label: "X" }, { code: "2", label: "Y" }] },
     ];
-    const result = await validateCsv(getConn(), ["q1", "q3_1", "q3_2"], layout);
+    const result = await validateRawData(getConn(), ["q1", "q3_1", "q3_2"], layout);
     expect(result).toEqual([]);
   });
 
@@ -31,7 +31,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "SA", key: "q1", label: "Q1", items: [{ code: "1", label: "A" }, { code: "2", label: "B" }] },
     ];
-    const result = await validateCsv(getConn(), ["q1"], layout);
+    const result = await validateRawData(getConn(), ["q1"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       type: "unknownCode",
@@ -48,7 +48,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "SA", key: "q1", label: "Q1", items: [{ code: "1", label: "A" }] },
     ];
-    const result = await validateCsv(getConn(), ["other"], layout);
+    const result = await validateRawData(getConn(), ["other"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ type: "dropped", severity: "warn", key: "q1" });
   });
@@ -60,7 +60,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "NA", key: "age", label: "年齢" },
     ];
-    const result = await validateCsv(getConn(), ["other"], layout);
+    const result = await validateRawData(getConn(), ["other"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ type: "dropped", severity: "warn", key: "age" });
   });
@@ -72,7 +72,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "WEIGHT", key: "w", label: "ウェイト" },
     ];
-    const result = await validateCsv(getConn(), ["other"], layout);
+    const result = await validateRawData(getConn(), ["other"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ type: "dropped", severity: "warn", key: "w" });
   });
@@ -84,7 +84,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "DATE", key: "date1", label: "回答日", granularity: "month" },
     ];
-    const result = await validateCsv(getConn(), ["other"], layout);
+    const result = await validateRawData(getConn(), ["other"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ type: "dropped", severity: "warn", key: "date1" });
   });
@@ -96,7 +96,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "MA", key: "q3", label: "Q3", items: [{ code: "1", label: "X" }, { code: "2", label: "Y" }] },
     ];
-    const result = await validateCsv(getConn(), ["other"], layout);
+    const result = await validateRawData(getConn(), ["other"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ type: "dropped", severity: "warn", key: "q3" });
   });
@@ -108,7 +108,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "MA", key: "q3", label: "Q3", items: [{ code: "1", label: "X" }, { code: "2", label: "Y" }] },
     ];
-    const result = await validateCsv(getConn(), ["q3_1", "q3_2"], layout);
+    const result = await validateRawData(getConn(), ["q3_1", "q3_2"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       type: "invalidMAValue",
@@ -125,7 +125,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "NA", key: "age", label: "年齢" },
     ];
-    const result = await validateCsv(getConn(), ["age"], layout);
+    const result = await validateRawData(getConn(), ["age"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       type: "nonNumeric",
@@ -142,7 +142,7 @@ describe("validateData", () => {
     const layout: Layout = [
       { type: "WEIGHT", key: "w", label: "ウェイト" },
     ];
-    const result = await validateCsv(getConn(), ["w"], layout);
+    const result = await validateRawData(getConn(), ["w"], layout);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       type: "nonNumeric",
@@ -161,7 +161,7 @@ describe("validateData", () => {
       { type: "MA", key: "q3", label: "Q3", items: [{ code: "1", label: "X" }, { code: "2", label: "Y" }] },
       { type: "NA", key: "missing", label: "欠損NA" },
     ];
-    const result = await validateCsv(getConn(), ["q1", "q3_1"], layout);
+    const result = await validateRawData(getConn(), ["q1", "q3_1"], layout);
 
     const types = result.map((d) => d.type);
     expect(types).toContain("unknownCode"); // q1 has code 9

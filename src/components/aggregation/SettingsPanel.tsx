@@ -1,11 +1,11 @@
 import type { Question } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
-import type { CsvData, LayoutData } from "../../lib/types";
+import type { RawData, LayoutData } from "../../lib/types";
 import { countLayoutColumns } from "../../lib/layout";
 
 interface SettingsPanelProps {
-  csv: CsvData;
+  rawData: RawData;
   layout: LayoutData;
   questions: Question[];
   crossSelected: Record<string, boolean>;
@@ -19,7 +19,7 @@ interface SettingsPanelProps {
 }
 
 export default function SettingsPanel({
-  csv,
+  rawData,
   layout,
   questions,
   crossSelected,
@@ -42,10 +42,10 @@ export default function SettingsPanel({
         <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("section.summary")}</h2>
         <div class="text-sm leading-relaxed text-text-secondary">
           <DataSummary
-            csv={{
-              fileName: csv.fileName,
-              rowCount: csv.rowCount,
-              headers: csv.headers,
+            rawData={{
+              fileName: rawData.fileName,
+              rowCount: rawData.rowCount,
+              headers: rawData.headers,
             }}
             layout={{
               fileName: layout.fileName,
@@ -149,17 +149,17 @@ function CrossConfig({
 }
 
 export function DataSummary({
-  csv,
+  rawData,
   layout,
 }: {
-  csv: { fileName: string; rowCount: number; headers: string[] };
+  rawData: { fileName: string; rowCount: number; headers: string[] };
   layout: { fileName: string; colCount: number };
 }) {
   return (
     <>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
         <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
-          {csv.fileName}
+          {rawData.fileName}
         </span>
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
@@ -169,7 +169,10 @@ export function DataSummary({
       </div>
       <div class="mb-1 flex items-baseline gap-2 pl-4">
         <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
-          {t("summary.rows", { rows: csv.rowCount.toLocaleString(), cols: csv.headers.length })}
+          {t("summary.rows", {
+            rows: rawData.rowCount.toLocaleString(),
+            cols: rawData.headers.length,
+          })}
         </span>
       </div>
     </>

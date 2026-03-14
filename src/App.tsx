@@ -5,13 +5,13 @@ import Header from "./components/Header";
 import ImportScreen from "./components/ImportScreen";
 import AggregationScreen from "./components/AggregationScreen";
 import { onLocaleChange } from "./lib/i18n";
-import type { CsvData, LayoutData } from "./lib/types";
+import type { RawData, LayoutData } from "./lib/types";
 
 export default function App() {
   const [screen, setScreen] = useState<"import" | "aggregation">("import");
   const [, setTick] = useState(0);
   const [loadedData, setLoadedData] = useState<{
-    csv: CsvData;
+    rawData: RawData;
     layout: LayoutData;
     dateWarnings: string[];
   } | null>(null);
@@ -22,10 +22,13 @@ export default function App() {
     onLocaleChange(() => setTick((n) => n + 1));
   }, []);
 
-  const handleComplete = useCallback((csv: CsvData, layout: LayoutData, dateWarnings: string[]) => {
-    setLoadedData({ csv, layout, dateWarnings });
-    setScreen("aggregation");
-  }, []);
+  const handleComplete = useCallback(
+    (rawData: RawData, layout: LayoutData, dateWarnings: string[]) => {
+      setLoadedData({ rawData, layout, dateWarnings });
+      setScreen("aggregation");
+    },
+    [],
+  );
 
   // Imperative initialization (runs once after mount)
   useEffect(() => {
@@ -47,7 +50,7 @@ export default function App() {
         ) : (
           loadedData && (
             <AggregationScreen
-              csv={loadedData.csv}
+              rawData={loadedData.rawData}
               layout={loadedData.layout}
               dateWarnings={loadedData.dateWarnings}
             />
