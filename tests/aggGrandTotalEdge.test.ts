@@ -152,4 +152,24 @@ describe("aggGrandTotalEdge - MA", () => {
     const naIdx = result.codes.indexOf("N/A");
     expect(result.slices[0].cells[naIdx].count).toBe(3);
   });
+
+  it("codes=1（MA列1つ） → 正常集計", async () => {
+    await loadCSV(
+      buildCSV(["id", "q_1"], [
+        [1, 1],
+        [2, 0],
+        [3, 1],
+      ]),
+    );
+    const input: Shape = { type: "MA", columns: ["q_1"], codes: ["1"] };
+    const result = await aggGrandTotal(getConn(), input, "");
+
+    expect(result.slices[0].n).toBe(3);
+    expect(result.slices[0].cells[0].count).toBe(2);
+    expect(result.slices[0].cells[0].pct).toBeCloseTo((2 / 3) * 100, 3);
+    // 行2は shown but none selected → N/A
+    expect(result.codes).toContain("N/A");
+    const naIdx = result.codes.indexOf("N/A");
+    expect(result.slices[0].cells[naIdx].count).toBe(1);
+  });
 });

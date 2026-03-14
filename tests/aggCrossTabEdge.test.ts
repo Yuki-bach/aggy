@@ -255,6 +255,26 @@ describe("aggCrossTabEdge - エッジケース", () => {
     }
   });
 
+  it("MA(main) codes=1 × SA(cross) → 正常集計", async () => {
+    await loadCSV(
+      buildCSV(["id", "q_1", "cross"], [
+        [1, 1, 1],
+        [2, 0, 1],
+        [3, 1, 2],
+      ]),
+    );
+    const mainInput: Shape = { type: "MA", columns: ["q_1"], codes: ["1"] };
+    const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
+    const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
+
+    // slice "1": q_1=1 → 行1 = 1件, N/A → 行2 = 1件, n=2
+    expect(sliceN(result, "1")).toBe(2);
+    expect(sliceCounts(result, "1")[0]).toBe(1);
+    // slice "2": q_1=1 → 行3 = 1件, n=1
+    expect(sliceN(result, "2")).toBe(1);
+    expect(sliceCounts(result, "2")[0]).toBe(1);
+  });
+
   it("1行のみのクロス", async () => {
     await loadCSV(buildCSV(["id", "main", "cross"], [[1, 2, 3]]));
     const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
