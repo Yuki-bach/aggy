@@ -18,9 +18,9 @@ type DateLayout = {
   granularity: DateGranularity;
 };
 
-export type LayoutEntry = SALayout | MALayout | NALayout | WeightLayout | DateLayout;
+export type LayoutQuestion = SALayout | MALayout | NALayout | WeightLayout | DateLayout;
 
-export type Layout = LayoutEntry[];
+export type Layout = LayoutQuestion[];
 
 const VALID_TYPES = new Set(["SA", "MA", "NA", "WEIGHT", "DATE"]);
 const VALID_GRANULARITIES = new Set(["year", "month", "week", "day"]);

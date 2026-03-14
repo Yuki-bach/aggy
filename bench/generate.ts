@@ -8,7 +8,7 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { LayoutEntry, LayoutItem } from "../src/lib/layout";
+import type { LayoutQuestion, LayoutItem } from "../src/lib/layout";
 
 // ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32) — deterministic across runs
@@ -95,9 +95,9 @@ function generateItems(count: number, prefix: string): LayoutItem[] {
   }));
 }
 
-function generateLayout(pattern: PatternDef): LayoutEntry[] {
+function generateLayout(pattern: PatternDef): LayoutQuestion[] {
   const { saCount, maCount, maSubCount } = pattern;
-  const layout: LayoutEntry[] = [{ key: "weight", label: "ウェイト", type: "WEIGHT" }];
+  const layout: LayoutQuestion[] = [{ key: "weight", label: "ウェイト", type: "WEIGHT" }];
 
   for (let i = 1; i <= saCount; i++) {
     layout.push({
