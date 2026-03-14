@@ -1,11 +1,11 @@
-import type { Tally } from "../../agg/types";
+import type { Tab } from "../../agg/types";
 import { t } from "../../i18n";
 
 /**
- * Convert Tally[] to long-format rows (1 row = 1 cell).
+ * Convert Tab[] to long-format rows (1 row = 1 cell).
  * Returns header row + data rows.
  */
-export function talliesToLongRows(tallies: Tally[]): string[][] {
+export function tabsToLongRows(tabs: Tab[]): string[][] {
   const total = t("export.long.total");
   const header = [
     t("export.header.variable"),
@@ -19,19 +19,19 @@ export function talliesToLongRows(tallies: Tally[]): string[][] {
   ];
   const rows: string[][] = [header];
 
-  for (const tally of tallies) {
-    const crossAxis = tally.by === null ? total : tally.by.label;
+  for (const tab of tabs) {
+    const crossAxis = tab.by === null ? total : tab.by.label;
 
-    for (const slice of tally.slices) {
-      const crossValue = tally.by === null ? total : tally.by.labels[slice.code!];
+    for (const slice of tab.slices) {
+      const crossValue = tab.by === null ? total : tab.by.labels[slice.code!];
 
-      for (let i = 0; i < tally.codes.length; i++) {
-        const code = tally.codes[i];
+      for (let i = 0; i < tab.codes.length; i++) {
+        const code = tab.codes[i];
         const cell = slice.cells[i];
         rows.push([
-          tally.questionCode,
-          tally.type,
-          tally.labels[code],
+          tab.questionCode,
+          tab.type,
+          tab.labels[code],
           crossAxis,
           crossValue,
           String(slice.n),

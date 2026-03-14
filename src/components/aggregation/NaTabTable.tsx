@@ -1,19 +1,19 @@
-import type { Tally } from "../../lib/agg/types";
+import type { Tab } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 
-interface NaGrandTotalTableProps {
-  tally: Tally;
+interface NaTabTableProps {
+  tab: Tab;
 }
 
 const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
 
-export function NaGrandTotalTable({ tally }: NaGrandTotalTableProps) {
-  const stats = tally.slices[0].stats!;
+export function NaTabTable({ tab }: NaTabTableProps) {
+  const stats = tab.slices[0].stats!;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums">
-      <caption class="sr-only">{t("table.caption.grandTotal", { question: tally.label })}</caption>
+      <caption class="sr-only">{t("table.caption.tab", { question: tab.label })}</caption>
       <thead>
         <tr>
           <Th>{t("table.option")}</Th>

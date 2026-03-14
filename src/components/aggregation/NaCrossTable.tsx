@@ -1,10 +1,10 @@
-import type { Tally } from "../../lib/agg/types";
+import type { Tab } from "../../lib/agg/types";
 import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
 
 interface NaCrossTableProps {
-  grandTotalTally: Tally;
-  crossTallies: Tally[];
+  tab: Tab;
+  crossTabs: Tab[];
 }
 
 const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
@@ -13,12 +13,12 @@ const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-bor
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
-export function NaCrossTable({ grandTotalTally, crossTallies }: NaCrossTableProps) {
-  const grandTotalStats = grandTotalTally.slices[0].stats!;
+export function NaCrossTable({ tab, crossTabs }: NaCrossTableProps) {
+  const tabStats = tab.slices[0].stats!;
 
-  const crossGroups = crossTallies.map((ct) => ({
+  const crossGroups = crossTabs.map((ct) => ({
     axis: ct.by!,
-    tally: ct,
+    tab: ct,
   }));
 
   const hasMultipleAxes = crossGroups.length > 1;
@@ -26,16 +26,16 @@ export function NaCrossTable({ grandTotalTally, crossTallies }: NaCrossTableProp
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
       <caption class="sr-only">
-        {t("table.caption.cross", { question: grandTotalTally.label })}
+        {t("table.caption.cross", { question: tab.label })}
       </caption>
       <thead>
         <tr>
           <th rowSpan={2} class="py-3 px-4" />
-          <th class={`${TH_BASE} text-center bg-grandTotal-bg text-accent`}>{t("table.total")}</th>
+          <th class={`${TH_BASE} text-center bg-tab-bg text-accent`}>{t("table.total")}</th>
           {crossGroups.map((group) => (
             <th
               key={group.axis.code}
-              colSpan={group.tally.slices.length}
+              colSpan={group.tab.slices.length}
               class={`${TH_BASE} text-center bg-cross-bg border-l border-border text-accent2 ${hasMultipleAxes ? "border-l-2 border-l-border-strong" : ""}`}
             >
               {group.axis.label}
@@ -45,7 +45,7 @@ export function NaCrossTable({ grandTotalTally, crossTallies }: NaCrossTableProp
         <tr>
           <th class={`${TH_BASE} text-right text-xs bg-surface2`} />
           {crossGroups.map((group, gi) =>
-            group.tally.slices.map((slice, si) => (
+            group.tab.slices.map((slice, si) => (
               <th
                 key={`${group.axis.code}-${slice.code}`}
                 class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2 ${hasMultipleAxes && si === 0 && gi > 0 ? "border-l-2 border-l-border-strong" : ""}`}
@@ -63,10 +63,10 @@ export function NaCrossTable({ grandTotalTally, crossTallies }: NaCrossTableProp
           <tr key={key}>
             <td class={`${TD_BASE} text-left text-sm`}>{t(`na.stat.${key}`)}</td>
             <td class={`${TD_BASE} ${MONO} text-accent`}>
-              {formatStat(key, grandTotalStats[key])}
+              {formatStat(key, tabStats[key])}
             </td>
             {crossGroups.map((group, gi) =>
-              group.tally.slices.map((slice, si) => (
+              group.tab.slices.map((slice, si) => (
                 <td
                   key={`${group.axis.code}-${slice.code}`}
                   class={`${TD_BASE} ${MONO} text-accent2 border-l border-l-row-border ${hasMultipleAxes && si === 0 && gi > 0 ? "border-l-2 border-l-border-strong" : ""}`}

@@ -1,7 +1,7 @@
-import type { Tally } from "../../agg/types";
-import { talliesToLongRows } from "./longFormat";
+import type { Tab } from "../../agg/types";
+import { tabsToLongRows } from "./longFormat";
 
-export function formatTSV(tallies: Tally[]): string {
-  const rows = talliesToLongRows(tallies);
+export function formatTSV(tabs: Tab[]): string {
+  const rows = tabsToLongRows(tabs);
   return rows.map((r) => r.join("\t")).join("\n");
 }

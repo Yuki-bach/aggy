@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { aggNaGrandTotal, aggNaCrossTab } from "../src/lib/agg/aggNa";
+import { aggNaTab, aggNaCrossTab } from "../src/lib/agg/aggNa";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import type { Shape } from "../src/lib/agg/types";
 
@@ -28,9 +28,9 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-describe("aggNaGrandTotal - unweighted", () => {
+describe("aggNaTab - unweighted", () => {
   it("returns correct stats for score column", async () => {
-    const result = await aggNaGrandTotal(getConn(), "score", "");
+    const result = await aggNaTab(getConn(), "score", "");
 
     expect(result.slices).toHaveLength(1);
     const slice = result.slices[0];
@@ -47,7 +47,7 @@ describe("aggNaGrandTotal - unweighted", () => {
   });
 
   it("returns correct frequency distribution as codes/cells", async () => {
-    const result = await aggNaGrandTotal(getConn(), "score", "");
+    const result = await aggNaTab(getConn(), "score", "");
 
     // Unique values: 3,4,5,6,7,8,9,10
     expect(result.codes).toEqual(["3", "4", "5", "6", "7", "8", "9", "10"]);
@@ -65,9 +65,9 @@ describe("aggNaGrandTotal - unweighted", () => {
   });
 });
 
-describe("aggNaGrandTotal - weighted", () => {
+describe("aggNaTab - weighted", () => {
   it("returns weighted stats", async () => {
-    const result = await aggNaGrandTotal(getConn(), "score", "weight");
+    const result = await aggNaTab(getConn(), "score", "weight");
 
     const slice = result.slices[0];
     // Weighted n = sum of weights for valid score rows

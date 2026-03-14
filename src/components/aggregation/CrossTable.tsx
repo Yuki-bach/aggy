@@ -1,20 +1,20 @@
-import type { Tally, Slice } from "../../lib/agg/types";
+import type { Tab, Slice } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import type { Basis } from "./viewTypes";
 import { formatN } from "../../lib/format";
 import { Th, Td } from "./TableCells";
 
 interface CrossTableProps {
-  grandTotalTally: Tally;
-  crossTallies: Tally[];
+  tab: Tab;
+  crossTabs: Tab[];
   basis: Basis;
 }
 
-export function CrossTable({ grandTotalTally, crossTallies, basis }: CrossTableProps) {
+export function CrossTable({ tab, crossTabs, basis }: CrossTableProps) {
   if (basis === "row") {
-    return <TransposedCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;
+    return <TransposedCrossTable tab={tab} crossTabs={crossTabs} />;
   }
-  return <VerticalCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;
+  return <VerticalCrossTable tab={tab} crossTabs={crossTabs} />;
 }
 
 const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong";
@@ -22,28 +22,28 @@ const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
 function VerticalCrossTable({
-  grandTotalTally,
-  crossTallies,
+  tab,
+  crossTabs,
 }: {
-  grandTotalTally: Tally;
-  crossTallies: Tally[];
+  tab: Tab;
+  crossTabs: Tab[];
 }) {
-  const grandTotalSlice = grandTotalTally.slices[0];
-  const codes = grandTotalTally.codes;
-  const hasMultipleAxes = crossTallies.length > 1;
+  const tabSlice = tab.slices[0];
+  const codes = tab.codes;
+  const hasMultipleAxes = crossTabs.length > 1;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
       <caption class="sr-only">
-        {t("table.caption.cross", { question: grandTotalTally.label })}
+        {t("table.caption.cross", { question: tab.label })}
       </caption>
       <thead>
         <tr>
           <th rowSpan={2} class="py-3 px-4" />
-          <th colSpan={2} class={`${TH_BASE} text-center bg-grandTotal-bg text-accent`}>
+          <th colSpan={2} class={`${TH_BASE} text-center bg-tab-bg text-accent`}>
             {t("table.total")}
           </th>
-          {crossTallies.map((ct) => (
+          {crossTabs.map((ct) => (
             <th
               key={ct.by!.code}
               colSpan={ct.slices.length}
@@ -56,7 +56,7 @@ function VerticalCrossTable({
         <tr>
           <Th right>n</Th>
           <Th right>%</Th>
-          {crossTallies.map((ct, gi) =>
+          {crossTabs.map((ct, gi) =>
             ct.slices.map((slice, si) => (
               <th
                 key={`${ct.by!.code}-${slice.code}`}
@@ -72,17 +72,17 @@ function VerticalCrossTable({
       </thead>
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
         {codes.map((code, i) => {
-          const grandTotalCell = grandTotalSlice.cells[i];
+          const tabCell = tabSlice.cells[i];
           return (
             <tr key={code}>
-              <Td>{grandTotalTally.labels[code]}</Td>
+              <Td>{tab.labels[code]}</Td>
               <Td right mono>
-                {formatN(grandTotalCell.count)}
+                {formatN(tabCell.count)}
               </Td>
               <Td right mono class="text-muted">
-                {grandTotalCell.pct.toFixed(1)}%
+                {tabCell.pct.toFixed(1)}%
               </Td>
-              {crossTallies.map((ct, gi) =>
+              {crossTabs.map((ct, gi) =>
                 ct.slices.map((slice, si) => {
                   const cell = slice.cells[i];
                   return (
@@ -104,19 +104,19 @@ function VerticalCrossTable({
 }
 
 function TransposedCrossTable({
-  grandTotalTally,
-  crossTallies,
+  tab,
+  crossTabs,
 }: {
-  grandTotalTally: Tally;
-  crossTallies: Tally[];
+  tab: Tab;
+  crossTabs: Tab[];
 }) {
-  const grandTotalSlice = grandTotalTally.slices[0];
-  const codes = grandTotalTally.codes;
+  const tabSlice = tab.slices[0];
+  const codes = tab.codes;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
       <caption class="sr-only">
-        {t("table.caption.cross", { question: grandTotalTally.label })}
+        {t("table.caption.cross", { question: tab.label })}
       </caption>
       <thead>
         <tr>
@@ -126,23 +126,23 @@ function TransposedCrossTable({
               key={code}
               class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2`}
             >
-              {grandTotalTally.labels[code]}
+              {tab.labels[code]}
             </th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {/* Grand Total row */}
+        {/* Tab total row */}
         <tr class="[&_td]:border-b-2 [&_td]:border-border-strong">
           <td
-            class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-grandTotal-bg text-accent`}
+            class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-tab-bg text-accent`}
           >
             {t("table.total")}
           </td>
           {codes.map((code, i) => {
-            const cell = grandTotalSlice.cells[i];
+            const cell = tabSlice.cells[i];
             return (
-              <td key={code} class={`${TD_BASE} ${MONO} text-accent bg-grandTotal-bg`}>
+              <td key={code} class={`${TD_BASE} ${MONO} text-accent bg-tab-bg`}>
                 {cell ? cell.pct.toFixed(1) + "%" : "-"}
               </td>
             );
@@ -150,7 +150,7 @@ function TransposedCrossTable({
         </tr>
 
         {/* Cross sub rows */}
-        {crossTallies.map((ct) => (
+        {crossTabs.map((ct) => (
           <>
             <tr key={`hdr-${ct.by!.code}`}>
               <td
@@ -181,7 +181,7 @@ function TransposedSubRow({
   codes,
 }: {
   slice: Slice;
-  by: Tally["by"] & {};
+  by: Tab["by"] & {};
   codes: string[];
 }) {
   return (

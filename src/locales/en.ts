@@ -58,7 +58,7 @@ const en: Record<string, string> = {
   "empty.text": "Select cross-tabulation axes and run the aggregation",
 
   // Results
-  "result.title.grandTotal": "Aggregation Results",
+  "result.title.tab": "Aggregation Results",
   "result.meta": "{count} questions  /  {weight}",
   "result.weight.applied": "Weighted: {col}",
   "result.weight.none": "Unweighted",
@@ -104,7 +104,7 @@ const en: Record<string, string> = {
   "table.option": "Option",
   "table.graph": "Graph",
   "table.total": "Total",
-  "table.caption.grandTotal": "Aggregation results for {question}",
+  "table.caption.tab": "Aggregation results for {question}",
   "table.caption.cross": "Cross-tabulation results for {question}",
 
   // AI Bubble

@@ -1,23 +1,23 @@
 import { useRef, useEffect } from "preact/hooks";
-import type { Tally } from "../../lib/agg/types";
+import type { Tab } from "../../lib/agg/types";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
 import { t } from "../../lib/i18n";
 import type { ChartConfiguration } from "chart.js";
 
 interface NaChartCardBodyProps {
-  grandTotalTally: Tally;
-  crossTallies: Tally[];
+  tab: Tab;
+  crossTabs: Tab[];
   paletteId: PaletteId;
 }
 
 export function NaChartCardBody({
-  grandTotalTally,
-  crossTallies,
+  tab,
+  crossTabs,
   paletteId,
 }: NaChartCardBodyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
-  const isCross = crossTallies.length > 0;
+  const isCross = crossTabs.length > 0;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,20 +29,20 @@ export function NaChartCardBody({
     if (isCross) {
       chartRef.current = buildMeanComparisonChart(
         canvas,
-        grandTotalTally,
-        crossTallies,
+        tab,
+        crossTabs,
         theme,
         paletteId,
       );
     } else {
-      chartRef.current = buildFreqChart(canvas, grandTotalTally, theme, paletteId);
+      chartRef.current = buildFreqChart(canvas, tab, theme, paletteId);
     }
 
     return () => {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [grandTotalTally, crossTallies, paletteId]);
+  }, [tab, crossTabs, paletteId]);
 
   return (
     <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
@@ -53,13 +53,13 @@ export function NaChartCardBody({
 
 function buildFreqChart(
   canvas: HTMLCanvasElement,
-  tally: Tally,
+  tab: Tab,
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,
 ): Chart {
-  const slice = tally.slices[0];
+  const slice = tab.slices[0];
   const stats = slice.stats!;
-  const labels = tally.codes;
+  const labels = tab.codes;
   const data = slice.cells.map((c) => c.count);
 
   return new Chart(canvas, {
@@ -109,12 +109,12 @@ function buildFreqChart(
 
 function buildMeanComparisonChart(
   canvas: HTMLCanvasElement,
-  _grandTotalTally: Tally,
-  crossTallies: Tally[],
+  _tab: Tab,
+  crossTabs: Tab[],
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,
 ): Chart {
-  const allSlices = crossTallies.flatMap((ct) => {
+  const allSlices = crossTabs.flatMap((ct) => {
     const axis = ct.by!;
     return ct.slices.map((s) => ({
       label: axis.labels[s.code!],
