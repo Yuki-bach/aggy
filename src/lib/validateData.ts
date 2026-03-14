@@ -25,29 +25,29 @@ export async function validateData(
 
   // Detect layout entries whose columns are missing from CSV
   const droppedEntries: ValidationResult["droppedEntries"] = [];
-  for (const entry of layout) {
-    if (entry.type === "SA" || entry.type === "NA" || entry.type === "WEIGHT") {
-      if (!headerSet.has(entry.key)) {
-        droppedEntries.push({ key: entry.key, label: entry.label ?? entry.key, type: entry.type });
+  for (const q of layout) {
+    if (q.type === "SA" || q.type === "NA" || q.type === "WEIGHT") {
+      if (!headerSet.has(q.key)) {
+        droppedEntries.push({ key: q.key, label: q.label, type: q.type });
       }
-    } else if (entry.type === "MA" && entry.items) {
-      const hasAny = entry.items.some((item) => headerSet.has(`${entry.key}_${item.code}`));
+    } else if (q.type === "MA") {
+      const hasAny = q.items.some((item) => headerSet.has(`${q.key}_${item.code}`));
       if (!hasAny) {
-        droppedEntries.push({ key: entry.key, label: entry.label ?? entry.key, type: entry.type });
+        droppedEntries.push({ key: q.key, label: q.label, type: q.type });
       }
     }
   }
 
   // Check SA columns for undefined codes
   const unknownCodeErrors: UnknownCodeError[] = [];
-  for (const entry of layout) {
-    if (entry.type !== "SA" || !entry.items || entry.items.length === 0) continue;
-    if (!headerSet.has(entry.key)) continue; // column not in CSV, already reported as dropped
+  for (const q of layout) {
+    if (q.type !== "SA") continue;
+    if (!headerSet.has(q.key)) continue; // column not in CSV, already reported as dropped
 
-    const definedCodes = new Set(entry.items.map((i) => i.code));
+    const definedCodes = new Set(q.items.map((i) => i.code));
 
     const result = await conn.query(
-      `SELECT DISTINCT "${esc(entry.key)}" AS v FROM survey WHERE "${esc(entry.key)}" IS NOT NULL`,
+      `SELECT DISTINCT "${esc(q.key)}" AS v FROM survey WHERE "${esc(q.key)}" IS NOT NULL`,
     );
 
     const unknownCodes: string[] = [];
@@ -60,8 +60,8 @@ export async function validateData(
 
     if (unknownCodes.length > 0) {
       unknownCodeErrors.push({
-        key: entry.key,
-        label: entry.label ?? entry.key,
+        key: q.key,
+        label: q.label,
         unknownCodes: unknownCodes.sort(),
       });
     }

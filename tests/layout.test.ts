@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filterLayout, buildQuestions } from "../src/lib/layout";
+import { parseLayout, filterLayout, buildQuestions } from "../src/lib/layout";
 import type { Layout } from "../src/lib/layout";
 
 const layout: Layout = [
@@ -22,7 +22,7 @@ const layout: Layout = [
       { code: "3", label: "Reading" },
     ],
   },
-  { key: "weight", type: "WEIGHT" },
+  { key: "weight", label: "ウェイト", type: "WEIGHT" },
   { key: "answer_date", label: "回答日", type: "DATE", granularity: "month" as const },
   { key: "score", label: "NPS", type: "NA" as const },
 ];
@@ -130,5 +130,42 @@ describe("buildQuestions", () => {
       label: "NPS",
       labels: {},
     });
+  });
+});
+
+describe("parseLayout validation", () => {
+  it("rejects entry without label", () => {
+    const json = JSON.stringify([{ key: "q1", type: "SA", items: [{ code: "1", label: "A" }] }]);
+    expect(() => parseLayout(json)).toThrow('"q1": "label"（文字列）が必要です。');
+  });
+
+  it("rejects SA entry without items", () => {
+    const json = JSON.stringify([{ key: "q1", label: "Q1", type: "SA" }]);
+    expect(() => parseLayout(json)).toThrow('"q1": SA には "items"（1件以上の配列）が必要です。');
+  });
+
+  it("rejects MA entry with empty items", () => {
+    const json = JSON.stringify([{ key: "q1", label: "Q1", type: "MA", items: [] }]);
+    expect(() => parseLayout(json)).toThrow('"q1": MA には "items"（1件以上の配列）が必要です。');
+  });
+
+  it("rejects DATE entry without granularity", () => {
+    const json = JSON.stringify([{ key: "d1", label: "Date", type: "DATE" }]);
+    expect(() => parseLayout(json)).toThrow('"d1": DATE には "granularity"');
+  });
+
+  it("rejects invalid type", () => {
+    const json = JSON.stringify([{ key: "q1", label: "Q1", type: "UNKNOWN" }]);
+    expect(() => parseLayout(json)).toThrow('"q1": "type" は');
+  });
+
+  it("accepts valid layout", () => {
+    const json = JSON.stringify([
+      { key: "q1", label: "Q1", type: "SA", items: [{ code: "1", label: "A" }] },
+      { key: "q2", label: "Q2", type: "NA" },
+      { key: "w", label: "Weight", type: "WEIGHT" },
+      { key: "d", label: "Date", type: "DATE", granularity: "month" },
+    ]);
+    expect(parseLayout(json)).toHaveLength(4);
   });
 });

@@ -1,6 +1,7 @@
 [
   {
     "key": "weight",
+    "label": "ウェイト",
     "type": "WEIGHT"
   },
   {

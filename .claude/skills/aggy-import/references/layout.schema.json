@@ -5,7 +5,7 @@
   "description": "アンケートローデータのレイアウト定義。CSV列の種別（SA/MA/WEIGHT）と選択肢ラベルを指定する。",
   "type": "array",
   "items": {
-    "$ref": "#/definitions/LayoutEntry"
+    "$ref": "#/definitions/LayoutQuestion"
   },
   "definitions": {
     "LayoutItem": {
@@ -24,7 +24,7 @@
       "required": ["code", "label"],
       "additionalProperties": false
     },
-    "LayoutEntry": {
+    "LayoutQuestion": {
       "type": "object",
       "properties": {
         "key": {
@@ -49,7 +49,7 @@
           "description": "選択肢リスト（SA/MAで使用）"
         }
       },
-      "required": ["key", "type"],
+      "required": ["key", "label", "type"],
       "additionalProperties": false,
       "allOf": [
         {

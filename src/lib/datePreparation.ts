@@ -21,16 +21,16 @@ export async function prepareDateColumns(
   const result: Layout = [];
   const warnings: string[] = [];
 
-  for (const entry of layout) {
-    if (entry.type !== "DATE") {
-      result.push(entry);
+  for (const q of layout) {
+    if (q.type !== "DATE") {
+      result.push(q);
       continue;
     }
 
-    const granularity = entry.granularity ?? "month";
+    const granularity = q.granularity;
     const fmt = FORMAT_MAP[granularity];
-    const col = esc(entry.key);
-    const fmtCol = esc(`${entry.key}__${granularity}`);
+    const col = esc(q.key);
+    const fmtCol = esc(`${q.key}__${granularity}`);
 
     await conn.query(`ALTER TABLE survey ADD COLUMN "${fmtCol}" VARCHAR`);
     await conn.query(
@@ -42,7 +42,7 @@ export async function prepareDateColumns(
     );
     const failCount = Number(failResult.toArray()[0].n);
     if (failCount > 0) {
-      warnings.push(`${entry.label ?? entry.key}:${failCount}`);
+      warnings.push(`${q.label}:${failCount}`);
     }
 
     const distinct = await conn.query(
@@ -51,8 +51,8 @@ export async function prepareDateColumns(
     const values = distinct.toArray().map((r) => String(r.v));
 
     result.push({
-      key: `${entry.key}__${granularity}`,
-      label: entry.label ?? entry.key,
+      key: `${q.key}__${granularity}`,
+      label: q.label,
       type: "SA",
       items: values.map((v) => ({ code: v, label: v })),
     });

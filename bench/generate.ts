@@ -8,6 +8,7 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import type { LayoutQuestion, LayoutItem } from "../src/lib/layout";
 
 // ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32) — deterministic across runs
@@ -87,29 +88,23 @@ function generateCSV(pattern: PatternDef, rand: () => number): string {
 // Layout JSON generation
 // ---------------------------------------------------------------------------
 
-interface LayoutEntry {
-  key: string;
-  type: string;
-  label?: string;
-  items?: { code: string; label: string }[];
+function generateItems(count: number, prefix: string): LayoutItem[] {
+  return Array.from({ length: count }, (_, j) => ({
+    code: String(j + 1),
+    label: `${prefix}${j + 1}`,
+  }));
 }
 
-function generateLayout(pattern: PatternDef): LayoutEntry[] {
+function generateLayout(pattern: PatternDef): LayoutQuestion[] {
   const { saCount, maCount, maSubCount } = pattern;
-  const layout: LayoutEntry[] = [
-    { key: "id", type: "ID" },
-    { key: "weight", type: "WEIGHT" },
-  ];
+  const layout: LayoutQuestion[] = [{ key: "weight", label: "ウェイト", type: "WEIGHT" }];
 
   for (let i = 1; i <= saCount; i++) {
     layout.push({
       key: `sa${i}`,
       label: `SA設問${i}`,
       type: "SA",
-      items: Array.from({ length: 5 }, (_, j) => ({
-        code: String(j + 1),
-        label: `選択肢${j + 1}`,
-      })),
+      items: generateItems(5, "選択肢"),
     });
   }
 
@@ -118,10 +113,7 @@ function generateLayout(pattern: PatternDef): LayoutEntry[] {
       key: `ma${i}`,
       label: `MA設問${i}`,
       type: "MA",
-      items: Array.from({ length: maSubCount }, (_, j) => ({
-        code: String(j + 1),
-        label: `項目${j + 1}`,
-      })),
+      items: generateItems(maSubCount, "項目"),
     });
   }
 
