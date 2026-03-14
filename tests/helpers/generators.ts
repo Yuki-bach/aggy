@@ -103,7 +103,7 @@ export function generateMADataset(opts: DatasetOpts): MADataset {
       row.push(Math.round((0.5 + rng.next() * 1.5) * 10) / 10);
     }
     // 先頭行は必ず shown（DuckDB が列型を推論できるよう保証）
-    if (i > 1 && rng.next() < nullRate) {
+    if (i !== 1 && rng.next() < nullRate) {
       // not shown — all NULL
       for (let j = 0; j < codes.length; j++) row.push(null);
     } else {
@@ -181,7 +181,7 @@ export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
     row.push(rng.next() < nullRate ? null : rng.pick(saCodes));
     row.push(rng.next() < nullRate ? null : rng.pick(sa2Codes));
     // MA columns（先頭行は必ず shown — DuckDB 型推論保証）
-    if (i > 1 && rng.next() < nullRate) {
+    if (i !== 1 && rng.next() < nullRate) {
       for (let j = 0; j < maCodes.length; j++) row.push(null);
     } else {
       for (let j = 0; j < maCodes.length; j++) {
