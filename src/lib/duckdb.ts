@@ -53,14 +53,12 @@ export async function initDuckDB(): Promise<void> {
   return initPromise;
 }
 
-/** Register raw data text in DuckDB and return headers and row count */
-export async function loadCSV(
-  rawDataText: string,
-): Promise<{ headers: string[]; rowCount: number }> {
+/** Register CSV text in DuckDB and return headers and row count */
+export async function loadCSV(csvText: string): Promise<{ headers: string[]; rowCount: number }> {
   await initDuckDB();
   if (!db) throw new Error("DuckDB is not ready");
 
-  await db.registerFileText("survey.csv", rawDataText);
+  await db.registerFileText("survey.csv", csvText);
 
   const c = await getConnection();
   await c.query(

@@ -11,7 +11,7 @@ afterAll(async () => {
   await teardownDuckDB();
 });
 
-describe("validateData", () => {
+describe("validateRawData", () => {
   it("全項目正常 → 空配列", async () => {
     const csv = "q1,q3_1,q3_2\n1,0,1\n2,1,0\n";
     await loadCSV(csv);
