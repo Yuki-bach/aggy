@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { t } from "../../lib/i18n";
 import { runValidation } from "../../lib/duckdb";
-import type { Diagnostics } from "../../lib/validateData";
+import type { Diagnostics } from "../../lib/validateCsv";
 import type { CsvData, LayoutData } from "../../lib/types";
 
 interface ValidationStepProps {
