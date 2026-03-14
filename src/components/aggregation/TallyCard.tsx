@@ -57,34 +57,47 @@ function CardBody({
   tableOpts,
   chartOpts,
 }: TallyCardProps) {
-  if (grandTotalTally.type === "NA") {
-    if (viewMode === "chart") {
-      return (
-        <NaChartCardBody
-          grandTotalTally={grandTotalTally}
-          crossTallies={crossTallies}
-          paletteId={chartOpts.paletteId}
-        />
-      );
-    }
-    if (crossTallies.length > 0) {
-      return <NaCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;
-    }
-    return <NaGrandTotalTable tally={grandTotalTally} />;
-  }
+  const isNA = grandTotalTally.type === "NA";
 
-  // SA | MA
   if (viewMode === "chart") {
-    const { saChartType, maChartType, paletteId } = chartOpts;
-    return (
+    return isNA ? (
+      <NaChartCardBody
+        grandTotalTally={grandTotalTally}
+        crossTallies={crossTallies}
+        paletteId={chartOpts.paletteId}
+      />
+    ) : (
       <ChartCardBody
         grandTotalTally={grandTotalTally}
         crossTallies={crossTallies}
-        grandTotalChartType={grandTotalTally.type === "SA" ? saChartType : maChartType}
-        paletteId={paletteId}
+        grandTotalChartType={
+          grandTotalTally.type === "SA" ? chartOpts.saChartType : chartOpts.maChartType
+        }
+        paletteId={chartOpts.paletteId}
       />
     );
   }
+
+  return isNA ? (
+    <NaTableCardBody grandTotalTally={grandTotalTally} crossTallies={crossTallies} />
+  ) : (
+    <TableCardBody
+      grandTotalTally={grandTotalTally}
+      crossTallies={crossTallies}
+      tableOpts={tableOpts}
+    />
+  );
+}
+
+function TableCardBody({
+  grandTotalTally,
+  crossTallies,
+  tableOpts,
+}: {
+  grandTotalTally: Tally;
+  crossTallies: Tally[];
+  tableOpts: TableOpts;
+}) {
   if (crossTallies.length > 0) {
     return (
       <CrossTable
@@ -95,4 +108,17 @@ function CardBody({
     );
   }
   return <GrandTotalTable tally={grandTotalTally} maxPct={tableOpts.maxPct} />;
+}
+
+function NaTableCardBody({
+  grandTotalTally,
+  crossTallies,
+}: {
+  grandTotalTally: Tally;
+  crossTallies: Tally[];
+}) {
+  if (crossTallies.length > 0) {
+    return <NaCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;
+  }
+  return <NaGrandTotalTable tally={grandTotalTally} />;
 }
