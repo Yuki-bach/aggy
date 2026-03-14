@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1773498921237,
+  "lastUpdate": 1773499330358,
   "repoUrl": "https://github.com/Yuki-bach/aggy",
   "entries": {
     "Benchmark": [
@@ -2441,6 +2441,80 @@ window.BENCHMARK_DATA = {
           {
             "name": "ma-only (10000 rows, 502 cols, cross=MA×2)",
             "value": 1459.1,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56685372+Yuki-bach@users.noreply.github.com",
+            "name": "Yuki Ogawa",
+            "username": "Yuki-bach"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e6eeb0fec14566b15af9859e3e0e3f259247bdb0",
+          "message": "Merge pull request #161 from Yuki-bach/refactor/formatLoadedInfo-guard-to-callsite\n\nrefactor: formatLoadedInfo の null ガードを呼び出し側に移動",
+          "timestamp": "2026-03-14T23:41:31+09:00",
+          "tree_id": "817c90edaad77b21161be59c86d3693f81ea4410",
+          "url": "https://github.com/Yuki-bach/aggy/commit/e6eeb0fec14566b15af9859e3e0e3f259247bdb0"
+        },
+        "date": 1773499329577,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "rows (10000 rows, 62 cols, cross=none)",
+            "value": 57.9,
+            "unit": "ms"
+          },
+          {
+            "name": "rows (10000 rows, 62 cols, cross=SA×2)",
+            "value": 158.6,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, 602 cols, cross=none)",
+            "value": 288.8,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, 602 cols, cross=SA×2)",
+            "value": 948.6,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, 602 cols, cross=none)",
+            "value": 267,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, 602 cols, cross=SA×2)",
+            "value": 963.3,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, 102 cols, cross=none)",
+            "value": 100.4,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, 102 cols, cross=SA×2)",
+            "value": 406.1,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, 502 cols, cross=none)",
+            "value": 139.9,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, 502 cols, cross=MA×2)",
+            "value": 1473.4,
             "unit": "ms"
           }
         ]
