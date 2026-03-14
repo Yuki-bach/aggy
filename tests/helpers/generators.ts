@@ -112,6 +112,36 @@ export function generateMADataset(opts: DatasetOpts): MADataset {
   };
 }
 
+interface NADataset {
+  csv: string;
+  column: string;
+  weightCol: string;
+}
+
+export function generateNADataset(opts: DatasetOpts): NADataset {
+  const rng = new Rng(opts.seed);
+  const nullRate = opts.nullRate ?? 0.1;
+  const weighted = opts.weighted ?? false;
+
+  const headers = ["id", ...(weighted ? ["weight"] : []), "q_na"];
+  const rows: (string | number | null)[][] = [];
+
+  for (let i = 1; i <= opts.rowCount; i++) {
+    const row: (string | number | null)[] = [i];
+    if (weighted) {
+      row.push(Math.round((0.5 + rng.next() * 1.5) * 10) / 10);
+    }
+    row.push(rng.next() < nullRate ? null : rng.int(0, 10));
+    rows.push(row);
+  }
+
+  return {
+    csv: buildCSV(headers, rows),
+    column: "q_na",
+    weightCol: weighted ? "weight" : "",
+  };
+}
+
 export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
   const rng = new Rng(opts.seed);
   const saCodes = ["1", "2", "3"];
