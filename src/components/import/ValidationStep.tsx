@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { t } from "../../lib/i18n";
 import { runValidation } from "../../lib/duckdb";
-import type { ValidationResult } from "../../lib/validateData";
+import type { Diagnostics } from "../../lib/validateData";
 import type { CsvData, LayoutData } from "../../lib/types";
 
 interface ValidationStepProps {
@@ -12,7 +12,7 @@ interface ValidationStepProps {
 }
 
 export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationStepProps) {
-  const [result, setResult] = useState<ValidationResult | null>(null);
+  const [result, setResult] = useState<Diagnostics | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,9 +51,14 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
     return <p class="py-4 text-center text-sm text-muted">{t("validation.running")}</p>;
   }
 
-  const hasUnknownCodes = result.unknownCodeErrors.length > 0;
-  const hasDropped = result.droppedEntries.length > 0;
-  const hasErrors = hasUnknownCodes;
+  const hasDropped = result.some((d) => d.type === "dropped");
+  const hasUnknownCodes = result.some((d) => d.type === "unknownCode");
+  const hasInvalidMA = result.some((d) => d.type === "invalidMAValue");
+  const hasNonNumeric = result.some((d) => d.type === "nonNumeric");
+  const hasErrors = result.some((d) => d.severity === "error");
+
+  const errors = result.filter((d) => d.severity === "error");
+  const warnings = result.filter((d) => d.severity === "warn");
 
   return (
     <div class="space-y-4">
@@ -62,18 +67,16 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
       <ul class="space-y-2 text-sm">
         <CheckItem label={t("validation.check.columns")} status={hasDropped ? "warn" : "ok"} />
         <CheckItem label={t("validation.check.saCode")} status={hasUnknownCodes ? "error" : "ok"} />
+        <CheckItem label={t("validation.check.maValues")} status={hasInvalidMA ? "error" : "ok"} />
+        <CheckItem label={t("validation.check.numeric")} status={hasNonNumeric ? "error" : "ok"} />
       </ul>
 
-      {hasUnknownCodes && (
+      {errors.length > 0 && (
         <div class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
           <ul class="list-inside list-disc space-y-1">
-            {result.unknownCodeErrors.map((e) => (
-              <li key={e.key}>
-                {t("validation.unknownCodes", {
-                  key: e.key,
-                  label: e.label,
-                  codes: e.unknownCodes.join(", "),
-                })}
+            {errors.map((d) => (
+              <li key={`${d.type}-${d.key}`}>
+                {t(`validation.detail.${d.type}`, { key: d.key, label: d.label, ...d.params })}
               </li>
             ))}
           </ul>
@@ -81,16 +84,12 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
         </div>
       )}
 
-      {hasDropped && (
+      {warnings.length > 0 && (
         <div class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           <ul class="list-inside list-disc space-y-1">
-            {result.droppedEntries.map((e) => (
-              <li key={e.key}>
-                {t("validation.droppedEntries", {
-                  key: e.key,
-                  label: e.label,
-                  type: e.type,
-                })}
+            {warnings.map((d) => (
+              <li key={`${d.type}-${d.key}`}>
+                {t(`validation.detail.${d.type}`, { key: d.key, label: d.label, ...d.params })}
               </li>
             ))}
           </ul>
