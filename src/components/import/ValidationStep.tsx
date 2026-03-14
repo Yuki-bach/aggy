@@ -12,17 +12,17 @@ interface ValidationStepProps {
 }
 
 export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationStepProps) {
-  const [result, setResult] = useState<Diagnostics | null>(null);
+  const [diagnostics, setDiagnostics] = useState<Diagnostics | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    setResult(null);
+    setDiagnostics(null);
     setError(null);
 
     runValidation(csv.headers, layout.layout)
       .then((r) => {
-        if (!cancelled) setResult(r);
+        if (!cancelled) setDiagnostics(r);
       })
       .catch((e) => {
         if (!cancelled) setError((e as Error).message);
@@ -47,28 +47,37 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
     );
   }
 
-  if (!result) {
+  if (!diagnostics) {
     return <p class="py-4 text-center text-sm text-muted">{t("validation.running")}</p>;
   }
 
-  const hasDropped = result.some((d) => d.type === "dropped");
-  const hasUnknownCodes = result.some((d) => d.type === "unknownCode");
-  const hasInvalidMA = result.some((d) => d.type === "invalidMAValue");
-  const hasNonNumeric = result.some((d) => d.type === "nonNumeric");
-  const hasErrors = result.some((d) => d.severity === "error");
+  const statusByType = new Map<string, "error" | "warn">();
+  for (const d of diagnostics) statusByType.set(d.type, d.severity);
 
-  const errors = result.filter((d) => d.severity === "error");
-  const warnings = result.filter((d) => d.severity === "warn");
+  const errors = diagnostics.filter((d) => d.severity === "error");
+  const warnings = diagnostics.filter((d) => d.severity === "warn");
 
   return (
     <div class="space-y-4">
       <h3 class="text-sm font-bold tracking-wider text-muted">{t("validation.title")}</h3>
 
       <ul class="space-y-2 text-sm">
-        <CheckItem label={t("validation.check.columns")} status={hasDropped ? "warn" : "ok"} />
-        <CheckItem label={t("validation.check.saCode")} status={hasUnknownCodes ? "error" : "ok"} />
-        <CheckItem label={t("validation.check.maValues")} status={hasInvalidMA ? "error" : "ok"} />
-        <CheckItem label={t("validation.check.numeric")} status={hasNonNumeric ? "error" : "ok"} />
+        <CheckItem
+          label={t("validation.check.columns")}
+          status={statusByType.get("dropped") ?? "ok"}
+        />
+        <CheckItem
+          label={t("validation.check.saCode")}
+          status={statusByType.get("unknownCode") ?? "ok"}
+        />
+        <CheckItem
+          label={t("validation.check.maValues")}
+          status={statusByType.get("invalidMAValue") ?? "ok"}
+        />
+        <CheckItem
+          label={t("validation.check.numeric")}
+          status={statusByType.get("nonNumeric") ?? "ok"}
+        />
       </ul>
 
       {errors.length > 0 && (
@@ -103,7 +112,7 @@ export function ValidationStep({ csv, layout, onProceed, onBack }: ValidationSte
         >
           {t("validation.back")}
         </button>
-        {!hasErrors && (
+        {errors.length === 0 && (
           <button
             class="cursor-pointer rounded-lg border-none bg-accent px-4 py-2 text-sm font-bold text-accent-contrast transition-colors hover:bg-accent-hover"
             onClick={onProceed}
