@@ -26,7 +26,7 @@ test("GT集計結果の自動表示", async ({ page }) => {
   await uploadFiles(page);
   await proceedToAggregation(page);
 
-  // 自動実行による GT テーブルが表示される
+  // 自動実行による Grand Total テーブルが表示される
   // テーブル caption でラベルを確認（getByText だと複数要素にマッチするため）
   await expect(page.getByText("性別 の集計結果")).toBeAttached({
     timeout: 30_000,
@@ -45,7 +45,7 @@ test("クロス集計", async ({ page }) => {
   await uploadFiles(page);
   await proceedToAggregation(page);
 
-  // GT テーブル表示を待つ
+  // Grand Total テーブル表示を待つ
   await expect(page.getByText("性別 の集計結果")).toBeAttached({
     timeout: 30_000,
   });

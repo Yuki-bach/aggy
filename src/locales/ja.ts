@@ -54,7 +54,7 @@ const ja: Record<string, string> = {
   "empty.text": "クロス集計軸を選んで集計を実行してください",
 
   // Results
-  "result.title.gt": "集計結果",
+  "result.title.grandTotal": "集計結果",
   "result.meta": "{count} 問  ／  {weight}",
   "result.weight.applied": "ウェイトバック適用: {col}",
   "result.weight.none": "実数集計",
@@ -100,7 +100,7 @@ const ja: Record<string, string> = {
   "table.option": "選択肢",
   "table.graph": "グラフ",
   "table.total": "全体",
-  "table.caption.gt": "{question} の集計結果",
+  "table.caption.grandTotal": "{question} の集計結果",
   "table.caption.cross": "{question} のクロス集計結果",
 
   // AI Bubble

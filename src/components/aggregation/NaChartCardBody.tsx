@@ -5,12 +5,16 @@ import { t } from "../../lib/i18n";
 import type { ChartConfiguration } from "chart.js";
 
 interface NaChartCardBodyProps {
-  gtTally: Tally;
+  grandTotalTally: Tally;
   crossTallies: Tally[];
   paletteId: PaletteId;
 }
 
-export function NaChartCardBody({ gtTally, crossTallies, paletteId }: NaChartCardBodyProps) {
+export function NaChartCardBody({
+  grandTotalTally,
+  crossTallies,
+  paletteId,
+}: NaChartCardBodyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
   const isCross = crossTallies.length > 0;
@@ -23,16 +27,22 @@ export function NaChartCardBody({ gtTally, crossTallies, paletteId }: NaChartCar
     const theme = getThemeColors();
 
     if (isCross) {
-      chartRef.current = buildMeanComparisonChart(canvas, gtTally, crossTallies, theme, paletteId);
+      chartRef.current = buildMeanComparisonChart(
+        canvas,
+        grandTotalTally,
+        crossTallies,
+        theme,
+        paletteId,
+      );
     } else {
-      chartRef.current = buildFreqChart(canvas, gtTally, theme, paletteId);
+      chartRef.current = buildFreqChart(canvas, grandTotalTally, theme, paletteId);
     }
 
     return () => {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [gtTally, crossTallies, paletteId]);
+  }, [grandTotalTally, crossTallies, paletteId]);
 
   return (
     <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
@@ -99,7 +109,7 @@ function buildFreqChart(
 
 function buildMeanComparisonChart(
   canvas: HTMLCanvasElement,
-  _gtTally: Tally,
+  _grandTotalTally: Tally,
   crossTallies: Tally[],
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,

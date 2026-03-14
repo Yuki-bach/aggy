@@ -2,18 +2,18 @@ import type { Tally } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 
-interface NaGtTableProps {
+interface NaGrandTotalTableProps {
   tally: Tally;
 }
 
 const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
 
-export function NaGtTable({ tally }: NaGtTableProps) {
+export function NaGrandTotalTable({ tally }: NaGrandTotalTableProps) {
   const stats = tally.slices[0].stats!;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums">
-      <caption class="sr-only">{t("table.caption.gt", { question: tally.label })}</caption>
+      <caption class="sr-only">{t("table.caption.grandTotal", { question: tally.label })}</caption>
       <thead>
         <tr>
           <Th>{t("table.option")}</Th>

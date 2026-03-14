@@ -5,34 +5,42 @@ import { formatN } from "../../lib/format";
 import { Th, Td } from "./TableCells";
 
 interface CrossTableProps {
-  gtTally: Tally;
+  grandTotalTally: Tally;
   crossTallies: Tally[];
   pctDir: PctDirection;
 }
 
-export function CrossTable({ gtTally, crossTallies, pctDir }: CrossTableProps) {
+export function CrossTable({ grandTotalTally, crossTallies, pctDir }: CrossTableProps) {
   if (pctDir === "horizontal") {
-    return <TransposedCrossTable gtTally={gtTally} crossTallies={crossTallies} />;
+    return <TransposedCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;
   }
-  return <VerticalCrossTable gtTally={gtTally} crossTallies={crossTallies} />;
+  return <VerticalCrossTable grandTotalTally={grandTotalTally} crossTallies={crossTallies} />;
 }
 
 const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong";
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
-function VerticalCrossTable({ gtTally, crossTallies }: { gtTally: Tally; crossTallies: Tally[] }) {
-  const gtSlice = gtTally.slices[0];
-  const codes = gtTally.codes;
+function VerticalCrossTable({
+  grandTotalTally,
+  crossTallies,
+}: {
+  grandTotalTally: Tally;
+  crossTallies: Tally[];
+}) {
+  const grandTotalSlice = grandTotalTally.slices[0];
+  const codes = grandTotalTally.codes;
   const hasMultipleAxes = crossTallies.length > 1;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
-      <caption class="sr-only">{t("table.caption.cross", { question: gtTally.label })}</caption>
+      <caption class="sr-only">
+        {t("table.caption.cross", { question: grandTotalTally.label })}
+      </caption>
       <thead>
         <tr>
           <th rowSpan={2} class="py-3 px-4" />
-          <th colSpan={2} class={`${TH_BASE} text-center bg-gt-bg text-accent`}>
+          <th colSpan={2} class={`${TH_BASE} text-center bg-grandTotal-bg text-accent`}>
             {t("table.total")}
           </th>
           {crossTallies.map((ct) => (
@@ -64,15 +72,15 @@ function VerticalCrossTable({ gtTally, crossTallies }: { gtTally: Tally; crossTa
       </thead>
       <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
         {codes.map((code, i) => {
-          const gtCell = gtSlice.cells[i];
+          const grandTotalCell = grandTotalSlice.cells[i];
           return (
             <tr key={code}>
-              <Td>{gtTally.labels[code]}</Td>
+              <Td>{grandTotalTally.labels[code]}</Td>
               <Td right mono>
-                {formatN(gtCell.count)}
+                {formatN(grandTotalCell.count)}
               </Td>
               <Td right mono class="text-muted">
-                {gtCell.pct.toFixed(1)}%
+                {grandTotalCell.pct.toFixed(1)}%
               </Td>
               {crossTallies.map((ct, gi) =>
                 ct.slices.map((slice, si) => {
@@ -96,18 +104,20 @@ function VerticalCrossTable({ gtTally, crossTallies }: { gtTally: Tally; crossTa
 }
 
 function TransposedCrossTable({
-  gtTally,
+  grandTotalTally,
   crossTallies,
 }: {
-  gtTally: Tally;
+  grandTotalTally: Tally;
   crossTallies: Tally[];
 }) {
-  const gtSlice = gtTally.slices[0];
-  const codes = gtTally.codes;
+  const grandTotalSlice = grandTotalTally.slices[0];
+  const codes = grandTotalTally.codes;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
-      <caption class="sr-only">{t("table.caption.cross", { question: gtTally.label })}</caption>
+      <caption class="sr-only">
+        {t("table.caption.cross", { question: grandTotalTally.label })}
+      </caption>
       <thead>
         <tr>
           <th class="py-3 px-4" />
@@ -116,23 +126,23 @@ function TransposedCrossTable({
               key={code}
               class={`${TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2`}
             >
-              {gtTally.labels[code]}
+              {grandTotalTally.labels[code]}
             </th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {/* GT row */}
+        {/* Grand Total row */}
         <tr class="[&_td]:border-b-2 [&_td]:border-border-strong">
           <td
-            class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-gt-bg text-accent`}
+            class={`${TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-grandTotal-bg text-accent`}
           >
             {t("table.total")}
           </td>
           {codes.map((code, i) => {
-            const cell = gtSlice.cells[i];
+            const cell = grandTotalSlice.cells[i];
             return (
-              <td key={code} class={`${TD_BASE} ${MONO} text-accent bg-gt-bg`}>
+              <td key={code} class={`${TD_BASE} ${MONO} text-accent bg-grandTotal-bg`}>
                 {cell ? cell.pct.toFixed(1) + "%" : "-"}
               </td>
             );

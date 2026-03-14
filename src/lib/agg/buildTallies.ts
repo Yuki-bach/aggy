@@ -1,8 +1,8 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Question, AggOutput, Axis, Tally } from "./types";
-import { aggTotals } from "./aggTotals";
+import { aggGrandTotal } from "./aggGrandTotal";
 import { aggCrossTab } from "./aggCrossTab";
-import { aggNaTotals, aggNaCrossTab } from "./aggNa";
+import { aggNaGrandTotal, aggNaCrossTab } from "./aggNa";
 import { NO_ANSWER_VALUE } from "./sqlHelpers";
 import { t } from "../i18n";
 
@@ -15,15 +15,15 @@ export async function buildTallies(
   const tallies: Tally[] = [];
   for (const q of questions) {
     if (q.type === "NA") {
-      const gtOutput = await aggNaTotals(conn, q.columns[0], weightCol);
-      tallies.push(toTally(q, gtOutput));
+      const grandTotalOutput = await aggNaGrandTotal(conn, q.columns[0], weightCol);
+      tallies.push(toTally(q, grandTotalOutput));
       for (const axisQuestion of crossQuestions) {
         const crossOutput = await aggNaCrossTab(conn, q.columns[0], axisQuestion, weightCol);
         tallies.push(toTally(q, crossOutput, axisQuestion));
       }
     } else {
-      const gtOutput = await aggTotals(conn, q, weightCol);
-      tallies.push(toTally(q, gtOutput));
+      const grandTotalOutput = await aggGrandTotal(conn, q, weightCol);
+      tallies.push(toTally(q, grandTotalOutput));
       for (const axisQuestion of crossQuestions) {
         const crossOutput = await aggCrossTab(conn, q, axisQuestion, weightCol);
         tallies.push(toTally(q, crossOutput, axisQuestion));

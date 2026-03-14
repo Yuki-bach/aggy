@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 import type { AggOutput } from "../../src/lib/agg/types";
 
-export function assertGtInvariants(
+export function assertGrandTotalInvariants(
   result: AggOutput,
   type: "SA" | "MA",
 ): void {

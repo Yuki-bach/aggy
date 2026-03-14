@@ -49,7 +49,7 @@ On the ImportScreen:
 
 Click the "Proceed" button. The app transitions to AggregationScreen and auto-runs the first aggregation. Wait for the result table to appear using `wait_for`.
 
-### Step 5: Run GT-only aggregation with Performance tracing
+### Step 5: Run Grand Total-only aggregation with Performance tracing
 
 Measure Grand Total only (no cross-tab):
 
@@ -76,7 +76,7 @@ Measure with cross-tabulation enabled:
 
 Use `performance_analyze_insight` to inspect both trace results. Report a comparison table:
 
-| Metric | GT only | Cross-tab (SA x2) |
+| Metric | Grand Total only | Cross-tab (SA x2) |
 |--------|---------|-------------------|
 | INP | | |
 | Input delay | | |
