@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { validateRawData, type Diagnostics } from "../src/lib/validateRawData";
+import { validateRawData, type Diagnostic } from "../src/lib/validateRawData";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import type { Layout } from "../src/lib/layout";
 
