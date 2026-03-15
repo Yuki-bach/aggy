@@ -3,7 +3,7 @@ import type { Question, Tab } from "./agg/types";
 import type { Layout } from "./layout";
 import { buildTabs } from "./agg/buildTabs";
 import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
-import { validateRawData, type Diagnostics } from "./validateRawData";
+import { validateRawData, type Diagnostic } from "./validateRawData";
 
 export type DuckStatus = "loading" | "ready" | "error";
 export type StatusListener = (s: DuckStatus, label: string) => void;
@@ -76,7 +76,7 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 }
 
 /** Validate CSV data against layout definition */
-export async function runValidation(headers: string[], layout: Layout): Promise<Diagnostics> {
+export async function runValidation(headers: string[], layout: Layout): Promise<Diagnostic[]> {
   const c = await getConnection();
   return validateRawData(c, headers, layout);
 }
