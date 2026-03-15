@@ -62,16 +62,61 @@ export function validateLayoutStructure(raw: unknown[]): Diagnostic[] {
     }
   }
 
+  const keySeen = new Map<string, { count: number; label: string }>();
+  for (const entry of raw) {
+    if (checkEntry(entry)) continue;
+    const e = entry as Record<string, unknown>;
+    const key = e["key"] as string;
+    const label = e["label"] as string;
+    const prev = keySeen.get(key);
+    keySeen.set(key, { count: (prev?.count ?? 0) + 1, label: prev?.label ?? label });
+  }
+  for (const [key, { count, label }] of keySeen) {
+    if (count > 1) {
+      diagnostics.push({
+        key,
+        label,
+        severity: "error",
+        type: "invalidLayout",
+        params: { reason: `"key" が重複しています: ${key}` },
+      });
+    }
+  }
+
   return diagnostics;
 }
 
-/** Build Layout from raw entries that pass structure validation. */
+/** Build Layout from raw entries that pass structure validation (skips duplicates). */
 export function buildValidLayout(raw: unknown[]): Layout {
   const layout: Layout = [];
+  const seenKeys = new Set<string>();
   for (let i = 0; i < raw.length; i++) {
-    if (!checkEntry(raw[i])) layout.push(raw[i] as LayoutQuestion);
+    if (checkEntry(raw[i])) continue;
+    const key = (raw[i] as Record<string, unknown>)["key"] as string;
+    if (seenKeys.has(key)) continue;
+    seenKeys.add(key);
+    layout.push(raw[i] as LayoutQuestion);
   }
   return layout;
+}
+
+/** Validate items array elements. Return error reason string or null. */
+function checkItems(items: unknown[]): string | null {
+  const codes = new Set<string>();
+  for (let i = 0; i < items.length; i++) {
+    if (typeof items[i] !== "object" || items[i] === null) {
+      return `"items[${i}]" はオブジェクトである必要があります`;
+    }
+    const item = items[i] as Record<string, unknown>;
+    if (typeof item["code"] !== "string" || typeof item["label"] !== "string") {
+      return `"items[${i}]" には "code"（文字列）と "label"（文字列）が必要です`;
+    }
+    if (codes.has(item["code"] as string)) {
+      return `"items" 内に重複した "code" があります: ${item["code"]}`;
+    }
+    codes.add(item["code"] as string);
+  }
+  return null;
 }
 
 /** Return error reason string if entry is invalid, or null if valid. */
@@ -81,6 +126,7 @@ function checkEntry(entry: unknown): string | null {
   }
   const e = entry as Record<string, unknown>;
   if (typeof e["key"] !== "string") return '"key"（文字列）が必要です';
+  if (e["key"] === "") return '"key" は空文字列にできません';
   if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) {
     return `"type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります`;
   }
@@ -88,6 +134,10 @@ function checkEntry(entry: unknown): string | null {
   const type = e["type"] as string;
   if ((type === "SA" || type === "MA") && (!Array.isArray(e["items"]) || e["items"].length === 0)) {
     return `${type} には "items"（1件以上の配列）が必要です`;
+  }
+  if (type === "SA" || type === "MA") {
+    const itemErr = checkItems(e["items"] as unknown[]);
+    if (itemErr) return itemErr;
   }
   if (
     type === "DATE" &&

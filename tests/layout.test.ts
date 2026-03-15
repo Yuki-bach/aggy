@@ -216,6 +216,66 @@ describe("validateLayoutStructure", () => {
     expect(diags).toHaveLength(1);
     expect(diags[0].params.reason).toContain('"key"');
   });
+
+  it("detects empty key", () => {
+    const raw = [{ key: "", label: "Q", type: "SA", items: [{ code: "1", label: "A" }] }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain("空文字列");
+  });
+
+  it("detects non-object items element", () => {
+    const raw = [{ key: "q1", label: "Q", type: "SA", items: ["not object"] }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain("オブジェクト");
+  });
+
+  it("detects items element missing code/label", () => {
+    const raw = [{ key: "q1", label: "Q", type: "SA", items: [{ code: 1 }] }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain('"code"');
+    expect(diags[0].params.reason).toContain('"label"');
+  });
+
+  it("detects duplicate code in items", () => {
+    const raw = [
+      {
+        key: "q1",
+        label: "Q",
+        type: "SA",
+        items: [
+          { code: "1", label: "A" },
+          { code: "1", label: "B" },
+        ],
+      },
+    ];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain("重複");
+  });
+
+  it("detects duplicate keys", () => {
+    const raw = [
+      { key: "q1", label: "Q1", type: "SA", items: [{ code: "1", label: "A" }] },
+      { key: "q1", label: "Q1b", type: "SA", items: [{ code: "2", label: "B" }] },
+    ];
+    const diags = validateLayoutStructure(raw);
+    const dupDiag = diags.find((d) => d.params.reason.includes("重複しています"));
+    expect(dupDiag).toBeDefined();
+    expect(dupDiag!.key).toBe("q1");
+    expect(dupDiag!.label).toBe("Q1");
+  });
+
+  it("ignores invalid entries for duplicate key check", () => {
+    const raw = [
+      { key: "q1", type: "UNKNOWN" },
+      { key: "q1", label: "Q1", type: "NA" },
+    ];
+    const diags = validateLayoutStructure(raw);
+    expect(diags.some((d) => d.params.reason.includes("重複しています"))).toBe(false);
+  });
 });
 
 describe("buildValidLayout", () => {
@@ -236,5 +296,18 @@ describe("buildValidLayout", () => {
     const result = buildValidLayout(raw);
     expect(result).toHaveLength(1);
     expect(result[0].key).toBe("q1");
+  });
+
+  it("skips duplicate keys keeping first occurrence", () => {
+    const raw = [
+      { key: "q1", label: "Q1", type: "SA", items: [{ code: "1", label: "A" }] },
+      { key: "q1", label: "Q1b", type: "SA", items: [{ code: "2", label: "B" }] },
+      { key: "q2", label: "Q2", type: "NA" },
+    ];
+    const result = buildValidLayout(raw);
+    expect(result).toHaveLength(2);
+    expect(result[0].key).toBe("q1");
+    expect(result[0].label).toBe("Q1");
+    expect(result[1].key).toBe("q2");
   });
 });
