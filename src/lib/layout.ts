@@ -62,6 +62,26 @@ export function validateLayoutStructure(raw: unknown[]): Diagnostic[] {
     }
   }
 
+  const keyCounts = new Map<string, number>();
+  for (const entry of raw) {
+    if (typeof entry !== "object" || entry === null) continue;
+    const e = entry as Record<string, unknown>;
+    const key = typeof e["key"] === "string" ? e["key"] : "";
+    if (!key) continue;
+    keyCounts.set(key, (keyCounts.get(key) ?? 0) + 1);
+  }
+  for (const [key, count] of keyCounts) {
+    if (count > 1) {
+      diagnostics.push({
+        key,
+        label: "",
+        severity: "error",
+        type: "invalidLayout",
+        params: { reason: `"key" が重複しています: ${key}` },
+      });
+    }
+  }
+
   return diagnostics;
 }
 
@@ -74,6 +94,25 @@ export function buildValidLayout(raw: unknown[]): Layout {
   return layout;
 }
 
+/** Validate items array elements. Return error reason string or null. */
+function checkItems(items: unknown[]): string | null {
+  const codes = new Set<string>();
+  for (let i = 0; i < items.length; i++) {
+    if (typeof items[i] !== "object" || items[i] === null) {
+      return `"items[${i}]" はオブジェクトである必要があります`;
+    }
+    const item = items[i] as Record<string, unknown>;
+    if (typeof item["code"] !== "string" || typeof item["label"] !== "string") {
+      return `"items" 内の各要素には "code"（文字列）と "label"（文字列）が必要です`;
+    }
+    if (codes.has(item["code"] as string)) {
+      return `"items" 内に重複した "code" があります: ${item["code"]}`;
+    }
+    codes.add(item["code"] as string);
+  }
+  return null;
+}
+
 /** Return error reason string if entry is invalid, or null if valid. */
 function checkEntry(entry: unknown): string | null {
   if (typeof entry !== "object" || entry === null) {
@@ -81,6 +120,7 @@ function checkEntry(entry: unknown): string | null {
   }
   const e = entry as Record<string, unknown>;
   if (typeof e["key"] !== "string") return '"key"（文字列）が必要です';
+  if (e["key"] === "") return '"key" は空文字列にできません';
   if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) {
     return `"type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります`;
   }
@@ -88,6 +128,10 @@ function checkEntry(entry: unknown): string | null {
   const type = e["type"] as string;
   if ((type === "SA" || type === "MA") && (!Array.isArray(e["items"]) || e["items"].length === 0)) {
     return `${type} には "items"（1件以上の配列）が必要です`;
+  }
+  if (type === "SA" || type === "MA") {
+    const itemErr = checkItems(e["items"] as unknown[]);
+    if (itemErr) return itemErr;
   }
   if (
     type === "DATE" &&
