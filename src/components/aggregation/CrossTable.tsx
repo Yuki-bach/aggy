@@ -21,22 +21,14 @@ const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-bor
 const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
 const MONO = "text-right tabular-nums font-mono";
 
-function VerticalCrossTable({
-  tab,
-  crossTabs,
-}: {
-  tab: Tab;
-  crossTabs: Tab[];
-}) {
+function VerticalCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) {
   const tabSlice = tab.slices[0];
   const codes = tab.codes;
   const hasMultipleAxes = crossTabs.length > 1;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
-      <caption class="sr-only">
-        {t("table.caption.cross", { question: tab.label })}
-      </caption>
+      <caption class="sr-only">{t("table.caption.cross", { question: tab.label })}</caption>
       <thead>
         <tr>
           <th rowSpan={2} class="py-3 px-4" />
@@ -103,21 +95,13 @@ function VerticalCrossTable({
   );
 }
 
-function TransposedCrossTable({
-  tab,
-  crossTabs,
-}: {
-  tab: Tab;
-  crossTabs: Tab[];
-}) {
+function TransposedCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) {
   const tabSlice = tab.slices[0];
   const codes = tab.codes;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
-      <caption class="sr-only">
-        {t("table.caption.cross", { question: tab.label })}
-      </caption>
+      <caption class="sr-only">{t("table.caption.cross", { question: tab.label })}</caption>
       <thead>
         <tr>
           <th class="py-3 px-4" />

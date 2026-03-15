@@ -78,12 +78,7 @@ function ResultContent({ tabs, weightCol }: { tabs: Tab[]; weightCol: string }) 
 
   return (
     <>
-      <Toolbar
-        tabs={tabs}
-        weightCol={weightCol}
-        currentViewMode={viewMode}
-        callbacks={callbacks}
-      />
+      <Toolbar tabs={tabs} weightCol={weightCol} currentViewMode={viewMode} callbacks={callbacks} />
       <ViewOpts
         currentViewMode={viewMode}
         currentBasis={basis}

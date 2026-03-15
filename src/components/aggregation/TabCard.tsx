@@ -16,13 +16,7 @@ interface TabCardProps {
   chartOpts: ChartOpts;
 }
 
-export function TabCard({
-  tab,
-  crossTabs,
-  viewMode,
-  tableOpts,
-  chartOpts,
-}: TabCardProps) {
+export function TabCard({ tab, crossTabs, viewMode, tableOpts, chartOpts }: TabCardProps) {
   const hasCross = crossTabs.length > 0;
 
   const tabN = tab.slices[0]?.n ?? 0;
@@ -50,29 +44,17 @@ export function TabCard({
   );
 }
 
-function CardBody({
-  tab,
-  crossTabs,
-  viewMode,
-  tableOpts,
-  chartOpts,
-}: TabCardProps) {
+function CardBody({ tab, crossTabs, viewMode, tableOpts, chartOpts }: TabCardProps) {
   const isNA = tab.type === "NA";
 
   if (viewMode === "chart") {
     return isNA ? (
-      <NaChartCardBody
-        tab={tab}
-        crossTabs={crossTabs}
-        paletteId={chartOpts.paletteId}
-      />
+      <NaChartCardBody tab={tab} crossTabs={crossTabs} paletteId={chartOpts.paletteId} />
     ) : (
       <ChartCardBody
         tab={tab}
         crossTabs={crossTabs}
-        tabChartType={
-          tab.type === "SA" ? chartOpts.saChartType : chartOpts.maChartType
-        }
+        tabChartType={tab.type === "SA" ? chartOpts.saChartType : chartOpts.maChartType}
         paletteId={chartOpts.paletteId}
       />
     );
@@ -81,11 +63,7 @@ function CardBody({
   return isNA ? (
     <NaTableCardBody tab={tab} crossTabs={crossTabs} />
   ) : (
-    <TableCardBody
-      tab={tab}
-      crossTabs={crossTabs}
-      tableOpts={tableOpts}
-    />
+    <TableCardBody tab={tab} crossTabs={crossTabs} tableOpts={tableOpts} />
   );
 }
 
@@ -99,24 +77,12 @@ function TableCardBody({
   tableOpts: TableOpts;
 }) {
   if (crossTabs.length > 0) {
-    return (
-      <CrossTable
-        tab={tab}
-        crossTabs={crossTabs}
-        basis={tableOpts.basis}
-      />
-    );
+    return <CrossTable tab={tab} crossTabs={crossTabs} basis={tableOpts.basis} />;
   }
   return <TabTable tab={tab} maxPct={tableOpts.maxPct} />;
 }
 
-function NaTableCardBody({
-  tab,
-  crossTabs,
-}: {
-  tab: Tab;
-  crossTabs: Tab[];
-}) {
+function NaTableCardBody({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) {
   if (crossTabs.length > 0) {
     return <NaCrossTable tab={tab} crossTabs={crossTabs} />;
   }

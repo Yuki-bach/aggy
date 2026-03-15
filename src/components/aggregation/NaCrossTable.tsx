@@ -25,9 +25,7 @@ export function NaCrossTable({ tab, crossTabs }: NaCrossTableProps) {
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">
-      <caption class="sr-only">
-        {t("table.caption.cross", { question: tab.label })}
-      </caption>
+      <caption class="sr-only">{t("table.caption.cross", { question: tab.label })}</caption>
       <thead>
         <tr>
           <th rowSpan={2} class="py-3 px-4" />
@@ -62,9 +60,7 @@ export function NaCrossTable({ tab, crossTabs }: NaCrossTableProps) {
         {STAT_KEYS.map((key) => (
           <tr key={key}>
             <td class={`${TD_BASE} text-left text-sm`}>{t(`na.stat.${key}`)}</td>
-            <td class={`${TD_BASE} ${MONO} text-accent`}>
-              {formatStat(key, tabStats[key])}
-            </td>
+            <td class={`${TD_BASE} ${MONO} text-accent`}>{formatStat(key, tabStats[key])}</td>
             {crossGroups.map((group, gi) =>
               group.tab.slices.map((slice, si) => (
                 <td

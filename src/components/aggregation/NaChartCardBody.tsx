@@ -10,11 +10,7 @@ interface NaChartCardBodyProps {
   paletteId: PaletteId;
 }
 
-export function NaChartCardBody({
-  tab,
-  crossTabs,
-  paletteId,
-}: NaChartCardBodyProps) {
+export function NaChartCardBody({ tab, crossTabs, paletteId }: NaChartCardBodyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
   const isCross = crossTabs.length > 0;
@@ -27,13 +23,7 @@ export function NaChartCardBody({
     const theme = getThemeColors();
 
     if (isCross) {
-      chartRef.current = buildMeanComparisonChart(
-        canvas,
-        tab,
-        crossTabs,
-        theme,
-        paletteId,
-      );
+      chartRef.current = buildMeanComparisonChart(canvas, tab, crossTabs, theme, paletteId);
     } else {
       chartRef.current = buildFreqChart(canvas, tab, theme, paletteId);
     }
