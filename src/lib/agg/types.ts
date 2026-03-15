@@ -43,7 +43,7 @@ export interface NaStats {
 }
 
 /** 消費用フラット型 */
-export interface Tally {
+export interface Tab {
   type: QuestionType;
   questionCode: string;
   label: string;

@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { buildPromptPayload } from "../src/lib/aiComment";
-import type { Tally } from "../src/lib/agg/types";
+import type { Tab } from "../src/lib/agg/types";
 
 // ─── helpers ─────────────────────────────────────────────────
 
-function makeTally(overrides: Partial<Tally> = {}): Tally {
+function makeTab(overrides: Partial<Tab> = {}): Tab {
   return {
     questionCode: "q1",
     type: "SA",
@@ -30,11 +30,11 @@ function makeTally(overrides: Partial<Tally> = {}): Tally {
 // ─── buildPromptPayload ──────────────────────────────────────
 
 describe("buildPromptPayload", () => {
-  it("Tally→プロンプト変換の全体像", () => {
-    const tally = makeTally();
-    const payload = buildPromptPayload([tally], "");
+  it("Tab→プロンプト変換の全体像", () => {
+    const tab = makeTab();
+    const payload = buildPromptPayload([tab], "");
 
-    // Tally { questionCode:"q1", type:"SA", label:"性別",
+    // Tab { questionCode:"q1", type:"SA", label:"性別",
     //         codes:["1","2","3"], labels:{1:"男性",2:"女性",3:"その他"},
     //         slices:[{ n:100, cells:[{pct:50},{pct:30},{pct:20}] }] }
     //
@@ -50,8 +50,8 @@ describe("buildPromptPayload", () => {
   });
 
   it("ウェイト付き+複数設問の変換全体像", () => {
-    const q1 = makeTally();
-    const q2 = makeTally({
+    const q1 = makeTab();
+    const q2 = makeTab({
       questionCode: "q2",
       type: "MA",
       label: "趣味",
@@ -88,30 +88,30 @@ describe("buildPromptPayload", () => {
     );
   });
 
-  it("GT集計のみがプロンプトに含まれ、クロス集計は除外される", () => {
-    const grandTotal = makeTally({ questionCode: "q1", label: "性別" });
-    const cross = makeTally({
+  it("Tab集計のみがプロンプトに含まれ、クロス集計は除外される", () => {
+    const tab = makeTab({ questionCode: "q1", label: "性別" });
+    const cross = makeTab({
       questionCode: "q2",
       label: "年代",
       by: { code: "q1", label: "性別", labels: { "1": "男性" } },
     });
 
-    const payload = buildPromptPayload([grandTotal, cross], "");
+    const payload = buildPromptPayload([tab, cross], "");
 
     expect(payload).toContain("q1");
     expect(payload).not.toContain("q2");
   });
 
   it("設問ヘッダに question, label, type, n が含まれる", () => {
-    const tally = makeTally({ questionCode: "q1", label: "性別", type: "SA" });
-    const payload = buildPromptPayload([tally], "");
+    const tab = makeTab({ questionCode: "q1", label: "性別", type: "SA" });
+    const payload = buildPromptPayload([tab], "");
 
     expect(payload).toContain("q1: 性別 (SA, n=100)");
   });
 
   it("選択肢はpct降順でラベル付きで出力される", () => {
-    const tally = makeTally();
-    const payload = buildPromptPayload([tally], "");
+    const tab = makeTab();
+    const payload = buildPromptPayload([tab], "");
 
     // 50% > 30% > 20% の順
     const dataLine = payload.split("\n").find((l) => l.startsWith("  "));
@@ -121,23 +121,23 @@ describe("buildPromptPayload", () => {
   });
 
   it("ウェイト列が指定されると先頭に注記が含まれる", () => {
-    const tally = makeTally();
-    const payload = buildPromptPayload([tally], "weight_col");
+    const tab = makeTab();
+    const payload = buildPromptPayload([tab], "weight_col");
 
     const firstLine = payload.split("\n")[0];
     expect(firstLine).toContain("weight_col");
   });
 
   it("ウェイト列が空文字の場合は注記が含まれない", () => {
-    const tally = makeTally();
-    const payload = buildPromptPayload([tally], "");
+    const tab = makeTab();
+    const payload = buildPromptPayload([tab], "");
 
     const firstLine = payload.split("\n")[0];
     expect(firstLine).not.toContain("ウェイト");
   });
 
   it("選択肢が多い場合、topN件+残件数の省略表記になる", () => {
-    const tally = makeTally({
+    const tab = makeTab({
       codes: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
       labels: {},
       slices: [
@@ -152,14 +152,14 @@ describe("buildPromptPayload", () => {
       ],
     });
 
-    const payload = buildPromptPayload([tally], "");
+    const payload = buildPromptPayload([tab], "");
     // topN=5 がデフォルト → 残り5件
     expect(payload).toContain("...他5件");
   });
 
   it("末尾にユーザープロンプト（分析指示）が含まれる", () => {
-    const tally = makeTally();
-    const payload = buildPromptPayload([tally], "");
+    const tab = makeTab();
+    const payload = buildPromptPayload([tab], "");
 
     const lastNonEmpty = payload
       .split("\n")
@@ -170,8 +170,8 @@ describe("buildPromptPayload", () => {
 
   it("ペイロードが3500文字以下に収まる", () => {
     // 大量の設問を用意
-    const tallies = Array.from({ length: 50 }, (_, i) =>
-      makeTally({
+    const tabs = Array.from({ length: 50 }, (_, i) =>
+      makeTab({
         questionCode: `q${i + 1}`,
         label: `設問${i + 1}の長いラベルテキスト`,
         codes: Array.from({ length: 20 }, (_, j) => String(j + 1)),
@@ -191,7 +191,7 @@ describe("buildPromptPayload", () => {
       }),
     );
 
-    const payload = buildPromptPayload(tallies, "");
+    const payload = buildPromptPayload(tabs, "");
     expect(payload.length).toBeLessThanOrEqual(3500);
   });
 });

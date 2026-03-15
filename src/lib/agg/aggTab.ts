@@ -1,4 +1,4 @@
-/** Grand Total aggregation — SA and MA */
+/** Tab (single tabulation) aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Shape, AggOutput } from "./types";
@@ -12,18 +12,18 @@ import {
 } from "./sqlHelpers";
 import { NO_ANSWER_VALUE } from "./constants";
 
-export async function aggGrandTotal(
+export async function aggTab(
   conn: duckdb.AsyncDuckDBConnection,
   shape: Shape,
   weightCol: string,
 ): Promise<AggOutput> {
-  const grandTotal = new GrandTotalAggregator(conn, weightCol);
+  const agg = new TabAggregator(conn, weightCol);
   return shape.type === "SA"
-    ? grandTotal.aggregateSA(shape.columns[0], shape.codes)
-    : grandTotal.aggregateMA(shape.columns, shape.codes);
+    ? agg.aggregateSA(shape.columns[0], shape.codes)
+    : agg.aggregateMA(shape.columns, shape.codes);
 }
 
-class GrandTotalAggregator {
+class TabAggregator {
   constructor(
     private conn: duckdb.AsyncDuckDBConnection,
     private weightCol: string,

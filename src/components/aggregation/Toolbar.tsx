@@ -1,4 +1,4 @@
-import type { Tally } from "../../lib/agg/types";
+import type { Tab } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfig";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
@@ -15,22 +15,22 @@ export interface ToolbarCallbacks {
 }
 
 interface ToolbarProps {
-  tallies: Tally[];
+  tabs: Tab[];
   weightCol: string;
   currentViewMode: ViewMode;
   callbacks: ToolbarCallbacks;
 }
 
-export function Toolbar({ tallies, weightCol, currentViewMode, callbacks }: ToolbarProps) {
+export function Toolbar({ tabs, weightCol, currentViewMode, callbacks }: ToolbarProps) {
   const weightText = weightCol
     ? t("result.weight.applied", { col: weightCol })
     : t("result.weight.none");
 
-  const questionCount = new Set(tallies.map((t) => t.questionCode)).size;
+  const questionCount = new Set(tabs.map((t) => t.questionCode)).size;
 
   return (
     <div class="mb-6 flex items-center gap-4">
-      <h2 class="text-xl font-bold">{t("result.title.grandTotal")}</h2>
+      <h2 class="text-xl font-bold">{t("result.title.tab")}</h2>
       <span class="text-xs text-muted">
         {t("result.meta", { count: questionCount, weight: weightText })}
       </span>
@@ -51,7 +51,7 @@ export function Toolbar({ tallies, weightCol, currentViewMode, callbacks }: Tool
         </ToggleButton>
       </ToggleGroup>
 
-      <ExportMenu onExport={(action: ExportAction) => executeExport(action, tallies, weightCol)} />
+      <ExportMenu onExport={(action: ExportAction) => executeExport(action, tabs, weightCol)} />
     </div>
   );
 }

@@ -31,7 +31,7 @@ const NO_ANSWER_VALUE = "N/A";
 
 // ── Public API ──
 
-export function oracleSaGrandTotal(
+export function oracleSaTab(
   rows: Record<string, string | null>[],
   column: string,
   codes: string[],
@@ -51,7 +51,7 @@ export function oracleSaGrandTotal(
   return { codes, slices: [{ code: null, n, cells }] };
 }
 
-export function oracleMaGrandTotal(
+export function oracleMaTab(
   rows: Record<string, string | null>[],
   columns: string[],
   codes: string[],

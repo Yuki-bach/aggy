@@ -1,15 +1,15 @@
 import { useState, useEffect } from "preact/hooks";
-import type { Tally } from "../../lib/agg/types";
+import type { Tab } from "../../lib/agg/types";
 import { generateComment } from "../../lib/aiComment";
 import { t } from "../../lib/i18n";
 import { isAICommentEnabled } from "../header/SettingsModal";
 
 interface AIBubbleProps {
-  tallies: Tally[];
+  tabs: Tab[];
   weightCol: string;
 }
 
-export function AIBubble({ tallies, weightCol }: AIBubbleProps) {
+export function AIBubble({ tabs, weightCol }: AIBubbleProps) {
   const [comment, setComment] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(true);
@@ -23,7 +23,7 @@ export function AIBubble({ tallies, weightCol }: AIBubbleProps) {
     setLoading(true);
     setComment(null);
     setVisible(true);
-    generateComment(tallies, weightCol).then((c) => {
+    generateComment(tabs, weightCol).then((c) => {
       if (cancelled) return;
       if (c) {
         setComment(c);
@@ -35,7 +35,7 @@ export function AIBubble({ tallies, weightCol }: AIBubbleProps) {
     return () => {
       cancelled = true;
     };
-  }, [tallies, weightCol]);
+  }, [tabs, weightCol]);
 
   if (!visible) return null;
 

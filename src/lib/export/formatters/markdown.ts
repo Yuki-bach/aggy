@@ -1,14 +1,14 @@
-import type { Tally } from "../../agg/types";
+import type { Tab } from "../../agg/types";
 import { buildExportGrids, type ExportGrid } from "./grid";
 import { downloadFile, today } from "../download";
 
-export function formatMarkdown(tallies: Tally[]): string {
-  const grids = buildExportGrids(tallies);
+export function formatMarkdown(tabs: Tab[]): string {
+  const grids = buildExportGrids(tabs);
   return gridsToMarkdown(grids);
 }
 
-export function downloadMarkdown(tallies: Tally[]): void {
-  const md = formatMarkdown(tallies);
+export function downloadMarkdown(tabs: Tab[]): void {
+  const md = formatMarkdown(tabs);
   downloadFile(md, `result_${today()}.md`, "text/markdown;charset=utf-8;");
 }
 

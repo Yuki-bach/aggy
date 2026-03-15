@@ -1,23 +1,23 @@
 import { useEffect, useState } from "preact/hooks";
-import type { Tally } from "../../lib/agg/types";
+import type { Tab } from "../../lib/agg/types";
 import { Toolbar, ViewOpts } from "./Toolbar";
-import { TallyCard } from "./TallyCard";
+import { TabCard } from "./TabCard";
 import { AIBubble } from "./AIBubble";
 import { t } from "../../lib/i18n";
 import type { Basis, ChartType, ViewMode } from "./viewTypes";
 import type { PaletteId } from "../../lib/chartConfig";
 
 interface ResultPanelProps {
-  tallies: Tally[] | null;
+  tabs: Tab[] | null;
   weightCol: string;
 }
 
-export default function ResultPanel({ tallies, weightCol }: ResultPanelProps) {
+export default function ResultPanel({ tabs, weightCol }: ResultPanelProps) {
   return (
     <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
-      {tallies ? (
+      {tabs ? (
         <div aria-live="polite">
-          <ResultContent tallies={tallies} weightCol={weightCol} />
+          <ResultContent tabs={tabs} weightCol={weightCol} />
         </div>
       ) : (
         <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
@@ -31,7 +31,7 @@ export default function ResultPanel({ tallies, weightCol }: ResultPanelProps) {
   );
 }
 
-function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: string }) {
+function ResultContent({ tabs, weightCol }: { tabs: Tab[]; weightCol: string }) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [saChartType, setSaChartType] = useState<ChartType>("bar-h");
   const [maChartType, setMaChartType] = useState<ChartType>("bar-h");
@@ -59,11 +59,11 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
     onPaletteChange: setPaletteId,
   };
 
-  const questionCodes = [...new Set(tallies.map((t) => t.questionCode))];
-  const hasCross = tallies.some((t) => t.by !== null);
+  const questionCodes = [...new Set(tabs.map((t) => t.questionCode))];
+  const hasCross = tabs.some((t) => t.by !== null);
 
   const maxPct = Math.max(
-    ...tallies
+    ...tabs
       .filter((t) => t.by === null && t.type !== "NA")
       .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct) ?? []),
     0,
@@ -78,12 +78,7 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
 
   return (
     <>
-      <Toolbar
-        tallies={tallies}
-        weightCol={weightCol}
-        currentViewMode={viewMode}
-        callbacks={callbacks}
-      />
+      <Toolbar tabs={tabs} weightCol={weightCol} currentViewMode={viewMode} callbacks={callbacks} />
       <ViewOpts
         currentViewMode={viewMode}
         currentBasis={basis}
@@ -93,17 +88,17 @@ function ResultContent({ tallies, weightCol }: { tallies: Tally[]; weightCol: st
       />
       <div class={gridClass}>
         {questionCodes.map((q) => (
-          <TallyCard
+          <TabCard
             key={q}
-            grandTotalTally={tallies.find((t) => t.questionCode === q && t.by === null)!}
-            crossTallies={tallies.filter((t) => t.questionCode === q && t.by !== null)}
+            tab={tabs.find((t) => t.questionCode === q && t.by === null)!}
+            crossTabs={tabs.filter((t) => t.questionCode === q && t.by !== null)}
             viewMode={viewMode}
             tableOpts={tableOpts}
             chartOpts={chartOpts}
           />
         ))}
       </div>
-      <AIBubble tallies={tallies} weightCol={weightCol} />
+      <AIBubble tabs={tabs} weightCol={weightCol} />
     </>
   );
 }
