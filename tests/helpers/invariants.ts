@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 import type { AggOutput } from "../../src/lib/agg/types";
 
-export function assertGrandTotalInvariants(
+export function assertTabInvariants(
   result: AggOutput,
   type: "SA" | "MA",
 ): void {
@@ -33,7 +33,7 @@ export function assertGrandTotalInvariants(
   }
 }
 
-export function assertNaGrandTotalInvariants(result: AggOutput): void {
+export function assertNaTabInvariants(result: AggOutput): void {
   // 1. Single slice with code === null
   expect(result.slices).toHaveLength(1);
   const slice = result.slices[0];

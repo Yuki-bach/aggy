@@ -11,7 +11,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
-import { aggGrandTotal } from "../src/lib/agg/aggGrandTotal";
+import { aggTab } from "../src/lib/agg/aggTab";
 import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import type { Question } from "../src/lib/agg/types";
 import { parseLayoutJson, buildValidLayout, filterLayout, buildQuestions } from "../src/lib/layout";
@@ -85,7 +85,7 @@ async function benchPattern(
   for (let i = 0; i < RUNS; i++) {
     const start = performance.now();
     for (const q of questions) {
-      await aggGrandTotal(conn, q, weightCol);
+      await aggTab(conn, q, weightCol);
       for (const cross of crossCols) {
         await aggCrossTab(conn, q, cross, weightCol);
       }

@@ -1,27 +1,22 @@
 import { useRef, useEffect } from "preact/hooks";
-import type { Tally } from "../../lib/agg/types";
+import type { Tab } from "../../lib/agg/types";
 import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
 import type { ChartType } from "./viewTypes";
 
 import type { ChartConfiguration } from "chart.js";
 
 interface ChartCardBodyProps {
-  grandTotalTally: Tally;
-  crossTallies: Tally[];
-  grandTotalChartType: ChartType;
+  tab: Tab;
+  crossTabs: Tab[];
+  tabChartType: ChartType;
   paletteId: PaletteId;
 }
 
-export function ChartCardBody({
-  grandTotalTally,
-  crossTallies,
-  grandTotalChartType,
-  paletteId,
-}: ChartCardBodyProps) {
+export function ChartCardBody({ tab, crossTabs, tabChartType, paletteId }: ChartCardBodyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
-  const isCross = crossTallies.length > 0;
+  const isCross = crossTabs.length > 0;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -31,29 +26,16 @@ export function ChartCardBody({
 
     const theme = getThemeColors();
     if (isCross) {
-      chartRef.current = buildCrossChart(
-        canvas,
-        grandTotalTally,
-        crossTallies,
-        grandTotalChartType,
-        theme,
-        paletteId,
-      );
+      chartRef.current = buildCrossChart(canvas, tab, crossTabs, tabChartType, theme, paletteId);
     } else {
-      chartRef.current = buildGrandTotalChart(
-        canvas,
-        grandTotalTally,
-        grandTotalChartType,
-        theme,
-        paletteId,
-      );
+      chartRef.current = buildTabChart(canvas, tab, tabChartType, theme, paletteId);
     }
 
     return () => {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [grandTotalTally, crossTallies, grandTotalChartType, paletteId]);
+  }, [tab, crossTabs, tabChartType, paletteId]);
 
   return (
     <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>
@@ -62,25 +44,21 @@ export function ChartCardBody({
   );
 }
 
-function resolveLabel(code: string, tally: Tally): string {
-  return tally.labels[code];
-}
-
-function buildGrandTotalChart(
+function buildTabChart(
   canvas: HTMLCanvasElement,
-  tally: Tally,
+  tab: Tab,
   chartType: ChartType,
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,
 ): Chart {
-  const slice = tally.slices[0];
-  const labels = tally.codes.map((code) => resolveLabel(code, tally));
+  const slice = tab.slices[0];
+  const labels = tab.codes.map((code) => tab.labels[code]);
   const data = slice.cells.map((c) => c.pct);
-  const colors = tally.codes.map((_, i) => getSeriesColor(i, paletteId));
+  const colors = tab.codes.map((_, i) => getSeriesColor(i, paletteId));
 
   if (chartType === "obi") {
-    const datasets = tally.codes.map((code, i) => ({
-      label: resolveLabel(code, tally),
+    const datasets = tab.codes.map((code, i) => ({
+      label: tab.labels[code],
       data: [slice.cells[i].pct],
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
@@ -158,14 +136,14 @@ function buildGrandTotalChart(
 
 function buildCrossChart(
   canvas: HTMLCanvasElement,
-  grandTotalTally: Tally,
-  crossTallies: Tally[],
-  grandTotalChartType: ChartType,
+  tab: Tab,
+  crossTabs: Tab[],
+  tabChartType: ChartType,
   theme: ReturnType<typeof getThemeColors>,
   paletteId: PaletteId,
 ): Chart {
   // Flatten all cross slices
-  const allSlices = crossTallies.flatMap((ct) => {
+  const allSlices = crossTabs.flatMap((ct) => {
     const axis = ct.by!;
     return ct.slices.map((s) => ({
       slice: s,
@@ -173,10 +151,10 @@ function buildCrossChart(
     }));
   });
 
-  if (grandTotalChartType === "obi") {
+  if (tabChartType === "obi") {
     const subLabels = allSlices.map((s) => s.label);
-    const datasets = grandTotalTally.codes.map((code, i) => ({
-      label: resolveLabel(code, grandTotalTally),
+    const datasets = tab.codes.map((code, i) => ({
+      label: tab.labels[code],
       data: allSlices.map((s) => s.slice.cells[i]?.pct ?? 0),
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
@@ -210,12 +188,12 @@ function buildCrossChart(
     } as ChartConfiguration);
   }
 
-  const isHorizontal = grandTotalChartType === "bar-h";
-  const labels = grandTotalTally.codes.map((code) => resolveLabel(code, grandTotalTally));
+  const isHorizontal = tabChartType === "bar-h";
+  const labels = tab.codes.map((code) => tab.labels[code]);
 
   const datasets = allSlices.map((s, i) => ({
     label: s.label,
-    data: grandTotalTally.codes.map((_, ci) => s.slice.cells[ci]?.pct ?? 0),
+    data: tab.codes.map((_, ci) => s.slice.cells[ci]?.pct ?? 0),
     backgroundColor: getSeriesColor(i, paletteId),
     borderRadius: 3,
     maxBarThickness: 40,

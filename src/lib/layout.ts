@@ -1,5 +1,5 @@
 import type { Question } from "./agg/types";
-import type { Diagnostics } from "./validateRawData";
+import type { Diagnostic } from "./validateRawData";
 
 export interface LayoutItem {
   code: string;
@@ -41,82 +41,24 @@ export function parseLayoutJson(jsonText: string): unknown[] {
 }
 
 /** Validate layout structure and return diagnostics (does not throw). */
-export function validateLayoutStructure(raw: unknown[]): Diagnostics {
-  const diagnostics: Diagnostics = [];
+export function validateLayoutStructure(raw: unknown[]): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
 
   for (let i = 0; i < raw.length; i++) {
-    const entry = raw[i];
-    if (typeof entry !== "object" || entry === null) {
-      diagnostics.push({
-        key: `[${i}]`,
-        label: "",
-        severity: "error",
-        type: "invalidLayout",
-        params: { reason: "各エントリはオブジェクトである必要があります" },
-      });
-      continue;
-    }
-    const e = entry as Record<string, unknown>;
-    const key = typeof e["key"] === "string" ? e["key"] : `[${i}]`;
-
-    if (typeof e["key"] !== "string") {
+    const reason = checkEntry(raw[i]);
+    if (reason) {
+      const entry = raw[i];
+      const e =
+        typeof entry === "object" && entry !== null ? (entry as Record<string, unknown>) : null;
+      const key = e && typeof e["key"] === "string" ? e["key"] : `[${i}]`;
+      const label = e && typeof e["label"] === "string" ? (e["label"] as string) : "";
       diagnostics.push({
         key,
-        label: "",
+        label,
         severity: "error",
         type: "invalidLayout",
-        params: { reason: '"key"（文字列）が必要です' },
+        params: { reason },
       });
-      continue;
-    }
-    if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) {
-      diagnostics.push({
-        key,
-        label: "",
-        severity: "error",
-        type: "invalidLayout",
-        params: {
-          reason: `"type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります`,
-        },
-      });
-      continue;
-    }
-    if (typeof e["label"] !== "string") {
-      diagnostics.push({
-        key,
-        label: "",
-        severity: "error",
-        type: "invalidLayout",
-        params: { reason: '"label"（文字列）が必要です' },
-      });
-      continue;
-    }
-    const type = e["type"] as string;
-    if (type === "SA" || type === "MA") {
-      if (!Array.isArray(e["items"]) || e["items"].length === 0) {
-        diagnostics.push({
-          key,
-          label: e["label"] as string,
-          severity: "error",
-          type: "invalidLayout",
-          params: { reason: `${type} には "items"（1件以上の配列）が必要です` },
-        });
-        continue;
-      }
-    }
-    if (type === "DATE") {
-      if (typeof e["granularity"] !== "string" || !VALID_GRANULARITIES.has(e["granularity"])) {
-        diagnostics.push({
-          key,
-          label: e["label"] as string,
-          severity: "error",
-          type: "invalidLayout",
-          params: {
-            reason: `DATE には "granularity"（${[...VALID_GRANULARITIES].join(", ")}）が必要です`,
-          },
-        });
-        continue;
-      }
     }
   }
 
@@ -126,23 +68,34 @@ export function validateLayoutStructure(raw: unknown[]): Diagnostics {
 /** Build Layout from raw entries that pass structure validation. */
 export function buildValidLayout(raw: unknown[]): Layout {
   const layout: Layout = [];
-  for (const entry of raw) {
-    if (typeof entry !== "object" || entry === null) continue;
-    const e = entry as Record<string, unknown>;
-    if (typeof e["key"] !== "string") continue;
-    if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) continue;
-    if (typeof e["label"] !== "string") continue;
-    const type = e["type"] as string;
-    if ((type === "SA" || type === "MA") && (!Array.isArray(e["items"]) || e["items"].length === 0))
-      continue;
-    if (
-      type === "DATE" &&
-      (typeof e["granularity"] !== "string" || !VALID_GRANULARITIES.has(e["granularity"]))
-    )
-      continue;
-    layout.push(entry as LayoutQuestion);
+  for (let i = 0; i < raw.length; i++) {
+    if (!checkEntry(raw[i])) layout.push(raw[i] as LayoutQuestion);
   }
   return layout;
+}
+
+/** Return error reason string if entry is invalid, or null if valid. */
+function checkEntry(entry: unknown): string | null {
+  if (typeof entry !== "object" || entry === null) {
+    return "各エントリはオブジェクトである必要があります";
+  }
+  const e = entry as Record<string, unknown>;
+  if (typeof e["key"] !== "string") return '"key"（文字列）が必要です';
+  if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) {
+    return `"type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります`;
+  }
+  if (typeof e["label"] !== "string") return '"label"（文字列）が必要です';
+  const type = e["type"] as string;
+  if ((type === "SA" || type === "MA") && (!Array.isArray(e["items"]) || e["items"].length === 0)) {
+    return `${type} には "items"（1件以上の配列）が必要です`;
+  }
+  if (
+    type === "DATE" &&
+    (typeof e["granularity"] !== "string" || !VALID_GRANULARITIES.has(e["granularity"]))
+  ) {
+    return `DATE には "granularity"（${[...VALID_GRANULARITIES].join(", ")}）が必要です`;
+  }
+  return null;
 }
 
 /** Filter layout entries to only include columns present in CSV headers */

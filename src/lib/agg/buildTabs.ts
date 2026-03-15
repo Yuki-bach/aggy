@@ -1,39 +1,39 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Question, AggOutput, Axis, Tally } from "./types";
-import { aggGrandTotal } from "./aggGrandTotal";
+import type { Question, AggOutput, Axis, Tab } from "./types";
+import { aggTab } from "./aggTab";
 import { aggCrossTab } from "./aggCrossTab";
-import { aggNaGrandTotal, aggNaCrossTab } from "./aggNa";
+import { aggNaTab, aggNaCrossTab } from "./aggNa";
 import { NO_ANSWER_VALUE } from "./constants";
 import { t } from "../i18n";
 
-export async function buildTallies(
+export async function buildTabs(
   conn: duckdb.AsyncDuckDBConnection,
   questions: Question[],
   crossQuestions: Question[],
   weightCol: string,
-): Promise<Tally[]> {
-  const tallies: Tally[] = [];
+): Promise<Tab[]> {
+  const tabs: Tab[] = [];
   for (const q of questions) {
     if (q.type === "NA") {
-      const grandTotalOutput = await aggNaGrandTotal(conn, q.columns[0], weightCol);
-      tallies.push(toTally(q, grandTotalOutput));
+      const tabOutput = await aggNaTab(conn, q.columns[0], weightCol);
+      tabs.push(toTab(q, tabOutput));
       for (const axisQuestion of crossQuestions) {
         const crossOutput = await aggNaCrossTab(conn, q.columns[0], axisQuestion, weightCol);
-        tallies.push(toTally(q, crossOutput, axisQuestion));
+        tabs.push(toTab(q, crossOutput, axisQuestion));
       }
     } else {
-      const grandTotalOutput = await aggGrandTotal(conn, q, weightCol);
-      tallies.push(toTally(q, grandTotalOutput));
+      const tabOutput = await aggTab(conn, q, weightCol);
+      tabs.push(toTab(q, tabOutput));
       for (const axisQuestion of crossQuestions) {
         const crossOutput = await aggCrossTab(conn, q, axisQuestion, weightCol);
-        tallies.push(toTally(q, crossOutput, axisQuestion));
+        tabs.push(toTab(q, crossOutput, axisQuestion));
       }
     }
   }
-  return tallies;
+  return tabs;
 }
 
-function toTally(question: Question, aggOutput: AggOutput, axisQuestion?: Question): Tally {
+function toTab(question: Question, aggOutput: AggOutput, axisQuestion?: Question): Tab {
   const labels: Record<string, string> = { ...question.labels };
 
   if (question.type === "NA") {

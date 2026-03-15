@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import type { Tally } from "../lib/agg/types";
+import type { Tab } from "../lib/agg/types";
 import ResultPanel from "./aggregation/ResultPanel";
 import SettingsPanel from "./aggregation/SettingsPanel";
 import { runAggregation } from "../lib/duckdb";
@@ -27,7 +27,7 @@ export default function AggregationScreen({
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [aggResult, setAggResult] = useState<{ tallies: Tally[]; weightCol: string } | null>(null);
+  const [aggResult, setAggResult] = useState<{ tabs: Tab[]; weightCol: string } | null>(null);
 
   const didAutoRun = useRef(false);
   useEffect(() => {
@@ -47,8 +47,8 @@ export default function AggregationScreen({
     const crossQuestions = questions.filter((q) => crossSelected[q.code]);
 
     try {
-      const tallies = await runAggregation(questions, crossQuestions, activeWeightCol);
-      setAggResult({ tallies, weightCol: activeWeightCol });
+      const tabs = await runAggregation(questions, crossQuestions, activeWeightCol);
+      setAggResult({ tabs, weightCol: activeWeightCol });
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
     }
@@ -71,7 +71,7 @@ export default function AggregationScreen({
         onRun={() => handleRunAggregation()}
       />
 
-      <ResultPanel tallies={aggResult?.tallies ?? null} weightCol={aggResult?.weightCol ?? ""} />
+      <ResultPanel tabs={aggResult?.tabs ?? null} weightCol={aggResult?.weightCol ?? ""} />
     </>
   );
 }

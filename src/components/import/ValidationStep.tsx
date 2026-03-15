@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { t } from "../../lib/i18n";
 import { runValidation } from "../../lib/duckdb";
-import type { Diagnostics } from "../../lib/validateRawData";
+import type { Diagnostic } from "../../lib/validateRawData";
 import type { RawData, LayoutData } from "../../lib/types";
 
 interface ValidationStepProps {
@@ -12,7 +12,7 @@ interface ValidationStepProps {
 }
 
 export function ValidationStep({ rawData, layout, onProceed, onBack }: ValidationStepProps) {
-  const [diagnostics, setDiagnostics] = useState<Diagnostics | null>(null);
+  const [diagnostics, setDiagnostics] = useState<Diagnostic[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

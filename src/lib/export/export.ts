@@ -1,4 +1,4 @@
-import type { Tally } from "../agg/types";
+import type { Tab } from "../agg/types";
 import { downloadCSV } from "./formatters/csv";
 import { formatTSV } from "./formatters/tsv";
 import { formatMarkdown, downloadMarkdown } from "./formatters/markdown";
@@ -15,34 +15,34 @@ export type ExportAction =
 
 export async function executeExport(
   action: ExportAction,
-  tallies: Tally[],
+  tabs: Tab[],
   weightCol: string,
 ): Promise<boolean> {
   switch (action) {
     case "download-csv": {
-      downloadCSV(tallies);
+      downloadCSV(tabs);
       return true;
     }
     case "download-markdown": {
-      downloadMarkdown(tallies);
+      downloadMarkdown(tabs);
       return true;
     }
     case "download-json": {
-      downloadJSON(tallies, weightCol);
+      downloadJSON(tabs, weightCol);
       return true;
     }
     case "copy-tsv": {
-      const tsv = formatTSV(tallies);
+      const tsv = formatTSV(tabs);
       await copyToClipboard({ "text/plain": tsv });
       return true;
     }
     case "copy-markdown": {
-      const md = formatMarkdown(tallies);
+      const md = formatMarkdown(tabs);
       await copyToClipboard({ "text/plain": md });
       return true;
     }
     case "copy-json": {
-      const json = formatJSON(tallies, weightCol);
+      const json = formatJSON(tabs, weightCol);
       await copyToClipboard({ "text/plain": json });
       return true;
     }

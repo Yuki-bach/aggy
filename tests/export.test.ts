@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { buildTallies } from "../src/lib/agg/buildTallies";
-import type { Tally } from "../src/lib/agg/types";
+import { buildTabs } from "../src/lib/agg/buildTabs";
+import type { Tab } from "../src/lib/agg/types";
 import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
 import { getQuestion } from "./helpers/fixtures";
 import { buildExportGrids } from "../src/lib/export/formatters/grid";
-import { talliesToLongRows } from "../src/lib/export/formatters/longFormat";
+import { tabsToLongRows } from "../src/lib/export/formatters/longFormat";
 import { formatCSV } from "../src/lib/export/formatters/csv";
 import { formatTSV } from "../src/lib/export/formatters/tsv";
 import { formatMarkdown } from "../src/lib/export/formatters/markdown";
@@ -13,14 +13,14 @@ import { formatJSON } from "../src/lib/export/formatters/json";
 const q1 = getQuestion("q1");
 const q2 = getQuestion("q2");
 const q3 = getQuestion("q3");
-let grandTotalTallies: Tally[];
-let crossTallies: Tally[];
+let tabResults: Tab[];
+let crossResults: Tab[];
 
 beforeAll(async () => {
   await setupDuckDB();
 
-  grandTotalTallies = await buildTallies(getConn(), [q1, q3], [], "");
-  crossTallies = await buildTallies(getConn(), [q2], [q1], "");
+  tabResults = await buildTabs(getConn(), [q1, q3], [], "");
+  crossResults = await buildTabs(getConn(), [q2], [q1], "");
 }, 30_000);
 
 afterAll(async () => {
@@ -31,7 +31,7 @@ afterAll(async () => {
 
 describe("buildExportGrids", () => {
   it("GT結果から正しいグリッド構造を生成する", () => {
-    const grids = buildExportGrids(grandTotalTallies);
+    const grids = buildExportGrids(tabResults);
     expect(grids).toHaveLength(2);
 
     const grid = grids[0];
@@ -46,7 +46,7 @@ describe("buildExportGrids", () => {
   });
 
   it("クロス結果からヘッダー2行のグリッドを生成する", () => {
-    const grids = buildExportGrids(crossTallies);
+    const grids = buildExportGrids(crossResults);
     expect(grids).toHaveLength(1);
 
     const grid = grids[0];
@@ -57,33 +57,33 @@ describe("buildExportGrids", () => {
   });
 });
 
-// ─── talliesToLongRows ──────────────────────────────────────
+// ─── tabsToLongRows ──────────────────────────────────────
 
-describe("talliesToLongRows", () => {
+describe("tabsToLongRows", () => {
   it("GT結果からロングフォーマット行を生成する", () => {
-    const rows = talliesToLongRows(grandTotalTallies);
+    const rows = tabsToLongRows(tabResults);
     // ヘッダー行（i18n: ja）
     expect(rows[0]).toEqual(["変数名", "種別", "選択肢", "クロス軸", "クロス値", "n", "度数", "%"]);
     // GT行のcross_axis/cross_valueは(全体)
     expect(rows[1][3]).toBe("(全体)");
     expect(rows[1][4]).toBe("(全体)");
-    // データ行数: ヘッダー1行 + 各tallyのcodes数の合計
-    const expectedDataRows = grandTotalTallies.reduce((sum, t) => sum + t.codes.length, 0);
+    // データ行数: ヘッダー1行 + 各tabのcodes数の合計
+    const expectedDataRows = tabResults.reduce((sum, t) => sum + t.codes.length, 0);
     expect(rows).toHaveLength(1 + expectedDataRows);
   });
 
   it("クロス結果でcross_axis/cross_valueが設定される", () => {
-    const rows = talliesToLongRows(crossTallies);
-    // GT行(by===null)は(全体)
-    const grandTotalRows = rows.filter((r) => r[3] === "(全体)");
-    expect(grandTotalRows.length).toBeGreaterThan(0);
+    const rows = tabsToLongRows(crossResults);
+    // Tab行(by===null)は(全体)
+    const tabRows = rows.filter((r) => r[3] === "(全体)");
+    expect(tabRows.length).toBeGreaterThan(0);
     // クロス行(by!==null)はcross_axisが軸ラベル
     const crossRows = rows.filter((r, i) => i > 0 && r[3] !== "(全体)");
     expect(crossRows.length).toBeGreaterThan(0);
   });
 
   it("ラベルが解決される", () => {
-    const labeled: Tally = {
+    const labeled: Tab = {
       questionCode: "q_test",
       type: "SA",
       label: "Test Q",
@@ -92,7 +92,7 @@ describe("talliesToLongRows", () => {
       by: null,
       slices: [{ code: null, n: 10, cells: [{ count: 6, pct: 60 }, { count: 4, pct: 40 }] }],
     };
-    const rows = talliesToLongRows([labeled]);
+    const rows = tabsToLongRows([labeled]);
     expect(rows[1][2]).toBe("はい");
     expect(rows[2][2]).toBe("いいえ");
   });
@@ -102,7 +102,7 @@ describe("talliesToLongRows", () => {
 
 describe("formatCSV", () => {
   it("ロングフォーマットのCSVを出力する", () => {
-    const csv = formatCSV(grandTotalTallies);
+    const csv = formatCSV(tabResults);
     const lines = csv.split("\r\n");
 
     // ヘッダー行
@@ -113,7 +113,7 @@ describe("formatCSV", () => {
   });
 
   it("ダブルクォートがエスケープされる", () => {
-    const tally: Tally = {
+    const tab: Tab = {
       questionCode: "test",
       type: "SA",
       label: "test",
@@ -122,7 +122,7 @@ describe("formatCSV", () => {
       by: null,
       slices: [{ code: null, n: 10, cells: [{ count: 10, pct: 100 }] }],
     };
-    const csv = formatCSV([tally]);
+    const csv = formatCSV([tab]);
     expect(csv).toContain('""quotes""');
   });
 });
@@ -131,7 +131,7 @@ describe("formatCSV", () => {
 
 describe("formatTSV", () => {
   it("タブ区切りのロングフォーマットで出力される", () => {
-    const tsv = formatTSV(grandTotalTallies);
+    const tsv = formatTSV(tabResults);
     const lines = tsv.split("\n");
 
     expect(lines[0]).toContain("\t");
@@ -144,7 +144,7 @@ describe("formatTSV", () => {
 
 describe("formatMarkdown", () => {
   it("パイプ区切りのテーブルを生成する", () => {
-    const md = formatMarkdown(grandTotalTallies);
+    const md = formatMarkdown(tabResults);
 
     expect(md).toContain("### q1 (SA)");
     expect(md).toContain("| --- |");
@@ -152,7 +152,7 @@ describe("formatMarkdown", () => {
   });
 
   it("クロス結果でもMarkdownテーブルを生成する", () => {
-    const md = formatMarkdown(crossTallies);
+    const md = formatMarkdown(crossResults);
 
     expect(md).toContain("### q2 (SA)");
     expect(md).toContain("| --- |");
@@ -162,13 +162,13 @@ describe("formatMarkdown", () => {
 // ─── JSON formatter ─────────────────────────────────────────
 
 describe("formatJSON", () => {
-  it("パース可能なJSONを出力し、Tally[]がそのまま含まれる", () => {
-    const json = formatJSON(grandTotalTallies, "");
+  it("パース可能なJSONを出力し、Tab[]がそのまま含まれる", () => {
+    const json = formatJSON(tabResults, "");
     const parsed = JSON.parse(json);
 
     expect(parsed.weightColumn).toBeNull();
     expect(Array.isArray(parsed.results)).toBe(true);
-    expect(parsed.results).toHaveLength(grandTotalTallies.length);
+    expect(parsed.results).toHaveLength(tabResults.length);
     expect(parsed.results[0].questionCode).toBe("q1");
     expect(parsed.results[0].type).toBe("SA");
     expect(Array.isArray(parsed.results[0].slices)).toBe(true);
@@ -176,14 +176,14 @@ describe("formatJSON", () => {
   });
 
   it("weightCol指定時にweightColumnが含まれる", () => {
-    const json = formatJSON(grandTotalTallies, "weight");
+    const json = formatJSON(tabResults, "weight");
     const parsed = JSON.parse(json);
 
     expect(parsed.weightColumn).toBe("weight");
   });
 
   it("各sliceのcellsにcount/pctが数値で含まれる", () => {
-    const json = formatJSON(grandTotalTallies, "");
+    const json = formatJSON(tabResults, "");
     const parsed = JSON.parse(json);
     const cell = parsed.results[0].slices[0].cells[0];
 
@@ -192,9 +192,9 @@ describe("formatJSON", () => {
   });
 
   it("クロス結果でbyフィールドが含まれる", () => {
-    const json = formatJSON(crossTallies, "");
+    const json = formatJSON(crossResults, "");
     const parsed = JSON.parse(json);
-    const crossResult = parsed.results.find((r: Tally) => r.by !== null);
+    const crossResult = parsed.results.find((r: Tab) => r.by !== null);
 
     expect(crossResult).toBeDefined();
     expect(crossResult.by.code).toBe("q1");

@@ -1,10 +1,10 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
-import type { Question, Tally } from "./agg/types";
+import type { Question, Tab } from "./agg/types";
 import type { Layout } from "./layout";
 import { validateLayoutStructure, buildValidLayout } from "./layout";
-import { buildTallies } from "./agg/buildTallies";
+import { buildTabs } from "./agg/buildTabs";
 import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
-import { validateRawData, type Diagnostics } from "./validateRawData";
+import { validateRawData, type Diagnostic } from "./validateRawData";
 
 export type DuckStatus = "loading" | "ready" | "error";
 export type StatusListener = (s: DuckStatus, label: string) => void;
@@ -77,7 +77,7 @@ export async function loadCSV(csvText: string): Promise<{ headers: string[]; row
 }
 
 /** Validate layout structure + CSV data against layout definition */
-export async function runValidation(rawJson: unknown[], headers: string[]): Promise<Diagnostics> {
+export async function runValidation(rawJson: unknown[], headers: string[]): Promise<Diagnostic[]> {
   const layoutDiags = validateLayoutStructure(rawJson);
   if (layoutDiags.length > 0) return layoutDiags;
 
@@ -91,9 +91,9 @@ export async function runAggregation(
   questions: Question[],
   crossQuestions: Question[],
   weightCol: string,
-): Promise<Tally[]> {
+): Promise<Tab[]> {
   const c = await getConnection();
-  return buildTallies(c, questions, crossQuestions, weightCol);
+  return buildTabs(c, questions, crossQuestions, weightCol);
 }
 
 /** Prepare DATE columns in layout (convert to SA with auto-generated items) */

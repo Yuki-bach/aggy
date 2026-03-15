@@ -10,16 +10,14 @@ export interface Diagnostic {
   params: Record<string, string>;
 }
 
-export type Diagnostics = Diagnostic[];
-
 /** Validate raw data against layout definition */
 export async function validateRawData(
   conn: duckdb.AsyncDuckDBConnection,
   headers: string[],
   layout: Layout,
-): Promise<Diagnostics> {
+): Promise<Diagnostic[]> {
   const headerSet = new Set(headers);
-  const diagnostics: Diagnostics = [];
+  const diagnostics: Diagnostic[] = [];
 
   for (const q of layout) {
     const dropped = checkDropped(q, headerSet);

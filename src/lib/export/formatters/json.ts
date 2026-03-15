@@ -1,11 +1,11 @@
-import type { Tally } from "../../agg/types";
+import type { Tab } from "../../agg/types";
 import { downloadFile, today } from "../download";
 
-export function formatJSON(tallies: Tally[], weightCol: string): string {
-  return JSON.stringify({ weightColumn: weightCol || null, results: tallies }, null, 2);
+export function formatJSON(tabs: Tab[], weightCol: string): string {
+  return JSON.stringify({ weightColumn: weightCol || null, results: tabs }, null, 2);
 }
 
-export function downloadJSON(tallies: Tally[], weightCol: string): void {
-  const json = formatJSON(tallies, weightCol);
+export function downloadJSON(tabs: Tab[], weightCol: string): void {
+  const json = formatJSON(tabs, weightCol);
   downloadFile(json, `result_${today()}.json`, "application/json;charset=utf-8;");
 }

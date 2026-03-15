@@ -1,4 +1,4 @@
-/** NA (Numerical Answer) aggregation — Grand Total and Cross */
+/** NA (Numerical Answer) aggregation — Tab and Cross */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
 import type { Shape, AggOutput, NaStats, Slice } from "./types";
@@ -9,9 +9,9 @@ interface ValueCount {
   count: number;
 }
 
-// ── Grand Total ──
+// ── Tab ──
 
-export async function aggNaGrandTotal(
+export async function aggNaTab(
   conn: duckdb.AsyncDuckDBConnection,
   column: string,
   weightCol: string,

@@ -24,7 +24,7 @@
   --color-row-border: var(--row-border);
   --color-row-hover: var(--row-hover);
   --color-cross-bg: var(--cross-bg);
-  --color-grandTotal-bg: var(--grandTotal-bg);
+  --color-tab-bg: var(--tab-bg);
   --color-error-bg: var(--error-bg);
   --color-error-border: var(--error-border);
   --color-warning: var(--warning);
@@ -101,7 +101,7 @@
     --row-border: var(--color-gray-200);
     --row-hover: var(--color-primary-50);
     --cross-bg: var(--color-secondary-100);
-    --grandTotal-bg: var(--color-primary-50);
+    --tab-bg: var(--color-primary-50);
     --error-bg: var(--color-error-50);
     --error-border: var(--color-error-100);
     --warning: var(--color-warning-700);
