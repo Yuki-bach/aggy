@@ -349,11 +349,10 @@ describe("formatCSV (fixture)", () => {
     expect(csv).toContain('"line1\nline2"');
   });
 
-  it("空 tabs: 空文字列 or ヘッダーのみ", () => {
+  it("空 tabs: ヘッダー行のみ出力", () => {
     const csv = formatCSV([]);
     const lines = csv.split("\r\n").filter((l) => l.length > 0);
-    // Should have at most the header row
-    expect(lines.length).toBeLessThanOrEqual(1);
+    expect(lines).toHaveLength(1);
   });
 
   it("SA fixture の CSV: questionCode と type が出力される", () => {
