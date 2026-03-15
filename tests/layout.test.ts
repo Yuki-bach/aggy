@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { parseLayout, filterLayout, buildQuestions } from "../src/lib/layout";
+import {
+  parseLayoutJson,
+  validateLayoutStructure,
+  buildValidLayout,
+  filterLayout,
+  buildQuestions,
+} from "../src/lib/layout";
 import type { Layout } from "../src/lib/layout";
 
 const layout: Layout = [
@@ -133,39 +139,102 @@ describe("buildQuestions", () => {
   });
 });
 
-describe("parseLayout validation", () => {
-  it("rejects entry without label", () => {
-    const json = JSON.stringify([{ key: "q1", type: "SA", items: [{ code: "1", label: "A" }] }]);
-    expect(() => parseLayout(json)).toThrow('"q1": "label"（文字列）が必要です。');
+describe("parseLayoutJson", () => {
+  it("parses valid JSON array", () => {
+    const result = parseLayoutJson('[{"key":"q1"}]');
+    expect(result).toEqual([{ key: "q1" }]);
   });
 
-  it("rejects SA entry without items", () => {
-    const json = JSON.stringify([{ key: "q1", label: "Q1", type: "SA" }]);
-    expect(() => parseLayout(json)).toThrow('"q1": SA には "items"（1件以上の配列）が必要です。');
+  it("throws on invalid JSON", () => {
+    expect(() => parseLayoutJson("{invalid")).toThrow("JSONの解析に失敗しました");
   });
 
-  it("rejects MA entry with empty items", () => {
-    const json = JSON.stringify([{ key: "q1", label: "Q1", type: "MA", items: [] }]);
-    expect(() => parseLayout(json)).toThrow('"q1": MA には "items"（1件以上の配列）が必要です。');
+  it("throws on non-array JSON", () => {
+    expect(() => parseLayoutJson('{"key":"q1"}')).toThrow("JSON配列である必要があります");
   });
+});
 
-  it("rejects DATE entry without granularity", () => {
-    const json = JSON.stringify([{ key: "d1", label: "Date", type: "DATE" }]);
-    expect(() => parseLayout(json)).toThrow('"d1": DATE には "granularity"');
-  });
-
-  it("rejects invalid type", () => {
-    const json = JSON.stringify([{ key: "q1", label: "Q1", type: "UNKNOWN" }]);
-    expect(() => parseLayout(json)).toThrow('"q1": "type" は');
-  });
-
-  it("accepts valid layout", () => {
-    const json = JSON.stringify([
+describe("validateLayoutStructure", () => {
+  it("returns empty diagnostics for valid layout", () => {
+    const raw = [
       { key: "q1", label: "Q1", type: "SA", items: [{ code: "1", label: "A" }] },
       { key: "q2", label: "Q2", type: "NA" },
       { key: "w", label: "Weight", type: "WEIGHT" },
       { key: "d", label: "Date", type: "DATE", granularity: "month" },
-    ]);
-    expect(parseLayout(json)).toHaveLength(4);
+    ];
+    expect(validateLayoutStructure(raw)).toHaveLength(0);
+  });
+
+  it("detects entry without label", () => {
+    const raw = [{ key: "q1", type: "SA", items: [{ code: "1", label: "A" }] }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].type).toBe("invalidLayout");
+    expect(diags[0].key).toBe("q1");
+    expect(diags[0].params.reason).toContain('"label"');
+  });
+
+  it("detects SA entry without items", () => {
+    const raw = [{ key: "q1", label: "Q1", type: "SA" }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].key).toBe("q1");
+    expect(diags[0].params.reason).toContain("items");
+  });
+
+  it("detects MA entry with empty items", () => {
+    const raw = [{ key: "q1", label: "Q1", type: "MA", items: [] }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain("items");
+  });
+
+  it("detects DATE entry without granularity", () => {
+    const raw = [{ key: "d1", label: "Date", type: "DATE" }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain("granularity");
+  });
+
+  it("detects invalid type", () => {
+    const raw = [{ key: "q1", label: "Q1", type: "UNKNOWN" }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain('"type"');
+  });
+
+  it("detects non-object entry", () => {
+    const raw = ["not an object"];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].key).toBe("[0]");
+  });
+
+  it("detects entry without key", () => {
+    const raw = [{ type: "SA", label: "Q1" }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain('"key"');
+  });
+});
+
+describe("buildValidLayout", () => {
+  it("builds layout from valid entries only", () => {
+    const raw = [
+      { key: "q1", label: "Q1", type: "SA", items: [{ code: "1", label: "A" }] },
+      { key: "bad", type: "UNKNOWN" },
+      { key: "q2", label: "Q2", type: "NA" },
+    ];
+    const result = buildValidLayout(raw);
+    expect(result).toHaveLength(2);
+    expect(result[0].key).toBe("q1");
+    expect(result[1].key).toBe("q2");
+  });
+
+  it("skips non-object entries", () => {
+    const raw = ["string", null, { key: "q1", label: "Q1", type: "NA" }];
+    const result = buildValidLayout(raw);
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe("q1");
   });
 });

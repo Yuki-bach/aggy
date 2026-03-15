@@ -3,6 +3,7 @@ import type { Tab } from "../lib/agg/types";
 import ResultPanel from "./aggregation/ResultPanel";
 import SettingsPanel from "./aggregation/SettingsPanel";
 import { runAggregation } from "../lib/duckdb";
+import type { Layout } from "../lib/layout";
 import { buildQuestions, findWeightColumn } from "../lib/layout";
 import { t } from "../lib/i18n";
 import type { RawData, LayoutData } from "../lib/types";
@@ -10,16 +11,18 @@ import type { RawData, LayoutData } from "../lib/types";
 interface AggregationScreenProps {
   rawData: RawData;
   layout: LayoutData;
+  preparedLayout: Layout;
   dateWarnings: string[];
 }
 
 export default function AggregationScreen({
   rawData,
   layout,
+  preparedLayout,
   dateWarnings,
 }: AggregationScreenProps) {
-  const questions = buildQuestions(layout.layout);
-  const weightCol = findWeightColumn(layout.layout);
+  const questions = buildQuestions(preparedLayout);
+  const weightCol = findWeightColumn(preparedLayout);
 
   const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
   const [weightEnabled, setWeightEnabled] = useState(true);
@@ -56,6 +59,7 @@ export default function AggregationScreen({
       <SettingsPanel
         rawData={rawData}
         layout={layout}
+        preparedLayout={preparedLayout}
         questions={questions}
         crossSelected={crossSelected}
         onCrossToggle={(key, checked) => setCrossSelected((prev) => ({ ...prev, [key]: checked }))}

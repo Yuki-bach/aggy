@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import ImportScreen from "./components/ImportScreen";
 import AggregationScreen from "./components/AggregationScreen";
 import { onLocaleChange } from "./lib/i18n";
+import type { Layout } from "./lib/layout";
 import type { RawData, LayoutData } from "./lib/types";
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
   const [loadedData, setLoadedData] = useState<{
     rawData: RawData;
     layout: LayoutData;
+    preparedLayout: Layout;
     dateWarnings: string[];
   } | null>(null);
   const isImport = screen === "import";
@@ -23,8 +25,8 @@ export default function App() {
   }, []);
 
   const handleComplete = useCallback(
-    (rawData: RawData, layout: LayoutData, dateWarnings: string[]) => {
-      setLoadedData({ rawData, layout, dateWarnings });
+    (rawData: RawData, layout: LayoutData, dateWarnings: string[], preparedLayout: Layout) => {
+      setLoadedData({ rawData, layout, preparedLayout, dateWarnings });
       setScreen("aggregation");
     },
     [],
@@ -52,6 +54,7 @@ export default function App() {
             <AggregationScreen
               rawData={loadedData.rawData}
               layout={loadedData.layout}
+              preparedLayout={loadedData.preparedLayout}
               dateWarnings={loadedData.dateWarnings}
             />
           )

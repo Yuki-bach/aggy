@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "preact/compat";
 import { useCallback, useRef, useState } from "preact/hooks";
-import { parseLayout, filterLayout } from "../lib/layout";
+import { parseLayoutJson, buildValidLayout, filterLayout } from "../lib/layout";
 import { loadCSV, prepareDateLayout } from "../lib/duckdb";
 import { saveData, loadSaved } from "../lib/opfs";
 import { t } from "../lib/i18n";
@@ -22,7 +22,12 @@ function formatLoadedInfo(rawData: RawData): string {
 }
 
 interface ImportScreenProps {
-  onComplete: (rawData: RawData, layout: LayoutData, dateWarnings: string[]) => void;
+  onComplete: (
+    rawData: RawData,
+    layout: LayoutData,
+    dateWarnings: string[],
+    preparedLayout: import("../lib/layout").Layout,
+  ) => void;
 }
 
 const STEPS = [
@@ -139,13 +144,13 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const handleLayoutFile = useCallback(async (file: File) => {
     try {
       const text = await file.text();
-      const parsed = parseLayout(text);
+      const rawJson = parseLayoutJson(text);
       opfsPayloadRef.current = {
         ...opfsPayloadRef.current,
         layoutJson: text,
         layoutFileName: file.name,
       };
-      setLayout({ fileName: file.name, layout: parsed });
+      setLayout({ fileName: file.name, rawJson });
       loadedFromSavedRef.current = false;
     } catch {
       // handled by UI state
@@ -155,7 +160,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const handleLoadFromSaved = useCallback(async (folderId: string) => {
     try {
       const { rawDataText, rawDataName, layoutJson, layoutName } = await loadSaved(folderId);
-      const parsed = parseLayout(layoutJson);
+      const rawJson = parseLayoutJson(layoutJson);
       const result = await loadCSV(rawDataText);
 
       opfsPayloadRef.current = {
@@ -169,7 +174,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         headers: result.headers,
         rowCount: result.rowCount,
       });
-      setLayout({ fileName: layoutName, layout: parsed });
+      setLayout({ fileName: layoutName, rawJson });
       loadedFromSavedRef.current = true;
     } catch {
       // handled by UI state
@@ -200,9 +205,10 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         // OPFS save is best-effort
       }
     }
-    const filtered = filterLayout(rawData.headers, layout.layout);
+    const validLayout = buildValidLayout(layout.rawJson);
+    const filtered = filterLayout(rawData.headers, validLayout);
     const { layout: prepared, warnings } = await prepareDateLayout(filtered);
-    onComplete(rawData, { ...layout, layout: prepared }, warnings);
+    onComplete(rawData, layout, warnings, prepared);
   }
 
   return (

@@ -18,6 +18,7 @@ const ja: Record<string, string> = {
   // Validation step
   "validation.title": "データ検証",
   "validation.running": "検証中...",
+  "validation.check.layoutStructure": "レイアウトJSONの構造が正しい",
   "validation.check.saCode": "SA列の回答コードがレイアウト定義と一致",
   "validation.check.columns": "レイアウト定義列がCSVに存在",
   "validation.check.maValues": "MA列の値が0/1のみ",
@@ -25,6 +26,7 @@ const ja: Record<string, string> = {
   "validation.ok": "OK",
   "validation.error": "エラーあり",
   "validation.warn": "警告あり",
+  "validation.detail.invalidLayout": "{key}: {reason}",
   "validation.detail.dropped": "{key}（{label}, {type}）がCSVに存在しません",
   "validation.detail.unknownCode": "{key}（{label}）に未定義コード: {codes}",
   "validation.detail.invalidMAValue": "{key}（{label}）のMA列に0/1以外の値: {values}",

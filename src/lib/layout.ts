@@ -1,4 +1,5 @@
 import type { Question } from "./agg/types";
+import type { Diagnostic } from "./validateRawData";
 
 export interface LayoutItem {
   code: string;
@@ -25,7 +26,8 @@ export type Layout = LayoutQuestion[];
 const VALID_TYPES = new Set(["SA", "MA", "NA", "WEIGHT", "DATE"]);
 const VALID_GRANULARITIES = new Set(["year", "month", "week", "day"]);
 
-export function parseLayout(jsonText: string): Layout {
+/** Parse JSON text into an unknown array. Throws only on JSON syntax errors or non-array input. */
+export function parseLayoutJson(jsonText: string): unknown[] {
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonText);
@@ -35,37 +37,65 @@ export function parseLayout(jsonText: string): Layout {
   if (!Array.isArray(parsed)) {
     throw new Error("レイアウトファイルはJSON配列である必要があります。");
   }
-  for (const entry of parsed as unknown[]) {
-    if (typeof entry !== "object" || entry === null) {
-      throw new Error("各エントリはオブジェクトである必要があります。");
-    }
-    const e = entry as Record<string, unknown>;
-    if (typeof e["key"] !== "string") {
-      throw new Error('各エントリに "key"（文字列）が必要です。');
-    }
-    if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) {
-      throw new Error(
-        `"${e["key"]}": "type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります。`,
-      );
-    }
-    if (typeof e["label"] !== "string") {
-      throw new Error(`"${e["key"]}": "label"（文字列）が必要です。`);
-    }
-    const type = e["type"] as string;
-    if (type === "SA" || type === "MA") {
-      if (!Array.isArray(e["items"]) || e["items"].length === 0) {
-        throw new Error(`"${e["key"]}": ${type} には "items"（1件以上の配列）が必要です。`);
-      }
-    }
-    if (type === "DATE") {
-      if (typeof e["granularity"] !== "string" || !VALID_GRANULARITIES.has(e["granularity"])) {
-        throw new Error(
-          `"${e["key"]}": DATE には "granularity"（${[...VALID_GRANULARITIES].join(", ")}）が必要です。`,
-        );
-      }
+  return parsed as unknown[];
+}
+
+/** Validate layout structure and return diagnostics (does not throw). */
+export function validateLayoutStructure(raw: unknown[]): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+
+  for (let i = 0; i < raw.length; i++) {
+    const reason = checkEntry(raw[i]);
+    if (reason) {
+      const entry = raw[i];
+      const e =
+        typeof entry === "object" && entry !== null ? (entry as Record<string, unknown>) : null;
+      const key = e && typeof e["key"] === "string" ? e["key"] : `[${i}]`;
+      const label = e && typeof e["label"] === "string" ? (e["label"] as string) : "";
+      diagnostics.push({
+        key,
+        label,
+        severity: "error",
+        type: "invalidLayout",
+        params: { reason },
+      });
     }
   }
-  return parsed as Layout;
+
+  return diagnostics;
+}
+
+/** Build Layout from raw entries that pass structure validation. */
+export function buildValidLayout(raw: unknown[]): Layout {
+  const layout: Layout = [];
+  for (let i = 0; i < raw.length; i++) {
+    if (!checkEntry(raw[i])) layout.push(raw[i] as LayoutQuestion);
+  }
+  return layout;
+}
+
+/** Return error reason string if entry is invalid, or null if valid. */
+function checkEntry(entry: unknown): string | null {
+  if (typeof entry !== "object" || entry === null) {
+    return "各エントリはオブジェクトである必要があります";
+  }
+  const e = entry as Record<string, unknown>;
+  if (typeof e["key"] !== "string") return '"key"（文字列）が必要です';
+  if (typeof e["type"] !== "string" || !VALID_TYPES.has(e["type"])) {
+    return `"type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります`;
+  }
+  if (typeof e["label"] !== "string") return '"label"（文字列）が必要です';
+  const type = e["type"] as string;
+  if ((type === "SA" || type === "MA") && (!Array.isArray(e["items"]) || e["items"].length === 0)) {
+    return `${type} には "items"（1件以上の配列）が必要です`;
+  }
+  if (
+    type === "DATE" &&
+    (typeof e["granularity"] !== "string" || !VALID_GRANULARITIES.has(e["granularity"]))
+  ) {
+    return `DATE には "granularity"（${[...VALID_GRANULARITIES].join(", ")}）が必要です`;
+  }
+  return null;
 }
 
 /** Filter layout entries to only include columns present in CSV headers */

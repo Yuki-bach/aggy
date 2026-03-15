@@ -6,7 +6,7 @@ export interface Diagnostic {
   key: string;
   label: string;
   severity: "error" | "warn";
-  type: "dropped" | "unknownCode" | "invalidMAValue" | "nonNumeric" | "allNull";
+  type: "dropped" | "unknownCode" | "invalidMAValue" | "nonNumeric" | "allNull" | "invalidLayout";
   params: Record<string, string>;
 }
 

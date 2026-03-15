@@ -14,7 +14,7 @@ import { performance } from "node:perf_hooks";
 import { aggTab } from "../src/lib/agg/aggTab";
 import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import type { Question } from "../src/lib/agg/types";
-import { parseLayout, filterLayout, buildQuestions } from "../src/lib/layout";
+import { parseLayoutJson, buildValidLayout, filterLayout, buildQuestions } from "../src/lib/layout";
 import { generate, PATTERNS, type PatternDef } from "./generate";
 
 // ---------------------------------------------------------------------------
@@ -141,7 +141,7 @@ async function main(): Promise<void> {
 
     // Parse layout → build questions
     const layoutText = readFileSync(resolve(dataDir, `${pattern.name}_layout.json`), "utf-8");
-    const layout = parseLayout(layoutText);
+    const layout = buildValidLayout(parseLayoutJson(layoutText));
 
     // Extract headers from CSV first line
     const headers = csvText.slice(0, csvText.indexOf("\n")).split(",");

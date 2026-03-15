@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { parseLayout, buildQuestions, findWeightColumn } from "../../src/lib/layout";
+import { parseLayoutJson, buildValidLayout, buildQuestions, findWeightColumn } from "../../src/lib/layout";
 import type { Shape, Question } from "../../src/lib/agg/types";
 
 const layoutPath = resolve(import.meta.dirname!, "../../testdata/test_layout.json");
-const layout = parseLayout(readFileSync(layoutPath, "utf-8"));
+const layout = buildValidLayout(parseLayoutJson(readFileSync(layoutPath, "utf-8")));
 const questions = buildQuestions(layout);
 
 export function getShape(code: string): Shape {
