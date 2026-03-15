@@ -20,10 +20,6 @@ export function buildExportGrids(tabs: Tab[]): ExportGrid[] {
 
 // ─── Internal ───────────────────────────────────────────────
 
-function resolveLabel(code: string, tab: Tab): string {
-  return tab.labels[code];
-}
-
 function buildTabGrid(tab: Tab): ExportGrid {
   if (tab.type === "NA") return buildNaTabGrid(tab);
   return buildCategoricalTabGrid(tab);
@@ -48,7 +44,7 @@ function buildCategoricalTabGrid(tab: Tab): ExportGrid {
     rows.push([
       tab.questionCode,
       tab.type,
-      resolveLabel(code, tab),
+      tab.labels[code],
       cell.count.toFixed(1),
       cell.pct.toFixed(1),
     ]);
@@ -126,7 +122,7 @@ function buildCrossGrids(tabs: Tab[]): ExportGrid[] {
       const dataRow = [
         tabResult.questionCode,
         tabResult.type,
-        resolveLabel(code, tabResult),
+        tabResult.labels[code],
         tabCell.count.toFixed(1),
         tabCell.pct.toFixed(1),
       ];
@@ -140,13 +136,7 @@ function buildCrossGrids(tabs: Tab[]): ExportGrid[] {
       rows.push(dataRow);
     }
 
-    const nRow = [
-      tabResult.questionCode,
-      tabResult.type,
-      "n",
-      tabSlice.n.toFixed(1),
-      "",
-    ];
+    const nRow = [tabResult.questionCode, tabResult.type, "n", tabSlice.n.toFixed(1), ""];
     for (const crossTab of qCrossTabs) {
       if (crossTab.type === "NA") continue;
       for (const slice of crossTab.slices) {

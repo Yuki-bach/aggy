@@ -12,12 +12,7 @@ interface ChartCardBodyProps {
   paletteId: PaletteId;
 }
 
-export function ChartCardBody({
-  tab,
-  crossTabs,
-  tabChartType,
-  paletteId,
-}: ChartCardBodyProps) {
+export function ChartCardBody({ tab, crossTabs, tabChartType, paletteId }: ChartCardBodyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -31,22 +26,9 @@ export function ChartCardBody({
 
     const theme = getThemeColors();
     if (isCross) {
-      chartRef.current = buildCrossChart(
-        canvas,
-        tab,
-        crossTabs,
-        tabChartType,
-        theme,
-        paletteId,
-      );
+      chartRef.current = buildCrossChart(canvas, tab, crossTabs, tabChartType, theme, paletteId);
     } else {
-      chartRef.current = buildTabChart(
-        canvas,
-        tab,
-        tabChartType,
-        theme,
-        paletteId,
-      );
+      chartRef.current = buildTabChart(canvas, tab, tabChartType, theme, paletteId);
     }
 
     return () => {
@@ -62,10 +44,6 @@ export function ChartCardBody({
   );
 }
 
-function resolveLabel(code: string, tab: Tab): string {
-  return tab.labels[code];
-}
-
 function buildTabChart(
   canvas: HTMLCanvasElement,
   tab: Tab,
@@ -74,13 +52,13 @@ function buildTabChart(
   paletteId: PaletteId,
 ): Chart {
   const slice = tab.slices[0];
-  const labels = tab.codes.map((code) => resolveLabel(code, tab));
+  const labels = tab.codes.map((code) => tab.labels[code]);
   const data = slice.cells.map((c) => c.pct);
   const colors = tab.codes.map((_, i) => getSeriesColor(i, paletteId));
 
   if (chartType === "obi") {
     const datasets = tab.codes.map((code, i) => ({
-      label: resolveLabel(code, tab),
+      label: tab.labels[code],
       data: [slice.cells[i].pct],
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
@@ -176,7 +154,7 @@ function buildCrossChart(
   if (tabChartType === "obi") {
     const subLabels = allSlices.map((s) => s.label);
     const datasets = tab.codes.map((code, i) => ({
-      label: resolveLabel(code, tab),
+      label: tab.labels[code],
       data: allSlices.map((s) => s.slice.cells[i]?.pct ?? 0),
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
@@ -211,7 +189,7 @@ function buildCrossChart(
   }
 
   const isHorizontal = tabChartType === "bar-h";
-  const labels = tab.codes.map((code) => resolveLabel(code, tab));
+  const labels = tab.codes.map((code) => tab.labels[code]);
 
   const datasets = allSlices.map((s, i) => ({
     label: s.label,
