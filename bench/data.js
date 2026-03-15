@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1773556189377,
+  "lastUpdate": 1773559680618,
   "repoUrl": "https://github.com/Yuki-bach/aggy",
   "entries": {
     "Benchmark": [
@@ -2811,6 +2811,80 @@ window.BENCHMARK_DATA = {
           {
             "name": "ma-only (10000 rows, 502 cols, cross=MA×2)",
             "value": 1639,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56685372+Yuki-bach@users.noreply.github.com",
+            "name": "Yuki Ogawa",
+            "username": "Yuki-bach"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6d82df5ece6cba10e5c37631cb591e245ec2b85f",
+          "message": "Merge pull request #171 from Yuki-bach/claude/review-type-names-2kLgp",
+          "timestamp": "2026-03-15T16:27:27+09:00",
+          "tree_id": "b5368fdf647e929f514cd38feb9b07eb299b150e",
+          "url": "https://github.com/Yuki-bach/aggy/commit/6d82df5ece6cba10e5c37631cb591e245ec2b85f"
+        },
+        "date": 1773559680169,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "rows (10000 rows, 62 cols, cross=none)",
+            "value": 53.4,
+            "unit": "ms"
+          },
+          {
+            "name": "rows (10000 rows, 62 cols, cross=SA×2)",
+            "value": 139.9,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, 602 cols, cross=none)",
+            "value": 257.8,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, 602 cols, cross=SA×2)",
+            "value": 895.3,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, 602 cols, cross=none)",
+            "value": 286.4,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, 602 cols, cross=SA×2)",
+            "value": 984.9,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, 102 cols, cross=none)",
+            "value": 101.8,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, 102 cols, cross=SA×2)",
+            "value": 404.4,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, 502 cols, cross=none)",
+            "value": 140.2,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, 502 cols, cross=MA×2)",
+            "value": 1404.6,
             "unit": "ms"
           }
         ]
