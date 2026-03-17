@@ -1,7 +1,7 @@
 /** Tab (single tabulation) aggregation — SA and MA */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Shape, AggOutput } from "./types";
+import type { Shape, TabCore } from "./types";
 import {
   esc,
   weightExpr,
@@ -16,7 +16,7 @@ export async function aggTab(
   conn: duckdb.AsyncDuckDBConnection,
   shape: Shape,
   weightCol: string,
-): Promise<AggOutput> {
+): Promise<TabCore> {
   const agg = new TabAggregator(conn, weightCol);
   return shape.type === "SA"
     ? agg.aggregateSA(shape.columns[0], shape.codes)
@@ -29,7 +29,7 @@ class TabAggregator {
     private weightCol: string,
   ) {}
 
-  async aggregateSA(column: string, codes: string[]): Promise<AggOutput> {
+  async aggregateSA(column: string, codes: string[]): Promise<TabCore> {
     const wExpr = weightExpr(this.weightCol);
     const sql = `
       SELECT
@@ -55,7 +55,7 @@ class TabAggregator {
     return { codes, slices: [{ code: null, n, cells }] };
   }
 
-  async aggregateMA(columns: string[], codes: string[]): Promise<AggOutput> {
+  async aggregateMA(columns: string[], codes: string[]): Promise<TabCore> {
     const selectClauses = columns.map((col, i) => {
       return `${maWeightedCountExpr(col, this.weightCol)} AS c${i}`;
     });

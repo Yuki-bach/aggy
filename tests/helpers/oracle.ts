@@ -1,11 +1,11 @@
 /**
  * Oracle (reference) implementations for aggregation.
  * These are intentionally independent of src/lib/agg/ — no imports from production code
- * except AggOutput (used only in the assertion signature).
+ * except TabCore (used only in the assertion signature).
  */
 
 import { expect } from "vitest";
-import type { AggOutput } from "../../src/lib/agg/types";
+import type { TabCore } from "../../src/lib/agg/types";
 
 // ── Local types ──
 
@@ -115,7 +115,7 @@ export function oracleSaSaCross(
 }
 
 export function assertOracleMatch(
-  actual: AggOutput,
+  actual: TabCore,
   expected: OracleOutput,
 ): void {
   expect(actual.codes).toEqual(expected.codes);
