@@ -1,4 +1,4 @@
-import type * as duckdb from "@duckdb/duckdb-wasm";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Layout, LayoutQuestion } from "./layout";
 import { esc } from "./agg/sqlHelpers";
 
@@ -12,7 +12,7 @@ export interface Diagnostic {
 
 /** Validate raw data against layout definition */
 export async function validateRawData(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   headers: string[],
   layout: Layout,
 ): Promise<Diagnostic[]> {
@@ -72,7 +72,7 @@ function checkDropped(q: LayoutQuestion, headerSet: Set<string>): Diagnostic | n
 }
 
 async function checkSAUnknownCodes(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   q: Extract<LayoutQuestion, { type: "SA" }>,
   headerSet: Set<string>,
 ): Promise<Diagnostic | null> {
@@ -104,7 +104,7 @@ async function checkSAUnknownCodes(
 }
 
 async function checkMAValues(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   q: Extract<LayoutQuestion, { type: "MA" }>,
   headerSet: Set<string>,
 ): Promise<Diagnostic | null> {
@@ -135,7 +135,7 @@ async function checkMAValues(
 }
 
 async function checkMAAllNull(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   q: Extract<LayoutQuestion, { type: "MA" }>,
   headerSet: Set<string>,
 ): Promise<Diagnostic | null> {
@@ -162,7 +162,7 @@ async function checkMAAllNull(
 }
 
 async function checkNumeric(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   q: Extract<LayoutQuestion, { type: "NA" }> | Extract<LayoutQuestion, { type: "WEIGHT" }>,
 ): Promise<Diagnostic | null> {
   const result = await conn.query(

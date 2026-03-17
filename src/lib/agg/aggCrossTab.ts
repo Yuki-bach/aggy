@@ -1,6 +1,6 @@
 /** Cross-tabulation aggregation — one cross axis at a time */
 
-import type * as duckdb from "@duckdb/duckdb-wasm";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Shape, TabData } from "./types";
 import {
   esc,
@@ -19,7 +19,7 @@ type CrossSliceData = {
 };
 
 export async function aggCrossTab(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   shape: Shape,
   axisShape: Shape,
   weightCol: string,
@@ -36,7 +36,7 @@ export async function aggCrossTab(
 
 class CrossTabAggregator {
   constructor(
-    private conn: duckdb.AsyncDuckDBConnection,
+    private conn: AsyncDuckDBConnection,
     private weightCol: string,
     private axisShape: Shape,
   ) {}

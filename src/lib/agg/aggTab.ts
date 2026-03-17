@@ -1,6 +1,6 @@
 /** Tab (single tabulation) aggregation — SA and MA */
 
-import type * as duckdb from "@duckdb/duckdb-wasm";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Shape, TabData } from "./types";
 import {
   esc,
@@ -13,7 +13,7 @@ import {
 import { NO_ANSWER_VALUE } from "./constants";
 
 export async function aggTab(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   shape: Shape,
   weightCol: string,
 ): Promise<TabData> {
@@ -25,7 +25,7 @@ export async function aggTab(
 
 class TabAggregator {
   constructor(
-    private conn: duckdb.AsyncDuckDBConnection,
+    private conn: AsyncDuckDBConnection,
     private weightCol: string,
   ) {}
 

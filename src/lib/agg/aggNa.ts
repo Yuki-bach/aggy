@@ -1,6 +1,6 @@
 /** NA (Numerical Answer) aggregation — Tab and Cross */
 
-import type * as duckdb from "@duckdb/duckdb-wasm";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Shape, TabData, NaStats, Slice } from "./types";
 import { esc, maShownCondition } from "./sqlHelpers";
 
@@ -12,7 +12,7 @@ interface ValueCount {
 // ── Tab ──
 
 export async function aggNaTab(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   column: string,
   weightCol: string,
 ): Promise<TabData> {
@@ -29,7 +29,7 @@ export async function aggNaTab(
 // ── Cross (NA × SA or NA × MA) ──
 
 export async function aggNaCrossTab(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   naColumn: string,
   axisShape: Shape,
   weightCol: string,
@@ -81,7 +81,7 @@ function alignSlices(sliceData: { code: string; freq: ValueCount[]; stats: NaSta
 // ── Internal ──
 
 async function queryStats(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   valExpr: string,
   whereCond: string,
   weightCol: string,
@@ -126,7 +126,7 @@ async function queryStats(
 }
 
 async function queryStatsGrouped(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   valExpr: string,
   whereCond: string,
   weightCol: string,
@@ -172,7 +172,7 @@ async function queryStatsGrouped(
 }
 
 async function queryFreq(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   valExpr: string,
   whereCond: string,
   weightCol: string,
@@ -193,7 +193,7 @@ async function queryFreq(
 }
 
 async function queryFreqGrouped(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   valExpr: string,
   whereCond: string,
   weightCol: string,
@@ -235,7 +235,7 @@ function toStats(row: Record<string, unknown>): NaStats {
 // ── NA × SA cross ──
 
 async function naCrossSA(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   naColumn: string,
   crossCol: string,
   crossCodes: string[],
@@ -260,7 +260,7 @@ async function naCrossSA(
 // ── NA × MA cross ──
 
 async function naCrossMA(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   naColumn: string,
   maCols: string[],
   maCodes: string[],
