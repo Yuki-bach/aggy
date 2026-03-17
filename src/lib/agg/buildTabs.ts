@@ -14,48 +14,60 @@ export async function buildTabs(
 ): Promise<Tab[]> {
   const tabs: Tab[] = [];
   for (const q of questions) {
-    if (q.type === "NA") {
-      const tabOutput = await aggNaTab(conn, q.columns[0], weightCol);
-      tabs.push(toTab(q, tabOutput));
-      for (const axisQuestion of crossQuestions) {
-        const crossOutput = await aggNaCrossTab(conn, q.columns[0], axisQuestion, weightCol);
-        tabs.push(toTab(q, crossOutput, axisQuestion));
-      }
-    } else {
-      const tabOutput = await aggTab(conn, q, weightCol);
-      tabs.push(toTab(q, tabOutput));
-      for (const axisQuestion of crossQuestions) {
-        const crossOutput = await aggCrossTab(conn, q, axisQuestion, weightCol);
-        tabs.push(toTab(q, crossOutput, axisQuestion));
-      }
+    const qTabs = await buildTabsFor(conn, q, crossQuestions, weightCol);
+    tabs.push(...qTabs);
+  }
+  return tabs;
+}
+
+async function buildTabsFor(
+  conn: AsyncDuckDBConnection,
+  q: Question,
+  crossQuestions: Question[],
+  weightCol: string,
+): Promise<Tab[]> {
+  const tabs: Tab[] = [];
+  if (q.type === "NA") {
+    const tabOutput = await aggNaTab(conn, q.columns[0], weightCol);
+    tabs.push(assembleTab(q, tabOutput));
+    for (const axisQuestion of crossQuestions) {
+      const crossOutput = await aggNaCrossTab(conn, q.columns[0], axisQuestion, weightCol);
+      tabs.push(assembleTab(q, crossOutput, axisQuestion));
+    }
+  } else {
+    const tabOutput = await aggTab(conn, q, weightCol);
+    tabs.push(assembleTab(q, tabOutput));
+    for (const axisQuestion of crossQuestions) {
+      const crossOutput = await aggCrossTab(conn, q, axisQuestion, weightCol);
+      tabs.push(assembleTab(q, crossOutput, axisQuestion));
     }
   }
   return tabs;
 }
 
-function toTab(question: Question, tabData: TabData, axisQuestion?: Question): Tab {
-  const labels: Record<string, string> = { ...question.labels };
-
-  if (question.type === "NA") {
-    // NA: self-labeling (value string as label)
-    for (const code of tabData.codes) {
-      labels[code] = code;
-    }
-  }
-
-  if (tabData.codes.includes(NO_ANSWER_VALUE)) {
-    labels[NO_ANSWER_VALUE] = t("label.noAnswer");
-  }
-
+function assembleTab(question: Question, tabData: TabData, axisQuestion?: Question): Tab {
   return {
     questionCode: question.code,
     type: question.type,
     label: question.label,
-    labels,
+    labels: buildLabels(question, tabData.codes),
     codes: tabData.codes,
     by: axisQuestion ? buildAxis(tabData, axisQuestion) : null,
     slices: tabData.slices,
   };
+}
+
+function buildLabels(question: Question, codes: string[]): Record<string, string> {
+  const labels: Record<string, string> = { ...question.labels };
+  if (question.type === "NA") {
+    for (const code of codes) {
+      labels[code] = code;
+    }
+  }
+  if (codes.includes(NO_ANSWER_VALUE)) {
+    labels[NO_ANSWER_VALUE] = t("label.noAnswer");
+  }
+  return labels;
 }
 
 function buildAxis(tabData: TabData, axisQuestion: Question): Axis {
