@@ -14,20 +14,32 @@ export async function buildTabs(
 ): Promise<Tab[]> {
   const tabs: Tab[] = [];
   for (const q of questions) {
-    if (q.type === "NA") {
-      const tabOutput = await aggNaTab(conn, q.columns[0], weightCol);
-      tabs.push(assembleTab(q, tabOutput));
-      for (const axisQuestion of crossQuestions) {
-        const crossOutput = await aggNaCrossTab(conn, q.columns[0], axisQuestion, weightCol);
-        tabs.push(assembleTab(q, crossOutput, axisQuestion));
-      }
-    } else {
-      const tabOutput = await aggTab(conn, q, weightCol);
-      tabs.push(assembleTab(q, tabOutput));
-      for (const axisQuestion of crossQuestions) {
-        const crossOutput = await aggCrossTab(conn, q, axisQuestion, weightCol);
-        tabs.push(assembleTab(q, crossOutput, axisQuestion));
-      }
+    const qTabs = await buildTab(conn, q, crossQuestions, weightCol);
+    tabs.push(...qTabs);
+  }
+  return tabs;
+}
+
+async function buildTab(
+  conn: AsyncDuckDBConnection,
+  q: Question,
+  crossQuestions: Question[],
+  weightCol: string,
+): Promise<Tab[]> {
+  const tabs: Tab[] = [];
+  if (q.type === "NA") {
+    const tabOutput = await aggNaTab(conn, q.columns[0], weightCol);
+    tabs.push(assembleTab(q, tabOutput));
+    for (const axisQuestion of crossQuestions) {
+      const crossOutput = await aggNaCrossTab(conn, q.columns[0], axisQuestion, weightCol);
+      tabs.push(assembleTab(q, crossOutput, axisQuestion));
+    }
+  } else {
+    const tabOutput = await aggTab(conn, q, weightCol);
+    tabs.push(assembleTab(q, tabOutput));
+    for (const axisQuestion of crossQuestions) {
+      const crossOutput = await aggCrossTab(conn, q, axisQuestion, weightCol);
+      tabs.push(assembleTab(q, crossOutput, axisQuestion));
     }
   }
   return tabs;
