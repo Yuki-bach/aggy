@@ -53,13 +53,13 @@ function buildTabChart(
 ): Chart {
   const slice = tab.slices[0];
   const labels = tab.codes.map((code) => tab.labels[code]);
-  const data = slice.cells.map((c) => c.pct);
+  const data = slice.cells.map((c) => c.pct ?? 0);
   const colors = tab.codes.map((_, i) => getSeriesColor(i, paletteId));
 
   if (chartType === "obi") {
     const datasets = tab.codes.map((code, i) => ({
       label: tab.labels[code],
-      data: [slice.cells[i].pct],
+      data: [slice.cells[i].pct ?? 0],
       backgroundColor: getSeriesColor(i, paletteId),
       maxBarThickness: 48,
     }));

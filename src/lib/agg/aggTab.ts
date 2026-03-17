@@ -2,6 +2,7 @@
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Shape, TabData } from "./types";
+import { calcPct } from "./types";
 import {
   esc,
   weightExpr,
@@ -43,14 +44,14 @@ class TabAggregator {
     `;
 
     const result = await this.conn.query(sql);
-    const cellByCode = new Map<string, { count: number; pct: number }>();
+    const cellByCode = new Map<string, { count: number; pct: number | null }>();
     let n = 0;
     for (const r of result.toArray()) {
-      cellByCode.set(String(r.mv), { count: Number(r.cnt), pct: Number(r.pct ?? 0) });
+      cellByCode.set(String(r.mv), { count: Number(r.cnt), pct: r.pct !== null && r.pct !== undefined ? Number(r.pct) : null });
       n = Number(r.n);
     }
 
-    const cells = codes.map((code) => cellByCode.get(code) ?? { count: 0, pct: 0 });
+    const cells = codes.map((code) => cellByCode.get(code) ?? { count: 0, pct: calcPct(0, n) });
 
     return { codes, slices: [{ code: null, n, cells }] };
   }
@@ -76,16 +77,14 @@ class TabAggregator {
     const questionN = Number(row.question_n ?? 0);
     const cells = columns.map((_col, i) => {
       const count = Number(row[`c${i}`] ?? 0);
-      const pct = questionN > 0 ? (count / questionN) * 100 : 0;
-      return { count, pct };
+      return { count, pct: calcPct(count, questionN) };
     });
 
     // No-answer cell (only if any respondent selected none)
     const naCount = Number(row.na_cnt ?? 0);
     const resultCodes = [...codes];
     if (naCount > 0) {
-      const naPct = questionN > 0 ? (naCount / questionN) * 100 : 0;
-      cells.push({ count: naCount, pct: naPct });
+      cells.push({ count: naCount, pct: calcPct(naCount, questionN) });
       resultCodes.push(NO_ANSWER_VALUE);
     }
 

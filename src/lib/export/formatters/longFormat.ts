@@ -36,7 +36,7 @@ export function tabsToLongRows(tabs: Tab[]): string[][] {
           crossValue,
           String(slice.n),
           String(cell.count),
-          String(cell.pct),
+          cell.pct !== null ? String(cell.pct) : "",
         ]);
       }
     }

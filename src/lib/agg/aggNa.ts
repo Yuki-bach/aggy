@@ -2,6 +2,7 @@
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Shape, TabData, NaStats, Slice } from "./types";
+import { calcPct } from "./types";
 import { esc, maShownCondition } from "./sqlHelpers";
 
 interface ValueCount {
@@ -49,7 +50,7 @@ function freqToCells(
   const codes = freq.map((f) => String(f.value));
   const cells = freq.map((f) => ({
     count: f.count,
-    pct: n > 0 ? (f.count / n) * 100 : 0,
+    pct: calcPct(f.count, n),
   }));
   return { codes, cells };
 }
@@ -70,7 +71,7 @@ function alignSlices(sliceData: { code: string; freq: ValueCount[]; stats: NaSta
     const freqMap = new Map(s.freq.map((f) => [f.value, f.count]));
     const cells = sortedValues.map((v) => {
       const count = freqMap.get(v) ?? 0;
-      return { count, pct: s.stats.n > 0 ? (count / s.stats.n) * 100 : 0 };
+      return { count, pct: calcPct(count, s.stats.n) };
     });
     return { code: s.code, n: s.stats.n, cells, stats: s.stats };
   });

@@ -65,7 +65,7 @@ function ResultContent({ tabs, weightCol }: { tabs: Tab[]; weightCol: string }) 
   const maxPct = Math.max(
     ...tabs
       .filter((t) => t.by === null && t.type !== "NA")
-      .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct) ?? []),
+      .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct ?? 0) ?? []),
     0,
   );
   const tableOpts = { basis, maxPct };

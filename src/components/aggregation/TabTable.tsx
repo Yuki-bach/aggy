@@ -28,7 +28,8 @@ export function TabTable({ tab, maxPct }: TabTableProps) {
           const cell = slice.cells[i];
           const label = tab.labels[code];
           const countStr = formatN(cell.count);
-          const barWidth = ((cell.pct / Math.max(maxPct, 1)) * 72).toFixed(1);
+          const pct = cell.pct ?? 0;
+          const barWidth = ((pct / Math.max(maxPct, 1)) * 72).toFixed(1);
 
           return (
             <tr key={code}>
@@ -37,7 +38,7 @@ export function TabTable({ tab, maxPct }: TabTableProps) {
                 {countStr}
               </Td>
               <Td right mono class="text-muted">
-                {cell.pct.toFixed(1)}%
+                {cell.pct !== null ? cell.pct.toFixed(1) + "%" : "-"}
               </Td>
               <td class="py-3 pr-4 pl-0 border-b border-row-border w-20" aria-hidden="true">
                 <div

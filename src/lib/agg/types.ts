@@ -17,7 +17,12 @@ export type Axis = Pick<Question, "code" | "label" | "labels">;
 
 export interface Cell {
   count: number;
-  pct: number;
+  pct: number | null;
+}
+
+/** n=0（有効回答なし）のとき null（算出不能）を返す */
+export function calcPct(count: number, n: number): number | null {
+  return n > 0 ? (count / n) * 100 : null;
 }
 
 export interface Slice {

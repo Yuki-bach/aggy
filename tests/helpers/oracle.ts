@@ -11,7 +11,11 @@ import type { TabData } from "../../src/lib/agg/types";
 
 interface OracleCell {
   count: number;
-  pct: number;
+  pct: number | null;
+}
+
+function calcPct(count: number, n: number): number | null {
+  return n > 0 ? (count / n) * 100 : null;
 }
 
 interface OracleSlice {
@@ -44,8 +48,7 @@ export function oracleSaTab(
   const cells = codes.map((code) => {
     const matching = valid.filter((r) => r[column] === code);
     const count = weighted ? sumWeights(matching, weightCol) : matching.length;
-    const pct = n > 0 ? (count / n) * 100 : 0;
-    return { count, pct };
+    return { count, pct: calcPct(count, n) };
   });
 
   return { codes, slices: [{ code: null, n, cells }] };
@@ -64,8 +67,7 @@ export function oracleMaTab(
   const cells: OracleCell[] = columns.map((col) => {
     const matching = shown.filter((r) => r[col] === "1");
     const count = weighted ? sumWeights(matching, weightCol) : matching.length;
-    const pct = n > 0 ? (count / n) * 100 : 0;
-    return { count, pct };
+    return { count, pct: calcPct(count, n) };
   });
 
   const resultCodes = [...codes];
@@ -76,8 +78,7 @@ export function oracleMaTab(
   );
   const naCount = weighted ? sumWeights(naRows, weightCol) : naRows.length;
   if (naCount > 0) {
-    const naPct = n > 0 ? (naCount / n) * 100 : 0;
-    cells.push({ count: naCount, pct: naPct });
+    cells.push({ count: naCount, pct: calcPct(naCount, n) });
     resultCodes.push(NO_ANSWER_VALUE);
   }
 
@@ -130,7 +131,11 @@ export function assertOracleMatch(
 
     for (let j = 0; j < eSlice.cells.length; j++) {
       expect(aSlice.cells[j].count).toBeCloseTo(eSlice.cells[j].count, 3);
-      expect(aSlice.cells[j].pct).toBeCloseTo(eSlice.cells[j].pct, 3);
+      if (eSlice.cells[j].pct === null) {
+        expect(aSlice.cells[j].pct).toBeNull();
+      } else {
+        expect(aSlice.cells[j].pct).toBeCloseTo(eSlice.cells[j].pct, 3);
+      }
     }
   }
 }
