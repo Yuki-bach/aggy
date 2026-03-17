@@ -1,10 +1,11 @@
 /**
  * Oracle (reference) implementations for aggregation.
  * These are intentionally independent of src/lib/agg/ — no imports from production code
- * except TabData (used only in the assertion signature).
+ * except TabData (assertion signature) and calcPct (pure arithmetic).
  */
 
 import { expect } from "vitest";
+import { calcPct } from "../../src/lib/agg/types";
 import type { TabData } from "../../src/lib/agg/types";
 
 // ── Local types ──
@@ -12,10 +13,6 @@ import type { TabData } from "../../src/lib/agg/types";
 interface OracleCell {
   count: number;
   pct: number | null;
-}
-
-function calcPct(count: number, n: number): number | null {
-  return n > 0 ? (count / n) * 100 : null;
 }
 
 interface OracleSlice {
