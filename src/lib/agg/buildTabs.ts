@@ -1,4 +1,4 @@
-import type * as duckdb from "@duckdb/duckdb-wasm";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Question, TabData, Axis, Tab } from "./types";
 import { aggTab } from "./aggTab";
 import { aggCrossTab } from "./aggCrossTab";
@@ -7,7 +7,7 @@ import { NO_ANSWER_VALUE } from "./constants";
 import { t } from "../i18n";
 
 export async function buildTabs(
-  conn: duckdb.AsyncDuckDBConnection,
+  conn: AsyncDuckDBConnection,
   questions: Question[],
   crossQuestions: Question[],
   weightCol: string,
