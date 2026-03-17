@@ -14,13 +14,13 @@ export async function buildTabs(
 ): Promise<Tab[]> {
   const tabs: Tab[] = [];
   for (const q of questions) {
-    const qTabs = await buildTab(conn, q, crossQuestions, weightCol);
+    const qTabs = await buildTabsFor(conn, q, crossQuestions, weightCol);
     tabs.push(...qTabs);
   }
   return tabs;
 }
 
-async function buildTab(
+async function buildTabsFor(
   conn: AsyncDuckDBConnection,
   q: Question,
   crossQuestions: Question[],
