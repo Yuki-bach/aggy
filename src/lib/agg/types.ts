@@ -17,6 +17,7 @@ export type Axis = Pick<Question, "code" | "label" | "labels">;
 
 export interface Cell {
   count: number;
+  /** 百分率。n=0（有効回答なし）のとき null（算出不能） */
   pct: number | null;
 }
 
