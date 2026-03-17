@@ -1,7 +1,7 @@
 /** Cross-tabulation aggregation — one cross axis at a time */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Shape, TabCore } from "./types";
+import type { Shape, TabData } from "./types";
 import {
   esc,
   weightExpr,
@@ -23,7 +23,7 @@ export async function aggCrossTab(
   shape: Shape,
   axisShape: Shape,
   weightCol: string,
-): Promise<TabCore> {
+): Promise<TabData> {
   const ca = new CrossTabAggregator(conn, weightCol, axisShape);
   const isMainSa = shape.type === "SA";
   const isCrossSa = axisShape.type === "SA";
@@ -43,7 +43,7 @@ class CrossTabAggregator {
 
   // ── SA main × SA cross ──
 
-  async saSA(column: string, codes: string[]): Promise<TabCore> {
+  async saSA(column: string, codes: string[]): Promise<TabData> {
     const crossCol = this.axisShape.columns[0];
     const crossValues = this.axisShape.codes;
     const wExpr = weightExpr(this.weightCol);
@@ -88,7 +88,7 @@ class CrossTabAggregator {
 
   // ── SA main × MA cross ──
 
-  async saMA(column: string, codes: string[]): Promise<TabCore> {
+  async saMA(column: string, codes: string[]): Promise<TabData> {
     const selectClauses = this.axisShape.columns.map(
       (maCol, i) => `${maWeightedCountExpr(maCol, this.weightCol)} AS c${i}`,
     );
@@ -126,7 +126,7 @@ class CrossTabAggregator {
 
   // ── MA main × SA cross ──
 
-  async maSA(columns: string[], codes: string[]): Promise<TabCore> {
+  async maSA(columns: string[], codes: string[]): Promise<TabData> {
     const crossCol = this.axisShape.columns[0];
     const crossValues = this.axisShape.codes;
     const wExpr = weightExpr(this.weightCol);
@@ -176,7 +176,7 @@ class CrossTabAggregator {
 
   // ── shared slice builder ──
 
-  private buildSlices(data: CrossSliceData[], codes: string[]): TabCore {
+  private buildSlices(data: CrossSliceData[], codes: string[]): TabData {
     const slices = data.map(({ code, n, counts }) => ({
       code,
       n,
@@ -190,7 +190,7 @@ class CrossTabAggregator {
 
   // ── MA main × MA cross ──
 
-  async maMA(columns: string[], codes: string[]): Promise<TabCore> {
+  async maMA(columns: string[], codes: string[]): Promise<TabData> {
     const shownCond = maShownCondition(columns);
 
     const selectClauses: string[] = [];

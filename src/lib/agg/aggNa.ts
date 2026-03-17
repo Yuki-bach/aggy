@@ -1,7 +1,7 @@
 /** NA (Numerical Answer) aggregation — Tab and Cross */
 
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Shape, TabCore, NaStats, Slice } from "./types";
+import type { Shape, TabData, NaStats, Slice } from "./types";
 import { esc, maShownCondition } from "./sqlHelpers";
 
 interface ValueCount {
@@ -15,7 +15,7 @@ export async function aggNaTab(
   conn: duckdb.AsyncDuckDBConnection,
   column: string,
   weightCol: string,
-): Promise<TabCore> {
+): Promise<TabData> {
   const valExpr = `CAST("${esc(column)}" AS DOUBLE)`;
   const whereCond = `"${esc(column)}" IS NOT NULL AND TRY_CAST("${esc(column)}" AS DOUBLE) IS NOT NULL`;
 
@@ -33,7 +33,7 @@ export async function aggNaCrossTab(
   naColumn: string,
   axisShape: Shape,
   weightCol: string,
-): Promise<TabCore> {
+): Promise<TabData> {
   if (axisShape.type === "SA") {
     return naCrossSA(conn, naColumn, axisShape.columns[0], axisShape.codes, weightCol);
   }
@@ -240,7 +240,7 @@ async function naCrossSA(
   crossCol: string,
   crossCodes: string[],
   weightCol: string,
-): Promise<TabCore> {
+): Promise<TabData> {
   const valExpr = `CAST("${esc(naColumn)}" AS DOUBLE)`;
   const whereCond = `"${esc(naColumn)}" IS NOT NULL AND TRY_CAST("${esc(naColumn)}" AS DOUBLE) IS NOT NULL`;
 
@@ -265,7 +265,7 @@ async function naCrossMA(
   maCols: string[],
   maCodes: string[],
   weightCol: string,
-): Promise<TabCore> {
+): Promise<TabData> {
   const valExpr = `CAST("${esc(naColumn)}" AS DOUBLE)`;
   const baseWhere = `"${esc(naColumn)}" IS NOT NULL AND TRY_CAST("${esc(naColumn)}" AS DOUBLE) IS NOT NULL AND (${maShownCondition(maCols)})`;
 

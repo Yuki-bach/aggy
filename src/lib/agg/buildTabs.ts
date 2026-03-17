@@ -1,5 +1,5 @@
 import type * as duckdb from "@duckdb/duckdb-wasm";
-import type { Question, TabCore, Axis, Tab } from "./types";
+import type { Question, TabData, Axis, Tab } from "./types";
 import { aggTab } from "./aggTab";
 import { aggCrossTab } from "./aggCrossTab";
 import { aggNaTab, aggNaCrossTab } from "./aggNa";
@@ -33,17 +33,17 @@ export async function buildTabs(
   return tabs;
 }
 
-function toTab(question: Question, tabCore: TabCore, axisQuestion?: Question): Tab {
+function toTab(question: Question, tabData: TabData, axisQuestion?: Question): Tab {
   const labels: Record<string, string> = { ...question.labels };
 
   if (question.type === "NA") {
     // NA: self-labeling (value string as label)
-    for (const code of tabCore.codes) {
+    for (const code of tabData.codes) {
       labels[code] = code;
     }
   }
 
-  if (tabCore.codes.includes(NO_ANSWER_VALUE)) {
+  if (tabData.codes.includes(NO_ANSWER_VALUE)) {
     labels[NO_ANSWER_VALUE] = t("label.noAnswer");
   }
 
@@ -52,15 +52,15 @@ function toTab(question: Question, tabCore: TabCore, axisQuestion?: Question): T
     type: question.type,
     label: question.label,
     labels,
-    codes: tabCore.codes,
-    by: axisQuestion ? buildAxis(tabCore, axisQuestion) : null,
-    slices: tabCore.slices,
+    codes: tabData.codes,
+    by: axisQuestion ? buildAxis(tabData, axisQuestion) : null,
+    slices: tabData.slices,
   };
 }
 
-function buildAxis(tabCore: TabCore, axisQuestion: Question): Axis {
+function buildAxis(tabData: TabData, axisQuestion: Question): Axis {
   const axisLabels: Record<string, string> = { ...axisQuestion.labels };
-  const hasNoAnswer = tabCore.slices.some((s) => s.code === NO_ANSWER_VALUE);
+  const hasNoAnswer = tabData.slices.some((s) => s.code === NO_ANSWER_VALUE);
   if (hasNoAnswer) {
     axisLabels[NO_ANSWER_VALUE] = t("label.noAnswer");
   }

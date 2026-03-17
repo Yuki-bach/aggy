@@ -1,8 +1,8 @@
 import { expect } from "vitest";
-import type { TabCore } from "../../src/lib/agg/types";
+import type { TabData } from "../../src/lib/agg/types";
 
 export function assertTabInvariants(
-  result: TabCore,
+  result: TabData,
   type: "SA" | "MA",
 ): void {
   expect(result.slices).toHaveLength(1);
@@ -33,7 +33,7 @@ export function assertTabInvariants(
   }
 }
 
-export function assertNaTabInvariants(result: TabCore): void {
+export function assertNaTabInvariants(result: TabData): void {
   // 1. Single slice with code === null
   expect(result.slices).toHaveLength(1);
   const slice = result.slices[0];
@@ -89,7 +89,7 @@ export function assertNaTabInvariants(result: TabCore): void {
 }
 
 export function assertCrossInvariants(
-  result: TabCore,
+  result: TabData,
   type: "SA" | "MA",
   expectedSliceCount: number,
 ): void {
