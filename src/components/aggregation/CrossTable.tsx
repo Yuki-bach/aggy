@@ -72,7 +72,7 @@ function VerticalCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) 
                 {formatN(tabCell.count)}
               </Td>
               <Td right mono class="text-muted">
-                {tabCell.pct.toFixed(1)}%
+                {tabCell.pct !== null ? tabCell.pct.toFixed(1) + "%" : "-"}
               </Td>
               {crossTabs.map((ct, gi) =>
                 ct.slices.map((slice, si) => {
@@ -82,7 +82,7 @@ function VerticalCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) 
                       key={`${ct.by!.code}-${slice.code}`}
                       class={`${TD_BASE} ${MONO} text-accent2 border-l border-l-row-border ${hasMultipleAxes && si === 0 && gi > 0 ? "border-l-2 border-l-border-strong" : ""}`}
                     >
-                      {cell ? cell.pct.toFixed(1) + "%" : "-"}
+                      {cell?.pct !== null ? cell.pct.toFixed(1) + "%" : "-"}
                     </td>
                   );
                 }),
@@ -127,7 +127,7 @@ function TransposedCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }
             const cell = tabSlice.cells[i];
             return (
               <td key={code} class={`${TD_BASE} ${MONO} text-accent bg-tab-bg`}>
-                {cell ? cell.pct.toFixed(1) + "%" : "-"}
+                {cell?.pct !== null ? cell.pct.toFixed(1) + "%" : "-"}
               </td>
             );
           })}
@@ -181,7 +181,7 @@ function TransposedSubRow({
         const cell = slice.cells[i];
         return (
           <td key={_code} class={`${TD_BASE} ${MONO} text-accent2 border-l border-l-row-border`}>
-            {cell ? cell.pct.toFixed(1) + "%" : "-"}
+            {cell?.pct !== null ? cell.pct.toFixed(1) + "%" : "-"}
           </td>
         );
       })}

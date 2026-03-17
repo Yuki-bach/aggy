@@ -2,6 +2,7 @@
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Shape, TabData } from "./types";
+import { calcPct } from "./types";
 import {
   esc,
   weightExpr,
@@ -182,7 +183,7 @@ class CrossTabAggregator {
       n,
       cells: counts.map((count) => ({
         count,
-        pct: n > 0 ? (count / n) * 100 : 0,
+        pct: calcPct(count, n),
       })),
     }));
     return { codes, slices };

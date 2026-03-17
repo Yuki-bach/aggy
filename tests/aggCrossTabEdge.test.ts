@@ -198,7 +198,7 @@ describe("aggCrossTabEdge - エッジケース", () => {
     expect(sliceCounts(result, "5")).toEqual([2, 1]);
   });
 
-  it("メイン全NULL → 各スライスn=0", async () => {
+  it("メイン全NULL → 各スライスn=0, pct=null", async () => {
     await loadCSV(
       buildCSV(["id", "main", "cross"], [
         [1, null, 1],
@@ -212,10 +212,13 @@ describe("aggCrossTabEdge - エッジケース", () => {
 
     for (const slice of result.slices) {
       expect(slice.n).toBe(0);
+      for (const cell of slice.cells) {
+        expect(cell.pct).toBeNull();
+      }
     }
   });
 
-  it("MA(main)全行NULL × SA(cross) → 各スライスn=0", async () => {
+  it("MA(main)全行NULL × SA(cross) → 各スライスn=0, pct=null", async () => {
     await loadCSV(
       buildCSV(["id", "q_1", "q_2", "cross"], [
         [1, null, null, 1],
@@ -231,11 +234,12 @@ describe("aggCrossTabEdge - エッジケース", () => {
       expect(slice.n).toBe(0);
       for (const cell of slice.cells) {
         expect(cell.count).toBe(0);
+        expect(cell.pct).toBeNull();
       }
     }
   });
 
-  it("SA(main) × MA(cross)全行NULL → スライスなしまたは全n=0", async () => {
+  it("SA(main) × MA(cross)全行NULL → スライスなしまたは全n=0, pct=null", async () => {
     await loadCSV(
       buildCSV(["id", "main", "q_1", "q_2"], [
         [1, 1, null, null],
@@ -251,6 +255,7 @@ describe("aggCrossTabEdge - エッジケース", () => {
       expect(slice.n).toBe(0);
       for (const cell of slice.cells) {
         expect(cell.count).toBe(0);
+        expect(cell.pct).toBeNull();
       }
     }
   });
@@ -273,6 +278,34 @@ describe("aggCrossTabEdge - エッジケース", () => {
     // slice "2": q_1=1 → 行3 = 1件, n=1
     expect(sliceN(result, "2")).toBe(1);
     expect(sliceCounts(result, "2")[0]).toBe(1);
+  });
+
+  it("一部スライスのみn=0 → 該当スライスだけpct=null", async () => {
+    await loadCSV(
+      buildCSV(["id", "main", "cross"], [
+        [1, 1, "A"],
+        [2, 2, "A"],
+        [3, 1, "A"],
+      ]),
+    );
+    const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
+    const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["A", "B"] };
+    const result = await aggCrossTab(getConn(), mainInput, crossInput, "");
+
+    // slice "A": n=3, pct は number
+    const sliceA = result.slices.find((s) => s.code === "A")!;
+    expect(sliceA.n).toBe(3);
+    for (const cell of sliceA.cells) {
+      expect(cell.pct).not.toBeNull();
+    }
+
+    // slice "B": 該当者ゼロ → n=0, pct=null
+    const sliceB = result.slices.find((s) => s.code === "B")!;
+    expect(sliceB.n).toBe(0);
+    for (const cell of sliceB.cells) {
+      expect(cell.count).toBe(0);
+      expect(cell.pct).toBeNull();
+    }
   });
 
   it("1行のみのクロス", async () => {

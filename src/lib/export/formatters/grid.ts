@@ -46,7 +46,7 @@ function buildCategoricalTabGrid(tab: Tab): ExportGrid {
       tab.type,
       tab.labels[code],
       cell.count.toFixed(1),
-      cell.pct.toFixed(1),
+      cell.pct !== null ? cell.pct.toFixed(1) : "",
     ]);
   }
   rows.push([tab.questionCode, tab.type, "n", slice.n.toFixed(1), ""]);
@@ -124,13 +124,13 @@ function buildCrossGrids(tabs: Tab[]): ExportGrid[] {
         tabResult.type,
         tabResult.labels[code],
         tabCell.count.toFixed(1),
-        tabCell.pct.toFixed(1),
+        tabCell.pct !== null ? tabCell.pct.toFixed(1) : "",
       ];
       for (const crossTab of qCrossTabs) {
         if (crossTab.type === "NA") continue;
         for (const slice of crossTab.slices) {
           const cell = slice.cells[i];
-          dataRow.push(cell ? cell.pct.toFixed(1) : "");
+          dataRow.push(cell?.pct !== null ? cell.pct.toFixed(1) : "");
         }
       }
       rows.push(dataRow);
