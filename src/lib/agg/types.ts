@@ -28,10 +28,7 @@ export interface Slice {
 }
 
 /** aggregate() の戻り値 — rawdata 由来のみ */
-export interface AggOutput {
-  codes: string[];
-  slices: Slice[];
-}
+export type TabData = Pick<Tab, "codes" | "slices">;
 
 export interface NaStats {
   n: number;
