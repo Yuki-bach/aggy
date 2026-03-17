@@ -47,7 +47,10 @@ class TabAggregator {
     const cellByCode = new Map<string, { count: number; pct: number | null }>();
     let n = 0;
     for (const r of result.toArray()) {
-      cellByCode.set(String(r.mv), { count: Number(r.cnt), pct: r.pct !== null && r.pct !== undefined ? Number(r.pct) : null });
+      cellByCode.set(String(r.mv), {
+        count: Number(r.cnt),
+        pct: r.pct !== null && r.pct !== undefined ? Number(r.pct) : null,
+      });
       n = Number(r.n);
     }
 
