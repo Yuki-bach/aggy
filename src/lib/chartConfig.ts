@@ -90,7 +90,7 @@ const COLORBREWER_PALETTES: Record<Exclude<PaletteId, "default">, string[]> = {
 };
 
 /** Representative base color for each palette (used for UI swatch) */
-export const PALETTE_BASES: Record<Exclude<PaletteId, "default">, string> = {
+const PALETTE_BASES: Record<Exclude<PaletteId, "default">, string> = {
   blue: "#2171b5",
   green: "#238b45",
   orange: "#d94801",
@@ -98,7 +98,16 @@ export const PALETTE_BASES: Record<Exclude<PaletteId, "default">, string> = {
   purple: "#6a51a3",
 };
 
-export const PALETTE_IDS: PaletteId[] = ["default", "red", "orange", "green", "blue", "purple"];
+const PALETTE_IDS: PaletteId[] = ["default", "red", "orange", "green", "blue", "purple"];
+
+export function getPaletteIds(): PaletteId[] {
+  return PALETTE_IDS;
+}
+
+export function getPaletteBase(id: PaletteId): string | undefined {
+  if (id === "default") return undefined;
+  return PALETTE_BASES[id];
+}
 
 export function getSeriesColor(index: number, paletteId: PaletteId = "default"): string {
   if (paletteId === "default") {
