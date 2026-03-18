@@ -3,7 +3,7 @@ import { downloadCSV } from "./formatters/csv";
 import { formatTSV } from "./formatters/tsv";
 import { formatMarkdown, downloadMarkdown } from "./formatters/markdown";
 import { formatJSON, downloadJSON } from "./formatters/json";
-import { copyToClipboard } from "./clipboard";
+import { copyToClipboard } from "./deliver";
 
 export type ExportAction =
   | "copy-tsv"

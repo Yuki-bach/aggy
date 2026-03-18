@@ -1,5 +1,5 @@
 import type { Tab } from "../../agg/types";
-import { downloadFile, today } from "../download";
+import { downloadFile, today } from "../deliver";
 
 export function formatJSON(tabs: Tab[], weightCol: string): string {
   return JSON.stringify({ weightColumn: weightCol || null, results: tabs }, null, 2);

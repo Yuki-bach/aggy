@@ -1,6 +1,6 @@
 import type { Tab } from "../../agg/types";
 import { buildExportGrids, type ExportGrid } from "./grid";
-import { downloadFile, today } from "../download";
+import { downloadFile, today } from "../deliver";
 
 export function formatMarkdown(tabs: Tab[]): string {
   const grids = buildExportGrids(tabs);
