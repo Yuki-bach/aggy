@@ -1,5 +1,5 @@
 import type { Tab } from "../../agg/types";
-import { downloadFile, today } from "../download";
+import { downloadFile, today } from "../deliver";
 import { tabsToLongRows } from "./longFormat";
 
 export function formatCSV(tabs: Tab[]): string {
