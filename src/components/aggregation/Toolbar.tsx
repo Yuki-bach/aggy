@@ -1,6 +1,6 @@
 import type { Tab } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
-import { PALETTE_BASES, PALETTE_IDS, type PaletteId } from "../../lib/chartConfig";
+import { getPaletteBase, getPaletteIds, type PaletteId } from "../../lib/chartConfig";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import { ExportMenu } from "./ExportMenu";
 import { executeExport, type ExportAction } from "../../lib/export/export";
@@ -130,9 +130,9 @@ function PaletteSelector({
   return (
     <div class="flex items-center gap-1.5" role="radiogroup" aria-label={t("chart.palette")}>
       <span class="mr-0.5 text-muted">{t("chart.palette")}:</span>
-      {PALETTE_IDS.map((id) => {
+      {getPaletteIds().map((id) => {
         const isActive = id === current;
-        const base = id === "default" ? undefined : PALETTE_BASES[id];
+        const base = getPaletteBase(id);
         return (
           <button
             key={id}
