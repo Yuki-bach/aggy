@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { t, getLocale, setLocale, onLocaleChange, offLocaleChange } from "../../lib/i18n";
+import { t, getLocale, setLocale } from "../../lib/i18n";
+import { useLocaleRerender, useDismiss } from "../../lib/hooks";
 
 export function isAICommentEnabled(): boolean {
   return localStorage.getItem(AI_KEY) !== "off";
@@ -38,31 +39,8 @@ export function SettingsRoot() {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Re-render on locale change
-  useEffect(() => {
-    const cb = () => setTick((n) => n + 1);
-    onLocaleChange(cb);
-    return () => offLocaleChange(cb);
-  }, []);
-
-  // Close on outside click or Escape
-  useEffect(() => {
-    if (!open) return;
-    const onClickOutside = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("click", onClickOutside);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("click", onClickOutside);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  useLocaleRerender();
+  useDismiss(open, () => setOpen(false), wrapRef);
 
   const handleToggle = async (e: MouseEvent) => {
     e.stopPropagation();

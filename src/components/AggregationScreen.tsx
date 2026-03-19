@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { Tab } from "../lib/agg/types";
 import ResultPanel from "./aggregation/ResultPanel";
 import SettingsPanel from "./aggregation/SettingsPanel";
@@ -24,20 +24,18 @@ export default function AggregationScreen({
   const questions = buildQuestions(preparedLayout);
   const weightCol = findWeightColumn(preparedLayout);
 
-  const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
+  const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>(() => {
+    const sel: Record<string, boolean> = {};
+    questions.forEach((q) => (sel[q.code] = false));
+    return sel;
+  });
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [aggResult, setAggResult] = useState<{ tabs: Tab[]; weightCol: string } | null>(null);
 
-  const didAutoRun = useRef(false);
+  // Run aggregation once on mount
   useEffect(() => {
-    if (!didAutoRun.current) {
-      didAutoRun.current = true;
-      const sel: Record<string, boolean> = {};
-      questions.forEach((q) => (sel[q.code] = false));
-      setCrossSelected(sel);
-      handleRunAggregation();
-    }
+    handleRunAggregation();
   }, []);
 
   async function handleRunAggregation(): Promise<void> {

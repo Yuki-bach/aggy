@@ -4,13 +4,12 @@ import { initTheme } from "./components/header/SettingsModal";
 import Header from "./components/Header";
 import ImportScreen from "./components/ImportScreen";
 import AggregationScreen from "./components/AggregationScreen";
-import { onLocaleChange, offLocaleChange } from "./lib/i18n";
+import { useLocaleRerender } from "./lib/hooks";
 import type { Layout } from "./lib/layout";
 import type { RawData, LayoutData } from "./lib/types";
 
 export default function App() {
   const [screen, setScreen] = useState<"import" | "aggregation">("import");
-  const [, setTick] = useState(0);
   const [loadedData, setLoadedData] = useState<{
     rawData: RawData;
     layout: LayoutData;
@@ -19,12 +18,7 @@ export default function App() {
   } | null>(null);
   const isImport = screen === "import";
 
-  // Re-render on locale change
-  useEffect(() => {
-    const cb = () => setTick((n) => n + 1);
-    onLocaleChange(cb);
-    return () => offLocaleChange(cb);
-  }, []);
+  useLocaleRerender();
 
   const handleComplete = useCallback(
     (rawData: RawData, layout: LayoutData, dateWarnings: string[], preparedLayout: Layout) => {

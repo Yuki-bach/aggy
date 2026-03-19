@@ -1,6 +1,7 @@
 import type { ComponentChildren } from "preact";
-import { useRef, useState, useEffect, useCallback } from "preact/hooks";
+import { useRef, useState, useCallback } from "preact/hooks";
 import { t } from "../../lib/i18n";
+import { useDismiss } from "../../lib/hooks";
 import type { ExportAction } from "../../lib/export/export";
 
 interface ExportMenuProps {
@@ -12,27 +13,7 @@ export function ExportMenu({ onExport }: ExportMenuProps) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Close on click outside
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  // Close on Escape
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open]);
+  useDismiss(open, () => setOpen(false), ref);
 
   const handleAction = useCallback(
     (action: ExportAction) => {
