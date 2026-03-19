@@ -107,6 +107,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
   const [layout, setLayout] = useState<LayoutData | null>(null);
   const [step, setStep] = useState(1);
   const [gsOpen, setGsOpen] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadedFromSavedRef = useRef(false);
   const opfsPayloadRef = useRef<{
@@ -123,6 +124,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
 
   const handleRawDataFile = useCallback(async (file: File) => {
     try {
+      setLoadError(null);
       const text = await file.text();
       const result = await loadCSV(text);
       opfsPayloadRef.current = {
@@ -136,13 +138,14 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
         rowCount: result.rowCount,
       });
       loadedFromSavedRef.current = false;
-    } catch {
-      // handled by UI state
+    } catch (e) {
+      setLoadError(t("error.csv.load", { msg: (e as Error).message }));
     }
   }, []);
 
   const handleLayoutFile = useCallback(async (file: File) => {
     try {
+      setLoadError(null);
       const text = await file.text();
       const rawJson = parseLayoutJson(text);
       opfsPayloadRef.current = {
@@ -152,13 +155,14 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       };
       setLayout({ fileName: file.name, rawJson });
       loadedFromSavedRef.current = false;
-    } catch {
-      // handled by UI state
+    } catch (e) {
+      setLoadError(t("error.layout.load", { msg: (e as Error).message }));
     }
   }, []);
 
   const handleLoadFromSaved = useCallback(async (folderId: string) => {
     try {
+      setLoadError(null);
       const { rawDataText, rawDataName, layoutJson, layoutName } = await loadSaved(folderId);
       const rawJson = parseLayoutJson(layoutJson);
       const result = await loadCSV(rawDataText);
@@ -176,8 +180,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
       });
       setLayout({ fileName: layoutName, rawJson });
       loadedFromSavedRef.current = true;
-    } catch {
-      // handled by UI state
+    } catch (e) {
+      setLoadError(t("error.saved.load", { msg: (e as Error).message }));
     }
   }, []);
 
@@ -241,6 +245,15 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
             </div>
 
             <LoadedInfo info={loadedInfo} />
+
+            {loadError && (
+              <div
+                class="mt-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
+                role="alert"
+              >
+                {loadError}
+              </div>
+            )}
 
             {bothLoaded && (
               <button

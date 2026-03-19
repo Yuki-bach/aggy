@@ -18,6 +18,7 @@ export function Dropzone({ accept, icon, text, loadedFileName, onFile }: Dropzon
   function handleChange(e: JSX.TargetedEvent<HTMLInputElement>) {
     const f = e.currentTarget.files?.[0];
     if (f) onFile(f);
+    e.currentTarget.value = "";
   }
 
   function handleDragEnter(e: DragEvent) {

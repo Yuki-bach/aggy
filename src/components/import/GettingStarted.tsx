@@ -1,12 +1,14 @@
 import { useEffect, useState } from "preact/hooks";
-import { t, onLocaleChange } from "../../lib/i18n";
+import { t, onLocaleChange, offLocaleChange } from "../../lib/i18n";
 
 export function GettingStartedModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [, setTick] = useState(0);
 
   // Re-render on locale change
   useEffect(() => {
-    onLocaleChange(() => setTick((n) => n + 1));
+    const cb = () => setTick((n) => n + 1);
+    onLocaleChange(cb);
+    return () => offLocaleChange(cb);
   }, []);
 
   // Escape key to close
