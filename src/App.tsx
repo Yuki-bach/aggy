@@ -4,7 +4,7 @@ import { initTheme } from "./components/header/SettingsModal";
 import Header from "./components/Header";
 import ImportScreen from "./components/ImportScreen";
 import AggregationScreen from "./components/AggregationScreen";
-import { onLocaleChange } from "./lib/i18n";
+import { onLocaleChange, offLocaleChange } from "./lib/i18n";
 import type { Layout } from "./lib/layout";
 import type { RawData, LayoutData } from "./lib/types";
 
@@ -21,7 +21,9 @@ export default function App() {
 
   // Re-render on locale change
   useEffect(() => {
-    onLocaleChange(() => setTick((n) => n + 1));
+    const cb = () => setTick((n) => n + 1);
+    onLocaleChange(cb);
+    return () => offLocaleChange(cb);
   }, []);
 
   const handleComplete = useCallback(
