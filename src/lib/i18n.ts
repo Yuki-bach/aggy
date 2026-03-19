@@ -39,6 +39,11 @@ export function onLocaleChange(cb: (locale: string) => void): void {
   listeners.push(cb);
 }
 
+export function offLocaleChange(cb: (locale: string) => void): void {
+  const idx = listeners.indexOf(cb);
+  if (idx !== -1) listeners.splice(idx, 1);
+}
+
 /** Initialize i18n: detect locale from localStorage or browser setting */
 export function initI18n(): void {
   const saved = localStorage.getItem(STORAGE_KEY);

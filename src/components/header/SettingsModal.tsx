@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { t, getLocale, setLocale, onLocaleChange } from "../../lib/i18n";
+import { t, getLocale, setLocale, onLocaleChange, offLocaleChange } from "../../lib/i18n";
 
 export function isAICommentEnabled(): boolean {
   return localStorage.getItem(AI_KEY) !== "off";
@@ -40,7 +40,9 @@ export function SettingsRoot() {
 
   // Re-render on locale change
   useEffect(() => {
-    onLocaleChange(() => setTick((n) => n + 1));
+    const cb = () => setTick((n) => n + 1);
+    onLocaleChange(cb);
+    return () => offLocaleChange(cb);
   }, []);
 
   // Close on outside click or Escape
