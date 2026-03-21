@@ -1,6 +1,67 @@
 import { expect } from "vite-plus/test";
 import type { Slice, TabData } from "../../src/lib/agg/types";
 
+// ── Public composite assertions ─────────────────────────────────────
+
+export function assertTabInvariants(result: TabData, type: "SA" | "MA"): void {
+  expect(result.slices).toHaveLength(1);
+  const slice = result.slices[0];
+  expect(slice.code).toBeNull();
+  expect(slice.n).toBeGreaterThanOrEqual(0);
+
+  assertCodesMatchCells(result);
+  assertSliceInvariants(slice, type);
+}
+
+export function assertNaTabInvariants(result: TabData): void {
+  expect(result.slices).toHaveLength(1);
+  const slice = result.slices[0];
+  expect(slice.code).toBeNull();
+  expect(slice.stats).toBeDefined();
+
+  assertCodesMatchCells(result);
+  assertCodesSortedAscending(result);
+
+  assertCountsNonNegative(slice);
+  assertPctMatchesCount(slice);
+  assertSACountsSumToN(slice);
+  assertSAPctSumTo100(slice);
+
+  assertStatsMeanInRange(slice);
+  assertStatsMedianInRange(slice);
+  assertStdDevNonNegative(slice);
+  assertStatsNMatchesSliceN(slice);
+}
+
+export function assertCrossInvariants(
+  result: TabData,
+  type: "SA" | "MA",
+  expectedSliceCount: number,
+): void {
+  expect(result.slices).toHaveLength(expectedSliceCount);
+
+  assertCodesMatchCells(result);
+
+  for (const slice of result.slices) {
+    expect(slice.code).not.toBeNull();
+    expect(slice.n).toBeGreaterThanOrEqual(0);
+    assertSliceInvariants(slice, type);
+  }
+}
+
+// ── Slice-level composite: SA / MA 共通 + 分岐 ─────────────────────
+
+function assertSliceInvariants(slice: Slice, type: "SA" | "MA"): void {
+  assertCountsNonNegative(slice);
+  assertPctMatchesCount(slice);
+  if (type === "SA") {
+    assertSACountsSumToN(slice);
+    assertSAPctSumTo100(slice);
+  } else {
+    assertMACountsNotExceedN(slice);
+  }
+}
+
 // ── Slice-level invariants ──────────────────────────────────────────
 
 /** 各セルの回答数が 0 以上であること */
@@ -80,65 +141,4 @@ function assertStdDevNonNegative(slice: Slice): void {
 /** stats.n と slice.n が一致すること */
 function assertStatsNMatchesSliceN(slice: Slice): void {
   expect(slice.stats!.n).toBeCloseTo(slice.n, 3);
-}
-
-// ── Slice-level composite: SA / MA 共通 + 分岐 ─────────────────────
-
-function assertSliceInvariants(slice: Slice, type: "SA" | "MA"): void {
-  assertCountsNonNegative(slice);
-  assertPctMatchesCount(slice);
-  if (type === "SA") {
-    assertSACountsSumToN(slice);
-    assertSAPctSumTo100(slice);
-  } else {
-    assertMACountsNotExceedN(slice);
-  }
-}
-
-// ── Public composite assertions ─────────────────────────────────────
-
-export function assertTabInvariants(result: TabData, type: "SA" | "MA"): void {
-  expect(result.slices).toHaveLength(1);
-  const slice = result.slices[0];
-  expect(slice.code).toBeNull();
-  expect(slice.n).toBeGreaterThanOrEqual(0);
-
-  assertCodesMatchCells(result);
-  assertSliceInvariants(slice, type);
-}
-
-export function assertNaTabInvariants(result: TabData): void {
-  expect(result.slices).toHaveLength(1);
-  const slice = result.slices[0];
-  expect(slice.code).toBeNull();
-  expect(slice.stats).toBeDefined();
-
-  assertCodesMatchCells(result);
-  assertCodesSortedAscending(result);
-
-  assertCountsNonNegative(slice);
-  assertPctMatchesCount(slice);
-  assertSACountsSumToN(slice);
-  assertSAPctSumTo100(slice);
-
-  assertStatsMeanInRange(slice);
-  assertStatsMedianInRange(slice);
-  assertStdDevNonNegative(slice);
-  assertStatsNMatchesSliceN(slice);
-}
-
-export function assertCrossInvariants(
-  result: TabData,
-  type: "SA" | "MA",
-  expectedSliceCount: number,
-): void {
-  expect(result.slices).toHaveLength(expectedSliceCount);
-
-  assertCodesMatchCells(result);
-
-  for (const slice of result.slices) {
-    expect(slice.code).not.toBeNull();
-    expect(slice.n).toBeGreaterThanOrEqual(0);
-    assertSliceInvariants(slice, type);
-  }
 }
