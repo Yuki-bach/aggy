@@ -23,7 +23,7 @@ jobs:
           cache: true
 
       - name: Run benchmark
-        run: BENCH_OUTPUT=bench/output.json pnpm bench
+        run: BENCH_OUTPUT=bench/output.json vp run bench
 
       - name: Store benchmark result
         continue-on-error: true
