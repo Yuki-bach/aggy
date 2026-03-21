@@ -4,7 +4,7 @@
  * except TabData (assertion signature) and calcPct (pure arithmetic).
  */
 
-import { expect } from "vitest";
+import { expect } from "vite-plus/test";
 import { calcPct } from "../../src/lib/agg/types";
 import type { TabData } from "../../src/lib/agg/types";
 

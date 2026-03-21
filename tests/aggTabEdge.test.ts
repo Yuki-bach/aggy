@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vite-plus/test";
 import { aggTab } from "../src/lib/agg/aggTab";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { buildCSV } from "./helpers/csv";

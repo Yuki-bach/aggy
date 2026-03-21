@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vite-plus/test";
 import { validateRawData, type Diagnostic } from "../src/lib/validateRawData";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import type { Layout } from "../src/lib/layout";

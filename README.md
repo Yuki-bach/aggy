@@ -4,11 +4,12 @@
 
 ## Tech Stack
 
-TypeScript, Vite, Preact, DuckDB Wasm, Tailwind CSS v4
+TypeScript, VitePlus (Vite + Vitest + Oxc), Preact, DuckDB Wasm, Tailwind CSS v4
 
 ## Quick Start
 
 ```bash
-pnpm install
-pnpm dev
+curl -fsSL https://vite.plus | bash   # install VitePlus CLI
+vp install
+vp dev
 ```

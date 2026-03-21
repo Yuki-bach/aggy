@@ -1,4 +1,4 @@
-import { expect } from "vitest";
+import { expect } from "vite-plus/test";
 import type { TabData } from "../../src/lib/agg/types";
 
 export function assertTabInvariants(

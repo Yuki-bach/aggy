@@ -4,19 +4,18 @@
 
 Aggy is a browser-based survey raw-data aggregation tool (アンケートローデータ集計システム). Users upload a CSV of survey responses and a JSON layout file, then run Grand Total and cross-tabulation — all client-side using DuckDB Wasm for SQL-based aggregation.
 
-Tech: TypeScript (strict), Vite, Preact (JSX), DuckDB Wasm, Tailwind CSS v4.
+Tech: TypeScript (strict), VitePlus (Vite + Vitest + Oxc), Preact (JSX), DuckDB Wasm, Tailwind CSS v4.
 
 ## Commands
 
 ```bash
-pnpm dev        # Vite dev server
-pnpm build      # tsc + vite build
-pnpm check      # fmt:check + lint + tsc --noEmit (CI validation)
-pnpm test       # vitest run
-pnpm lint       # oxlint
-pnpm lint:fix   # oxlint --fix
-pnpm fmt        # oxfmt
-pnpm fmt:check  # oxfmt --check
+vp dev          # dev server
+vp build        # production build
+vp check        # fmt + lint + type check
+vp test run     # vitest run
+vp test         # vitest watch
+vp fmt          # oxfmt
+vp lint         # oxlint
 pnpm bench      # aggregate() benchmark (all patterns)
 pnpm bench rows # single pattern (rows / cols / both)
 pnpm bench:gen  # generate benchmark data

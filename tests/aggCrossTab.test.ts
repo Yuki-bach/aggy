@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vite-plus/test";
 import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
 import { getShape } from "./helpers/fixtures";
