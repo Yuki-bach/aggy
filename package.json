@@ -5,6 +5,9 @@
   "type": "module",
   "packageManager": "pnpm@10.22.0",
   "scripts": {
+    "build": "vp build",
+    "test": "vp test run",
+    "check": "vp check",
     "bench:gen": "tsx bench/generate.ts",
     "bench": "tsx bench/run.ts",
     "e2e": "playwright test",

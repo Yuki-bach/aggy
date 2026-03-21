@@ -16,12 +16,10 @@ jobs:
         browser: ${{ github.event_name == 'push' && fromJSON('["chromium","firefox","webkit"]') || fromJSON('["chromium"]') }}
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: voidzero-dev/setup-vp@v1
         with:
           node-version-file: .node-version
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache: true
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
       - name: Run E2E tests
