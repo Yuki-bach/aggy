@@ -56,6 +56,19 @@ describe("aggCrossTab - 重みなし", () => {
       //   q2=1:2件(行7,10), q2=2:1件(行3), q2=3:2件(行1,5), q2=99:0件
       expect(sliceCounts(result, "1")).toEqual([2, 1, 2, 0]);
     });
+
+    it("sliceが軸(q1)のcodes順に並ぶ", async () => {
+      const result = await aggCrossTab(getConn(), q2, q1, "");
+      expect(result.slices.map((s) => s.code)).toEqual(q1.codes);
+    });
+
+    it("各slice内のcellsがq2のcodes順に並ぶ", async () => {
+      const result = await aggCrossTab(getConn(), q2, q1, "");
+      expect(result.codes).toEqual(q2.codes);
+      for (const slice of result.slices) {
+        expect(slice.cells).toHaveLength(q2.codes.length);
+      }
+    });
   });
 
   describe("SA × MA クロス集計", () => {
@@ -66,6 +79,19 @@ describe("aggCrossTab - 重みなし", () => {
       //   q1有効(非NULL)かつq3_1='1': 行1,3,4,6,8,9 (行14はq1=NULL)
       //   q1=1:2件(行1,3), q1=2:2件(行6,9), q1=3:2件(行4,8), q1=99:0件
       expect(sliceCounts(result, "1")).toEqual([2, 2, 2, 0]);
+    });
+
+    it("sliceが軸(q3)のcodes順に並ぶ", async () => {
+      const result = await aggCrossTab(getConn(), q1, q3, "");
+      expect(result.slices.map((s) => s.code)).toEqual(q3.codes);
+    });
+
+    it("各slice内のcellsがq1のcodes順に並ぶ", async () => {
+      const result = await aggCrossTab(getConn(), q1, q3, "");
+      expect(result.codes).toEqual(q1.codes);
+      for (const slice of result.slices) {
+        expect(slice.cells).toHaveLength(q1.codes.length);
+      }
     });
   });
 
@@ -79,6 +105,19 @@ describe("aggCrossTab - 重みなし", () => {
       //   q3 shown かつ q1=1: 行1,3,5,7,10,12
       //   q3_1='1':2件(行1,3), q3_2='1':3件(行3,5,7), q3_3='1':3件(行1,5,10), N/A:1件(行12)
       expect(sliceCounts(result, "1")).toEqual([2, 3, 3, 1]);
+    });
+
+    it("sliceが軸(q1)のcodes順に並ぶ", async () => {
+      const result = await aggCrossTab(getConn(), q3, q1, "");
+      expect(result.slices.map((s) => s.code)).toEqual(q1.codes);
+    });
+
+    it("各slice内のcellsがq3のcodes順+N/Aで並ぶ", async () => {
+      const result = await aggCrossTab(getConn(), q3, q1, "");
+      expect(result.codes).toEqual([...q3.codes, "N/A"]);
+      for (const slice of result.slices) {
+        expect(slice.cells).toHaveLength(q3.codes.length + 1);
+      }
     });
   });
 
@@ -94,6 +133,19 @@ describe("aggCrossTab - 重みなし", () => {
       // slice "2" = q3_2='1' の行: 2,3,5,7,9
       //   q3_1='1':2件(行3,9), q3_2='1':5件, q3_3='1':2件(行2,5)
       expect(sliceCounts(result, "2")).toEqual([2, 5, 2]);
+    });
+
+    it("sliceが軸(q3)のcodes順に並ぶ", async () => {
+      const result = await aggCrossTab(getConn(), q3, q3, "");
+      expect(result.slices.map((s) => s.code)).toEqual(q3.codes);
+    });
+
+    it("各slice内のcellsがq3のcodes順に並ぶ", async () => {
+      const result = await aggCrossTab(getConn(), q3, q3, "");
+      expect(result.codes).toEqual(q3.codes);
+      for (const slice of result.slices) {
+        expect(slice.cells).toHaveLength(q3.codes.length);
+      }
     });
   });
 });
