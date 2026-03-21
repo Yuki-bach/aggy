@@ -5,7 +5,7 @@
     "type": "WEIGHT"
   },
   {
-    "key": "q1",
+    "key": "f1",
     "label": "性別",
     "type": "SA",
     "items": [
@@ -15,27 +15,133 @@
     ]
   },
   {
-    "key": "q2",
-    "label": "満足度",
+    "key": "f2",
+    "label": "年代",
     "type": "SA",
     "items": [
-      { "code": "1", "label": "満足" },
-      { "code": "2", "label": "普通" },
-      { "code": "3", "label": "不満" }
+      { "code": "1", "label": "20代" },
+      { "code": "2", "label": "30代" },
+      { "code": "3", "label": "40代" },
+      { "code": "4", "label": "50代" },
+      { "code": "5", "label": "60代" },
+      { "code": "6", "label": "70代以上" }
     ]
   },
   {
-    "key": "q3",
+    "key": "f3",
+    "label": "居住地域",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "北海道" },
+      { "code": "2", "label": "東北" },
+      { "code": "3", "label": "関東" },
+      { "code": "4", "label": "中部" },
+      { "code": "5", "label": "近畿" },
+      { "code": "6", "label": "中国" },
+      { "code": "7", "label": "四国" },
+      { "code": "8", "label": "九州・沖縄" }
+    ]
+  },
+  {
+    "key": "q1",
+    "label": "利用頻度",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "ほぼ毎日" },
+      { "code": "2", "label": "週2〜3回" },
+      { "code": "3", "label": "週1回" },
+      { "code": "4", "label": "月2〜3回" },
+      { "code": "5", "label": "月1回以下" }
+    ]
+  },
+  {
+    "key": "q2",
+    "label": "総合満足度",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "非常に満足" },
+      { "code": "2", "label": "やや満足" },
+      { "code": "3", "label": "どちらでもない" },
+      { "code": "4", "label": "やや不満" },
+      { "code": "5", "label": "非常に不満" }
+    ]
+  },
+  {
+    "key": "q3a",
+    "label": "品質満足度",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "非常に満足" },
+      { "code": "2", "label": "やや満足" },
+      { "code": "3", "label": "どちらでもない" },
+      { "code": "4", "label": "やや不満" },
+      { "code": "5", "label": "非常に不満" }
+    ]
+  },
+  {
+    "key": "q3b",
+    "label": "価格満足度",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "非常に満足" },
+      { "code": "2", "label": "やや満足" },
+      { "code": "3", "label": "どちらでもない" },
+      { "code": "4", "label": "やや不満" },
+      { "code": "5", "label": "非常に不満" }
+    ]
+  },
+  {
+    "key": "q3c",
+    "label": "対応満足度",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "非常に満足" },
+      { "code": "2", "label": "やや満足" },
+      { "code": "3", "label": "どちらでもない" },
+      { "code": "4", "label": "やや不満" },
+      { "code": "5", "label": "非常に不満" }
+    ]
+  },
+  {
+    "key": "q3d",
+    "label": "使いやすさ満足度",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "非常に満足" },
+      { "code": "2", "label": "やや満足" },
+      { "code": "3", "label": "どちらでもない" },
+      { "code": "4", "label": "やや不満" },
+      { "code": "5", "label": "非常に不満" }
+    ]
+  },
+  {
+    "key": "q4",
     "label": "利用サービス",
     "type": "MA",
     "items": [
-      { "code": "1", "label": "サービスA" },
-      { "code": "2", "label": "サービスB" },
-      { "code": "3", "label": "サービスC" }
+      { "code": "1", "label": "オンラインストア" },
+      { "code": "2", "label": "実店舗" },
+      { "code": "3", "label": "カスタマーサポート" },
+      { "code": "4", "label": "モバイルアプリ" },
+      { "code": "5", "label": "メールマガジン" },
+      { "code": "6", "label": "ポイントプログラム" }
     ]
   },
   {
-    "key": "nps",
+    "key": "q5",
+    "label": "改善してほしい点",
+    "type": "MA",
+    "items": [
+      { "code": "1", "label": "品質の向上" },
+      { "code": "2", "label": "価格の見直し" },
+      { "code": "3", "label": "対応スピード" },
+      { "code": "4", "label": "品揃えの充実" },
+      { "code": "5", "label": "ウェブサイトの改善" },
+      { "code": "6", "label": "アフターサービス" }
+    ]
+  },
+  {
+    "key": "q6",
     "label": "推奨度（NPS）",
     "type": "NA"
   },
