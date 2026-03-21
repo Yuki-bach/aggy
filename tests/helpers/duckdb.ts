@@ -1,20 +1,21 @@
+// @ts-nocheck — require() 経由の DuckDB Node blocking API は型定義がexportされていない
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import type { DuckDBNodeBindings } from "@duckdb/duckdb-wasm/dist/types/src/bindings/bindings_node_base";
+import type { DuckDBConnection } from "@duckdb/duckdb-wasm/dist/types/src/bindings/connection";
 
 const require = createRequire(import.meta.url);
 const DUCKDB_DIST = resolve(require.resolve("@duckdb/duckdb-wasm"), "..");
 
 // Node.js ブロッキングモードを使用（Worker不要）
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const {
-  createDuckDB,
-  NODE_RUNTIME,
-  ConsoleLogger,
-} = require(resolve(DUCKDB_DIST, "duckdb-node-blocking.cjs"));
+const { createDuckDB, NODE_RUNTIME, ConsoleLogger } = require(
+  resolve(DUCKDB_DIST, "duckdb-node-blocking.cjs"),
+);
 
-let db: ReturnType<typeof createDuckDB> extends Promise<infer T> ? T : never;
-let conn: Awaited<ReturnType<typeof db.connect>> | null = null;
+let db: DuckDBNodeBindings;
+let conn: DuckDBConnection | null = null;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getConn(): any {
@@ -50,7 +51,5 @@ export async function teardownDuckDB(): Promise<void> {
 
 export async function loadCSV(csvText: string): Promise<void> {
   await db.registerFileText("survey.csv", csvText);
-  await conn!.query(
-    `CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv')`,
-  );
+  await conn!.query(`CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv')`);
 }

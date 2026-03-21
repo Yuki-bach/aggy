@@ -1,10 +1,7 @@
 import { expect } from "vite-plus/test";
 import type { TabData } from "../../src/lib/agg/types";
 
-export function assertTabInvariants(
-  result: TabData,
-  type: "SA" | "MA",
-): void {
+export function assertTabInvariants(result: TabData, type: "SA" | "MA"): void {
   expect(result.slices).toHaveLength(1);
   const slice = result.slices[0];
   expect(slice.code).toBeNull();
@@ -22,7 +19,7 @@ export function assertTabInvariants(
   if (type === "SA") {
     const sumCounts = slice.cells.reduce((s, c) => s + c.count, 0);
     expect(sumCounts).toBeCloseTo(slice.n, 3);
-    const sumPct = slice.cells.reduce((s, c) => s + c.pct, 0);
+    const sumPct = slice.cells.reduce((s, c) => s + (c.pct ?? 0), 0);
     if (slice.n > 0) {
       expect(sumPct).toBeCloseTo(100, 3);
     }
@@ -60,7 +57,7 @@ export function assertNaTabInvariants(result: TabData): void {
 
   // 6. sum(cells.pct) ≈ 100 (when n > 0)
   if (slice.n > 0) {
-    const sumPct = slice.cells.reduce((s, c) => s + c.pct, 0);
+    const sumPct = slice.cells.reduce((s, c) => s + (c.pct ?? 0), 0);
     expect(sumPct).toBeCloseTo(100, 3);
   }
 
@@ -111,7 +108,7 @@ export function assertCrossInvariants(
       const sumCounts = slice.cells.reduce((s, c) => s + c.count, 0);
       expect(sumCounts).toBeCloseTo(slice.n, 3);
       if (slice.n > 0) {
-        const sumPct = slice.cells.reduce((s, c) => s + c.pct, 0);
+        const sumPct = slice.cells.reduce((s, c) => s + (c.pct ?? 0), 0);
         expect(sumPct).toBeCloseTo(100, 3);
       }
     } else {

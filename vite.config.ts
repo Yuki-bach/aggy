@@ -5,56 +5,47 @@ import preact from "@preact/preset-vite";
 
 export default defineConfig({
   staged: {
-    "*": "vp check --fix"
+    "*": "vp check --fix",
   },
   fmt: {
-    "semi": true,
-    "singleQuote": false,
-    "tabWidth": 2,
-    "useTabs": false,
-    "printWidth": 100,
-    "trailingComma": "all",
-    "arrowParens": "always",
-    "bracketSpacing": true,
-    "endOfLine": "lf"
+    semi: true,
+    singleQuote: false,
+    tabWidth: 2,
+    useTabs: false,
+    printWidth: 100,
+    trailingComma: "all",
+    arrowParens: "always",
+    bracketSpacing: true,
+    endOfLine: "lf",
   },
   lint: {
-    "plugins": [
-      "typescript",
-      "import",
-      "unicorn"
-    ],
-    "env": {
-      "browser": true
+    plugins: ["typescript", "import", "unicorn"],
+    env: {
+      browser: true,
     },
-    "ignorePatterns": [
-      "dist/",
-      "node_modules/",
-      "testdata/"
-    ],
-    "rules": {
+    ignorePatterns: ["dist/", "node_modules/", "testdata/"],
+    rules: {
       "no-unused-vars": "warn",
       "no-console": "warn",
-      "eqeqeq": "warn",
+      eqeqeq: "warn",
       "no-var": "error",
       "prefer-const": "warn",
       "typescript/no-explicit-any": "warn",
-      "import/no-duplicates": "warn"
+      "import/no-duplicates": "warn",
+      "typescript/triple-slash-reference": "off",
     },
-    "overrides": [
+    overrides: [
       {
-        "files": [
-          "scripts/**/*.ts"
-        ],
-        "rules": {
-          "no-console": "off"
-        }
-      }
+        files: ["scripts/**/*.ts", "bench/**/*.ts", ".claude/skills/**/*.mjs"],
+        rules: {
+          "no-console": "off",
+        },
+      },
     ],
-    "options": {
-      "typeAware": true,
-      "typeCheck": true
-    }
+    options: {
+      typeAware: true,
+      typeCheck: true,
+    },
   },
   plugins: [tailwindcss(), preact()],
   define: {

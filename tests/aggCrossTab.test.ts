@@ -16,7 +16,10 @@ const q2 = getShape("q2");
 const q3 = getShape("q3");
 
 /** スライスのcounts配列を取得 */
-function sliceCounts(result: { codes: string[]; slices: { code: string | null; cells: { count: number }[] }[] }, sliceCode: string): number[] {
+function sliceCounts(
+  result: { codes: string[]; slices: { code: string | null; cells: { count: number }[] }[] },
+  sliceCode: string,
+): number[] {
   const slice = result.slices.find((s) => s.code === sliceCode)!;
   return slice.cells.map((c) => c.count);
 }

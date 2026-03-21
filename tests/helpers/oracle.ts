@@ -70,9 +70,7 @@ export function oracleMaTab(
   const resultCodes = [...codes];
 
   // N/A: shown rows where ALL columns !== "1"
-  const naRows = shown.filter((r) =>
-    columns.every((col) => r[col] !== "1"),
-  );
+  const naRows = shown.filter((r) => columns.every((col) => r[col] !== "1"));
   const naCount = weighted ? sumWeights(naRows, weightCol) : naRows.length;
   if (naCount > 0) {
     cells.push({ count: naCount, pct: calcPct(naCount, n) });
@@ -90,9 +88,7 @@ export function oracleSaSaCross(
   crossCodes: string[],
   weightCol: string,
 ): OracleOutput {
-  const valid = rows.filter(
-    (r) => r[mainCol] !== null && r[crossCol] !== null,
-  );
+  const valid = rows.filter((r) => r[mainCol] !== null && r[crossCol] !== null);
   const weighted = weightCol !== "";
 
   const slices = crossCodes.map((crossCode) => {
@@ -100,9 +96,7 @@ export function oracleSaSaCross(
     const n = weighted ? sumWeights(sliceRows, weightCol) : sliceRows.length;
     const cells = mainCodes.map((mainCode) => {
       const matching = sliceRows.filter((r) => r[mainCol] === mainCode);
-      const count = weighted
-        ? sumWeights(matching, weightCol)
-        : matching.length;
+      const count = weighted ? sumWeights(matching, weightCol) : matching.length;
       const pct = n > 0 ? (count / n) * 100 : 0;
       return { count, pct };
     });
@@ -112,10 +106,7 @@ export function oracleSaSaCross(
   return { codes: mainCodes, slices };
 }
 
-export function assertOracleMatch(
-  actual: TabData,
-  expected: OracleOutput,
-): void {
+export function assertOracleMatch(actual: TabData, expected: OracleOutput): void {
   expect(actual.codes).toEqual(expected.codes);
   expect(actual.slices).toHaveLength(expected.slices.length);
 
@@ -131,7 +122,7 @@ export function assertOracleMatch(
       if (eSlice.cells[j].pct === null) {
         expect(aSlice.cells[j].pct).toBeNull();
       } else {
-        expect(aSlice.cells[j].pct).toBeCloseTo(eSlice.cells[j].pct, 3);
+        expect(aSlice.cells[j].pct).toBeCloseTo(eSlice.cells[j].pct!, 3);
       }
     }
   }
@@ -139,9 +130,6 @@ export function assertOracleMatch(
 
 // ── Internal helpers ──
 
-function sumWeights(
-  rows: Record<string, string | null>[],
-  weightCol: string,
-): number {
+function sumWeights(rows: Record<string, string | null>[], weightCol: string): number {
   return rows.reduce((sum, r) => sum + Number(r[weightCol] ?? 0), 0);
 }

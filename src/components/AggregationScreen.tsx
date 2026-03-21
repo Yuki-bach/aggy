@@ -36,7 +36,7 @@ export default function AggregationScreen({
       const sel: Record<string, boolean> = {};
       questions.forEach((q) => (sel[q.code] = false));
       setCrossSelected(sel);
-      handleRunAggregation();
+      void handleRunAggregation();
     }
   }, []);
 

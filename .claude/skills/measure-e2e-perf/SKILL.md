@@ -23,6 +23,7 @@ Use `$ARGUMENTS` to specify the benchmark data pattern. Defaults to `rows` if om
 Available patterns and their characteristics are defined in `bench/generate.ts` (`PATTERNS` array). Read that file to see the current pattern names, row counts, and column counts.
 
 Benchmark data paths:
+
 - CSV: `bench/data/{pattern}.csv`
 - Layout JSON: `bench/data/{pattern}_layout.json`
 
@@ -76,16 +77,17 @@ Measure with cross-tabulation enabled:
 
 Use `performance_analyze_insight` to inspect both trace results. Report a comparison table:
 
-| Metric | Grand Total only | Cross-tab (SA x2) |
-|--------|---------|-------------------|
-| INP | | |
-| Input delay | | |
-| Processing duration | | |
-| Presentation delay | | |
-| Long Tasks | | |
-| CLS | | |
+| Metric              | Grand Total only | Cross-tab (SA x2) |
+| ------------------- | ---------------- | ----------------- |
+| INP                 |                  |                   |
+| Input delay         |                  |                   |
+| Processing duration |                  |                   |
+| Presentation delay  |                  |                   |
+| Long Tasks          |                  |                   |
+| CLS                 |                  |                   |
 
 Also report:
+
 - **Pattern**: which data pattern was used
 - **Bottlenecks**: any identified bottlenecks and their causes
 - **Recommendations**: actionable suggestions if issues are found
