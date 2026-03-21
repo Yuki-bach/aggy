@@ -9,6 +9,8 @@ import { FileUploadPanel } from "./import/FileUploadPanel";
 import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./import/SavedFiles";
 import { ValidationStep } from "./import/ValidationStep";
 import { Button } from "./shared/Button";
+import { SectionTitle } from "./shared/SectionTitle";
+import { Alert } from "./shared/Alert";
 import type { RawData, LayoutData } from "../lib/types";
 
 const GettingStartedModal = lazy(() =>
@@ -81,12 +83,9 @@ function LoadedInfo({ info }: { info: string | null }) {
   if (!info) return null;
 
   return (
-    <div
-      class="mt-3 whitespace-pre-line rounded-lg border border-accent-light bg-accent-bg px-4 py-3 text-sm leading-normal text-text-secondary"
-      aria-live="polite"
-    >
+    <Alert variant="info" role="status" class="mt-3 whitespace-pre-line">
       {info}
-    </div>
+    </Alert>
   );
 }
 
@@ -233,9 +232,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
             />
 
             <div class="mt-5 border-t border-border pt-4">
-              <h3 class="mb-3 text-sm font-bold tracking-wider text-muted">
-                {t("import.history")}
-              </h3>
+              <SectionTitle>{t("import.history")}</SectionTitle>
               <div class="flex max-h-[160px] flex-col gap-2 overflow-y-auto">
                 <SavedFilesList
                   entries={entries}
@@ -248,12 +245,9 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
             <LoadedInfo info={loadedInfo} />
 
             {loadError && (
-              <div
-                class="mt-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
-                role="alert"
-              >
+              <Alert variant="error" class="mt-3">
                 {loadError}
-              </div>
+              </Alert>
             )}
 
             {bothLoaded && (

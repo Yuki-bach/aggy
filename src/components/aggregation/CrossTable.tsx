@@ -2,7 +2,7 @@ import type { Tab, Slice } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
 import type { Basis } from "./viewTypes";
 import { formatN } from "../../lib/format";
-import { Th, Td } from "./TableCells";
+import { Th, Td, TH_BASE, TD_BASE, MONO } from "./TableCells";
 
 interface CrossTableProps {
   tab: Tab;
@@ -16,10 +16,6 @@ export function CrossTable({ tab, crossTabs, basis }: CrossTableProps) {
   }
   return <VerticalCrossTable tab={tab} crossTabs={crossTabs} />;
 }
-
-const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong";
-const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
-const MONO = "text-right tabular-nums font-mono";
 
 function VerticalCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) {
   const tabSlice = tab.slices[0];
