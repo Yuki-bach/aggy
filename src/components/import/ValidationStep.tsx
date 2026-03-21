@@ -3,6 +3,7 @@ import { t } from "../../lib/i18n";
 import { runValidation } from "../../lib/duckdb";
 import type { Diagnostic } from "../../lib/validateRawData";
 import type { RawData, LayoutData } from "../../lib/types";
+import { Button } from "../shared/Button";
 
 interface ValidationStepProps {
   rawData: RawData;
@@ -37,12 +38,7 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
     return (
       <div class="space-y-4">
         <p class="text-sm text-red-600">{error}</p>
-        <button
-          class="cursor-pointer rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
-          onClick={onBack}
-        >
-          {t("validation.back")}
-        </button>
+        <Button onClick={onBack}>{t("validation.back")}</Button>
       </div>
     );
   }
@@ -110,19 +106,11 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
       )}
 
       <div class="flex gap-3 pt-2">
-        <button
-          class="cursor-pointer rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
-          onClick={onBack}
-        >
-          {t("validation.back")}
-        </button>
+        <Button onClick={onBack}>{t("validation.back")}</Button>
         {errors.length === 0 && (
-          <button
-            class="cursor-pointer rounded-lg border-none bg-accent px-4 py-2 text-sm font-bold text-accent-contrast transition-colors hover:bg-accent-hover"
-            onClick={onProceed}
-          >
+          <Button variant="primary" onClick={onProceed}>
             {t("import.proceed")}
-          </button>
+          </Button>
         )}
       </div>
     </div>

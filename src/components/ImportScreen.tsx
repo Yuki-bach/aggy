@@ -8,6 +8,7 @@ import { t } from "../lib/i18n";
 import { FileUploadPanel } from "./import/FileUploadPanel";
 import { SavedFilesList, triggerSavedFilesRefresh, useSavedFiles } from "./import/SavedFiles";
 import { ValidationStep } from "./import/ValidationStep";
+import { Button } from "./shared/Button";
 import type { RawData, LayoutData } from "../lib/types";
 
 const GettingStartedModal = lazy(() =>
@@ -256,12 +257,11 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
             )}
 
             {bothLoaded && (
-              <button
-                class="mt-5 min-h-12 w-full cursor-pointer rounded-lg border-none bg-accent px-4 py-3 text-base font-bold tracking-wide text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
-                onClick={handleGoToValidation}
-              >
-                {t("import.step.validate")} →
-              </button>
+              <div class="mt-5 w-full">
+                <Button variant="primary" size="lg" onClick={handleGoToValidation}>
+                  {t("import.step.validate")} →
+                </Button>
+              </div>
             )}
           </>
         )}

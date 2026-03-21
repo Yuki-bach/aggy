@@ -1,5 +1,6 @@
 import type { Question } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
+import { Button } from "../shared/Button";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
 import type { RawData, LayoutData } from "../../lib/types";
 import type { Layout } from "../../lib/layout";
@@ -104,12 +105,11 @@ export default function SettingsPanel({
       )}
 
       {/* Run Button */}
-      <button
-        class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-wide text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
-        onClick={onRun}
-      >
-        {t("run.button")}
-      </button>
+      <div class="mx-4 my-4 shrink-0">
+        <Button variant="primary" size="lg" onClick={onRun}>
+          {t("run.button")}
+        </Button>
+      </div>
     </div>
   );
 }
