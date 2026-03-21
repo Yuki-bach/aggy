@@ -61,6 +61,7 @@ export function SettingsRoot() {
   return (
     <div class="relative" ref={wrapRef}>
       <IconButton
+        size="md"
         id="settings-btn"
         label={t("header.settings")}
         data-i18n="header.settings"

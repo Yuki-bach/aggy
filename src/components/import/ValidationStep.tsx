@@ -38,7 +38,9 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
     return (
       <div class="space-y-4">
         <p class="text-sm text-red-600">{error}</p>
-        <Button onClick={onBack}>{t("validation.back")}</Button>
+        <Button variant="secondary" size="md" onClick={onBack}>
+          {t("validation.back")}
+        </Button>
       </div>
     );
   }
@@ -106,9 +108,11 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
       )}
 
       <div class="flex gap-3 pt-2">
-        <Button onClick={onBack}>{t("validation.back")}</Button>
+        <Button variant="secondary" size="md" onClick={onBack}>
+          {t("validation.back")}
+        </Button>
         {errors.length === 0 && (
-          <Button variant="primary" onClick={onProceed}>
+          <Button variant="primary" size="md" onClick={onProceed}>
             {t("import.proceed")}
           </Button>
         )}

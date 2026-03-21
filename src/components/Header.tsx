@@ -12,7 +12,7 @@ export default function Header({ isImport, onBack }: HeaderProps) {
   return (
     <header class="flex items-center gap-4 border-b border-border bg-surface px-6 py-4">
       {!isImport && (
-        <IconButton label={t("header.back")} onClick={onBack}>
+        <IconButton size="md" label={t("header.back")} onClick={onBack}>
           ←
         </IconButton>
       )}

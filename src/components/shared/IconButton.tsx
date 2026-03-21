@@ -2,13 +2,13 @@ import type { ComponentChildren } from "preact";
 import type { JSX } from "preact/jsx-runtime";
 
 export function IconButton({
-  size = "md",
+  size,
   label,
   onClick,
   children,
   ...rest
 }: {
-  size?: "sm" | "md" | "lg";
+  size: "sm" | "md" | "lg";
   label: string;
   onClick: JSX.MouseEventHandler<HTMLButtonElement>;
   children: ComponentChildren;

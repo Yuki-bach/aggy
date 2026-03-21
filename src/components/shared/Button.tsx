@@ -2,13 +2,13 @@ import type { ComponentChildren } from "preact";
 import type { JSX } from "preact/jsx-runtime";
 
 export function Button({
-  variant = "secondary",
-  size = "md",
+  variant,
+  size,
   children,
   ...rest
 }: {
-  variant?: "primary" | "secondary" | "ghost";
-  size?: "md" | "lg";
+  variant: "primary" | "secondary" | "ghost";
+  size: "md" | "lg";
   children: ComponentChildren;
 } & Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size" | "class" | "className">) {
   return (
