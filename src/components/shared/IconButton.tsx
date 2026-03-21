@@ -8,7 +8,7 @@ export function IconButton({
 }: {
   size?: "sm" | "md" | "lg";
   children: ComponentChildren;
-} & Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size">) {
+} & Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size" | "class" | "className">) {
   return (
     <button class={`${base} ${sizes[size]}`} {...rest}>
       {children}

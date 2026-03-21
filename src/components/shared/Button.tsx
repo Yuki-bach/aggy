@@ -10,7 +10,7 @@ export function Button({
   variant?: "primary" | "secondary" | "ghost";
   size?: "md" | "lg";
   children: ComponentChildren;
-} & Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size">) {
+} & Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size" | "class" | "className">) {
   return (
     <button class={`${base} ${variants[variant]} ${sizes[size]}`} {...rest}>
       {children}
