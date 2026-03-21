@@ -3,22 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "packageManager": "pnpm@10.22.0",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "oxlint src/ scripts/ vite.config.ts",
-    "lint:fix": "oxlint --fix src/ scripts/ vite.config.ts",
-    "fmt": "oxfmt src/ scripts/ vite.config.ts index.html",
-    "fmt:check": "oxfmt --check src/ scripts/ vite.config.ts index.html",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "check": "pnpm run fmt:check && pnpm run lint && tsc --noEmit",
+    "build": "vp build",
+    "test": "vp test run",
+    "check": "vp check",
     "bench:gen": "tsx bench/generate.ts",
     "bench": "tsx bench/run.ts",
     "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui"
+    "e2e:ui": "playwright test --ui",
+    "prepare": "vp config"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
@@ -30,17 +23,21 @@
     "@preact/preset-vite": "^2.10.3",
     "@tailwindcss/vite": "^4.2.1",
     "@vitest/coverage-v8": "^4.1.0",
-    "oxfmt": "^0.35.0",
-    "oxlint": "^1.50.0",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vite": "^8.0.0",
-    "vitest": "^4.1.0"
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vite-plus": "latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
   },
+  "packageManager": "pnpm@10.22.0",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@swc/core"
-    ]
+    ],
+    "overrides": {
+      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+      "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
+    }
   }
 }

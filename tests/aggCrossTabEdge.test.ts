@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vite-plus/test";
 import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { getShape, weightColumn } from "./helpers/fixtures";
@@ -183,11 +183,14 @@ describe("aggCrossTabEdge - 全スライス網羅", () => {
 describe("aggCrossTabEdge - エッジケース", () => {
   it("クロス軸が1値のみ → スライス1個", async () => {
     await loadCSV(
-      buildCSV(["id", "main", "cross"], [
-        [1, 1, 5],
-        [2, 2, 5],
-        [3, 1, 5],
-      ]),
+      buildCSV(
+        ["id", "main", "cross"],
+        [
+          [1, 1, 5],
+          [2, 2, 5],
+          [3, 1, 5],
+        ],
+      ),
     );
     const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
     const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["5"] };
@@ -200,11 +203,14 @@ describe("aggCrossTabEdge - エッジケース", () => {
 
   it("メイン全NULL → 各スライスn=0, pct=null", async () => {
     await loadCSV(
-      buildCSV(["id", "main", "cross"], [
-        [1, null, 1],
-        [2, null, 2],
-        [3, null, 1],
-      ]),
+      buildCSV(
+        ["id", "main", "cross"],
+        [
+          [1, null, 1],
+          [2, null, 2],
+          [3, null, 1],
+        ],
+      ),
     );
     const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1"] };
     const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
@@ -220,11 +226,14 @@ describe("aggCrossTabEdge - エッジケース", () => {
 
   it("MA(main)全行NULL × SA(cross) → 各スライスn=0, pct=null", async () => {
     await loadCSV(
-      buildCSV(["id", "q_1", "q_2", "cross"], [
-        [1, null, null, 1],
-        [2, null, null, 2],
-        [3, null, null, 1],
-      ]),
+      buildCSV(
+        ["id", "q_1", "q_2", "cross"],
+        [
+          [1, null, null, 1],
+          [2, null, null, 2],
+          [3, null, null, 1],
+        ],
+      ),
     );
     const mainInput: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
     const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
@@ -241,11 +250,14 @@ describe("aggCrossTabEdge - エッジケース", () => {
 
   it("SA(main) × MA(cross)全行NULL → スライスなしまたは全n=0, pct=null", async () => {
     await loadCSV(
-      buildCSV(["id", "main", "q_1", "q_2"], [
-        [1, 1, null, null],
-        [2, 2, null, null],
-        [3, 1, null, null],
-      ]),
+      buildCSV(
+        ["id", "main", "q_1", "q_2"],
+        [
+          [1, 1, null, null],
+          [2, 2, null, null],
+          [3, 1, null, null],
+        ],
+      ),
     );
     const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
     const crossInput: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
@@ -262,11 +274,14 @@ describe("aggCrossTabEdge - エッジケース", () => {
 
   it("MA(main) codes=1 × SA(cross) → 正常集計", async () => {
     await loadCSV(
-      buildCSV(["id", "q_1", "cross"], [
-        [1, 1, 1],
-        [2, 0, 1],
-        [3, 1, 2],
-      ]),
+      buildCSV(
+        ["id", "q_1", "cross"],
+        [
+          [1, 1, 1],
+          [2, 0, 1],
+          [3, 1, 2],
+        ],
+      ),
     );
     const mainInput: Shape = { type: "MA", columns: ["q_1"], codes: ["1"] };
     const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["1", "2"] };
@@ -282,11 +297,14 @@ describe("aggCrossTabEdge - エッジケース", () => {
 
   it("一部スライスのみn=0 → 該当スライスだけpct=null", async () => {
     await loadCSV(
-      buildCSV(["id", "main", "cross"], [
-        [1, 1, "A"],
-        [2, 2, "A"],
-        [3, 1, "A"],
-      ]),
+      buildCSV(
+        ["id", "main", "cross"],
+        [
+          [1, 1, "A"],
+          [2, 2, "A"],
+          [3, 1, "A"],
+        ],
+      ),
     );
     const mainInput: Shape = { type: "SA", columns: ["main"], codes: ["1", "2"] };
     const crossInput: Shape = { type: "SA", columns: ["cross"], codes: ["A", "B"] };

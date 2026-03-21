@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import type { Tab } from "../src/lib/agg/types";
 import { buildExportGrids } from "../src/lib/export/formatters/grid";
 import { tabsToLongRows } from "../src/lib/export/formatters/longFormat";

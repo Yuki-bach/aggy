@@ -1,4 +1,4 @@
-import { describe, it, beforeAll, afterAll } from "vitest";
+import { describe, it, beforeAll, afterAll } from "vite-plus/test";
 import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { generateCrossDataset, SEEDS, rowCount } from "./helpers/generators";

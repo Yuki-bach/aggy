@@ -23,7 +23,7 @@ export function AIBubble({ tabs, weightCol }: AIBubbleProps) {
     setLoading(true);
     setComment(null);
     setVisible(true);
-    generateComment(tabs, weightCol).then((c) => {
+    void generateComment(tabs, weightCol).then((c) => {
       if (cancelled) return;
       if (c) {
         setComment(c);

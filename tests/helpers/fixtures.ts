@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { parseLayoutJson, buildValidLayout, buildQuestions, findWeightColumn } from "../../src/lib/layout";
+import {
+  parseLayoutJson,
+  buildValidLayout,
+  buildQuestions,
+  findWeightColumn,
+} from "../../src/lib/layout";
 import type { Shape, Question } from "../../src/lib/agg/types";
 
 const layoutPath = resolve(import.meta.dirname!, "../../testdata/test_layout.json");

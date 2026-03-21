@@ -1,7 +1,4 @@
-export function buildCSV(
-  headers: string[],
-  rows: (string | number | null)[][],
-): string {
+export function buildCSV(headers: string[], rows: (string | number | null)[][]): string {
   const escape = (v: string | number | null): string => {
     if (v === null) return "";
     const s = String(v);

@@ -164,13 +164,7 @@ export function generateCrossDataset(opts: DatasetOpts): CrossDataset {
   const weighted = opts.weighted ?? false;
 
   const maColumns = maCodes.map((_, i) => `q_ma_${i + 1}`);
-  const headers = [
-    "id",
-    ...(weighted ? ["weight"] : []),
-    "q_sa",
-    "q_sa2",
-    ...maColumns,
-  ];
+  const headers = ["id", ...(weighted ? ["weight"] : []), "q_sa", "q_sa2", ...maColumns];
   const rows: (string | number | null)[][] = [];
 
   for (let i = 1; i <= opts.rowCount; i++) {

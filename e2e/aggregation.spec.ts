@@ -17,9 +17,7 @@ test("ファイルアップロード → 検証 → 集計画面遷移", async (
   await proceedToAggregation(page);
 
   // 集計画面の「集計を実行」ボタンが表示される
-  await expect(
-    page.getByRole("button", { name: /集計を実行/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /集計を実行/ })).toBeVisible();
 });
 
 test("GT集計結果の自動表示", async ({ page }) => {
@@ -32,9 +30,7 @@ test("GT集計結果の自動表示", async ({ page }) => {
     timeout: 30_000,
   });
   await expect(page.getByText("満足度 の集計結果")).toBeAttached();
-  await expect(
-    page.getByText("利用しているサービス の集計結果"),
-  ).toBeAttached();
+  await expect(page.getByText("利用しているサービス の集計結果")).toBeAttached();
 
   // テーブルが 3 つ以上存在すること
   const tables = page.locator("table");
