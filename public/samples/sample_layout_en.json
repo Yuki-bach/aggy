@@ -1,0 +1,154 @@
+[
+  {
+    "key": "weight",
+    "label": "Weight",
+    "type": "WEIGHT"
+  },
+  {
+    "key": "f1",
+    "label": "Gender",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "Male" },
+      { "code": "2", "label": "Female" },
+      { "code": "3", "label": "Other" }
+    ]
+  },
+  {
+    "key": "f2",
+    "label": "Age Group",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "20s" },
+      { "code": "2", "label": "30s" },
+      { "code": "3", "label": "40s" },
+      { "code": "4", "label": "50s" },
+      { "code": "5", "label": "60s" },
+      { "code": "6", "label": "70+" }
+    ]
+  },
+  {
+    "key": "f3",
+    "label": "Region",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "Hokkaido" },
+      { "code": "2", "label": "Tohoku" },
+      { "code": "3", "label": "Kanto" },
+      { "code": "4", "label": "Chubu" },
+      { "code": "5", "label": "Kinki" },
+      { "code": "6", "label": "Chugoku" },
+      { "code": "7", "label": "Shikoku" },
+      { "code": "8", "label": "Kyushu/Okinawa" }
+    ]
+  },
+  {
+    "key": "q1",
+    "label": "Usage Frequency",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "Almost daily" },
+      { "code": "2", "label": "2-3 times/week" },
+      { "code": "3", "label": "Once a week" },
+      { "code": "4", "label": "2-3 times/month" },
+      { "code": "5", "label": "Once a month or less" }
+    ]
+  },
+  {
+    "key": "q2",
+    "label": "Overall Satisfaction",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "Very satisfied" },
+      { "code": "2", "label": "Somewhat satisfied" },
+      { "code": "3", "label": "Neither" },
+      { "code": "4", "label": "Somewhat dissatisfied" },
+      { "code": "5", "label": "Very dissatisfied" }
+    ]
+  },
+  {
+    "key": "q3a",
+    "label": "Quality Satisfaction",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "Very satisfied" },
+      { "code": "2", "label": "Somewhat satisfied" },
+      { "code": "3", "label": "Neither" },
+      { "code": "4", "label": "Somewhat dissatisfied" },
+      { "code": "5", "label": "Very dissatisfied" }
+    ]
+  },
+  {
+    "key": "q3b",
+    "label": "Price Satisfaction",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "Very satisfied" },
+      { "code": "2", "label": "Somewhat satisfied" },
+      { "code": "3", "label": "Neither" },
+      { "code": "4", "label": "Somewhat dissatisfied" },
+      { "code": "5", "label": "Very dissatisfied" }
+    ]
+  },
+  {
+    "key": "q3c",
+    "label": "Support Satisfaction",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "Very satisfied" },
+      { "code": "2", "label": "Somewhat satisfied" },
+      { "code": "3", "label": "Neither" },
+      { "code": "4", "label": "Somewhat dissatisfied" },
+      { "code": "5", "label": "Very dissatisfied" }
+    ]
+  },
+  {
+    "key": "q3d",
+    "label": "Usability Satisfaction",
+    "type": "SA",
+    "items": [
+      { "code": "1", "label": "Very satisfied" },
+      { "code": "2", "label": "Somewhat satisfied" },
+      { "code": "3", "label": "Neither" },
+      { "code": "4", "label": "Somewhat dissatisfied" },
+      { "code": "5", "label": "Very dissatisfied" }
+    ]
+  },
+  {
+    "key": "q4",
+    "label": "Services Used",
+    "type": "MA",
+    "items": [
+      { "code": "1", "label": "Online Store" },
+      { "code": "2", "label": "Physical Store" },
+      { "code": "3", "label": "Customer Support" },
+      { "code": "4", "label": "Mobile App" },
+      { "code": "5", "label": "Email Newsletter" },
+      { "code": "6", "label": "Loyalty Program" }
+    ]
+  },
+  {
+    "key": "q5",
+    "label": "Areas for Improvement",
+    "type": "MA",
+    "items": [
+      { "code": "1", "label": "Product quality" },
+      { "code": "2", "label": "Pricing" },
+      { "code": "3", "label": "Response speed" },
+      { "code": "4", "label": "Product variety" },
+      { "code": "5", "label": "Website usability" },
+      { "code": "6", "label": "After-sales service" }
+    ]
+  },
+  {
+    "key": "q6",
+    "label": "NPS Score",
+    "type": "NA"
+  },
+  {
+    "key": "answer_date",
+    "label": "Response Date",
+    "type": "DATE",
+    "granularity": "month"
+  }
+]

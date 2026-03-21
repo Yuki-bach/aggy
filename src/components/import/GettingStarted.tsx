@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { t, onLocaleChange, offLocaleChange } from "../../lib/i18n";
+import { t, getLocale, onLocaleChange, offLocaleChange } from "../../lib/i18n";
 
 export function GettingStartedModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [, setTick] = useState(0);
@@ -95,7 +95,14 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
               <SampleLink href="samples/sample_data.csv" name="sample_data.csv">
                 {t("gs.section1.sampleCsv")}
               </SampleLink>
-              <SampleLink href="samples/sample_layout.json" name="sample_layout.json">
+              <SampleLink
+                href={
+                  getLocale() === "ja"
+                    ? "samples/sample_layout.json"
+                    : "samples/sample_layout_en.json"
+                }
+                name="sample_layout.json"
+              >
                 {t("gs.section1.sampleLayout")}
               </SampleLink>
             </div>
