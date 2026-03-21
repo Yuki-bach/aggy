@@ -24,18 +24,20 @@ export default function AggregationScreen({
   const questions = buildQuestions(preparedLayout);
   const weightCol = findWeightColumn(preparedLayout);
 
-  const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>({});
+  const [crossSelected, setCrossSelected] = useState<Record<string, boolean>>(() => {
+    const sel: Record<string, boolean> = {};
+    questions.forEach((q) => (sel[q.code] = false));
+    return sel;
+  });
   const [weightEnabled, setWeightEnabled] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [aggResult, setAggResult] = useState<{ tabs: Tab[]; weightCol: string } | null>(null);
 
+  // Run aggregation once on mount (guard against StrictMode double-invoke)
   const didAutoRun = useRef(false);
   useEffect(() => {
     if (!didAutoRun.current) {
       didAutoRun.current = true;
-      const sel: Record<string, boolean> = {};
-      questions.forEach((q) => (sel[q.code] = false));
-      setCrossSelected(sel);
       void handleRunAggregation();
     }
   }, []);

@@ -1,25 +1,10 @@
-import { useEffect, useState } from "preact/hooks";
-import { t, getLocale, onLocaleChange, offLocaleChange } from "../../lib/i18n";
+import { useEffect } from "preact/hooks";
+import { t, getLocale } from "../../lib/i18n";
+import { useLocaleRerender, useDismiss } from "../../lib/hooks";
 
 export function GettingStartedModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [, setTick] = useState(0);
-
-  // Re-render on locale change
-  useEffect(() => {
-    const cb = () => setTick((n) => n + 1);
-    onLocaleChange(cb);
-    return () => offLocaleChange(cb);
-  }, []);
-
-  // Escape key to close
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  useLocaleRerender();
+  useDismiss(open, onClose);
 
   // Lock body scroll
   useEffect(() => {
