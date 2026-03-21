@@ -62,9 +62,9 @@ export function SettingsRoot() {
     <div class="relative" ref={wrapRef}>
       <IconButton
         id="settings-btn"
+        label={t("header.settings")}
         data-i18n="header.settings"
         data-i18n-attr="aria-label"
-        aria-label={t("header.settings")}
         onClick={handleToggle}
       >
         ⚙

@@ -3,14 +3,16 @@ import type { JSX } from "preact/jsx-runtime";
 
 export function IconButton({
   size = "md",
+  label,
   children,
   ...rest
 }: {
   size?: "sm" | "md" | "lg";
+  label: string;
   children: ComponentChildren;
-} & Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size" | "class" | "className">) {
+} & Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size" | "class" | "className" | "aria-label">) {
   return (
-    <button class={`${base} ${sizes[size]}`} {...rest}>
+    <button class={`${base} ${sizes[size]}`} aria-label={label} {...rest}>
       {children}
     </button>
   );

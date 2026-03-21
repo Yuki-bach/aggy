@@ -58,7 +58,7 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
       role="document"
     >
       <div class="absolute top-3 right-3 text-2xl leading-none">
-        <IconButton size="sm" aria-label={t("gs.close")} onClick={onClose}>
+        <IconButton size="sm" label={t("gs.close")} onClick={onClose}>
           &times;
         </IconButton>
       </div>

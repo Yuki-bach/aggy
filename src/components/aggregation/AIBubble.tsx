@@ -48,7 +48,7 @@ export function AIBubble({ tabs, weightCol }: AIBubbleProps) {
         style="border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--surface)"
       />
       <div class="absolute top-2 right-3">
-        <IconButton size="lg" aria-label={t("ai.close")} onClick={() => setVisible(false)}>
+        <IconButton size="lg" label={t("ai.close")} onClick={() => setVisible(false)}>
           {"\u00d7"}
         </IconButton>
       </div>
