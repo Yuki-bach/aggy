@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { t, getLocale, setLocale } from "../../lib/i18n";
 import { useLocaleRerender, useDismiss } from "../../lib/hooks";
+import { IconButton } from "../shared/IconButton";
 
 export function isAICommentEnabled(): boolean {
   return localStorage.getItem(AI_KEY) !== "off";
@@ -59,16 +60,15 @@ export function SettingsRoot() {
 
   return (
     <div class="relative" ref={wrapRef}>
-      <button
+      <IconButton
         id="settings-btn"
-        class="cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
         data-i18n="header.settings"
         data-i18n-attr="aria-label"
         aria-label={t("header.settings")}
         onClick={handleToggle}
       >
         ⚙
-      </button>
+      </IconButton>
       {open && (
         <div class="absolute top-[calc(100%+8px)] right-0 z-100 w-[300px] rounded-xl border border-border bg-surface p-4 shadow-lg">
           <SettingsPanel showAI={aiAvailable} onRerender={rerender} />
