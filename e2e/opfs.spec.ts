@@ -52,9 +52,7 @@ test.beforeEach(async ({ page }) => {
 async function createHistoryEntry(page: Page): Promise<void> {
   await uploadFiles(page);
   await proceedToAggregation(page);
-  await expect(
-    page.getByRole("button", { name: /集計を実行/ }),
-  ).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("button", { name: /集計を実行/ })).toBeVisible({ timeout: 30_000 });
   await page.goto("/");
   await waitForWasmReady(page);
 }
@@ -66,16 +64,17 @@ test("集計画面遷移後、履歴にエントリが追加される", async ({
   await createHistoryEntry(page);
 
   // 履歴に test_data.csv のエントリが表示される
-  await expect(
-    page.getByRole("button", { name: /test_data\.csv/ }).first(),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /test_data\.csv/ }).first()).toBeVisible();
 });
 
 test("履歴からデータを読み込み、集計画面に遷移できる", async ({ page }) => {
   await createHistoryEntry(page);
 
   // 履歴エントリをクリック
-  await page.getByRole("button", { name: /test_data\.csv/ }).first().click();
+  await page
+    .getByRole("button", { name: /test_data\.csv/ })
+    .first()
+    .click();
 
   // ファイル名が表示されることを確認
   await expect(page.getByText("test_data.csv")).toBeVisible();
@@ -83,9 +82,7 @@ test("履歴からデータを読み込み、集計画面に遷移できる", as
 
   // 集計画面へ遷移できる
   await proceedToAggregation(page);
-  await expect(
-    page.getByRole("button", { name: /集計を実行/ }),
-  ).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("button", { name: /集計を実行/ })).toBeVisible({ timeout: 30_000 });
 });
 
 test("履歴エントリを削除できる", async ({ page }) => {

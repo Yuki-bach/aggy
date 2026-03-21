@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vite-plus/test";
 import { aggTab } from "../src/lib/agg/aggTab";
 import { setupDuckDB, teardownDuckDB, getConn } from "./helpers/duckdb";
 import { getShape } from "./helpers/fixtures";
@@ -57,7 +57,7 @@ describe("aggTab - 重みなし", () => {
       expect(counts).toEqual([6, 3, 2, 2]);
 
       const pcts = slice.cells.map((c) => c.pct);
-      expect(pcts.map((p) => Math.round(p * 1e5) / 1e5)).toEqual(
+      expect(pcts.map((p) => Math.round((p ?? 0) * 1e5) / 1e5)).toEqual(
         [6, 3, 2, 2].map((c) => Math.round((c / n) * 100 * 1e5) / 1e5),
       );
     });

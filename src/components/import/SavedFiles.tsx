@@ -20,7 +20,7 @@ export function useSavedFiles() {
   }, []);
 
   useEffect(() => {
-    refresh();
+    void refresh();
     listeners.add(refresh);
     return () => {
       listeners.delete(refresh);
@@ -30,7 +30,7 @@ export function useSavedFiles() {
   const deleteEntry = useCallback(
     async (folderId: string) => {
       await deleteSaved(folderId);
-      refresh();
+      void refresh();
     },
     [refresh],
   );

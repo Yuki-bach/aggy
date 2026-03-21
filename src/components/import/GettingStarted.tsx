@@ -1,5 +1,5 @@
 import { useEffect } from "preact/hooks";
-import { t } from "../../lib/i18n";
+import { t, getLocale } from "../../lib/i18n";
 import { useLocaleRerender, useDismiss } from "../../lib/hooks";
 
 export function GettingStartedModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -80,7 +80,14 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
               <SampleLink href="samples/sample_data.csv" name="sample_data.csv">
                 {t("gs.section1.sampleCsv")}
               </SampleLink>
-              <SampleLink href="samples/sample_layout.json" name="sample_layout.json">
+              <SampleLink
+                href={
+                  getLocale() === "ja"
+                    ? "samples/sample_layout.json"
+                    : "samples/sample_layout_en.json"
+                }
+                name="sample_layout.json"
+              >
                 {t("gs.section1.sampleLayout")}
               </SampleLink>
             </div>

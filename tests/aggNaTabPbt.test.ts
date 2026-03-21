@@ -1,4 +1,4 @@
-import { describe, it, beforeAll, afterAll } from "vitest";
+import { describe, it, beforeAll, afterAll } from "vite-plus/test";
 import { aggNaTab } from "../src/lib/agg/aggNa";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { generateNADataset } from "./helpers/generators";

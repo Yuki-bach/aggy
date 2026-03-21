@@ -55,9 +55,7 @@ function validateLayout(layout) {
       continue;
     }
     if (!validTypes.has(typ)) {
-      errors.push(
-        `${prefix}: type '${typ}' は無効です（有効: ${[...validTypes].join(", ")}）`,
-      );
+      errors.push(`${prefix}: type '${typ}' は無効です（有効: ${[...validTypes].join(", ")}）`);
       continue;
     }
 
@@ -130,13 +128,9 @@ function validateSaMa(entry, prefix, typ, errors) {
     }
 
     // 余分なフィールド
-    const extraFields = Object.keys(item).filter(
-      (k) => k !== "code" && k !== "label",
-    );
+    const extraFields = Object.keys(item).filter((k) => k !== "code" && k !== "label");
     if (extraFields.length > 0) {
-      errors.push(
-        `${ip}: 不明なフィールド: {${extraFields.join(", ")}}`,
-      );
+      errors.push(`${ip}: 不明なフィールド: {${extraFields.join(", ")}}`);
     }
   }
 }
@@ -189,9 +183,7 @@ function checkCsvConsistency(layout, csvPath) {
     if (typ === "SA" || typ === "WEIGHT" || typ === "DATE") {
       expected.add(key);
       if (!headerSet.has(key)) {
-        errors.push(
-          `レイアウトの key '${key}' (${typ}) がCSVヘッダーにありません`,
-        );
+        errors.push(`レイアウトの key '${key}' (${typ}) がCSVヘッダーにありません`);
       }
     } else if (typ === "MA") {
       for (const item of entry.items || []) {

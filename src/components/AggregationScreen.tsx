@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type { Tab } from "../lib/agg/types";
 import ResultPanel from "./aggregation/ResultPanel";
 import SettingsPanel from "./aggregation/SettingsPanel";
@@ -33,9 +33,13 @@ export default function AggregationScreen({
   const [errorMsg, setErrorMsg] = useState("");
   const [aggResult, setAggResult] = useState<{ tabs: Tab[]; weightCol: string } | null>(null);
 
-  // Run aggregation once on mount
+  // Run aggregation once on mount (guard against StrictMode double-invoke)
+  const didAutoRun = useRef(false);
   useEffect(() => {
-    handleRunAggregation();
+    if (!didAutoRun.current) {
+      didAutoRun.current = true;
+      void handleRunAggregation();
+    }
   }, []);
 
   async function handleRunAggregation(): Promise<void> {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vite-plus/test";
 import { aggTab } from "../src/lib/agg/aggTab";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { buildCSV } from "./helpers/csv";
@@ -15,9 +15,16 @@ afterAll(async () => {
 describe("aggTabEdge - SA", () => {
   it("全行同値 → count=5, pct=100", async () => {
     await loadCSV(
-      buildCSV(["id", "q1"], [
-        [1, 1], [2, 1], [3, 1], [4, 1], [5, 1],
-      ]),
+      buildCSV(
+        ["id", "q1"],
+        [
+          [1, 1],
+          [2, 1],
+          [3, 1],
+          [4, 1],
+          [5, 1],
+        ],
+      ),
     );
     const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
     const result = await aggTab(getConn(), input, "");
@@ -32,9 +39,14 @@ describe("aggTabEdge - SA", () => {
 
   it("全行NULL → n=0", async () => {
     await loadCSV(
-      buildCSV(["id", "q1"], [
-        [1, null], [2, null], [3, null],
-      ]),
+      buildCSV(
+        ["id", "q1"],
+        [
+          [1, null],
+          [2, null],
+          [3, null],
+        ],
+      ),
     );
     const input: Shape = { type: "SA", columns: ["q1"], codes: ["1"] };
     const result = await aggTab(getConn(), input, "");
@@ -54,9 +66,14 @@ describe("aggTabEdge - SA", () => {
 
   it("layoutコードがデータに未出現 → count=0", async () => {
     await loadCSV(
-      buildCSV(["id", "q1"], [
-        [1, 1], [2, 1], [3, 1],
-      ]),
+      buildCSV(
+        ["id", "q1"],
+        [
+          [1, 1],
+          [2, 1],
+          [3, 1],
+        ],
+      ),
     );
     const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2", "3"] };
     const result = await aggTab(getConn(), input, "");
@@ -68,11 +85,14 @@ describe("aggTabEdge - SA", () => {
 
   it("weight=0の行 → count寄与0", async () => {
     await loadCSV(
-      buildCSV(["id", "weight", "q1"], [
-        [1, 1.0, 1],
-        [2, 0.0, 1],
-        [3, 1.0, 2],
-      ]),
+      buildCSV(
+        ["id", "weight", "q1"],
+        [
+          [1, 1.0, 1],
+          [2, 0.0, 1],
+          [3, 1.0, 2],
+        ],
+      ),
     );
     const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2"] };
     const result = await aggTab(getConn(), input, "weight");
@@ -84,9 +104,16 @@ describe("aggTabEdge - SA", () => {
 
   it("weight=1均一 ≡ 重みなし", async () => {
     await loadCSV(
-      buildCSV(["id", "weight", "q1"], [
-        [1, 1, 1], [2, 1, 2], [3, 1, 1], [4, 1, 3], [5, 1, 2],
-      ]),
+      buildCSV(
+        ["id", "weight", "q1"],
+        [
+          [1, 1, 1],
+          [2, 1, 2],
+          [3, 1, 1],
+          [4, 1, 3],
+          [5, 1, 2],
+        ],
+      ),
     );
     const input: Shape = { type: "SA", columns: ["q1"], codes: ["1", "2", "3"] };
     const unweighted = await aggTab(getConn(), input, "");
@@ -102,11 +129,14 @@ describe("aggTabEdge - MA", () => {
   it("NULL行はshownから除外される → nに寄与しない", async () => {
     // 型推論のため非NULLの行を含む。NULL行のみがshown=falseで除外される
     await loadCSV(
-      buildCSV(["id", "q_1", "q_2"], [
-        [1, null, null],
-        [2, null, null],
-        [3, 1, 0],
-      ]),
+      buildCSV(
+        ["id", "q_1", "q_2"],
+        [
+          [1, null, null],
+          [2, null, null],
+          [3, 1, 0],
+        ],
+      ),
     );
     const input: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
     const result = await aggTab(getConn(), input, "");
@@ -119,11 +149,14 @@ describe("aggTabEdge - MA", () => {
 
   it("全行NULL → n=0, 全セル count=0", async () => {
     await loadCSV(
-      buildCSV(["id", "q_1", "q_2"], [
-        [1, null, null],
-        [2, null, null],
-        [3, null, null],
-      ]),
+      buildCSV(
+        ["id", "q_1", "q_2"],
+        [
+          [1, null, null],
+          [2, null, null],
+          [3, null, null],
+        ],
+      ),
     );
     const input: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
     const result = await aggTab(getConn(), input, "");
@@ -135,11 +168,14 @@ describe("aggTabEdge - MA", () => {
 
   it("全列0（shown but none selected） → N/A count=n", async () => {
     await loadCSV(
-      buildCSV(["id", "q_1", "q_2"], [
-        [1, 0, 0],
-        [2, 0, 0],
-        [3, 0, 0],
-      ]),
+      buildCSV(
+        ["id", "q_1", "q_2"],
+        [
+          [1, 0, 0],
+          [2, 0, 0],
+          [3, 0, 0],
+        ],
+      ),
     );
     const input: Shape = { type: "MA", columns: ["q_1", "q_2"], codes: ["1", "2"] };
     const result = await aggTab(getConn(), input, "");
@@ -155,11 +191,14 @@ describe("aggTabEdge - MA", () => {
 
   it("codes=1（MA列1つ） → 正常集計", async () => {
     await loadCSV(
-      buildCSV(["id", "q_1"], [
-        [1, 1],
-        [2, 0],
-        [3, 1],
-      ]),
+      buildCSV(
+        ["id", "q_1"],
+        [
+          [1, 1],
+          [2, 0],
+          [3, 1],
+        ],
+      ),
     );
     const input: Shape = { type: "MA", columns: ["q_1"], codes: ["1"] };
     const result = await aggTab(getConn(), input, "");

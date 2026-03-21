@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import {
   parseLayoutJson,
   validateLayoutStructure,
@@ -61,10 +61,14 @@ describe("filterLayout", () => {
     const headers = ["q2_1", "q2_3"];
     const filtered = filterLayout(headers, layout);
     expect(filtered).toHaveLength(1);
-    expect(filtered[0].items).toEqual([
-      { code: "1", label: "Sports" },
-      { code: "3", label: "Reading" },
-    ]);
+    const ma = filtered[0];
+    expect(ma.type).toBe("MA");
+    if (ma.type === "MA") {
+      expect(ma.items).toEqual([
+        { code: "1", label: "Sports" },
+        { code: "3", label: "Reading" },
+      ]);
+    }
   });
 
   it("removes MA entry when no items match", () => {
