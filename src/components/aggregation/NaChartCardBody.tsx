@@ -72,7 +72,7 @@ function buildFreqChart(
         legend: { display: false },
         title: {
           display: true,
-          text: `n=${stats.n.toLocaleString()}  ${t("na.stat.mean")}=${stats.mean.toFixed(2)}  SD=${stats.sd.toFixed(2)}`,
+          text: `n=${stats.n.toLocaleString()}  ${t("na.stat.mean")}=${stats.mean?.toFixed(2) ?? "-"}  SD=${stats.sd?.toFixed(2) ?? "-"}`,
           color: theme.muted,
           font: { size: 12, weight: "normal" },
         },
@@ -113,7 +113,7 @@ function buildMeanComparisonChart(
   });
 
   const labels = allSlices.map((s) => s.label);
-  const means = allSlices.map((s) => s.stats.mean);
+  const means = allSlices.map((s) => s.stats.mean ?? 0);
 
   return new Chart(canvas, {
     type: "bar",

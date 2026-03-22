@@ -75,7 +75,8 @@ export function NaCrossTable({ tab, crossTabs }: NaCrossTableProps) {
   );
 }
 
-function formatStat(key: string, value: number): string {
+function formatStat(key: string, value: number | null): string {
+  if (value === null) return "-";
   if (key === "n") return value.toLocaleString();
   return value.toFixed(2);
 }

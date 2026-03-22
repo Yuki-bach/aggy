@@ -1,10 +1,16 @@
 /** NA (Numerical Answer) single tabulation */
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import type { TabData, NaStats } from "./types";
+import type { NaStats, TabData } from "./types";
 import { calcPct } from "./types";
 import { esc } from "./sqlHelpers";
-import { type ValueCount, naValExpr, naWhereCond, assembleStats } from "./naHelpers";
+import {
+  type ValueCount,
+  EMPTY_NA_STATS,
+  naValExpr,
+  naWhereCond,
+  assembleStats,
+} from "./naHelpers";
 
 export async function aggNaTab(
   conn: AsyncDuckDBConnection,
@@ -71,7 +77,7 @@ class NaTabAggregator {
 
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
-    if (!row) return { n: 0, mean: 0, median: 0, sd: 0, min: 0, max: 0 };
+    if (!row) return EMPTY_NA_STATS;
     return assembleStats(row);
   }
 

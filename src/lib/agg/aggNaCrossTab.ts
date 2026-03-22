@@ -1,10 +1,16 @@
 /** NA (Numerical Answer) cross-tabulation */
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import type { Shape, TabData, NaStats, Slice } from "./types";
+import type { Shape, TabData, Slice, NaStats } from "./types";
 import { calcPct } from "./types";
 import { esc, maShownCondition } from "./sqlHelpers";
-import { type ValueCount, naValExpr, naWhereCond, assembleStats } from "./naHelpers";
+import {
+  type ValueCount,
+  EMPTY_NA_STATS,
+  naValExpr,
+  naWhereCond,
+  assembleStats,
+} from "./naHelpers";
 
 export async function aggNaCrossTab(
   conn: AsyncDuckDBConnection,
@@ -32,14 +38,13 @@ class NaCrossTabAggregator {
   // ── NA × SA cross ──
 
   private async naCrossSA(crossCol: string, crossCodes: string[]): Promise<TabData> {
-    const statsMap = await this.queryStatsGrouped(crossCol);
-    const freqMap = await this.queryFreqGrouped(crossCol);
+    const statsMap = await this.queryStatsGrouped(crossCol, crossCodes);
+    const freqMap = await this.queryFreqGrouped(crossCol, crossCodes);
 
-    const emptyStats: NaStats = { n: 0, mean: 0, median: 0, sd: 0, min: 0, max: 0 };
     const sliceData = crossCodes.map((code) => ({
       code,
-      stats: statsMap.get(code) ?? emptyStats,
-      freq: freqMap.get(code) ?? [],
+      stats: statsMap.get(code)!,
+      freq: freqMap.get(code)!,
     }));
 
     return this.alignSlices(sliceData);
@@ -95,11 +100,14 @@ class NaCrossTabAggregator {
 
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
-    if (!row) return { n: 0, mean: 0, median: 0, sd: 0, min: 0, max: 0 };
+    if (!row) return EMPTY_NA_STATS;
     return assembleStats(row);
   }
 
-  private async queryStatsGrouped(groupByCol: string): Promise<Map<string, NaStats>> {
+  private async queryStatsGrouped(
+    groupByCol: string,
+    codes: string[],
+  ): Promise<Map<string, NaStats>> {
     const w = this.weightCol ? `"${esc(this.weightCol)}"` : "";
     let sql: string;
     // NOTE: MEDIAN is unweighted even in weighted mode
@@ -133,6 +141,7 @@ class NaCrossTabAggregator {
 
     const result = await this.conn.query(sql);
     const map = new Map<string, NaStats>();
+    for (const code of codes) map.set(code, EMPTY_NA_STATS);
     for (const row of result.toArray()) {
       map.set(String(row.grp), assembleStats(row));
     }
@@ -153,7 +162,10 @@ class NaCrossTabAggregator {
     return result.toArray().map((r) => ({ value: Number(r.val), count: Number(r.cnt) }));
   }
 
-  private async queryFreqGrouped(groupByCol: string): Promise<Map<string, ValueCount[]>> {
+  private async queryFreqGrouped(
+    groupByCol: string,
+    codes: string[],
+  ): Promise<Map<string, ValueCount[]>> {
     const countExpr = this.weightCol ? `SUM("${esc(this.weightCol)}")` : `COUNT(*)::DOUBLE`;
     const sql = `
       SELECT ${naValExpr(this.column)} AS val, ${countExpr} AS cnt, "${esc(groupByCol)}" AS grp
@@ -164,6 +176,7 @@ class NaCrossTabAggregator {
     `;
     const result = await this.conn.query(sql);
     const map = new Map<string, ValueCount[]>();
+    for (const code of codes) map.set(code, []);
     for (const row of result.toArray()) {
       const grp = String(row.grp);
       let arr = map.get(grp);

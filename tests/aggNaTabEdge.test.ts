@@ -37,13 +37,13 @@ describe("aggNaTabEdge", () => {
     expect(slice.cells[0].pct).toBeCloseTo(100, 3);
   });
 
-  it("n=1 → STDDEV_SAMP=NULL → sd=0", async () => {
+  it("n=1 → STDDEV_SAMP=NULL → sd=null", async () => {
     await loadCSV(buildCSV(["id", "score"], [[1, 7]]));
     const result = await aggNaTab(getConn(), "score", "");
     const slice = result.slices[0];
 
     expect(slice.stats!.n).toBe(1);
-    expect(slice.stats!.sd).toBe(0);
+    expect(slice.stats!.sd).toBeNull();
     expect(slice.stats!.mean).toBe(7);
     expect(slice.stats!.min).toBe(7);
     expect(slice.stats!.max).toBe(7);
