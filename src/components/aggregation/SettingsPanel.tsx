@@ -101,7 +101,7 @@ export default function SettingsPanel({
 
       {/* Run Button */}
       <div class="mx-4 my-4 shrink-0">
-        <Button variant="primary" size="lg" onClick={onRun}>
+        <Button variant="primary" size="lg" fullWidth onClick={onRun}>
           {t("run.button")}
         </Button>
       </div>

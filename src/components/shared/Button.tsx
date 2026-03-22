@@ -4,15 +4,20 @@ import type { JSX } from "preact/jsx-runtime";
 export function Button({
   variant,
   size,
+  fullWidth,
   children,
   ...rest
 }: {
   variant: "primary" | "secondary" | "ghost";
   size: "md" | "lg";
+  fullWidth?: boolean;
   children: ComponentChildren;
 } & Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size" | "class" | "className">) {
   return (
-    <button class={`${base} ${variants[variant]} ${sizes[size]}`} {...rest}>
+    <button
+      class={`${base} ${variants[variant]} ${sizes[size]}${fullWidth ? " w-full" : ""}`}
+      {...rest}
+    >
       {children}
     </button>
   );
