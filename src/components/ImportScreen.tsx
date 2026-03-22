@@ -19,7 +19,7 @@ const GettingStartedModal = lazy(() =>
 
 function formatLoadedInfo(rawData: RawData): string {
   return t("summary.rows", {
-    rows: rawData.rowCount.toLocaleString(),
+    rows: rawData.rowCount,
     cols: rawData.headers.length,
   });
 }

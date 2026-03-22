@@ -168,7 +168,7 @@ export function DataSummary({
       <div class="mb-1 flex items-baseline gap-2 pl-4">
         <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text">
           {t("summary.rows", {
-            rows: rawData.rowCount.toLocaleString(),
+            rows: rawData.rowCount,
             cols: rawData.headers.length,
           })}
         </span>
