@@ -29,7 +29,7 @@ export default defineConfig({
       "no-console": "warn",
       eqeqeq: "error",
       "no-var": "error",
-      "prefer-const": "warn",
+      "prefer-const": "error",
       "typescript/no-explicit-any": "error",
       "import/no-duplicates": "error",
       "typescript/triple-slash-reference": "off",
