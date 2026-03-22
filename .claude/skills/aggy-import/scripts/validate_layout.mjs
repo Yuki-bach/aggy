@@ -35,7 +35,7 @@ function validateLayout(layout) {
     }
 
     // key: 必須、文字列
-    const key = entry.key;
+    const { key } = entry;
     if (key === undefined || key === null) {
       errors.push(`${prefix}: 'key' がありません`);
     } else if (typeof key !== "string" || key === "") {
@@ -80,7 +80,7 @@ function validateLayout(layout) {
 }
 
 function validateSaMa(entry, prefix, typ, errors) {
-  const items = entry.items;
+  const { items } = entry;
   if (items === undefined || items === null) {
     errors.push(`${prefix}: ${typ} には 'items' が必須です`);
     return;
@@ -105,7 +105,7 @@ function validateSaMa(entry, prefix, typ, errors) {
     }
 
     // code: 必須、文字列
-    const code = item.code;
+    const { code } = item;
     if (code === undefined || code === null) {
       errors.push(`${ip}: 'code' がありません`);
     } else if (typeof code !== "string") {
@@ -120,7 +120,7 @@ function validateSaMa(entry, prefix, typ, errors) {
     }
 
     // label: 必須、文字列
-    const label = item.label;
+    const { label } = item;
     if (label === undefined || label === null) {
       errors.push(`${ip}: 'label' がありません`);
     } else if (typeof label !== "string") {
@@ -167,7 +167,7 @@ function parseCsvFirstLine(csvPath) {
   // Handle both \r\n and \n line endings
   const firstLine = content.split(/\r?\n/)[0];
   // Simple CSV header parse (no quotes handling needed for headers typically)
-  return firstLine.split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
+  return firstLine.split(",").map((h) => h.trim().replaceAll(/^"|"$/g, ""));
 }
 
 function checkCsvConsistency(layout, csvPath) {

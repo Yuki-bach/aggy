@@ -1,7 +1,7 @@
 /** Shared SQL helpers and constants for aggregation */
 
 export function esc(name: string): string {
-  return name.replace(/"/g, '""');
+  return name.replaceAll('"', '""');
 }
 
 export function weightExpr(weightCol: string): string {

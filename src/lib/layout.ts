@@ -131,7 +131,7 @@ function checkEntry(entry: unknown): string | null {
     return `"type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります`;
   }
   if (typeof e["label"] !== "string") return '"label"（文字列）が必要です';
-  const type = e["type"];
+  const { type } = e;
   if ((type === "SA" || type === "MA") && (!Array.isArray(e["items"]) || e["items"].length === 0)) {
     return `${type} には "items"（1件以上の配列）が必要です`;
   }

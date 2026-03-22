@@ -3,7 +3,7 @@ export function buildCSV(headers: string[], rows: (string | number | null)[][]):
     if (v === null) return "";
     const s = String(v);
     if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-      return `"${s.replace(/"/g, '""')}"`;
+      return `"${s.replaceAll('"', '""')}"`;
     }
     return s;
   };

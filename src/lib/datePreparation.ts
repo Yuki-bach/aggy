@@ -27,7 +27,7 @@ export async function prepareDateColumns(
       continue;
     }
 
-    const granularity = q.granularity;
+    const { granularity } = q;
     const fmt = FORMAT_MAP[granularity];
     const col = esc(q.key);
     const fmtCol = esc(`${q.key}__${granularity}`);
