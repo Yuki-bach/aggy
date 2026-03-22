@@ -53,3 +53,14 @@ export async function loadCSV(csvText: string): Promise<void> {
   await db.registerFileText("survey.csv", csvText);
   await conn!.query(`CREATE OR REPLACE VIEW survey AS SELECT * FROM read_csv('survey.csv')`);
 }
+
+export async function loadCSVAsTable(csvText: string): Promise<void> {
+  await db.registerFileText("survey.csv", csvText);
+  // DuckDB requires matching DROP type (TABLE vs VIEW), so try both
+  try {
+    await conn!.query(`DROP TABLE IF EXISTS survey`);
+  } catch {
+    await conn!.query(`DROP VIEW IF EXISTS survey`);
+  }
+  await conn!.query(`CREATE TABLE survey AS SELECT * FROM read_csv('survey.csv')`);
+}
