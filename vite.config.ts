@@ -19,20 +19,46 @@ export default defineConfig({
     endOfLine: "lf",
   },
   lint: {
-    plugins: ["typescript", "import", "unicorn"],
+    plugins: ["typescript", "import", "unicorn", "react", "vitest"],
+    categories: {
+      correctness: "error",
+      suspicious: "warn",
+      perf: "warn",
+    },
     env: {
       browser: true,
     },
     ignorePatterns: ["dist/", "node_modules/", "testdata/"],
     rules: {
+      // --- core ---
       "no-unused-vars": "error",
       "no-console": "warn",
       eqeqeq: "error",
       "no-var": "error",
       "prefer-const": "error",
+
+      // --- typescript ---
       "typescript/no-explicit-any": "error",
-      "import/no-duplicates": "error",
       "typescript/triple-slash-reference": "off",
+
+      // --- type-aware (require typeAware: true) ---
+      "typescript/no-floating-promises": "error",
+      "typescript/no-misused-promises": "warn",
+      "typescript/await-thenable": "error",
+      "typescript/no-unnecessary-type-assertion": "error",
+
+      // --- import ---
+      "import/no-duplicates": "error",
+      "import/no-named-as-default": "off",
+
+      // --- react (Preact compat) ---
+      "react/no-unknown-property": "off",
+      "react/react-in-jsx-scope": "off",
+
+      // --- project-specific overrides ---
+      "no-await-in-loop": "off", // DuckDB Wasm requires sequential await (see CLAUDE.md)
+      "typescript/no-unsafe-type-assertion": "off", // too noisy; no-explicit-any covers main concern
+      "unicorn/no-array-sort": "off", // [...arr].sort() pattern is safe
     },
     overrides: [
       {

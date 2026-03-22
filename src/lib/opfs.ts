@@ -40,7 +40,7 @@ export async function listSaved(): Promise<SavedEntry[]> {
 
     let rawDataName = "";
     let layoutName = "";
-    for await (const [fileName] of (handle as FileSystemDirectoryHandle).entries()) {
+    for await (const [fileName] of handle.entries()) {
       if (fileName.endsWith(".csv")) rawDataName = fileName;
       else if (fileName.endsWith(".json")) layoutName = fileName;
     }

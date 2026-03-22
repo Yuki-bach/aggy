@@ -59,13 +59,13 @@ function ResultContent({ tabs, weightCol }: { tabs: Tab[]; weightCol: string }) 
     onPaletteChange: setPaletteId,
   };
 
-  const questionCodes = [...new Set(tabs.map((t) => t.questionCode))];
-  const hasCross = tabs.some((t) => t.by !== null);
+  const questionCodes = [...new Set(tabs.map((tab) => tab.questionCode))];
+  const hasCross = tabs.some((tab) => tab.by !== null);
 
   const maxPct = Math.max(
     ...tabs
-      .filter((t) => t.by === null && t.type !== "NA")
-      .flatMap((t) => t.slices[0]?.cells.map((c) => c.pct ?? 0) ?? []),
+      .filter((tab) => tab.by === null && tab.type !== "NA")
+      .flatMap((tab) => tab.slices[0]?.cells.map((c) => c.pct ?? 0) ?? []),
     0,
   );
   const tableOpts = { basis, maxPct };
@@ -90,8 +90,8 @@ function ResultContent({ tabs, weightCol }: { tabs: Tab[]; weightCol: string }) 
         {questionCodes.map((q) => (
           <TabCard
             key={q}
-            tab={tabs.find((t) => t.questionCode === q && t.by === null)!}
-            crossTabs={tabs.filter((t) => t.questionCode === q && t.by !== null)}
+            tab={tabs.find((tab) => tab.questionCode === q && tab.by === null)!}
+            crossTabs={tabs.filter((tab) => tab.questionCode === q && tab.by !== null)}
             viewMode={viewMode}
             tableOpts={tableOpts}
             chartOpts={chartOpts}

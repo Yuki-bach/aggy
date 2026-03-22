@@ -37,7 +37,7 @@ export function parseLayoutJson(jsonText: string): unknown[] {
   if (!Array.isArray(parsed)) {
     throw new Error("レイアウトファイルはJSON配列である必要があります。");
   }
-  return parsed as unknown[];
+  return parsed;
 }
 
 /** Validate layout structure and return diagnostics (does not throw). */
@@ -51,7 +51,7 @@ export function validateLayoutStructure(raw: unknown[]): Diagnostic[] {
       const e =
         typeof entry === "object" && entry !== null ? (entry as Record<string, unknown>) : null;
       const key = e && typeof e["key"] === "string" ? e["key"] : `[${i}]`;
-      const label = e && typeof e["label"] === "string" ? (e["label"] as string) : "";
+      const label = e && typeof e["label"] === "string" ? e["label"] : "";
       diagnostics.push({
         key,
         label,
@@ -111,10 +111,10 @@ function checkItems(items: unknown[]): string | null {
     if (typeof item["code"] !== "string" || typeof item["label"] !== "string") {
       return `"items[${i}]" には "code"（文字列）と "label"（文字列）が必要です`;
     }
-    if (codes.has(item["code"] as string)) {
+    if (codes.has(item["code"])) {
       return `"items" 内に重複した "code" があります: ${item["code"]}`;
     }
-    codes.add(item["code"] as string);
+    codes.add(item["code"]);
   }
   return null;
 }
@@ -131,7 +131,7 @@ function checkEntry(entry: unknown): string | null {
     return `"type" は ${[...VALID_TYPES].join(", ")} のいずれかである必要があります`;
   }
   if (typeof e["label"] !== "string") return '"label"（文字列）が必要です';
-  const type = e["type"] as string;
+  const type = e["type"];
   if ((type === "SA" || type === "MA") && (!Array.isArray(e["items"]) || e["items"].length === 0)) {
     return `${type} には "items"（1件以上の配列）が必要です`;
   }

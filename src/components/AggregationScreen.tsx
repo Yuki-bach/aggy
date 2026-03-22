@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import type { Tab } from "../lib/agg/types";
 import ResultPanel from "./aggregation/ResultPanel";
 import SettingsPanel from "./aggregation/SettingsPanel";
@@ -33,16 +33,7 @@ export default function AggregationScreen({
   const [errorMsg, setErrorMsg] = useState("");
   const [aggResult, setAggResult] = useState<{ tabs: Tab[]; weightCol: string } | null>(null);
 
-  // Run aggregation once on mount (guard against StrictMode double-invoke)
-  const didAutoRun = useRef(false);
-  useEffect(() => {
-    if (!didAutoRun.current) {
-      didAutoRun.current = true;
-      void handleRunAggregation();
-    }
-  }, []);
-
-  async function handleRunAggregation(): Promise<void> {
+  const handleRunAggregation = useCallback(async (): Promise<void> => {
     setErrorMsg("");
 
     const activeWeightCol = weightEnabled ? weightCol : "";
@@ -54,7 +45,16 @@ export default function AggregationScreen({
     } catch (e) {
       setErrorMsg(t("error.aggregation", { msg: (e as Error).message }));
     }
-  }
+  }, [weightEnabled, weightCol, questions, crossSelected]);
+
+  // Run aggregation once on mount (guard against StrictMode double-invoke)
+  const didAutoRun = useRef(false);
+  useEffect(() => {
+    if (!didAutoRun.current) {
+      didAutoRun.current = true;
+      void handleRunAggregation();
+    }
+  }, [handleRunAggregation]);
 
   return (
     <>
