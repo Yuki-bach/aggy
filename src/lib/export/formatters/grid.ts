@@ -11,11 +11,11 @@ export interface ExportGrid {
 const NA_STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
 
 export function buildExportGrids(tabs: Tab[]): ExportGrid[] {
-  const hasCross = tabs.some((t) => t.by !== null);
+  const hasCross = tabs.some((tab) => tab.by !== null);
   if (hasCross) {
     return buildCrossGrids(tabs);
   }
-  return tabs.filter((t) => t.by === null).map((tab) => buildTabGrid(tab));
+  return tabs.filter((tab) => tab.by === null).map((tab) => buildTabGrid(tab));
 }
 
 // ─── Internal ───────────────────────────────────────────────
@@ -67,21 +67,21 @@ function buildNaTabGrid(tab: Tab): ExportGrid {
 }
 
 function buildCrossGrids(tabs: Tab[]): ExportGrid[] {
-  const firstCross = tabs.find((t) => t.by !== null);
+  const firstCross = tabs.find((tab) => tab.by !== null);
   if (!firstCross) {
-    return tabs.filter((t) => t.by === null).map((tab) => buildTabGrid(tab));
+    return tabs.filter((tab) => tab.by === null).map((tab) => buildTabGrid(tab));
   }
 
-  const questionCodes = [...new Set(tabs.map((t) => t.questionCode))];
+  const questionCodes = [...new Set(tabs.map((tab) => tab.questionCode))];
 
   // Find first categorical question for shared headers
   const firstCatQCode = questionCodes.find((qc) => {
-    const tabResult = tabs.find((t) => t.questionCode === qc && t.by === null);
+    const tabResult = tabs.find((tab) => tab.questionCode === qc && tab.by === null);
     return tabResult && tabResult.type !== "NA";
   });
 
   const crossTabsForFirst = firstCatQCode
-    ? tabs.filter((t) => t.questionCode === firstCatQCode && t.by !== null)
+    ? tabs.filter((tab) => tab.questionCode === firstCatQCode && tab.by !== null)
     : [];
 
   // Build shared 2-row headers for categorical
@@ -106,8 +106,8 @@ function buildCrossGrids(tabs: Tab[]): ExportGrid[] {
   const sharedHeaders = [headerRow1, headerRow2];
 
   return questionCodes.map((qCode) => {
-    const tabResult = tabs.find((t) => t.questionCode === qCode && t.by === null)!;
-    const qCrossTabs = tabs.filter((t) => t.questionCode === qCode && t.by !== null);
+    const tabResult = tabs.find((tab) => tab.questionCode === qCode && tab.by === null)!;
+    const qCrossTabs = tabs.filter((tab) => tab.questionCode === qCode && tab.by !== null);
 
     if (tabResult.type === "NA") {
       return buildNaTabCrossGrid(tabResult, qCrossTabs);

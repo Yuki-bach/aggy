@@ -174,15 +174,15 @@ describe("buildPromptPayload", () => {
       makeTab({
         questionCode: `q${i + 1}`,
         label: `設問${i + 1}の長いラベルテキスト`,
-        codes: Array.from({ length: 20 }, (_, j) => String(j + 1)),
+        codes: Array.from({ length: 20 }, (__, j) => String(j + 1)),
         labels: Object.fromEntries(
-          Array.from({ length: 20 }, (_, j) => [String(j + 1), `選択肢${j + 1}のラベル`]),
+          Array.from({ length: 20 }, (__, j) => [String(j + 1), `選択肢${j + 1}のラベル`]),
         ),
         slices: [
           {
             code: null,
             n: 1000,
-            cells: Array.from({ length: 20 }, (_, j) => ({
+            cells: Array.from({ length: 20 }, (__, j) => ({
               count: 50 - j,
               pct: (50 - j) / 10,
             })),

@@ -26,7 +26,7 @@ export function Toolbar({ tabs, weightCol, currentViewMode, callbacks }: Toolbar
     ? t("result.weight.applied", { col: weightCol })
     : t("result.weight.none");
 
-  const questionCount = new Set(tabs.map((t) => t.questionCode)).size;
+  const questionCount = new Set(tabs.map((tab) => tab.questionCode)).size;
 
   return (
     <div class="mb-6 flex items-center gap-4">

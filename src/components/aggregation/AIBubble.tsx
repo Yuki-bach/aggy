@@ -45,7 +45,11 @@ export function AIBubble({ tabs, weightCol }: AIBubbleProps) {
       {/* Triangle pointer */}
       <div
         class="absolute -bottom-2 right-6 h-0 w-0"
-        style="border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--surface)"
+        style={{
+          borderLeft: "8px solid transparent",
+          borderRight: "8px solid transparent",
+          borderTop: "8px solid var(--surface)",
+        }}
       />
       <div class="absolute top-2 right-3">
         <IconButton size="lg" label={t("ai.close")} onClick={() => setVisible(false)}>

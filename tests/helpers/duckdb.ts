@@ -15,10 +15,10 @@ const { createDuckDB, NODE_RUNTIME, ConsoleLogger } = require(
 );
 
 let db: DuckDBNodeBindings;
+// eslint-disable-next-line typescript-eslint/no-redundant-type-constituents
 let conn: DuckDBConnection | null = null;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getConn(): any {
+export function getConn(): DuckDBConnection {
   if (!conn) throw new Error("setupDuckDB() has not been called yet");
   return conn;
 }
@@ -37,7 +37,7 @@ export async function setupDuckDB() {
   conn = await db.connect();
 
   // testdata/test_data.csv を survey ビューとして登録
-  const csvPath = resolve(import.meta.dirname!, "../../testdata/test_data.csv");
+  const csvPath = resolve(import.meta.dirname, "../../testdata/test_data.csv");
   const csvText = readFileSync(csvPath, "utf-8");
   await loadCSV(csvText);
 }
