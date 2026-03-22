@@ -51,7 +51,11 @@ export function Toolbar({ tabs, weightCol, currentViewMode, callbacks }: Toolbar
         </ToggleButton>
       </ToggleGroup>
 
-      <ExportMenu onExport={(action: ExportAction) => executeExport(action, tabs, weightCol)} />
+      <ExportMenu
+        onExport={(action: ExportAction) => {
+          void executeExport(action, tabs, weightCol);
+        }}
+      />
     </div>
   );
 }

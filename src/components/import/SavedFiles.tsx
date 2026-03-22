@@ -21,9 +21,12 @@ export function useSavedFiles() {
 
   useEffect(() => {
     void refresh();
-    listeners.add(refresh);
+    const listener = () => {
+      void refresh();
+    };
+    listeners.add(listener);
     return () => {
-      listeners.delete(refresh);
+      listeners.delete(listener);
     };
   }, [refresh]);
 
@@ -73,7 +76,7 @@ export function SavedFilesList({
               class="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center px-3 py-2 text-sm text-muted transition-colors hover:text-danger"
               type="button"
               aria-label={t("saved.delete", { name: entry.rawDataName })}
-              onClick={async (e) => {
+              onClick={(e) => {
                 e.stopPropagation();
                 onDeleteEntry(entry.folderId);
               }}
