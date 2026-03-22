@@ -37,7 +37,7 @@ export async function setupDuckDB() {
   conn = await db.connect();
 
   // testdata/test_data.csv を survey ビューとして登録
-  const csvPath = resolve(import.meta.dirname!, "../../testdata/test_data.csv");
+  const csvPath = resolve(import.meta.dirname, "../../testdata/test_data.csv");
   const csvText = readFileSync(csvPath, "utf-8");
   await loadCSV(csvText);
 }

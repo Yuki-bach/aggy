@@ -23,7 +23,7 @@ function gridsToMarkdown(grids: ExportGrid[]): string {
     lines.push("");
 
     // Use last header row as column names, first row (if cross) as context
-    const headers = grid.headers;
+    const { headers } = grid;
     if (headers.length === 2) {
       // Cross-tab: merge header rows
       const merged = headers[0].map((h, i) => {
@@ -57,5 +57,5 @@ function separatorRow(colCount: number): string {
 }
 
 function escapeMarkdown(s: string): string {
-  return s.replace(/\|/g, "\\|");
+  return s.replaceAll("|", String.raw`\|`);
 }

@@ -234,7 +234,7 @@ describe("formatTSV", () => {
 // ─── formatMarkdown (fixture) ───────────────────────────────
 
 describe("formatMarkdown", () => {
-  it("パイプ文字エスケープ: \\| に変換される", () => {
+  it(String.raw`パイプ文字エスケープ: \| に変換される`, () => {
     const tab: Tab = {
       questionCode: "q_pipe",
       type: "SA",
@@ -245,7 +245,7 @@ describe("formatMarkdown", () => {
       slices: [{ code: null, n: 5, cells: [{ count: 5, pct: 100 }] }],
     };
     const md = formatMarkdown([tab]);
-    expect(md).toContain("A\\|B");
+    expect(md).toContain(String.raw`A\|B`);
   });
 
   it("NA GT の Markdown: ### q_na (NA) セクション、6データ行", () => {
@@ -333,7 +333,7 @@ describe("formatJSON", () => {
   it("stats の数値精度: mean/sd 等が元の値と一致", () => {
     const json = formatJSON([NA_GT], "");
     const parsed = JSON.parse(json);
-    const stats = parsed.results[0].slices[0].stats;
+    const { stats } = parsed.results[0].slices[0];
     const original = NA_GT.slices[0].stats!;
     expect(stats.mean).toBe(original.mean);
     expect(stats.sd).toBe(original.sd);

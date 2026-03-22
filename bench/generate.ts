@@ -125,7 +125,7 @@ function generateLayout(pattern: PatternDef): LayoutQuestion[] {
 // ---------------------------------------------------------------------------
 
 export function generate(patternNames?: string[]): void {
-  const dataDir = resolve(import.meta.dirname!, "data");
+  const dataDir = resolve(import.meta.dirname, "data");
   mkdirSync(dataDir, { recursive: true });
 
   const targets = patternNames ? PATTERNS.filter((p) => patternNames.includes(p.name)) : PATTERNS;

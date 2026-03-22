@@ -123,7 +123,7 @@ async function main(): Promise<void> {
   }
 
   // Ensure data exists
-  const dataDir = resolve(import.meta.dirname!, "data");
+  const dataDir = resolve(import.meta.dirname, "data");
   const missing = targets.filter((p) => !existsSync(resolve(dataDir, `${p.name}.csv`)));
   if (missing.length > 0) {
     console.log(`Generating missing data: ${missing.map((p) => p.name).join(", ")}`);

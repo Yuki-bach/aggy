@@ -32,7 +32,7 @@ export function NaChartCardBody({ tab, crossTabs, paletteId }: NaChartCardBodyPr
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [tab, crossTabs, paletteId]);
+  }, [tab, crossTabs, isCross, paletteId]);
 
   return (
     <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>

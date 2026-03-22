@@ -69,7 +69,7 @@ function summarizeResults(tabs: Tab[], weightCol: string, topN: number): string 
   }
 
   // Only use Tab (non-cross) results
-  const tabOnly = tabs.filter((t) => t.by === null);
+  const tabOnly = tabs.filter((tab) => tab.by === null);
 
   for (const tab of tabOnly) {
     if (tab.type === "NA") {

@@ -6,4 +6,4 @@ import App from "./App";
 initI18n();
 
 // Mount root Preact app
-render(<App />, document.getElementById("app")!);
+render(<App />, document.querySelector("#app")!);

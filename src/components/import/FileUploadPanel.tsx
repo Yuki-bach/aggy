@@ -1,5 +1,5 @@
 import { useRef, useState } from "preact/hooks";
-import type { JSX } from "preact";
+import type { TargetedEvent } from "preact";
 import { t } from "../../lib/i18n";
 
 interface FileUploadPanelProps {
@@ -55,7 +55,7 @@ function Dropzone({ accept, icon, text, loadedFileName, onFile }: DropzoneProps)
 
   const isLoaded = loadedFileName !== null;
 
-  function handleChange(e: JSX.TargetedEvent<HTMLInputElement>) {
+  function handleChange(e: TargetedEvent<HTMLInputElement>) {
     const f = e.currentTarget.files?.[0];
     if (f) onFile(f);
     e.currentTarget.value = "";

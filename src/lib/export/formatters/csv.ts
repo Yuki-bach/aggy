@@ -4,7 +4,9 @@ import { tabsToLongRows } from "./longFormat";
 
 export function formatCSV(tabs: Tab[]): string {
   const rows = tabsToLongRows(tabs);
-  return rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  return rows
+    .map((r) => r.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(","))
+    .join("\r\n");
 }
 
 export function downloadCSV(tabs: Tab[]): void {

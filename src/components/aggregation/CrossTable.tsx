@@ -23,7 +23,7 @@ const MONO = "text-right tabular-nums font-mono";
 
 function VerticalCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) {
   const tabSlice = tab.slices[0];
-  const codes = tab.codes;
+  const { codes } = tab;
   const hasMultipleAxes = crossTabs.length > 1;
 
   return (
@@ -97,7 +97,7 @@ function VerticalCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) 
 
 function TransposedCrossTable({ tab, crossTabs }: { tab: Tab; crossTabs: Tab[] }) {
   const tabSlice = tab.slices[0];
-  const codes = tab.codes;
+  const { codes } = tab;
 
   return (
     <table class="w-full border-collapse text-sm tabular-nums min-w-[400px]">

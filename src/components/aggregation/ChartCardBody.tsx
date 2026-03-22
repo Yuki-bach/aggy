@@ -35,7 +35,7 @@ export function ChartCardBody({ tab, crossTabs, tabChartType, paletteId }: Chart
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [tab, crossTabs, tabChartType, paletteId]);
+  }, [tab, crossTabs, tabChartType, paletteId, isCross]);
 
   return (
     <div class={`p-4 ${isCross ? "h-[400px]" : "h-80"}`}>

@@ -1,6 +1,6 @@
-import type { JSX } from "preact";
+import type { HTMLAttributes } from "preact";
 
-interface ThProps extends JSX.HTMLAttributes<HTMLTableCellElement> {
+interface ThProps extends HTMLAttributes<HTMLTableCellElement> {
   right?: boolean;
 }
 
@@ -15,7 +15,7 @@ export function Th({ right, class: cls, children, ...props }: ThProps) {
   );
 }
 
-interface TdProps extends JSX.HTMLAttributes<HTMLTableCellElement> {
+interface TdProps extends HTMLAttributes<HTMLTableCellElement> {
   right?: boolean;
   mono?: boolean;
 }
