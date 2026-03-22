@@ -25,7 +25,7 @@ export default defineConfig({
     },
     ignorePatterns: ["dist/", "node_modules/", "testdata/"],
     rules: {
-      "no-unused-vars": "warn",
+      "no-unused-vars": "error",
       "no-console": "warn",
       eqeqeq: "error",
       "no-var": "error",
