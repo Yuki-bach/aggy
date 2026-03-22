@@ -1,5 +1,5 @@
 import type { Tab } from "../../lib/agg/types";
-import { formatN } from "../../lib/format";
+import { formatN, formatStat } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { TH_BASE, TD_BASE, MONO } from "./TableCells";
 
@@ -73,10 +73,4 @@ export function NaCrossTable({ tab, crossTabs }: NaCrossTableProps) {
       </tbody>
     </table>
   );
-}
-
-function formatStat(key: string, value: number | null): string {
-  if (value === null) return "-";
-  if (key === "n") return value.toLocaleString();
-  return value.toFixed(2);
 }
