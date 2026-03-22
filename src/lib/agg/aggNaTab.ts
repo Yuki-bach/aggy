@@ -15,17 +15,11 @@ export async function aggNaTab(
 }
 
 class NaTabAggregator {
-  private valExpr: string;
-  private whereCond: string;
-
   constructor(
     private conn: AsyncDuckDBConnection,
-    column: string,
+    private column: string,
     private weightCol: string,
-  ) {
-    this.valExpr = naValExpr(column);
-    this.whereCond = naWhereCond(column);
-  }
+  ) {}
 
   async tab(): Promise<TabData> {
     const stats = await this.queryStats();
@@ -60,7 +54,7 @@ class NaTabAggregator {
           STDDEV_SAMP(val) AS sd,
           MIN(val) AS min_val,
           MAX(val) AS max_val
-        FROM (SELECT ${this.valExpr} AS val, ${w} FROM survey WHERE ${this.whereCond}) sub
+        FROM (SELECT ${naValExpr(this.column)} AS val, ${w} FROM survey WHERE ${naWhereCond(this.column)}) sub
       `;
     } else {
       sql = `
@@ -71,7 +65,7 @@ class NaTabAggregator {
           STDDEV_SAMP(val) AS sd,
           MIN(val) AS min_val,
           MAX(val) AS max_val
-        FROM (SELECT ${this.valExpr} AS val FROM survey WHERE ${this.whereCond}) sub
+        FROM (SELECT ${naValExpr(this.column)} AS val FROM survey WHERE ${naWhereCond(this.column)}) sub
       `;
     }
 
@@ -84,10 +78,10 @@ class NaTabAggregator {
   private async queryFreq(): Promise<ValueCount[]> {
     const countExpr = this.weightCol ? `SUM("${esc(this.weightCol)}")` : `COUNT(*)::DOUBLE`;
     const sql = `
-      SELECT ${this.valExpr} AS val, ${countExpr} AS cnt
+      SELECT ${naValExpr(this.column)} AS val, ${countExpr} AS cnt
       FROM survey
-      WHERE ${this.whereCond}
-      GROUP BY ${this.valExpr}
+      WHERE ${naWhereCond(this.column)}
+      GROUP BY ${naValExpr(this.column)}
       ORDER BY val
     `;
     const result = await this.conn.query(sql);

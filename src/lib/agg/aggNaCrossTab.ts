@@ -16,17 +16,11 @@ export async function aggNaCrossTab(
 }
 
 class NaCrossTabAggregator {
-  private valExpr: string;
-  private whereCond: string;
-
   constructor(
     private conn: AsyncDuckDBConnection,
-    naColumn: string,
+    private column: string,
     private weightCol: string,
-  ) {
-    this.valExpr = naValExpr(naColumn);
-    this.whereCond = naWhereCond(naColumn);
-  }
+  ) {}
 
   async crossTab(axisShape: Shape): Promise<TabData> {
     if (axisShape.type === "SA") {
@@ -54,7 +48,7 @@ class NaCrossTabAggregator {
   // ── NA × MA cross ──
 
   private async naCrossMA(maCols: string[], maCodes: string[]): Promise<TabData> {
-    const baseWhere = `${this.whereCond} AND (${maShownCondition(maCols)})`;
+    const baseWhere = `${naWhereCond(this.column)} AND (${maShownCondition(maCols)})`;
 
     const sliceData: { code: string; freq: ValueCount[]; stats: NaStats }[] = [];
     for (let i = 0; i < maCols.length; i++) {
@@ -71,7 +65,7 @@ class NaCrossTabAggregator {
   // ── Query helpers ──
 
   private async queryStats(whereOverride?: string): Promise<NaStats> {
-    const where = whereOverride ?? this.whereCond;
+    const where = whereOverride ?? naWhereCond(this.column);
     let sql: string;
     // NOTE: MEDIAN is unweighted even in weighted mode.
     if (this.weightCol) {
@@ -84,7 +78,7 @@ class NaCrossTabAggregator {
           STDDEV_SAMP(val) AS sd,
           MIN(val) AS min_val,
           MAX(val) AS max_val
-        FROM (SELECT ${this.valExpr} AS val, ${w} FROM survey WHERE ${where}) sub
+        FROM (SELECT ${naValExpr(this.column)} AS val, ${w} FROM survey WHERE ${where}) sub
       `;
     } else {
       sql = `
@@ -95,7 +89,7 @@ class NaCrossTabAggregator {
           STDDEV_SAMP(val) AS sd,
           MIN(val) AS min_val,
           MAX(val) AS max_val
-        FROM (SELECT ${this.valExpr} AS val FROM survey WHERE ${where}) sub
+        FROM (SELECT ${naValExpr(this.column)} AS val FROM survey WHERE ${where}) sub
       `;
     }
 
@@ -119,7 +113,7 @@ class NaCrossTabAggregator {
           STDDEV_SAMP(val) AS sd,
           MIN(val) AS min_val,
           MAX(val) AS max_val
-        FROM (SELECT ${this.valExpr} AS val, ${w}, "${esc(groupByCol)}" FROM survey WHERE ${this.whereCond} AND "${esc(groupByCol)}" IS NOT NULL) sub
+        FROM (SELECT ${naValExpr(this.column)} AS val, ${w}, "${esc(groupByCol)}" FROM survey WHERE ${naWhereCond(this.column)} AND "${esc(groupByCol)}" IS NOT NULL) sub
         GROUP BY "${esc(groupByCol)}"
       `;
     } else {
@@ -132,7 +126,7 @@ class NaCrossTabAggregator {
           STDDEV_SAMP(val) AS sd,
           MIN(val) AS min_val,
           MAX(val) AS max_val
-        FROM (SELECT ${this.valExpr} AS val, "${esc(groupByCol)}" FROM survey WHERE ${this.whereCond} AND "${esc(groupByCol)}" IS NOT NULL) sub
+        FROM (SELECT ${naValExpr(this.column)} AS val, "${esc(groupByCol)}" FROM survey WHERE ${naWhereCond(this.column)} AND "${esc(groupByCol)}" IS NOT NULL) sub
         GROUP BY "${esc(groupByCol)}"
       `;
     }
@@ -146,13 +140,13 @@ class NaCrossTabAggregator {
   }
 
   private async queryFreq(whereOverride?: string): Promise<ValueCount[]> {
-    const where = whereOverride ?? this.whereCond;
+    const where = whereOverride ?? naWhereCond(this.column);
     const countExpr = this.weightCol ? `SUM("${esc(this.weightCol)}")` : `COUNT(*)::DOUBLE`;
     const sql = `
-      SELECT ${this.valExpr} AS val, ${countExpr} AS cnt
+      SELECT ${naValExpr(this.column)} AS val, ${countExpr} AS cnt
       FROM survey
       WHERE ${where}
-      GROUP BY ${this.valExpr}
+      GROUP BY ${naValExpr(this.column)}
       ORDER BY val
     `;
     const result = await this.conn.query(sql);
@@ -162,10 +156,10 @@ class NaCrossTabAggregator {
   private async queryFreqGrouped(groupByCol: string): Promise<Map<string, ValueCount[]>> {
     const countExpr = this.weightCol ? `SUM("${esc(this.weightCol)}")` : `COUNT(*)::DOUBLE`;
     const sql = `
-      SELECT ${this.valExpr} AS val, ${countExpr} AS cnt, "${esc(groupByCol)}" AS grp
+      SELECT ${naValExpr(this.column)} AS val, ${countExpr} AS cnt, "${esc(groupByCol)}" AS grp
       FROM survey
-      WHERE ${this.whereCond} AND "${esc(groupByCol)}" IS NOT NULL
-      GROUP BY ${this.valExpr}, "${esc(groupByCol)}"
+      WHERE ${naWhereCond(this.column)} AND "${esc(groupByCol)}" IS NOT NULL
+      GROUP BY ${naValExpr(this.column)}, "${esc(groupByCol)}"
       ORDER BY val
     `;
     const result = await this.conn.query(sql);
