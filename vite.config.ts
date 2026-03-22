@@ -31,7 +31,7 @@ export default defineConfig({
       "no-var": "error",
       "prefer-const": "warn",
       "typescript/no-explicit-any": "error",
-      "import/no-duplicates": "warn",
+      "import/no-duplicates": "error",
       "typescript/triple-slash-reference": "off",
     },
     overrides: [
