@@ -1,6 +1,9 @@
 import type { Question } from "../../lib/agg/types";
 import { t } from "../../lib/i18n";
+import { Button } from "../shared/Button";
 import { ToggleButton, ToggleGroup } from "../shared/ToggleButton";
+import { SectionTitle } from "../shared/SectionTitle";
+import { Alert } from "../shared/Alert";
 import type { RawData, LayoutData } from "../../lib/types";
 import type { Layout } from "../../lib/layout";
 import { countLayoutColumns } from "../../lib/layout";
@@ -42,7 +45,7 @@ export default function SettingsPanel({
     >
       {/* Data Summary */}
       <section class="shrink-0 border-b border-border p-4">
-        <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("section.summary")}</h2>
+        <SectionTitle>{t("section.summary")}</SectionTitle>
         <div class="text-sm leading-relaxed text-text-secondary">
           <DataSummary
             rawData={{
@@ -60,7 +63,7 @@ export default function SettingsPanel({
 
       {/* Cross Config */}
       <section class="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border p-4">
-        <h2 class="mb-3 text-sm font-bold tracking-wider text-muted">{t("section.cross")}</h2>
+        <SectionTitle>{t("section.cross")}</SectionTitle>
         <div
           class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
           role="group"
@@ -81,35 +84,27 @@ export default function SettingsPanel({
 
       {/* Date Warnings */}
       {dateWarnings.length > 0 && (
-        <div
-          class="mx-4 shrink-0 rounded-lg border border-warning-border bg-warning-bg px-4 py-3 text-sm leading-normal text-warning"
-          role="status"
-        >
+        <Alert variant="warning" role="status" class="mx-4 shrink-0">
           {dateWarnings.map((w) => {
             const [col, count] = w.split(":");
             return <p key={w}>{t("warn.date.cast", { col, count })}</p>;
           })}
-        </div>
+        </Alert>
       )}
 
       {/* Error Message */}
       {errorMsg && (
-        <div
-          class="mx-4 shrink-0 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm leading-normal text-danger"
-          role="alert"
-          aria-live="assertive"
-        >
+        <Alert variant="error" class="mx-4 shrink-0">
           {errorMsg}
-        </div>
+        </Alert>
       )}
 
       {/* Run Button */}
-      <button
-        class="mx-4 my-4 min-h-12 w-[calc(100%-32px)] shrink-0 cursor-pointer rounded-lg border-none bg-accent text-base font-bold tracking-wide text-accent-contrast transition-[background] duration-150 hover:bg-accent-hover active:bg-[var(--color-primary-900)]"
-        onClick={onRun}
-      >
-        {t("run.button")}
-      </button>
+      <div class="mx-4 my-4 shrink-0">
+        <Button variant="primary" size="lg" fullWidth onClick={onRun}>
+          {t("run.button")}
+        </Button>
+      </div>
     </div>
   );
 }

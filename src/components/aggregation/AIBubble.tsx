@@ -3,6 +3,7 @@ import type { Tab } from "../../lib/agg/types";
 import { generateComment } from "../../lib/aiComment";
 import { t } from "../../lib/i18n";
 import { isAICommentEnabled } from "../header/SettingsModal";
+import { IconButton } from "../shared/IconButton";
 
 interface AIBubbleProps {
   tabs: Tab[];
@@ -50,13 +51,11 @@ export function AIBubble({ tabs, weightCol }: AIBubbleProps) {
           borderTop: "8px solid var(--surface)",
         }}
       />
-      <button
-        class="absolute top-2 right-3 flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-1 text-lg leading-none text-muted hover:text-text"
-        aria-label={t("ai.close")}
-        onClick={() => setVisible(false)}
-      >
-        {"\u00d7"}
-      </button>
+      <div class="absolute top-2 right-3">
+        <IconButton size="lg" label={t("ai.close")} onClick={() => setVisible(false)}>
+          {"\u00d7"}
+        </IconButton>
+      </div>
       <div class="mb-3 text-sm font-bold text-accent2">{t("ai.header")}</div>
       <div
         class={`whitespace-pre-wrap text-sm leading-relaxed text-text${loading ? " text-muted animate-[pulse_1.2s_ease-in-out_infinite]" : ""}`}

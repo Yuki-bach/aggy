@@ -3,6 +3,9 @@ import { t } from "../../lib/i18n";
 import { runValidation } from "../../lib/duckdb";
 import type { Diagnostic } from "../../lib/validateRawData";
 import type { RawData, LayoutData } from "../../lib/types";
+import { Button } from "../shared/Button";
+import { SectionTitle } from "../shared/SectionTitle";
+import { Alert } from "../shared/Alert";
 
 interface ValidationStepProps {
   rawData: RawData;
@@ -37,12 +40,9 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
     return (
       <div class="space-y-4">
         <p class="text-sm text-red-600">{error}</p>
-        <button
-          class="cursor-pointer rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
-          onClick={onBack}
-        >
+        <Button variant="secondary" size="md" onClick={onBack}>
           {t("validation.back")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -59,7 +59,7 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
 
   return (
     <div class="space-y-4">
-      <h3 class="text-sm font-bold tracking-wider text-muted">{t("validation.title")}</h3>
+      <SectionTitle class="">{t("validation.title")}</SectionTitle>
 
       <ul class="space-y-2 text-sm">
         <CheckItem
@@ -85,7 +85,7 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
       </ul>
 
       {errors.length > 0 && (
-        <div class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+        <Alert variant="error">
           <ul class="list-inside list-disc space-y-1">
             {errors.map((d) => (
               <li key={`${d.type}-${d.key}`}>
@@ -94,11 +94,11 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
             ))}
           </ul>
           <p class="mt-2 font-medium">{t("validation.fixPrompt")}</p>
-        </div>
+        </Alert>
       )}
 
       {warnings.length > 0 && (
-        <div class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+        <Alert variant="warning">
           <ul class="list-inside list-disc space-y-1">
             {warnings.map((d) => (
               <li key={`${d.type}-${d.key}`}>
@@ -106,23 +106,17 @@ export function ValidationStep({ rawData, layout, onProceed, onBack }: Validatio
               </li>
             ))}
           </ul>
-        </div>
+        </Alert>
       )}
 
       <div class="flex gap-3 pt-2">
-        <button
-          class="cursor-pointer rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
-          onClick={onBack}
-        >
+        <Button variant="secondary" size="md" onClick={onBack}>
           {t("validation.back")}
-        </button>
+        </Button>
         {errors.length === 0 && (
-          <button
-            class="cursor-pointer rounded-lg border-none bg-accent px-4 py-2 text-sm font-bold text-accent-contrast transition-colors hover:bg-accent-hover"
-            onClick={onProceed}
-          >
+          <Button variant="primary" size="md" onClick={onProceed}>
             {t("import.proceed")}
-          </button>
+          </Button>
         )}
       </div>
     </div>

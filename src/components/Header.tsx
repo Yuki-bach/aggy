@@ -1,5 +1,6 @@
 import { t } from "../lib/i18n";
 import { SettingsRoot } from "./header/SettingsModal";
+import { IconButton } from "./shared/IconButton";
 import WasmStatus from "./header/WasmStatus";
 
 interface HeaderProps {
@@ -11,13 +12,9 @@ export default function Header({ isImport, onBack }: HeaderProps) {
   return (
     <header class="flex items-center gap-4 border-b border-border bg-surface px-6 py-4">
       {!isImport && (
-        <button
-          class="shrink-0 cursor-pointer rounded-lg border border-border bg-transparent px-3 py-2 text-base leading-none text-text-secondary transition-[background,border-color] duration-150 hover:border-border-strong hover:bg-surface2"
-          aria-label={t("header.back")}
-          onClick={onBack}
-        >
+        <IconButton size="md" label={t("header.back")} onClick={onBack}>
           ←
-        </button>
+        </IconButton>
       )}
       <h1 class="text-lg font-bold text-text">Aggy</h1>
       <span class="text-xs tracking-widest text-muted">{t("header.subtitle")}</span>

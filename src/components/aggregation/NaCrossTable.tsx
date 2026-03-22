@@ -1,6 +1,7 @@
 import type { Tab } from "../../lib/agg/types";
 import { formatN } from "../../lib/format";
 import { t } from "../../lib/i18n";
+import { TH_BASE, TD_BASE, MONO } from "./TableCells";
 
 interface NaCrossTableProps {
   tab: Tab;
@@ -8,10 +9,6 @@ interface NaCrossTableProps {
 }
 
 const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
-
-const TH_BASE = "py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong";
-const TD_BASE = "py-3 px-4 border-b border-row-border leading-[1.2]";
-const MONO = "text-right tabular-nums font-mono";
 
 export function NaCrossTable({ tab, crossTabs }: NaCrossTableProps) {
   const tabStats = tab.slices[0].stats!;

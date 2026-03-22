@@ -1,6 +1,7 @@
 import { useEffect } from "preact/hooks";
 import { t, getLocale } from "../../lib/i18n";
 import { useLocaleRerender, useDismiss } from "../../lib/hooks";
+import { IconButton } from "../shared/IconButton";
 
 export function GettingStartedModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   useLocaleRerender();
@@ -56,13 +57,11 @@ function GettingStartedContent({ onClose }: { onClose: () => void }) {
       class="relative w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-lg border border-border bg-surface p-8 shadow-xl max-md:max-h-[90vh] max-md:p-5"
       role="document"
     >
-      <button
-        class="absolute top-3 right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded text-2xl leading-none text-text-secondary hover:bg-surface2 hover:text-text"
-        aria-label={t("gs.close")}
-        onClick={onClose}
-      >
-        &times;
-      </button>
+      <div class="absolute top-3 right-3 text-2xl leading-none">
+        <IconButton size="sm" label={t("gs.close")} onClick={onClose}>
+          &times;
+        </IconButton>
+      </div>
       <h2 id="gs-title" class="m-0 mb-6 pr-8 text-xl font-bold text-text">
         {t("gs.title")}
       </h2>
