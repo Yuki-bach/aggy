@@ -27,7 +27,7 @@ export default defineConfig({
     rules: {
       "no-unused-vars": "warn",
       "no-console": "warn",
-      eqeqeq: "warn",
+      eqeqeq: "error",
       "no-var": "error",
       "prefer-const": "warn",
       "typescript/no-explicit-any": "warn",
