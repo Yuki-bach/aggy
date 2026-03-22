@@ -61,6 +61,12 @@ describe("aggTab - 重みなし", () => {
         [6, 3, 2, 2].map((c) => Math.round((c / n) * 100 * 1e5) / 1e5),
       );
     });
+
+    it("codesがレイアウト順で、cellsがcodes順に対応する", async () => {
+      const result = await aggTab(getConn(), q1, "");
+      expect(result.codes).toEqual(q1.codes);
+      expect(result.slices[0].cells).toHaveLength(q1.codes.length);
+    });
   });
 
   describe("MA Tab集計", () => {
@@ -80,6 +86,12 @@ describe("aggTab - 重みなし", () => {
 
       const counts = slice.cells.map((c) => c.count);
       expect(counts).toEqual([7, 5, 7, 2]);
+    });
+
+    it("codesがレイアウト順+N/Aで、cellsがcodes順に対応する", async () => {
+      const result = await aggTab(getConn(), q3, "");
+      expect(result.codes).toEqual([...q3.codes, "N/A"]);
+      expect(result.slices[0].cells).toHaveLength(q3.codes.length + 1);
     });
   });
 });
