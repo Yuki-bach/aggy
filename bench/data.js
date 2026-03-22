@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1774126802729,
+  "lastUpdate": 1774137994100,
   "repoUrl": "https://github.com/Yuki-bach/aggy",
   "entries": {
     "Benchmark": [
@@ -4069,6 +4069,80 @@ window.BENCHMARK_DATA = {
           {
             "name": "ma-only (10000 rows, 502 cols, cross=MA×2)",
             "value": 1667.6,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56685372+Yuki-bach@users.noreply.github.com",
+            "name": "Yuki Ogawa",
+            "username": "Yuki-bach"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "907318ac6d8f8c46a818ad5ca243d970b31640a9",
+          "message": "Merge pull request #192 from Yuki-bach/claude/fix-slice-ordering-rEvft",
+          "timestamp": "2026-03-22T09:05:53+09:00",
+          "tree_id": "d54941051105b4331ae76bfa07343be6e8f0adb9",
+          "url": "https://github.com/Yuki-bach/aggy/commit/907318ac6d8f8c46a818ad5ca243d970b31640a9"
+        },
+        "date": 1774137993245,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "rows (10000 rows, 62 cols, cross=none)",
+            "value": 74.3,
+            "unit": "ms"
+          },
+          {
+            "name": "rows (10000 rows, 62 cols, cross=SA×2)",
+            "value": 159.5,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, 602 cols, cross=none)",
+            "value": 284.5,
+            "unit": "ms"
+          },
+          {
+            "name": "cols (1000 rows, 602 cols, cross=SA×2)",
+            "value": 981.4,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, 602 cols, cross=none)",
+            "value": 300,
+            "unit": "ms"
+          },
+          {
+            "name": "both (10000 rows, 602 cols, cross=SA×2)",
+            "value": 1002.2,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, 102 cols, cross=none)",
+            "value": 104.8,
+            "unit": "ms"
+          },
+          {
+            "name": "sa-only (10000 rows, 102 cols, cross=SA×2)",
+            "value": 421.2,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, 502 cols, cross=none)",
+            "value": 144.2,
+            "unit": "ms"
+          },
+          {
+            "name": "ma-only (10000 rows, 502 cols, cross=MA×2)",
+            "value": 1526.7,
             "unit": "ms"
           }
         ]
