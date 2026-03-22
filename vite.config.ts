@@ -30,35 +30,26 @@ export default defineConfig({
     },
     ignorePatterns: ["dist/", "node_modules/", "testdata/"],
     rules: {
-      // --- core ---
-      "no-unused-vars": "error",
-      "no-console": "warn",
-      eqeqeq: "error",
-      "no-var": "error",
-      "prefer-const": "error",
+      // --- promotion: category default → error ---
+      "typescript/no-unnecessary-type-assertion": "error", // suspicious → error
 
-      // --- typescript ---
-      "typescript/no-explicit-any": "error",
-      "typescript/triple-slash-reference": "off",
+      // --- enable: not in any active category ---
+      "no-console": "warn", // restriction
+      "no-var": "error", // restriction
+      "prefer-const": "error", // style
+      eqeqeq: "error", // pedantic
+      "typescript/no-explicit-any": "error", // restriction
+      "import/no-duplicates": "error", // style
 
-      // --- type-aware (require typeAware: true) ---
-      "typescript/no-floating-promises": "error",
-      "typescript/no-misused-promises": "off",
-      "typescript/await-thenable": "error",
-      "typescript/no-unnecessary-type-assertion": "error",
-
-      // --- import ---
-      "import/no-duplicates": "error",
-      "import/no-named-as-default": "off",
-
-      // --- react (Preact compat) ---
-      "react/no-unknown-property": "off",
-      "react/react-in-jsx-scope": "off",
-
-      // --- project-specific overrides ---
-      "no-await-in-loop": "off", // DuckDB Wasm requires sequential await (see CLAUDE.md)
-      "typescript/no-unsafe-type-assertion": "off", // too noisy; no-explicit-any covers main concern
-      "unicorn/no-array-sort": "off", // [...arr].sort() pattern is safe
+      // --- disable: category-enabled but too noisy / incompatible ---
+      "typescript/triple-slash-reference": "off", // correctness; used in ambient declarations
+      "typescript/no-misused-promises": "off", // pedantic; too noisy for Preact JSX attributes
+      "import/no-named-as-default": "off", // suspicious; false positives with Preact lazy()
+      "react/no-unknown-property": "off", // restriction; Preact supports standard HTML attrs
+      "react/react-in-jsx-scope": "off", // suspicious; Preact auto-injects JSX runtime
+      "no-await-in-loop": "off", // perf; DuckDB Wasm requires sequential await
+      "typescript/no-unsafe-type-assertion": "off", // suspicious; too noisy
+      "unicorn/no-array-sort": "off", // suspicious; [...arr].sort() pattern is safe
     },
     overrides: [
       {
