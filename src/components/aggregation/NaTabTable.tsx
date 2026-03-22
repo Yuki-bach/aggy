@@ -1,4 +1,5 @@
 import type { Tab } from "../../lib/agg/types";
+import { formatStat } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { Th, Td } from "./TableCells";
 
@@ -32,9 +33,4 @@ export function NaTabTable({ tab }: NaTabTableProps) {
       </tbody>
     </table>
   );
-}
-
-function formatStat(key: string, value: number): string {
-  if (key === "n") return value.toLocaleString();
-  return value.toFixed(2);
 }

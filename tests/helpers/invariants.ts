@@ -121,6 +121,7 @@ function assertCodesSortedAscending(result: TabData): void {
 function assertStatsMeanInRange(slice: Slice): void {
   if (slice.n === 0) return;
   const stats = slice.stats!;
+  if (stats.min === null || stats.mean === null || stats.max === null) return;
   expect(stats.min).toBeLessThanOrEqual(stats.mean + 1e-9);
   expect(stats.mean).toBeLessThanOrEqual(stats.max + 1e-9);
 }
@@ -129,13 +130,16 @@ function assertStatsMeanInRange(slice: Slice): void {
 function assertStatsMedianInRange(slice: Slice): void {
   if (slice.n === 0) return;
   const stats = slice.stats!;
+  if (stats.min === null || stats.median === null || stats.max === null) return;
   expect(stats.min).toBeLessThanOrEqual(stats.median + 1e-9);
   expect(stats.median).toBeLessThanOrEqual(stats.max + 1e-9);
 }
 
 /** 標準偏差が 0 以上であること */
 function assertStdDevNonNegative(slice: Slice): void {
-  expect(slice.stats!.sd).toBeGreaterThanOrEqual(0);
+  const sd = slice.stats!.sd;
+  if (sd === null) return;
+  expect(sd).toBeGreaterThanOrEqual(0);
 }
 
 /** stats.n と slice.n が一致すること */

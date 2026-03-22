@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, afterAll } from "vite-plus/test";
-import { aggNaTab } from "../src/lib/agg/aggNa";
+import { aggNaTab } from "../src/lib/agg/aggNaTab";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import { generateNADataset } from "./helpers/generators";
 import { parseCSVToRows } from "./helpers/parseCSV";

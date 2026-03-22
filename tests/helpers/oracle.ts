@@ -164,11 +164,13 @@ export function assertOracleMatch(actual: TabData, expected: OracleOutput): void
       const a = aSlice.stats!;
       const e = eSlice.stats;
       expect(a.n).toBeCloseTo(e.n, 3);
-      expect(a.mean).toBeCloseTo(e.mean, 3);
-      expect(a.median).toBeCloseTo(e.median, 3);
-      expect(a.sd).toBeCloseTo(e.sd, 3);
-      expect(a.min).toBeCloseTo(e.min, 3);
-      expect(a.max).toBeCloseTo(e.max, 3);
+      for (const key of ["mean", "median", "sd", "min", "max"] as const) {
+        if (e[key] === null) {
+          expect(a[key]).toBeNull();
+        } else {
+          expect(a[key]).toBeCloseTo(e[key], 3);
+        }
+      }
     }
   }
 }
@@ -181,7 +183,8 @@ function sumWeights(rows: Record<string, string | null>[], weightCol: string): n
 
 /** Compute NA stats matching DuckDB behavior (median always unweighted, STDDEV_SAMP) */
 function computeNaStats(values: number[], weights: number[] | null): NaStats {
-  if (values.length === 0) return { n: 0, mean: 0, median: 0, sd: 0, min: 0, max: 0 };
+  if (values.length === 0)
+    return { n: 0, mean: null, median: null, sd: null, min: null, max: null };
 
   const n = weights ? weights.reduce((s, w) => s + w, 0) : values.length;
   const mean = weights
@@ -193,8 +196,8 @@ function computeNaStats(values: number[], weights: number[] | null): NaStats {
   const mid = Math.floor(sorted.length / 2);
   const median = sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 
-  // STDDEV_SAMP: n<=1 → 0 (DuckDB returns NULL, coerced to 0)
-  let sd = 0;
+  // STDDEV_SAMP: n<=1 → null (DuckDB returns NULL)
+  let sd: number | null = null;
   if (values.length > 1) {
     const unweightedMean = values.reduce((s, v) => s + v, 0) / values.length;
     const variance =

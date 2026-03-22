@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vite-plus/test";
-import { aggNaTab, aggNaCrossTab } from "../src/lib/agg/aggNa";
+import { aggNaTab } from "../src/lib/agg/aggNaTab";
+import { aggNaCrossTab } from "../src/lib/agg/aggNaCrossTab";
 import { setupDuckDB, teardownDuckDB, getConn, loadCSV } from "./helpers/duckdb";
 import type { Shape } from "../src/lib/agg/types";
 

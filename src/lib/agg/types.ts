@@ -55,11 +55,11 @@ export type TabData = Pick<Tab, "codes" | "slices">;
 
 export interface NaStats {
   n: number;
-  mean: number;
-  median: number;
-  sd: number;
-  min: number;
-  max: number;
+  mean: number | null;
+  median: number | null;
+  sd: number | null;
+  min: number | null;
+  max: number | null;
 }
 
 /** 消費用フラット型 */

@@ -2,7 +2,8 @@ import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Question, TabData, Axis, Tab } from "./types";
 import { aggTab } from "./aggTab";
 import { aggCrossTab } from "./aggCrossTab";
-import { aggNaTab, aggNaCrossTab } from "./aggNa";
+import { aggNaTab } from "./aggNaTab";
+import { aggNaCrossTab } from "./aggNaCrossTab";
 import { NO_ANSWER_VALUE } from "./constants";
 import { t } from "../i18n";
 
