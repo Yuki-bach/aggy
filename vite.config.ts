@@ -25,13 +25,13 @@ export default defineConfig({
     },
     ignorePatterns: ["dist/", "node_modules/", "testdata/"],
     rules: {
-      "no-unused-vars": "warn",
+      "no-unused-vars": "error",
       "no-console": "warn",
-      eqeqeq: "warn",
+      eqeqeq: "error",
       "no-var": "error",
-      "prefer-const": "warn",
-      "typescript/no-explicit-any": "warn",
-      "import/no-duplicates": "warn",
+      "prefer-const": "error",
+      "typescript/no-explicit-any": "error",
+      "import/no-duplicates": "error",
       "typescript/triple-slash-reference": "off",
     },
     overrides: [

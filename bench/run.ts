@@ -1,3 +1,4 @@
+// @ts-nocheck — require() 経由の DuckDB Node blocking API は型定義がexportされていない
 /**
  * Benchmark runner — measures aggregate() execution time for each data pattern.
  *
@@ -16,6 +17,8 @@ import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
 import type { Question } from "../src/lib/agg/types";
 import { parseLayoutJson, buildValidLayout, filterLayout, buildQuestions } from "../src/lib/layout";
 import { generate, PATTERNS, type PatternDef } from "./generate";
+import type { DuckDBNodeBindings } from "@duckdb/duckdb-wasm/dist/types/src/bindings/bindings_node_base";
+import type { DuckDBConnection } from "@duckdb/duckdb-wasm/dist/types/src/bindings/connection";
 
 // ---------------------------------------------------------------------------
 // DuckDB setup (same approach as tests/helpers/duckdb.ts)
@@ -24,12 +27,13 @@ import { generate, PATTERNS, type PatternDef } from "./generate";
 const require = createRequire(import.meta.url);
 const DUCKDB_DIST = resolve(require.resolve("@duckdb/duckdb-wasm"), "..");
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { createDuckDB, NODE_RUNTIME, ConsoleLogger } = require(
   resolve(DUCKDB_DIST, "duckdb-node-blocking.cjs"),
 );
 
-let db: any;
-let conn: any;
+let db: DuckDBNodeBindings;
+let conn: DuckDBConnection;
 
 async function initDuckDB(): Promise<void> {
   const logger = new ConsoleLogger();
