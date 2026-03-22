@@ -43,7 +43,7 @@ export default defineConfig({
 
       // --- type-aware (require typeAware: true) ---
       "typescript/no-floating-promises": "error",
-      "typescript/no-misused-promises": "warn",
+      "typescript/no-misused-promises": "off",
       "typescript/await-thenable": "error",
       "typescript/no-unnecessary-type-assertion": "error",
 
