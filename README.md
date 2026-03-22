@@ -25,4 +25,4 @@ vp install
 vp dev
 ```
 
-> VitePlus CLI は `pnpm add -g vite-plus` でもインストールできます。
+> `vp` は devDependencies に含まれるため、`pnpm install` 後は `pnpm exec vp dev` でも起動できます。
