@@ -40,6 +40,7 @@ export default defineConfig({
       eqeqeq: "error", // pedantic
       "typescript/no-explicit-any": "error", // restriction
       "import/no-duplicates": "error", // style
+      "typescript/no-deprecated": "warn", // restriction; catch deprecated API usage
 
       // --- prefer-* (autofix): modern idioms ---
       // typescript
