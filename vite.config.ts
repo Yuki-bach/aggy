@@ -30,7 +30,7 @@ export default defineConfig({
       eqeqeq: "error",
       "no-var": "error",
       "prefer-const": "warn",
-      "typescript/no-explicit-any": "warn",
+      "typescript/no-explicit-any": "error",
       "import/no-duplicates": "warn",
       "typescript/triple-slash-reference": "off",
     },

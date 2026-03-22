@@ -18,8 +18,7 @@ let db: DuckDBNodeBindings;
 // eslint-disable-next-line typescript-eslint/no-redundant-type-constituents
 let conn: DuckDBConnection | null = null;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getConn(): any {
+export function getConn(): DuckDBConnection {
   if (!conn) throw new Error("setupDuckDB() has not been called yet");
   return conn;
 }
