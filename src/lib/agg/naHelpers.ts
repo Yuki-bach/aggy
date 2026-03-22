@@ -16,7 +16,7 @@ export function naWhereCond(column: string): string {
   return `"${esc(column)}" IS NOT NULL AND TRY_CAST("${esc(column)}" AS DOUBLE) IS NOT NULL`;
 }
 
-export function toStats(row: Record<string, unknown>): NaStats {
+export function assembleStats(row: Record<string, unknown>): NaStats {
   return {
     n: Number(row.n ?? 0),
     mean: Number(row.mean ?? 0),

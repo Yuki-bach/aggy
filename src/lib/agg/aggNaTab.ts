@@ -4,7 +4,7 @@ import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { TabData, NaStats } from "./types";
 import { calcPct } from "./types";
 import { esc } from "./sqlHelpers";
-import { type ValueCount, naValExpr, naWhereCond, toStats } from "./naHelpers";
+import { type ValueCount, naValExpr, naWhereCond, assembleStats } from "./naHelpers";
 
 export async function aggNaTab(
   conn: AsyncDuckDBConnection,
@@ -72,7 +72,7 @@ class NaTabAggregator {
     const result = await this.conn.query(sql);
     const row = result.toArray()[0];
     if (!row) return { n: 0, mean: 0, median: 0, sd: 0, min: 0, max: 0 };
-    return toStats(row);
+    return assembleStats(row);
   }
 
   private async queryFreq(): Promise<ValueCount[]> {
