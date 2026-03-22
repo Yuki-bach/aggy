@@ -30,6 +30,9 @@ export function GettingStartedModal({ open, onClose }: { open: boolean; onClose:
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
     >
       <GettingStartedContent onClose={onClose} />
     </div>
