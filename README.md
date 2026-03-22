@@ -25,4 +25,9 @@ vp install
 vp dev
 ```
 
-> `vp` は devDependencies に含まれるため、`pnpm install` 後は `pnpm exec vp dev` でも起動できます。
+VitePlus CLI なしでも起動できます:
+
+```bash
+pnpm install
+pnpm exec vp dev
+```
