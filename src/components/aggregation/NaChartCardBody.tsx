@@ -72,7 +72,7 @@ function buildFreqChart(
         legend: { display: false },
         title: {
           display: true,
-          text: `n=${stats.n.toLocaleString()}  ${t("na.stat.mean")}=${stats.mean?.toFixed(2) ?? "-"}  SD=${stats.sd?.toFixed(2) ?? "-"}`,
+          text: `n=${stats.n}  ${t("na.stat.mean")}=${stats.mean?.toFixed(2) ?? "-"}  SD=${stats.sd?.toFixed(2) ?? "-"}`,
           color: theme.muted,
           font: { size: 12, weight: "normal" },
         },
