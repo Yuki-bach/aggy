@@ -280,7 +280,7 @@ function main() {
     }
     const summary = Object.entries(typeCounts)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([t, c]) => `${t} x${c}`)
+      .map(([t, c]) => `${t} x${Number(c)}`)
       .join(", ");
     console.log(`OK: ${layout.length} エントリ (${summary})`);
     if (csvPath) {

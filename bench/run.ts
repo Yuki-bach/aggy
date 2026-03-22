@@ -24,12 +24,15 @@ import { generate, PATTERNS, type PatternDef } from "./generate";
 const require = createRequire(import.meta.url);
 const DUCKDB_DIST = resolve(require.resolve("@duckdb/duckdb-wasm"), "..");
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { createDuckDB, NODE_RUNTIME, ConsoleLogger } = require(
   resolve(DUCKDB_DIST, "duckdb-node-blocking.cjs"),
 );
 
-let db: any;
-let conn: any;
+// eslint-disable-next-line typescript-eslint/no-explicit-any
+let db: any; // DuckDBNodeBindings — type not importable without @ts-nocheck
+// eslint-disable-next-line typescript-eslint/no-explicit-any
+let conn: any; // DuckDBConnection
 
 async function initDuckDB(): Promise<void> {
   const logger = new ConsoleLogger();

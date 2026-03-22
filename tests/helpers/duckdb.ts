@@ -15,6 +15,7 @@ const { createDuckDB, NODE_RUNTIME, ConsoleLogger } = require(
 );
 
 let db: DuckDBNodeBindings;
+// eslint-disable-next-line typescript-eslint/no-redundant-type-constituents
 let conn: DuckDBConnection | null = null;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
