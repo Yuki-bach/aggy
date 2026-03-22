@@ -227,12 +227,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
             <FileUploadPanel
               rawDataFileName={rawData?.fileName ?? null}
               layoutFileName={layout?.fileName ?? null}
-              onRawDataFile={(f: File) => {
-                void handleRawDataFile(f);
-              }}
-              onLayoutFile={(f: File) => {
-                void handleLayoutFile(f);
-              }}
+              onRawDataFile={handleRawDataFile}
+              onLayoutFile={handleLayoutFile}
             />
 
             <div class="mt-5 border-t border-border pt-4">
@@ -242,12 +238,8 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
               <div class="flex max-h-[160px] flex-col gap-2 overflow-y-auto">
                 <SavedFilesList
                   entries={entries}
-                  onSelectEntry={(id: string) => {
-                    void handleLoadFromSaved(id);
-                  }}
-                  onDeleteEntry={(id: string) => {
-                    void deleteEntry(id);
-                  }}
+                  onSelectEntry={handleLoadFromSaved}
+                  onDeleteEntry={deleteEntry}
                 />
               </div>
             </div>
@@ -278,9 +270,7 @@ export default function ImportScreen({ onComplete }: ImportScreenProps) {
           <ValidationStep
             rawData={rawData}
             layout={layout}
-            onProceed={() => {
-              void handleProceed();
-            }}
+            onProceed={handleProceed}
             onBack={handleBackToUpload}
           />
         )}

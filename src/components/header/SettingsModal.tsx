@@ -65,9 +65,7 @@ export function SettingsRoot() {
         data-i18n="header.settings"
         data-i18n-attr="aria-label"
         aria-label={t("header.settings")}
-        onClick={(e: MouseEvent) => {
-          void handleToggle(e);
-        }}
+        onClick={handleToggle}
       >
         ⚙
       </button>

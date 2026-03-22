@@ -70,9 +70,7 @@ export default function AggregationScreen({
         onWeightToggle={setWeightEnabled}
         dateWarnings={dateWarnings}
         errorMsg={errorMsg}
-        onRun={() => {
-          void handleRunAggregation();
-        }}
+        onRun={() => handleRunAggregation()}
       />
 
       <ResultPanel tabs={aggResult?.tabs ?? null} weightCol={aggResult?.weightCol ?? ""} />
