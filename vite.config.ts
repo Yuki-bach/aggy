@@ -19,7 +19,7 @@ export default defineConfig({
     endOfLine: "lf",
   },
   lint: {
-    plugins: ["typescript", "import", "unicorn", "react", "vitest", "jsx-a11y"],
+    plugins: ["typescript", "import", "unicorn", "react", "vitest", "jsx-a11y", "promise"],
     categories: {
       correctness: "error",
       suspicious: "warn",
