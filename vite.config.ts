@@ -105,9 +105,15 @@ export default defineConfig({
         },
       },
       {
-        files: ["src/components/**/*.{ts,tsx}"],
+        files: ["src/components/**/*.tsx"],
         rules: {
-          "unicorn/filename-case": ["error", { cases: { pascalCase: true, camelCase: true } }],
+          "unicorn/filename-case": ["error", { case: "pascalCase" }],
+        },
+      },
+      {
+        files: ["src/components/**/*.ts"],
+        rules: {
+          "unicorn/filename-case": ["error", { case: "camelCase" }],
         },
       },
       {
