@@ -5,12 +5,12 @@ import { t } from "../../lib/i18n";
 import { isAICommentEnabled } from "../header/SettingsModal";
 import { IconButton } from "../shared/IconButton";
 
-interface AIBubbleProps {
+interface AiBubbleProps {
   tabs: Tab[];
   weightCol: string;
 }
 
-export function AIBubble({ tabs, weightCol }: AIBubbleProps) {
+export function AiBubble({ tabs, weightCol }: AiBubbleProps) {
   const [comment, setComment] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(true);

@@ -29,7 +29,6 @@ pnpm bench:gen  # generate benchmark data
 ## Conventions
 
 - Data format conventions: see `.claude/skills/aggy-import/references/data-preparation-guide.md`
-- Component files: PascalCase `.tsx`; lib files: camelCase `.ts`
 - Module-level singleton state for infrastructure (`duckdb`, `i18n`); UI state uses hooks + Context
 - File ordering: `imports → exports (Public API) → internal implementation`. Props interfaces stay with their exported component
 - DuckDB Wasm runs sequentially on a single Web Worker — never use `Promise.all` with `duckdb` methods; call them with sequential `await`

@@ -104,6 +104,18 @@ export default defineConfig({
           "no-console": "off",
         },
       },
+      {
+        files: ["src/components/**/*.{ts,tsx}"],
+        rules: {
+          "unicorn/filename-case": ["error", { cases: { pascalCase: true, camelCase: true } }],
+        },
+      },
+      {
+        files: ["src/lib/**/*.ts"],
+        rules: {
+          "unicorn/filename-case": ["error", { case: "camelCase" }],
+        },
+      },
     ],
     options: {
       typeAware: true,
