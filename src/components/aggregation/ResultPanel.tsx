@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import type { Tab } from "../../lib/agg/types";
 import { Toolbar, ViewOpts } from "./Toolbar";
 import { TabCard } from "./TabCard";
-import { AIBubble } from "./AIBubble";
+import { AiBubble } from "./AiBubble";
 import { t } from "../../lib/i18n";
 import type { Basis, ChartType, ViewMode } from "./viewTypes";
 import type { PaletteId } from "../../lib/chartConfig";
@@ -98,7 +98,7 @@ function ResultContent({ tabs, weightCol }: { tabs: Tab[]; weightCol: string }) 
           />
         ))}
       </div>
-      <AIBubble tabs={tabs} weightCol={weightCol} />
+      <AiBubble tabs={tabs} weightCol={weightCol} />
     </>
   );
 }

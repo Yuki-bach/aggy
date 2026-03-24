@@ -19,7 +19,7 @@ export default defineConfig({
     endOfLine: "lf",
   },
   lint: {
-    plugins: ["typescript", "import", "unicorn", "react", "vitest", "jsx-a11y"],
+    plugins: ["typescript", "import", "unicorn", "react", "vitest", "jsx-a11y", "promise"],
     categories: {
       correctness: "error",
       suspicious: "warn",
@@ -102,6 +102,18 @@ export default defineConfig({
         files: ["scripts/**/*.ts", "bench/**/*.ts", ".claude/skills/**/*.mjs"],
         rules: {
           "no-console": "off",
+        },
+      },
+      {
+        files: ["src/{components,lib}/**/*.tsx"],
+        rules: {
+          "unicorn/filename-case": ["error", { case: "pascalCase" }],
+        },
+      },
+      {
+        files: ["src/{components,lib}/**/*.ts"],
+        rules: {
+          "unicorn/filename-case": ["error", { case: "camelCase" }],
         },
       },
     ],
