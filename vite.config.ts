@@ -105,19 +105,13 @@ export default defineConfig({
         },
       },
       {
-        files: ["src/components/**/*.tsx"],
+        files: ["src/{components,lib}/**/*.tsx"],
         rules: {
           "unicorn/filename-case": ["error", { case: "pascalCase" }],
         },
       },
       {
-        files: ["src/components/**/*.ts"],
-        rules: {
-          "unicorn/filename-case": ["error", { case: "camelCase" }],
-        },
-      },
-      {
-        files: ["src/lib/**/*.ts"],
+        files: ["src/{components,lib}/**/*.ts"],
         rules: {
           "unicorn/filename-case": ["error", { case: "camelCase" }],
         },
