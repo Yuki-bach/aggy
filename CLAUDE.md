@@ -21,10 +21,23 @@ pnpm bench rows # single pattern (rows / cols / both)
 pnpm bench:gen  # generate benchmark data
 ```
 
+## Release
+
+1. `src/lib/changelog.json` に新バージョンのエントリを追加
+2. `npm version minor` (or `patch` / `major`) — package.json更新 + git tag作成（`preversion` でchangelogエントリの存在を検証）
+3. `git push origin main --tags`
+4. `gh release create v0.x.0 --generate-notes`
+
 ## Architecture
 
 - **`src/components/`** — UI: event handling, DOM rendering, and component-local helpers
 - **`src/lib/`** — Shared pure logic used by multiple modules (aggregation SQL, DuckDB bridge, layout parsing, pivot, export)
+
+## Branch Strategy
+
+- `develop` — daily integration branch. Feature branches merge here.
+- `main` — release branch. `develop` merges to `main` at release time.
+- Tags: `v1.x.0` on `main` after merge. GitHub Release Notes auto-generated via `gh release create`.
 
 ## Conventions
 

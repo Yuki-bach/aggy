@@ -168,6 +168,9 @@ const ja: Record<string, string> = {
   "settings.ai.on": "ON",
   "settings.ai.off": "OFF",
   "settings.close": "閉じる",
+
+  // Changelog
+  "changelog.title": "更新情報",
 };
 
 export default ja;
