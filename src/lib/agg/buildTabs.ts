@@ -5,7 +5,7 @@ import { aggCrossTab } from "./aggCrossTab";
 import { aggNaTab } from "./aggNaTab";
 import { aggNaCrossTab } from "./aggNaCrossTab";
 import { NO_ANSWER_VALUE } from "./constants";
-import { t } from "../i18n";
+import { t } from "../i18n.svelte";
 
 export async function buildTabs(
   conn: AsyncDuckDBConnection,

@@ -1,5 +1,5 @@
 import type { Tab } from "../../agg/types";
-import { t } from "../../i18n";
+import { t } from "../../i18n.svelte";
 
 /**
  * Convert Tab[] to long-format rows (1 row = 1 cell).
