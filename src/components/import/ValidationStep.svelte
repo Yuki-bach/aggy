@@ -39,7 +39,7 @@
     };
   });
 
-  let statusByType = $derived(() => {
+  let statusByType = $derived.by(() => {
     const map = new Map<string, "error" | "warn">();
     if (diagnostics) {
       for (const d of diagnostics) map.set(d.type, d.severity);
@@ -86,23 +86,23 @@
     <ul class="space-y-2 text-sm">
       {@render CheckItem(
         t("validation.check.layoutStructure"),
-        statusByType().get("invalidLayout") ?? "ok",
+        statusByType.get("invalidLayout") ?? "ok",
       )}
       {@render CheckItem(
         t("validation.check.columns"),
-        statusByType().get("dropped") ?? "ok",
+        statusByType.get("dropped") ?? "ok",
       )}
       {@render CheckItem(
         t("validation.check.saCode"),
-        statusByType().get("unknownCode") ?? "ok",
+        statusByType.get("unknownCode") ?? "ok",
       )}
       {@render CheckItem(
         t("validation.check.maValues"),
-        statusByType().get("invalidMAValue") ?? "ok",
+        statusByType.get("invalidMAValue") ?? "ok",
       )}
       {@render CheckItem(
         t("validation.check.numeric"),
-        statusByType().get("nonNumeric") ?? "ok",
+        statusByType.get("nonNumeric") ?? "ok",
       )}
     </ul>
 
