@@ -25,7 +25,7 @@
   let showFeedback = $derived(feedback !== null);
 </script>
 
-<div class="relative" use:clickOutside={{ onClose: () => (open = false) }}>
+<div class="relative" {@attach clickOutside({ onClose: () => (open = false) })}>
   <button
     class="relative flex size-9 cursor-pointer items-center justify-center rounded-lg border border-border text-muted transition-colors hover:border-accent hover:text-accent"
     onclick={() => (open = !open)}

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { t, getLocale, setLocale } from "../../lib/i18n.svelte";
   import { clickOutside } from "../../lib/dismiss";
   import {
@@ -16,7 +15,7 @@
   let tick = $state(0);
 
   // System theme change listener
-  onMount(() => {
+  $effect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => {
       if (getStoredTheme() === "system") applyTheme("system");
@@ -55,7 +54,7 @@
   });
 </script>
 
-<div class="relative" use:clickOutside={{ onClose: () => (open = false) }}>
+<div class="relative" {@attach clickOutside({ onClose: () => (open = false) })}>
   <IconButton
     size="md"
     id="settings-btn"
