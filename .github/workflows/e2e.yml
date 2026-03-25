@@ -15,7 +15,7 @@ jobs:
       matrix:
         browser: ${{ github.event_name == 'push' && fromJSON('["chromium","firefox","webkit"]') || fromJSON('["chromium"]') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version-file: .node-version
