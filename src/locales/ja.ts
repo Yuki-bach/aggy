@@ -95,6 +95,7 @@ const ja: Record<string, string> = {
   "na.stat.sd": "標準偏差",
   "na.stat.min": "最小",
   "na.stat.max": "最大",
+  "na.binWidth": "階級幅",
 
   // Chart type
   "chart.barH": "横棒",

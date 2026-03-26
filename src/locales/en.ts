@@ -95,6 +95,7 @@ const en: Record<string, string> = {
   "na.stat.sd": "Std Dev",
   "na.stat.min": "Min",
   "na.stat.max": "Max",
+  "na.binWidth": "Class width",
 
   // Chart type
   "chart.barH": "Horizontal Bar",
