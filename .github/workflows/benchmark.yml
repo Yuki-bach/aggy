@@ -22,11 +22,8 @@ jobs:
           node-version-file: .node-version
           cache: true
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Run benchmark
-        run: cd packages/lib && BENCH_OUTPUT=bench/output.json pnpm bench
+        run: cd packages/lib && BENCH_OUTPUT=bench/output.json vp exec tsx bench/run.ts
 
       - name: Store benchmark result
         continue-on-error: true
