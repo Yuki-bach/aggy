@@ -189,7 +189,7 @@
 
 <div class="p-4 {isCross ? 'h-[400px]' : 'h-80'}">
   {#if !isCross && range > 0}
-    <div class="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+    <div class="flex items-center justify-end gap-2 mb-2 text-xs text-muted-foreground">
       <label>{t("na.binWidth")}</label>
       <input
         type="range"
