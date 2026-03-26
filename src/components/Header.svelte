@@ -3,7 +3,7 @@
   import SettingsModal from "./header/SettingsModal.svelte";
   import IconButton from "./shared/IconButton.svelte";
   import WasmStatus from "./header/WasmStatus.svelte";
-  import ChangelogButton from "./import/ChangelogButton.svelte";
+  import ChangelogButton from "./header/ChangelogButton.svelte";
 
   interface Props {
     isImport: boolean;
