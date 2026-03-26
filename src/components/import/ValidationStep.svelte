@@ -1,6 +1,5 @@
 <script lang="ts">
   import { t } from "../../lib/i18n.svelte";
-  import { runValidation } from "../../lib/duckdb";
   import type { Diagnostic } from "../../lib/validateRawData";
   import type { RawData, LayoutData } from "../../lib/types";
   import Button from "../shared/Button.svelte";
@@ -10,34 +9,13 @@
   interface Props {
     rawData: RawData;
     layout: LayoutData;
+    diagnostics: Diagnostic[] | null;
+    error: string | null;
     onProceed: () => void;
     onBack: () => void;
   }
 
-  let { rawData, layout, onProceed, onBack }: Props = $props();
-
-  let diagnostics = $state<Diagnostic[] | null>(null);
-  let error = $state<string | null>(null);
-
-  $effect(() => {
-    const _rawData = rawData;
-    const _layout = layout;
-    let cancelled = false;
-    diagnostics = null;
-    error = null;
-
-    runValidation(_layout.rawJson, _rawData.headers)
-      .then((r) => {
-        if (!cancelled) diagnostics = r;
-      })
-      .catch((e) => {
-        if (!cancelled) error = (e as Error).message;
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  });
+  let { rawData, layout, diagnostics, error, onProceed, onBack }: Props = $props();
 
   let statusByType = $derived.by(() => {
     const map = new Map<string, "error" | "warn">();

@@ -13,7 +13,7 @@ const ja: Record<string, string> = {
   "import.step.select": "ファイル選択",
   "import.step.proceed": "集計へ",
   "import.proceed": "集計画面へ進む →",
-  "import.step.validate": "検証",
+  "import.start": "集計開始",
 
   // Validation step
   "validation.title": "データ検証",
