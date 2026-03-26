@@ -12,7 +12,7 @@
   let { open, onclose, trigger, children }: Props = $props();
 </script>
 
-<div class="relative" {@attach clickOutside({ onClose: onclose })}>
+<div {@attach clickOutside({ onClose: onclose })}>
   {@render trigger()}
   {#if open}
     <div
