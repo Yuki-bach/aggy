@@ -1,11 +1,17 @@
 import ja from "../locales/ja";
 import en from "../locales/en";
 
-const STORAGE_KEY = "aggy-locale";
-const messages: Record<string, Record<string, string>> = { ja, en };
-const supportedLocales = Object.keys(messages);
+export type Locale = "ja" | "en";
 
-let currentLocale = "ja";
+const STORAGE_KEY = "aggy-locale";
+const messages: Record<Locale, Record<string, string>> = { ja, en };
+const supportedLocales = Object.keys(messages) as Locale[];
+
+function isLocale(v: string): v is Locale {
+  return supportedLocales.includes(v as Locale);
+}
+
+let currentLocale: Locale = "ja";
 let localeVersion = $state(0);
 
 /** Get translated string. Supports parameter interpolation: t("key", { name: "X" }) */
@@ -20,12 +26,12 @@ export function t(key: string, params?: Record<string, string | number>): string
   return text;
 }
 
-export function getLocale(): string {
+export function getLocale(): Locale {
   return currentLocale;
 }
 
 export function setLocale(locale: string): void {
-  if (!supportedLocales.includes(locale)) return;
+  if (!isLocale(locale)) return;
   if (locale === currentLocale) return;
 
   currentLocale = locale;
@@ -38,11 +44,11 @@ export function setLocale(locale: string): void {
 /** Initialize i18n: detect locale from localStorage or browser setting */
 export function initI18n(): void {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved && supportedLocales.includes(saved)) {
+  if (saved && isLocale(saved)) {
     currentLocale = saved;
   } else {
     const browserLang = navigator.language.split("-")[0];
-    currentLocale = supportedLocales.includes(browserLang) ? browserLang : "en";
+    currentLocale = isLocale(browserLang) ? browserLang : "en";
   }
   document.documentElement.lang = currentLocale;
   translateDOM();

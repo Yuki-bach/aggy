@@ -1,9 +1,10 @@
+import type { Locale } from "./i18n.svelte";
 import entries from "./changelog.json";
 
 export interface ChangelogEntry {
   version: string;
   date: string;
-  changes: Array<{ ja: string; en: string }>;
+  changes: Array<Record<Locale, string>>;
 }
 
 export const changelog: ChangelogEntry[] = entries;

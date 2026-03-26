@@ -55,7 +55,7 @@
             <ul class="mt-1 list-disc pl-4">
               {#each entry.changes as change}
                 <li class="text-xs text-text-secondary">
-                  {change[getLocale() as "ja" | "en"]}
+                  {change[getLocale()]}
                 </li>
               {/each}
             </ul>
