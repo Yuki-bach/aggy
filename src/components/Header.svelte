@@ -3,6 +3,7 @@
   import SettingsModal from "./header/SettingsModal.svelte";
   import IconButton from "./shared/IconButton.svelte";
   import WasmStatus from "./header/WasmStatus.svelte";
+  import ChangelogButton from "./header/ChangelogButton.svelte";
 
   interface Props {
     isImport: boolean;
@@ -20,8 +21,9 @@
   {/if}
   <h1 class="text-lg font-bold text-text">Aggy</h1>
   <span class="text-xs tracking-widest text-muted">{t("header.subtitle")}</span>
-  <div class="ml-auto flex items-center gap-3">
+  <div class="relative ml-auto flex items-center gap-3">
     <WasmStatus />
+    <ChangelogButton />
     <SettingsModal />
   </div>
 </header>

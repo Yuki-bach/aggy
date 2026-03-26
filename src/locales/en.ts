@@ -168,6 +168,9 @@ const en: Record<string, string> = {
   "settings.ai.on": "ON",
   "settings.ai.off": "OFF",
   "settings.close": "Close",
+
+  // Changelog
+  "changelog.title": "What's New",
 };
 
 export default en;
