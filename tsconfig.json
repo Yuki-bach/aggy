@@ -1,15 +1,7 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "types": ["vitest/importMeta"],
-    "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src"]
+  "files": [],
+  "references": [
+    { "path": "packages/lib" },
+    { "path": "apps/web" }
+  ]
 }
