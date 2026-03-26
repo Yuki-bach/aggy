@@ -1,7 +1,7 @@
 /// <reference types="vite-plus" />
 import { defineConfig } from "vite-plus";
 import tailwindcss from "@tailwindcss/vite";
-import preact from "@preact/preset-vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 export default defineConfig({
   staged: {
@@ -19,7 +19,7 @@ export default defineConfig({
     endOfLine: "lf",
   },
   lint: {
-    plugins: ["typescript", "import", "unicorn", "react", "vitest", "jsx-a11y"],
+    plugins: ["typescript", "import", "unicorn", "vitest"],
     categories: {
       correctness: "error",
       suspicious: "warn",
@@ -89,10 +89,8 @@ export default defineConfig({
 
       // --- disable: category-enabled but too noisy / incompatible ---
       "typescript/triple-slash-reference": "off", // correctness; used in ambient declarations
-      "typescript/no-misused-promises": "off", // pedantic; too noisy for Preact JSX attributes
-      "import/no-named-as-default": "off", // suspicious; false positives with Preact lazy()
-      "react/no-unknown-property": "off", // restriction; Preact supports standard HTML attrs
-      "react/react-in-jsx-scope": "off", // suspicious; Preact auto-injects JSX runtime
+      "typescript/no-misused-promises": "off", // pedantic; too noisy
+      "import/no-named-as-default": "off", // suspicious; false positives
       "no-await-in-loop": "off", // perf; DuckDB Wasm requires sequential await
       "typescript/no-unsafe-type-assertion": "off", // suspicious; too noisy
       "unicorn/no-array-sort": "off", // suspicious; [...arr].sort() pattern is safe
@@ -104,13 +102,20 @@ export default defineConfig({
           "no-console": "off",
         },
       },
+      {
+        files: ["**/*.svelte"],
+        rules: {
+          "prefer-const": "off", // Svelte $props() requires `let` destructuring
+          "no-unassigned-vars": "off", // bind:this vars assigned by Svelte runtime
+        },
+      },
     ],
     options: {
       typeAware: true,
       typeCheck: true,
     },
   },
-  plugins: [tailwindcss(), preact()],
+  plugins: [tailwindcss(), svelte()],
   define: {
     "import.meta.vitest": "undefined",
   },

@@ -1,5 +1,5 @@
 import type { QuestionType, Tab } from "../../agg/types";
-import { t } from "../../i18n";
+import { t } from "../../i18n.svelte";
 
 export interface ExportGrid {
   questionCode: string;
