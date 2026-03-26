@@ -17,11 +17,17 @@ jobs:
           node-version-file: .node-version
           cache: true
 
-      - name: Check
-        run: vp check
+      - name: Check (lib)
+        run: cd packages/lib && vp check
 
-      - name: Test
-        run: vp test run
+      - name: Test (lib)
+        run: cd packages/lib && vp test run
 
-      - name: Build
-        run: vp build
+      - name: Check (web)
+        run: cd apps/web && vp check
+
+      - name: Test (web)
+        run: cd apps/web && vp test run
+
+      - name: Build (web)
+        run: cd apps/web && vp build

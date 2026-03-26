@@ -1,35 +1,7 @@
 {
   "name": "aggy",
-  "version": "1.0.0",
-  "description": "",
+  "private": true,
   "type": "module",
-  "scripts": {
-    "build": "vp build",
-    "test": "vp test run",
-    "check": "vp check",
-    "bench:gen": "tsx bench/generate.ts",
-    "bench": "tsx bench/run.ts",
-    "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui",
-    "prepare": "vp config"
-  },
-  "dependencies": {
-    "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
-    "chart.js": "^4.5.1",
-    "svelte": "^5.35.5"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.58.2",
-    "@sveltejs/vite-plugin-svelte": "^5.0.3",
-    "@tailwindcss/vite": "^4.2.1",
-    "@vitest/coverage-v8": "^4.1.0",
-    "tailwindcss": "^4.2.1",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2",
-    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-    "vite-plus": "latest",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
-  },
   "packageManager": "pnpm@10.22.0",
   "pnpm": {
     "onlyBuiltDependencies": [

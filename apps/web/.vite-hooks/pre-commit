@@ -1,0 +1,2 @@
+export PATH="$(cd "$(dirname "$0")/.." && pwd)/node_modules/.bin:$PATH"
+cd "$(dirname "$0")/.." && vp staged

@@ -6,16 +6,26 @@ Aggy is a browser-based survey raw-data aggregation tool (アンケートロー�
 
 Tech: TypeScript (strict), VitePlus (Vite + Vitest + Oxc), Svelte 5 (SFC), DuckDB Wasm, Tailwind CSS v4.
 
+## Monorepo Structure
+
+pnpm workspaces monorepo with two packages:
+
+- **`packages/lib/`** (`@aggy/lib`) — Shared pure domain logic: aggregation SQL, layout parsing, export formatters, i18n core, validation
+- **`apps/web/`** (`@aggy/web`) — Browser app: Svelte UI, DuckDB Wasm bridge, OPFS storage, theme, Chart.js
+
 ## Commands
 
 ```bash
+# apps/web (run from apps/web/)
 vp dev          # dev server
 vp build        # production build
 vp check        # fmt + lint + type check
 vp test run     # vitest run
-vp test         # vitest watch
-vp fmt          # oxfmt
-vp lint         # oxlint
+pnpm e2e        # playwright E2E
+
+# packages/lib (run from packages/lib/)
+vp check        # fmt + lint + type check
+vp test run     # vitest run (600+ tests)
 pnpm bench      # aggregate() benchmark (all patterns)
 pnpm bench rows # single pattern (rows / cols / both)
 pnpm bench:gen  # generate benchmark data
@@ -23,8 +33,12 @@ pnpm bench:gen  # generate benchmark data
 
 ## Architecture
 
-- **`src/components/`** — UI: event handling, DOM rendering, and component-local helpers
-- **`src/lib/`** — Shared pure logic used by multiple modules (aggregation SQL, DuckDB bridge, layout parsing, pivot, export)
+- **`packages/lib/src/agg/`** — Aggregation SQL generation (aggTab, aggCrossTab, etc.)
+- **`packages/lib/src/export/`** — Export formatters (CSV, TSV, JSON, Markdown)
+- **`packages/lib/src/layout.ts`** — Layout schema parsing & validation
+- **`packages/lib/src/i18n.ts`** — Pure i18n core (t function, locale data)
+- **`apps/web/src/components/`** — UI: event handling, DOM rendering, and component-local helpers
+- **`apps/web/src/lib/`** — Browser-specific: DuckDB bridge, OPFS, i18n Svelte wrapper, theme, Chart.js config
 
 ## Conventions
 
@@ -34,3 +48,4 @@ pnpm bench:gen  # generate benchmark data
 - File ordering: `<script> → template → <style>` for Svelte SFCs. Props interfaces stay with their component
 - DuckDB Wasm runs sequentially on a single Web Worker — never use `Promise.all` with `duckdb` methods; call them with sequential `await`
 - Prefer functional style by default. Use classes when multiple functions need shared state to avoid props drilling (e.g. `aggGrandTotal` — bundle related data into a class and access it via methods)
+- apps/web imports shared logic from `@aggy/lib` (barrel export) or `@aggy/lib/i18n`

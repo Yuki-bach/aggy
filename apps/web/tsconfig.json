@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "types": ["vitest/importMeta"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@aggy/lib": ["../../packages/lib/src/index.ts"],
+      "@aggy/lib/i18n": ["../../packages/lib/src/i18n.ts"]
+    }
+  },
+  "include": ["src", "tests"]
+}
