@@ -10,8 +10,8 @@
   "scripts": {
     "test": "vp test run",
     "check": "vp check",
-    "bench": "tsx bench/run.ts",
-    "bench:gen": "tsx bench/generate.ts"
+    "bench": "pnpm exec tsx bench/run.ts",
+    "bench:gen": "pnpm exec tsx bench/generate.ts"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.33.1-dev18.0"
