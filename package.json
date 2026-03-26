@@ -12,7 +12,7 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "prepare": "vp config",
-    "preversion": "node scripts/check-changelog.mjs"
+    "preversion": "tsx scripts/check-changelog.ts"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
