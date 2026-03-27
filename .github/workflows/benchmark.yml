@@ -23,14 +23,14 @@ jobs:
           cache: true
 
       - name: Run benchmark
-        run: BENCH_OUTPUT=bench/output.json vp run bench
+        run: cd packages/lib && BENCH_OUTPUT=bench/output.json vp exec tsx bench/run.ts
 
       - name: Store benchmark result
         continue-on-error: true
         uses: benchmark-action/github-action-benchmark@v1
         with:
           tool: customSmallerIsBetter
-          output-file-path: bench/output.json
+          output-file-path: packages/lib/bench/output.json
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: bench
           auto-push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

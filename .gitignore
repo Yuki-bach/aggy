@@ -2,9 +2,9 @@ node_modules/
 dist/
 .claude/settings.local.json
 .claude/worktrees/
-bench/data/
-bench/output.json
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+**/bench/data/
+**/bench/output.json
+**/test-results/
+**/playwright-report/
+**/blob-report/
+**/playwright/.cache/

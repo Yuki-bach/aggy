@@ -1,0 +1,26 @@
+{
+  "name": "@aggy/lib",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./i18n": "./src/i18n.ts"
+  },
+  "scripts": {
+    "test": "vp test run",
+    "check": "vp check",
+    "bench": "tsx bench/run.ts",
+    "bench:gen": "tsx bench/generate.ts"
+  },
+  "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.33.1-dev18.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vite-plus": "latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
+  }
+}
