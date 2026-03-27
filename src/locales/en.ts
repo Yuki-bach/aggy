@@ -13,7 +13,7 @@ const en: Record<string, string> = {
   "import.step.select": "Select Files",
   "import.step.proceed": "Aggregate",
   "import.proceed": "Proceed to Aggregation →",
-  "import.step.validate": "Validate",
+  "import.start": "Start Aggregation",
 
   // Validation step
   "validation.title": "Data Validation",
