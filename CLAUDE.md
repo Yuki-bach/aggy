@@ -23,10 +23,13 @@ pnpm bench:gen  # generate benchmark data
 
 ## Release
 
-1. `src/lib/changelog.json` に新バージョンのエントリを追加
-2. `npm version minor` (or `patch` / `major`) — package.json更新 + git tag作成（`preversion` でchangelogエントリの存在を検証）
-3. `git push origin main --tags`
-4. `gh release create v0.x.0 --generate-notes`
+release-please（GitHub Action）で自動化。Conventional Commits（`feat:`, `fix:` 等）を使うこと。
+
+1. develop → main へのPRをマージ（`release-pr.yml` が自動作成）
+2. release-please が自動で Release PR を作成（CHANGELOG.md + version bump）
+3. Release PR をマージ → git tag + GitHub Release が自動作成
+
+UI用の `src/lib/changelog.json` はユーザー向け表示用。必要に応じて手動更新。
 
 ## Architecture
 
