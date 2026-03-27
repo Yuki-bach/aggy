@@ -1,1 +1,16 @@
-npx commitlint --edit $1
+#!/bin/sh
+# Enforce Conventional Commits (feat, fix, chore, docs, style, refactor, perf, test, ci, build, revert)
+msg=$(head -1 "$1")
+
+# Allow merge commits
+echo "$msg" | grep -qE '^Merge ' && exit 0
+
+if ! echo "$msg" | grep -qE '^(feat|fix|chore|docs|style|refactor|perf|test|ci|build|revert)(\(.+\))?!?: .+'; then
+  echo "❌ Invalid commit message:"
+  echo "   $msg"
+  echo ""
+  echo "   Format: <type>: <description>"
+  echo "   Types:  feat, fix, chore, docs, style, refactor, perf, test, ci, build, revert"
+  echo "   Example: feat: add histogram bin config"
+  exit 1
+fi
