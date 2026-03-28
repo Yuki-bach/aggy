@@ -20,6 +20,9 @@ importers:
       '@aggy/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@duckdb/duckdb-wasm':
+        specifier: ^1.33.1-dev18.0
+        version: 1.33.1-dev18.0
       '@tauri-apps/api':
         specifier: ^2
         version: 2.10.1
