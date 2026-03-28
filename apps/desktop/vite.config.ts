@@ -76,7 +76,9 @@ export default defineConfig({
       "typescript/triple-slash-reference": "off",
       "typescript/no-misused-promises": "off",
       "import/no-named-as-default": "off",
+      "import/no-unassigned-import": "off",
       "typescript/no-unsafe-type-assertion": "off",
+      "no-await-in-loop": "off",
       "unicorn/no-array-sort": "off",
     },
     overrides: [

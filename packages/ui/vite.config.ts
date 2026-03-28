@@ -12,10 +12,7 @@ export default defineConfig({
         import.meta.dirname,
         "../../packages/lib/src/agg/naHelpers.ts",
       ),
-      "@aggy/lib/changelog": resolve(
-        import.meta.dirname,
-        "../../packages/lib/src/changelog.ts",
-      ),
+      "@aggy/lib/changelog": resolve(import.meta.dirname, "../../packages/lib/src/changelog.ts"),
       "@aggy/lib": resolve(import.meta.dirname, "../../packages/lib/src/index.ts"),
     },
   },

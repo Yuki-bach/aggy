@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "copy-duckdb": "node -e \"const{cpSync,mkdirSync}=require('fs');const d='public/duckdb';mkdirSync(d,{recursive:true});for(const f of['duckdb-eh.wasm','duckdb-browser-eh.worker.js'])cpSync(require.resolve('@duckdb/duckdb-wasm/dist/'+f),d+'/'+f);\"",
+    "predev": "pnpm copy-duckdb",
     "dev": "tauri dev",
+    "prebuild": "pnpm copy-duckdb",
     "build": "tauri build",
     "check": "vp check",
     "test": "vp test run"
@@ -25,6 +28,7 @@
     "tailwindcss": "^4.2.1",
     "typescript": "^6.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-    "vite-plus": "latest"
+    "vite-plus": "latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
   }
 }

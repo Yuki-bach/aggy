@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vite-plus/test";
+import { describe, it, expect } from "vite-plus/test";
 import { hasUnreadChanges, markChangelogSeen } from "../src/lib/changelog";
 
 // Polyfill localStorage for Node test environment
