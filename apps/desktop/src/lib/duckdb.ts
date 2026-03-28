@@ -26,12 +26,12 @@ export async function initDuckDB(): Promise<void> {
 
       const BUNDLES: duckdb.DuckDBBundles = {
         mvp: {
-          mainModule: `${DUCKDB_CDN}/duckdb-mvp.wasm`,
-          mainWorker: `${DUCKDB_CDN}/duckdb-browser-mvp.worker.js`,
+          mainModule: `${DUCKDB_LOCAL}/duckdb-eh.wasm`,
+          mainWorker: `${DUCKDB_LOCAL}/duckdb-browser-eh.worker.js`,
         },
         eh: {
-          mainModule: `${DUCKDB_CDN}/duckdb-eh.wasm`,
-          mainWorker: `${DUCKDB_CDN}/duckdb-browser-eh.worker.js`,
+          mainModule: `${DUCKDB_LOCAL}/duckdb-eh.wasm`,
+          mainWorker: `${DUCKDB_LOCAL}/duckdb-browser-eh.worker.js`,
         },
       };
 
@@ -106,7 +106,7 @@ export async function prepareDateLayout(layout: Layout): Promise<DatePreparation
 
 // ─── Internal ───────────────────────────────────────────────
 
-const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
+const DUCKDB_LOCAL = "/duckdb";
 
 let db: duckdb.AsyncDuckDB | null = null;
 let conn: duckdb.AsyncDuckDBConnection | null = null;

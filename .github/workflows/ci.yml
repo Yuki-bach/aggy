@@ -23,6 +23,12 @@ jobs:
       - name: Test (lib)
         run: cd packages/lib && vp test run
 
+      - name: Check (ui)
+        run: cd packages/ui && vp check
+
+      - name: Test (ui)
+        run: cd packages/ui && vp test run
+
       - name: Check (web)
         run: cd apps/web && vp check
 

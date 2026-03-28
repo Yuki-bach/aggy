@@ -161,10 +161,7 @@ describe("buildPromptPayload", () => {
     const tab = makeTab();
     const payload = buildPromptPayload([tab], "");
 
-    const lastNonEmpty = payload
-      .split("\n")
-      .filter((l) => l.length > 0)
-      .at(-1);
+    const lastNonEmpty = payload.split("\n").findLast((l) => l.length > 0);
     expect(lastNonEmpty).toContain("注目すべき傾向");
   });
 

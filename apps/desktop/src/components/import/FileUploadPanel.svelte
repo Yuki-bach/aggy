@@ -1,6 +1,6 @@
 <script lang="ts">
   import { open } from "@tauri-apps/plugin-dialog";
-  import { invoke } from "@tauri-apps/api/core";
+  import { readTextFile } from "@tauri-apps/plugin-fs";
   import { t } from "@aggy/ui";
 
   interface Props {
@@ -19,7 +19,7 @@
     });
     if (!result) return;
     const path = result as string;
-    const text = await invoke<string>("read_file_text", { path });
+    const text = await readTextFile(path);
     const fileName = path.split(/[\\/]/).at(-1) ?? "data.csv";
     onRawDataFile(text, fileName);
   }
@@ -31,7 +31,7 @@
     });
     if (!result) return;
     const path = result as string;
-    const text = await invoke<string>("read_file_text", { path });
+    const text = await readTextFile(path);
     const fileName = path.split(/[\\/]/).at(-1) ?? "layout.json";
     onLayoutFile(text, fileName);
   }
