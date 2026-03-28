@@ -151,6 +151,10 @@ const ja: Record<string, string> = {
   "gs.section3.step1": "ローデータファイルとレイアウトファイルを読み込む",
   "gs.section3.step2": "必要に応じてクロス集計軸を選択する",
   "gs.section3.step3": "「集計を実行」ボタンをクリック",
+  "gs.section4.title": "デスクトップ版",
+  "gs.section4.desc": "インストール版でオフライン・高速動作",
+  "gs.section4.mac": "Mac 版をダウンロード",
+  "gs.section4.windows": "Windows 版をダウンロード",
   "gs.dismiss": "今後表示しない",
   "gs.ok": "はじめる",
 

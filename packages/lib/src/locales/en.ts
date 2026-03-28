@@ -151,6 +151,10 @@ const en: Record<string, string> = {
   "gs.section3.step1": "Load a raw data file and a layout file",
   "gs.section3.step2": "Select cross-tabulation axes if needed",
   "gs.section3.step3": 'Click the "Run Aggregation" button',
+  "gs.section4.title": "Desktop App",
+  "gs.section4.desc": "Install for offline use and faster performance",
+  "gs.section4.mac": "Download for Mac",
+  "gs.section4.windows": "Download for Windows",
   "gs.dismiss": "Don't show again",
   "gs.ok": "Get Started",
 
