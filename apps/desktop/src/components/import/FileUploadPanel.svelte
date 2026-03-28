@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { open } from "@tauri-apps/plugin-dialog";
-  import { readTextFile } from "@tauri-apps/plugin-fs";
+  import { invoke } from "@tauri-apps/api/core";
   import { t } from "@aggy/ui";
 
   interface Props {
@@ -12,28 +11,14 @@
 
   let { rawDataFileName, layoutFileName, onRawDataFile, onLayoutFile }: Props = $props();
 
-  async function openCsvDialog() {
-    const result = await open({
-      multiple: false,
-      filters: [{ name: "CSV", extensions: ["csv"] }],
-    });
+  async function pickFile(
+    extensions: string[],
+    onFile: (text: string, fileName: string) => void,
+  ) {
+    const result = await invoke<[string, string] | null>("pick_and_read_text", { extensions });
     if (!result) return;
-    const path = result as string;
-    const text = await readTextFile(path);
-    const fileName = path.split(/[\\/]/).at(-1) ?? "data.csv";
-    onRawDataFile(text, fileName);
-  }
-
-  async function openJsonDialog() {
-    const result = await open({
-      multiple: false,
-      filters: [{ name: "JSON", extensions: ["json"] }],
-    });
-    if (!result) return;
-    const path = result as string;
-    const text = await readTextFile(path);
-    const fileName = path.split(/[\\/]/).at(-1) ?? "layout.json";
-    onLayoutFile(text, fileName);
+    const [text, fileName] = result;
+    onFile(text, fileName);
   }
 </script>
 
@@ -42,7 +27,7 @@
     <button
       type="button"
       class="w-full rounded-lg border-2 border-dashed border-border-strong px-4 py-5 transition-colors hover:border-accent hover:bg-accent-bg"
-      onclick={openCsvDialog}
+      onclick={() => pickFile(["csv"], onRawDataFile)}
     >
       <div class="flex flex-col items-center gap-1">
         <span class="rounded-sm bg-accent-light px-3 py-1 text-xs font-bold tracking-wide text-accent">
@@ -62,7 +47,7 @@
     <button
       type="button"
       class="w-full rounded-lg border-2 border-dashed border-border-strong px-4 py-5 transition-colors hover:border-accent hover:bg-accent-bg"
-      onclick={openJsonDialog}
+      onclick={() => pickFile(["json"], onLayoutFile)}
     >
       <div class="flex flex-col items-center gap-1">
         <span class="rounded-sm bg-accent-light px-3 py-1 text-xs font-bold tracking-wide text-accent">

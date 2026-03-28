@@ -24,25 +24,18 @@ export async function initDuckDB(): Promise<void> {
     try {
       statusListener?.("loading", "DuckDB 読み込み中...");
 
-      const BUNDLES: duckdb.DuckDBBundles = {
-        mvp: {
-          mainModule: `${DUCKDB_LOCAL}/duckdb-eh.wasm`,
-          mainWorker: `${DUCKDB_LOCAL}/duckdb-browser-eh.worker.js`,
-        },
-        eh: {
-          mainModule: `${DUCKDB_LOCAL}/duckdb-eh.wasm`,
-          mainWorker: `${DUCKDB_LOCAL}/duckdb-browser-eh.worker.js`,
-        },
-      };
+      // Tauri targets modern WebViews (Chrome/Safari) that support EH (Exception Handling).
+      // No need for selectBundle() — use EH directly.
+      const mainModule = `${DUCKDB_LOCAL}/duckdb-eh.wasm`;
+      const mainWorker = `${DUCKDB_LOCAL}/duckdb-browser-eh.worker.js`;
 
-      const bundle = await duckdb.selectBundle(BUNDLES);
-      const workerBlob = new Blob([`importScripts("${bundle.mainWorker!}");`], {
+      const workerBlob = new Blob([`importScripts("${mainWorker}");`], {
         type: "application/javascript",
       });
       const worker = new Worker(URL.createObjectURL(workerBlob));
       const logger = new duckdb.ConsoleLogger();
       db = new duckdb.AsyncDuckDB(logger, worker);
-      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+      await db.instantiate(mainModule);
 
       status = "ready";
       statusListener?.("ready", "DuckDB Ready");
