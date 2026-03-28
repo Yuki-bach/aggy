@@ -13,7 +13,7 @@ export type {
 export type { Layout, LayoutQuestion, LayoutItem, DateGranularity } from "./layout";
 export type { Diagnostic } from "./validateRawData";
 export type { DatePreparationResult } from "./datePreparation";
-export type { RawData, LayoutData } from "./types";
+export type { RawData, LayoutData, SavedEntry } from "./types";
 export type { ExportGrid } from "./export/formatters/grid";
 
 // ─── Agg ────────────────────────────────────────────────────

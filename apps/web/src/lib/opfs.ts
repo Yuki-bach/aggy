@@ -1,9 +1,5 @@
-export interface SavedEntry {
-  folderId: string;
-  rawDataName: string;
-  layoutName: string;
-  timestamp: number;
-}
+import type { SavedEntry } from "@aggy/lib";
+export type { SavedEntry };
 
 export async function saveData(
   rawDataName: string,
