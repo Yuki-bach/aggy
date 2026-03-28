@@ -27,9 +27,7 @@ function dirEntry(name: string, isDirectory: boolean) {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(appDataDir).mockResolvedValue(BASE);
-  vi.mocked(join).mockImplementation((...parts: string[]) =>
-    Promise.resolve(parts.join("/")),
-  );
+  vi.mocked(join).mockImplementation((...parts: string[]) => Promise.resolve(parts.join("/")));
   vi.mocked(mkdir).mockResolvedValue(undefined);
   vi.mocked(writeTextFile).mockResolvedValue(undefined);
   vi.mocked(remove).mockResolvedValue(undefined);
@@ -71,10 +69,7 @@ describe("listEntries", () => {
   it("フォルダ一覧をタイムスタンプ降順で返す", async () => {
     vi.mocked(readDir).mockImplementation(async (path: unknown) => {
       if (path === AGGY_DIR) {
-        return [
-          dirEntry("1000000000000", true),
-          dirEntry("2000000000000", true),
-        ];
+        return [dirEntry("1000000000000", true), dirEntry("2000000000000", true)];
       }
       if (path === `${AGGY_DIR}/1000000000000`) {
         return [dirEntry("a.csv", false), dirEntry("b.json", false)];
@@ -116,10 +111,7 @@ describe("listEntries", () => {
   it("ファイルエントリ（isDirectory=false）はスキップする", async () => {
     vi.mocked(readDir).mockImplementation(async (path: unknown) => {
       if (path === AGGY_DIR) {
-        return [
-          dirEntry("some-file.txt", false),
-          dirEntry("1000000000000", true),
-        ];
+        return [dirEntry("some-file.txt", false), dirEntry("1000000000000", true)];
       }
       if (path === `${AGGY_DIR}/1000000000000`) {
         return [dirEntry("a.csv", false), dirEntry("b.json", false)];
