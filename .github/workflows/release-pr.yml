@@ -12,18 +12,12 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-      - name: Create or update release PR
+      - uses: x-motemen/git-pr-release-action@v1
+        with:
+          base: main
+          head: develop
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          existing=$(gh pr list --base main --head develop --json number --jq '.[0].number')
-          if [ -n "$existing" ]; then
-            echo "Release PR #$existing already exists"
-          else
-            gh pr create \
-              --base main \
-              --head develop \
-              --title "release: develop → main" \
-              --body "Automated release PR from develop to main."
-          fi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

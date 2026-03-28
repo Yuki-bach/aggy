@@ -23,10 +23,11 @@ pnpm bench:gen  # generate benchmark data
 
 ## Release
 
-1. `src/lib/changelog.json` に新バージョンのエントリを追加
-2. `npm version minor` (or `patch` / `major`) — package.json更新 + git tag作成（`preversion` でchangelogエントリの存在を検証）
-3. `git push origin main --tags`
-4. `gh release create v0.x.0 --generate-notes`
+1. Update `packages/lib/src/changelog.json` with the new version entry
+2. Merge the develop → main PR (auto-created/updated by `release-pr.yml` with merged PR list)
+3. `git tag vX.Y.Z` on main (SemVer, manual)
+4. `git push origin main --tags`
+5. `gh release create vX.Y.Z --generate-notes`
 
 ## Architecture
 
