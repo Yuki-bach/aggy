@@ -1,6 +1,12 @@
 import { appDataDir, join } from "@tauri-apps/api/path";
 import { mkdir, writeTextFile, readTextFile, readDir, remove } from "@tauri-apps/plugin-fs";
-import type { SavedEntry } from "@aggy/lib";
+
+export type SavedEntry = {
+  folderId: string;
+  rawDataName: string;
+  layoutName: string;
+  timestamp: number;
+};
 
 async function getAggyDir(): Promise<string> {
   const base = await appDataDir();

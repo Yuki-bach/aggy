@@ -1,4 +1,4 @@
-import type { SavedEntry } from "@aggy/lib";
+import type { SavedEntry } from "./storage";
 import { listEntries, deleteEntry } from "./storage";
 
 let entries = $state<SavedEntry[]>([]);

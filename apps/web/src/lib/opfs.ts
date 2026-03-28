@@ -1,5 +1,9 @@
-import type { SavedEntry } from "@aggy/lib";
-export type { SavedEntry };
+export type SavedEntry = {
+  folderId: string;
+  rawDataName: string;
+  layoutName: string;
+  timestamp: number;
+};
 
 export async function saveData(
   rawDataName: string,

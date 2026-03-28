@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SavedEntry } from "@aggy/lib";
+  import type { SavedEntry } from "../../lib/storage";
   import { t } from "@aggy/ui";
 
   interface Props {
