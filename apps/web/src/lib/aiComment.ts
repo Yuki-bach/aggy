@@ -1,7 +1,7 @@
 /** AI analysis comment generation via Chrome Built-in AI (Prompt API) */
 
 import type { Tab } from "@aggy/lib";
-import { getLocale, t } from "./i18n.svelte";
+import { getLocale, t } from "@aggy/ui";
 
 // Chrome Prompt API type declarations
 

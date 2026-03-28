@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { setStatusListener, type DuckStatus } from "../../lib/duckdb";
-  import { t } from "../../lib/i18n.svelte";
+  import { t } from "@aggy/ui";
 
   const STATUS_CLASSES: Record<DuckStatus, string> = {
     loading: "bg-[var(--color-warning-700)] animate-[pulse_1s_infinite]",

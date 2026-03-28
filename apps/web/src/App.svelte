@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { initDuckDB } from "./lib/duckdb";
-  import { initTheme } from "./lib/theme";
+  import { initTheme } from "@aggy/ui";
   import Header from "./components/Header.svelte";
   import ImportScreen from "./components/ImportScreen.svelte";
   import AggregationScreen from "./components/AggregationScreen.svelte";

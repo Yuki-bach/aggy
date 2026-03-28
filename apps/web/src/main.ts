@@ -1,5 +1,5 @@
 import { mount } from "svelte";
-import { initI18n } from "./lib/i18n.svelte";
+import { initI18n } from "@aggy/ui";
 import App from "./App.svelte";
 
 // Initialize i18n first (before any UI rendering)

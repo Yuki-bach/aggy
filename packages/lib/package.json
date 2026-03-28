@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./i18n": "./src/i18n.ts"
+    "./i18n": "./src/i18n.ts",
+    "./changelog": "./src/changelog.ts",
+    "./agg/naHelpers": "./src/agg/naHelpers.ts"
   },
   "scripts": {
     "test": "vp test run",
