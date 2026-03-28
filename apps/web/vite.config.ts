@@ -30,6 +30,7 @@ export default defineConfig({
     arrowParens: "always",
     bracketSpacing: true,
     endOfLine: "lf",
+    ignorePatterns: ["dist/"],
   },
   lint: {
     plugins: ["typescript", "import", "unicorn", "vitest"],
