@@ -31,3 +31,9 @@ jobs:
 
       - name: Build (web)
         run: cd apps/web && vp build
+
+      - name: Check (desktop)
+        run: cd apps/desktop && vp check
+
+      - name: Test (desktop)
+        run: cd apps/desktop && vp test run
