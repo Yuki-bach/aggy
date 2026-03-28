@@ -1,6 +1,7 @@
 <script lang="ts">
   import { t, getLocale } from "../../lib/i18n.svelte";
-  import { changelog, hasUnreadChanges, markChangelogSeen } from "@aggy/lib/changelog";
+  import { changelog } from "@aggy/lib/changelog";
+  import { hasUnreadChanges, markChangelogSeen } from "../../lib/changelog";
   import Dropdown from "../shared/Dropdown.svelte";
   import IconButton from "../shared/IconButton.svelte";
 

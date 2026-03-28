@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vite-plus/test";
-import { hasUnreadChanges, markChangelogSeen } from "../src/changelog";
+import { hasUnreadChanges, markChangelogSeen } from "../src/lib/changelog";
 
 // Polyfill localStorage for Node test environment
 const store = new Map<string, string>();
@@ -15,10 +15,6 @@ if (typeof globalThis.localStorage === "undefined") {
 }
 
 describe("changelog", () => {
-  beforeEach(() => {
-    store.clear();
-  });
-
   it("hasUnreadChanges returns true when localStorage is empty", () => {
     expect(hasUnreadChanges()).toBe(true);
   });
