@@ -2,6 +2,8 @@
   "files": [],
   "references": [
     { "path": "packages/lib" },
-    { "path": "apps/web" }
+    { "path": "packages/ui" },
+    { "path": "apps/web" },
+    { "path": "apps/desktop" }
   ]
 }

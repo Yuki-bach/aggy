@@ -16,5 +16,5 @@
       "@aggy/lib/agg/naHelpers": ["../../packages/lib/src/agg/naHelpers.ts"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
+    "types": ["vitest/importMeta"],
     "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -17,5 +18,5 @@
       "@aggy/ui": ["../../packages/ui/src/index.ts"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }
