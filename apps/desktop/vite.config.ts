@@ -10,10 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@aggy/lib/i18n": resolve(import.meta.dirname, "../../packages/lib/src/i18n.ts"),
-      "@aggy/lib/changelog": resolve(
-        import.meta.dirname,
-        "../../packages/lib/src/changelog.ts",
-      ),
+      "@aggy/lib/changelog": resolve(import.meta.dirname, "../../packages/lib/src/changelog.ts"),
       "@aggy/lib/agg/naHelpers": resolve(
         import.meta.dirname,
         "../../packages/lib/src/agg/naHelpers.ts",
@@ -41,8 +38,7 @@ export default defineConfig({
   },
   envPrefix: ["VITE_", "TAURI_ENV_*"],
   build: {
-    target:
-      process.env.TAURI_ENV_PLATFORM === "windows" ? "chrome105" : "safari13",
+    target: process.env.TAURI_ENV_PLATFORM === "windows" ? "chrome105" : "safari13",
     minify: !process.env.TAURI_ENV_DEBUG ? ("esbuild" as const) : false,
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
   },

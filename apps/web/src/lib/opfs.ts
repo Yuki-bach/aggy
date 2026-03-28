@@ -1,9 +1,9 @@
-export interface SavedEntry {
+export type SavedEntry = {
   folderId: string;
   rawDataName: string;
   layoutName: string;
   timestamp: number;
-}
+};
 
 export async function saveData(
   rawDataName: string,

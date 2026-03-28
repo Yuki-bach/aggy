@@ -3,8 +3,15 @@
   import { parseLayoutJson, buildValidLayout, filterLayout } from "@aggy/lib";
   import type { RawData, LayoutData, Layout, Diagnostic } from "@aggy/lib";
   import { loadCSV, prepareDateLayout, runValidation } from "../lib/duckdb";
+  import { saveEntry, loadEntry } from "../lib/storage";
   import { t, ValidationStep, Button, SectionTitle, Alert, GettingStarted } from "@aggy/ui";
+  import {
+    getSavedEntries,
+    refreshSavedFiles,
+    deleteSavedEntry,
+  } from "../lib/savedFilesStore.svelte";
   import FileUploadPanel from "./import/FileUploadPanel.svelte";
+  import SavedFiles from "./import/SavedFiles.svelte";
 
   interface Props {
     onComplete: (
@@ -26,6 +33,15 @@
   let validationResult = $state<Diagnostic[] | null>(null);
   let validationError = $state<string | null>(null);
 
+  let loadedFromSaved = false;
+  let pendingPayload: {
+    rawDataText?: string;
+    rawDataFileName?: string;
+    layoutJson?: string;
+    layoutFileName?: string;
+  } = {};
+
+  let entries = $derived(getSavedEntries());
   let bothLoaded = $derived(rawData !== null && layout !== null);
   let loadedInfo = $derived(
     rawData
@@ -36,30 +52,56 @@
       : null,
   );
 
+  onMount(() => {
+    void refreshSavedFiles();
+  });
+
   const STEPS = [
     { num: 1, labelKey: "import.step.select" },
     { num: 2, labelKey: "import.step.proceed" },
   ] as const;
 
-  async function handleRawDataFile(file: File) {
+  async function handleRawDataFile(text: string, fileName: string) {
     try {
       loadError = null;
-      const text = await file.text();
       const result = await loadCSV(text);
-      rawData = { fileName: file.name, headers: result.headers, rowCount: result.rowCount };
+      pendingPayload = { ...pendingPayload, rawDataText: text, rawDataFileName: fileName };
+      rawData = { fileName, headers: result.headers, rowCount: result.rowCount };
+      loadedFromSaved = false;
     } catch (e) {
       loadError = t("error.csv.load", { msg: (e as Error).message });
     }
   }
 
-  async function handleLayoutFile(file: File) {
+  async function handleLayoutFile(text: string, fileName: string) {
     try {
       loadError = null;
-      const text = await file.text();
       const rawJson = parseLayoutJson(text);
-      layout = { fileName: file.name, rawJson };
+      pendingPayload = { ...pendingPayload, layoutJson: text, layoutFileName: fileName };
+      layout = { fileName, rawJson };
+      loadedFromSaved = false;
     } catch (e) {
       loadError = t("error.layout.load", { msg: (e as Error).message });
+    }
+  }
+
+  async function handleLoadFromSaved(folderId: string) {
+    try {
+      loadError = null;
+      const data = await loadEntry(folderId);
+      const rawJson = parseLayoutJson(data.layoutJson);
+      const result = await loadCSV(data.rawDataText);
+      pendingPayload = {
+        rawDataText: data.rawDataText,
+        rawDataFileName: data.rawDataName,
+        layoutJson: data.layoutJson,
+        layoutFileName: data.layoutName,
+      };
+      rawData = { fileName: data.rawDataName, headers: result.headers, rowCount: result.rowCount };
+      layout = { fileName: data.layoutName, rawJson };
+      loadedFromSaved = true;
+    } catch (e) {
+      loadError = t("error.saved.load", { msg: (e as Error).message });
     }
   }
 
@@ -86,6 +128,19 @@
 
   async function handleProceed() {
     if (!rawData || !layout) return;
+    if (!loadedFromSaved && pendingPayload.rawDataText && pendingPayload.layoutJson) {
+      try {
+        await saveEntry(
+          pendingPayload.rawDataFileName!,
+          pendingPayload.rawDataText,
+          pendingPayload.layoutFileName!,
+          pendingPayload.layoutJson,
+        );
+        await refreshSavedFiles();
+      } catch {
+        // storage save is best-effort
+      }
+    }
     const validLayout = buildValidLayout(layout.rawJson);
     const filtered = filterLayout(rawData.headers, validLayout);
     const { layout: prepared, warnings } = await prepareDateLayout(filtered);
@@ -144,6 +199,17 @@
         onRawDataFile={handleRawDataFile}
         onLayoutFile={handleLayoutFile}
       />
+
+      <div class="mt-5 border-t border-border pt-4">
+        <SectionTitle>{t("import.history")}</SectionTitle>
+        <div class="flex max-h-[160px] flex-col gap-2 overflow-y-auto">
+          <SavedFiles
+            {entries}
+            onSelectEntry={handleLoadFromSaved}
+            onDeleteEntry={deleteSavedEntry}
+          />
+        </div>
+      </div>
 
       {#if loadedInfo}
         <Alert variant="info" role="status" class="mt-3 whitespace-pre-line">
