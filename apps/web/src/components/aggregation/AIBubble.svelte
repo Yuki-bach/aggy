@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { Tab } from "@aggy/lib";
   import { generateComment } from "../../lib/aiComment";
-  import { t } from "../../lib/i18n.svelte";
-  import { isAICommentEnabled } from "../../lib/theme";
-  import IconButton from "../shared/IconButton.svelte";
+  import { t, isAICommentEnabled, IconButton } from "@aggy/ui";
 
   interface Props {
     tabs: Tab[];

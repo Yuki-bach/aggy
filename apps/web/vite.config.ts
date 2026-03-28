@@ -8,7 +8,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@aggy/lib/i18n": resolve(import.meta.dirname, "../../packages/lib/src/i18n.ts"),
+      "@aggy/lib/changelog": resolve(import.meta.dirname, "../../packages/lib/src/changelog.ts"),
+      "@aggy/lib/agg/naHelpers": resolve(
+        import.meta.dirname,
+        "../../packages/lib/src/agg/naHelpers.ts",
+      ),
       "@aggy/lib": resolve(import.meta.dirname, "../../packages/lib/src/index.ts"),
+      "@aggy/ui": resolve(import.meta.dirname, "../../packages/ui/src/index.ts"),
     },
   },
   staged: {

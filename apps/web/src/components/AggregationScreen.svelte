@@ -2,10 +2,9 @@
   import { onMount } from "svelte";
   import type { Tab, Layout, RawData, LayoutData } from "@aggy/lib";
   import { buildQuestions, findWeightColumn } from "@aggy/lib";
-  import ResultPanel from "./aggregation/ResultPanel.svelte";
-  import SettingsPanel from "./aggregation/SettingsPanel.svelte";
+  import { ResultPanel, SettingsPanel, t } from "@aggy/ui";
+  import AIBubble from "./aggregation/AIBubble.svelte";
   import { runAggregation } from "../lib/duckdb";
-  import { t } from "../lib/i18n.svelte";
 
   interface Props {
     rawData: RawData;
@@ -65,4 +64,7 @@
   onRun={() => handleRunAggregation()}
 />
 
-<ResultPanel tabs={aggResult?.tabs ?? null} weightCol={aggResult?.weightCol ?? ""} />
+{#snippet aiAreaSnippet()}
+  <AIBubble tabs={aggResult?.tabs ?? []} weightCol={aggResult?.weightCol ?? ""} />
+{/snippet}
+<ResultPanel tabs={aggResult?.tabs ?? null} weightCol={aggResult?.weightCol ?? ""} aiArea={aiAreaSnippet} />

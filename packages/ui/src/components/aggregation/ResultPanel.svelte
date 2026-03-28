@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import type { Snippet } from "svelte";
   import type { Tab } from "@aggy/lib";
   import Toolbar from "./Toolbar.svelte";
   import ViewOpts from "./ViewOpts.svelte";
   import TabCard from "./TabCard.svelte";
-  import AIBubble from "./AIBubble.svelte";
   import { t } from "../../lib/i18n.svelte";
   import type { Basis, ChartType, ViewMode } from "./viewTypes";
   import type { PaletteId } from "../../lib/chartConfig";
@@ -12,9 +12,10 @@
   interface Props {
     tabs: Tab[] | null;
     weightCol: string;
+    aiArea?: Snippet<[]>;
   }
 
-  let { tabs, weightCol }: Props = $props();
+  let { tabs, weightCol, aiArea }: Props = $props();
 
   let viewMode = $state<ViewMode>("table");
   let saChartType = $state<ChartType>("bar-h");
@@ -87,7 +88,7 @@
           />
         {/each}
       </div>
-      <AIBubble {tabs} {weightCol} />
+      {#if aiArea}{@render aiArea()}{/if}
     </div>
   {:else}
     <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">

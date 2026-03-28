@@ -1,9 +1,6 @@
 <script lang="ts">
-  import { t } from "../lib/i18n.svelte";
-  import SettingsModal from "./header/SettingsModal.svelte";
-  import IconButton from "./shared/IconButton.svelte";
+  import { t, SettingsModal, IconButton, ChangelogButton } from "@aggy/ui";
   import WasmStatus from "./header/WasmStatus.svelte";
-  import ChangelogButton from "./header/ChangelogButton.svelte";
 
   interface Props {
     isImport: boolean;

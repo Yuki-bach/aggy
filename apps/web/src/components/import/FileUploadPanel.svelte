@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { t } from "../../lib/i18n.svelte";
-  import Dropzone from "./Dropzone.svelte";
+  import { t, Dropzone } from "@aggy/ui";
 
   interface Props {
     rawDataFileName: string | null;

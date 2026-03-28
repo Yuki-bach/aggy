@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { SavedEntry } from "../../lib/opfs";
-  import { t } from "../../lib/i18n.svelte";
+  import { t } from "@aggy/ui";
 
   interface Props {
     entries: SavedEntry[];

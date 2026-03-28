@@ -4,7 +4,7 @@
   import type { RawData, LayoutData, Layout, Diagnostic } from "@aggy/lib";
   import { loadCSV, prepareDateLayout, runValidation } from "../lib/duckdb";
   import { saveData, loadSaved } from "../lib/opfs";
-  import { t } from "../lib/i18n.svelte";
+  import { t, ValidationStep, Button, SectionTitle, Alert, GettingStarted } from "@aggy/ui";
   import {
     getSavedEntries,
     refreshSavedFiles,
@@ -13,10 +13,6 @@
 
   import FileUploadPanel from "./import/FileUploadPanel.svelte";
   import SavedFiles from "./import/SavedFiles.svelte";
-  import ValidationStep from "./import/ValidationStep.svelte";
-  import Button from "./shared/Button.svelte";
-  import SectionTitle from "./shared/SectionTitle.svelte";
-  import Alert from "./shared/Alert.svelte";
 
   interface Props {
     onComplete: (
@@ -278,8 +274,6 @@
 
   <!-- Getting Started Modal -->
   {#if gsOpen}
-    {#await import("./import/GettingStarted.svelte") then { default: GettingStartedModal }}
-      <GettingStartedModal open={gsOpen} onClose={() => (gsOpen = false)} />
-    {/await}
+    <GettingStarted open={gsOpen} onClose={() => (gsOpen = false)} />
   {/if}
 </div>
