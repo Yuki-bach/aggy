@@ -33,6 +33,11 @@ jobs:
           node-version-file: .node-version
           cache: true
 
+      - uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
