@@ -23,10 +23,11 @@ pnpm bench:gen  # generate benchmark data
 
 ## Release
 
-1. Merge the develop → main PR (auto-created/updated by `release-pr.yml` with merged PR list)
-2. `git tag vX.Y.Z` on main (SemVer, manual)
-3. `git push origin main --tags`
-4. `gh release create vX.Y.Z --generate-notes`
+1. Update `packages/lib/src/changelog.json` with the new version entry
+2. Merge the develop → main PR (auto-created/updated by `release-pr.yml` with merged PR list)
+3. `git tag vX.Y.Z` on main (SemVer, manual)
+4. `git push origin main --tags`
+5. `gh release create vX.Y.Z --generate-notes`
 
 ## Architecture
 
