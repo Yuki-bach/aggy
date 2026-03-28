@@ -98,4 +98,7 @@ export default defineConfig({
     },
   },
   plugins: [tailwindcss(), svelte()],
+  optimizeDeps: {
+    exclude: ["@duckdb/duckdb-wasm"],
+  },
 });

@@ -12,6 +12,7 @@
   "dependencies": {
     "@aggy/lib": "workspace:*",
     "@aggy/ui": "workspace:*",
+    "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2",
     "@tauri-apps/plugin-fs": "^2",
