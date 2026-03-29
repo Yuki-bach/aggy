@@ -15,9 +15,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: x-motemen/git-pr-release-action@v1
-        with:
-          base: main
-          head: develop
+      - name: Create or update release PR
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Collect merged PR titles between main..develop
+          BODY=$(git log origin/main..HEAD --merges --oneline \
+            | sed -n 's/.*Merge pull request #\([0-9]*\) from .*/\1/p' \
+            | xargs -I{} gh pr view {} --json number,title --jq '"* #\(.number) \(.title)"' \
+            2>/dev/null)
+          BODY="${BODY:-_No merged PRs found._}"
+
+          # Create or update release PR
+          EXISTING=$(gh pr list --base main --head develop --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh pr edit "$EXISTING" --body "$BODY"
+          else
+            gh pr create --base main --head develop \
+              --title "release: develop → main" \
+              --body "$BODY"
+          fi
