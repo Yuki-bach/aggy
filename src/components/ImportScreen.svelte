@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { parseLayoutJson, buildValidLayout, filterLayout } from "../lib/layout";
-  import { loadCSV, prepareDateLayout } from "../lib/duckdb";
+  import { loadCSV, prepareDateLayout, runValidation } from "../lib/duckdb";
   import { saveData, loadSaved } from "../lib/opfs";
   import { t } from "../lib/i18n.svelte";
   import {
@@ -18,6 +18,7 @@
   import Alert from "./shared/Alert.svelte";
   import type { RawData, LayoutData } from "../lib/types";
   import type { Layout } from "../lib/layout";
+  import type { Diagnostic } from "../lib/validateRawData";
 
   interface Props {
     onComplete: (
@@ -35,6 +36,9 @@
   let step = $state(1);
   let gsOpen = $state(false);
   let loadError = $state<string | null>(null);
+  let validating = $state(false);
+  let validationResult = $state<Diagnostic[] | null>(null);
+  let validationError = $state<string | null>(null);
 
   let loadedFromSaved = false;
   let opfsPayload: {
@@ -61,8 +65,7 @@
 
   const STEPS = [
     { num: 1, labelKey: "import.step.select" },
-    { num: 2, labelKey: "import.step.validate" },
-    { num: 3, labelKey: "import.step.proceed" },
+    { num: 2, labelKey: "import.step.proceed" },
   ] as const;
 
   async function handleRawDataFile(file: File) {
@@ -120,8 +123,25 @@
     }
   }
 
-  function handleGoToValidation() {
-    if (bothLoaded) step = 2;
+  async function handleStart() {
+    if (!rawData || !layout) return;
+    validating = true;
+    validationResult = null;
+    validationError = null;
+    try {
+      const diags = await runValidation(layout.rawJson, rawData.headers);
+      if (diags.length === 0) {
+        await handleProceed();
+      } else {
+        validationResult = diags;
+        step = 2;
+      }
+    } catch (e) {
+      validationError = (e as Error).message;
+      step = 2;
+    } finally {
+      validating = false;
+    }
   }
 
   function handleBackToUpload() {
@@ -227,8 +247,12 @@
 
       {#if bothLoaded}
         <div class="mt-5 w-full">
-          <Button variant="primary" size="lg" onclick={handleGoToValidation}>
-            {t("import.step.validate")} &rarr;
+          <Button variant="primary" size="lg" onclick={handleStart} disabled={validating}>
+            {#if validating}
+              {t("validation.running")}
+            {:else}
+              {t("import.start")} &rarr;
+            {/if}
           </Button>
         </div>
       {/if}
@@ -236,6 +260,8 @@
       <ValidationStep
         {rawData}
         {layout}
+        diagnostics={validationResult}
+        error={validationError}
         onProceed={handleProceed}
         onBack={handleBackToUpload}
       />

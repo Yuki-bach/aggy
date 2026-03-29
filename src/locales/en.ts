@@ -13,7 +13,7 @@ const en: Record<string, string> = {
   "import.step.select": "Select Files",
   "import.step.proceed": "Aggregate",
   "import.proceed": "Proceed to Aggregation →",
-  "import.step.validate": "Validate",
+  "import.start": "Start Aggregation",
 
   // Validation step
   "validation.title": "Data Validation",
@@ -95,6 +95,7 @@ const en: Record<string, string> = {
   "na.stat.sd": "Std Dev",
   "na.stat.min": "Min",
   "na.stat.max": "Max",
+  "na.binWidth": "Class width",
 
   // Chart type
   "chart.barH": "Horizontal Bar",
@@ -168,6 +169,9 @@ const en: Record<string, string> = {
   "settings.ai.on": "ON",
   "settings.ai.off": "OFF",
   "settings.close": "Close",
+
+  // Changelog
+  "changelog.title": "What's New",
 };
 
 export default en;

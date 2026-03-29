@@ -13,7 +13,7 @@ const ja: Record<string, string> = {
   "import.step.select": "ファイル選択",
   "import.step.proceed": "集計へ",
   "import.proceed": "集計画面へ進む →",
-  "import.step.validate": "検証",
+  "import.start": "集計開始",
 
   // Validation step
   "validation.title": "データ検証",
@@ -95,6 +95,7 @@ const ja: Record<string, string> = {
   "na.stat.sd": "標準偏差",
   "na.stat.min": "最小",
   "na.stat.max": "最大",
+  "na.binWidth": "階級幅",
 
   // Chart type
   "chart.barH": "横棒",
@@ -168,6 +169,9 @@ const ja: Record<string, string> = {
   "settings.ai.on": "ON",
   "settings.ai.off": "OFF",
   "settings.close": "閉じる",
+
+  // Changelog
+  "changelog.title": "更新情報",
 };
 
 export default ja;

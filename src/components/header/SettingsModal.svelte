@@ -1,6 +1,5 @@
 <script lang="ts">
   import { t, getLocale, setLocale } from "../../lib/i18n.svelte";
-  import { clickOutside } from "../../lib/dismiss";
   import {
     isAICommentEnabled,
     setAIComment,
@@ -8,6 +7,7 @@
     getStoredTheme,
     type Theme,
   } from "../../lib/theme";
+  import Dropdown from "../shared/Dropdown.svelte";
   import IconButton from "../shared/IconButton.svelte";
 
   let open = $state(false);
@@ -54,21 +54,19 @@
   });
 </script>
 
-<div class="relative" {@attach clickOutside({ onClose: () => (open = false) })}>
-  <IconButton
-    size="md"
-    id="settings-btn"
-    label={t("header.settings")}
-    data-i18n="header.settings"
-    data-i18n-attr="aria-label"
-    onclick={handleToggle}
-  >
-    &#x2699;
-  </IconButton>
-  {#if open}
-    <div
-      class="absolute top-[calc(100%+8px)] right-0 z-100 w-[300px] rounded-xl border border-border bg-surface p-4 shadow-lg"
+<Dropdown {open} onclose={() => (open = false)}>
+  {#snippet trigger()}
+    <IconButton
+      size="md"
+      id="settings-btn"
+      label={t("header.settings")}
+      data-i18n="header.settings"
+      data-i18n-attr="aria-label"
+      onclick={handleToggle}
     >
+      &#x2699;
+    </IconButton>
+  {/snippet}
       <!-- Language -->
       <div class="mb-4 last:mb-0">
         <span class="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted">
@@ -142,6 +140,4 @@
           </div>
         </div>
       {/if}
-    </div>
-  {/if}
-</div>
+</Dropdown>

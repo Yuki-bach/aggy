@@ -21,10 +21,24 @@ pnpm bench rows # single pattern (rows / cols / both)
 pnpm bench:gen  # generate benchmark data
 ```
 
+## Release
+
+1. Update `packages/lib/src/changelog.json` with the new version entry
+2. Merge the develop → main PR (auto-created/updated by `release-pr.yml` with merged PR list)
+3. `git tag vX.Y.Z` on main (SemVer, manual)
+4. `git push origin main --tags`
+5. `gh release create vX.Y.Z --generate-notes`
+
 ## Architecture
 
 - **`src/components/`** — UI: event handling, DOM rendering, and component-local helpers
 - **`src/lib/`** — Shared pure logic used by multiple modules (aggregation SQL, DuckDB bridge, layout parsing, pivot, export)
+
+## Branch Strategy
+
+- `develop` — daily integration branch. Feature branches merge here.
+- `main` — release branch. `develop` merges to `main` at release time.
+- Tags: `v1.x.0` on `main` after merge. GitHub Release Notes auto-generated via `gh release create`.
 
 ## Conventions
 
