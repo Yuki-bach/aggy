@@ -182,6 +182,9 @@ const en: Record<string, string> = {
     "Questions with the most skewed response distributions (low entropy)",
   "dashboard.notable.score": "Skewness",
   "dashboard.notable.empty": "No applicable questions",
+  "dashboard.segment.title": "Segment Differences",
+  "dashboard.segment.description":
+    "Cross-tabulations with the largest segment differences (Cramér's V ≥ 0.3)",
 
   // Toolbar
   "toolbar.crossAxis": "Cross Axes",

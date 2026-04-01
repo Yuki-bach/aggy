@@ -181,6 +181,9 @@ const ja: Record<string, string> = {
   "dashboard.notable.description": "回答の偏りが大きい設問（低エントロピー）を自動検出しています",
   "dashboard.notable.score": "偏りスコア",
   "dashboard.notable.empty": "対象となる設問がありません",
+  "dashboard.segment.title": "セグメント間差異",
+  "dashboard.segment.description":
+    "クロス集計でセグメント間の差が大きい設問（クラメールのV ≥ 0.3）",
 
   // Toolbar
   "toolbar.crossAxis": "クロス集計軸",

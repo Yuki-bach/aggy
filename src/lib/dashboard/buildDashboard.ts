@@ -1,6 +1,6 @@
 import type { Question, Tab } from "../agg/types";
 import type { DashboardData, RankedQuestion, SurveyOverview } from "./types";
-import { skewnessScore } from "./stats";
+import { rankCrossTabs, skewnessScore } from "./stats";
 
 const TOP_N = 5;
 
@@ -47,8 +47,10 @@ export function buildDashboard(
   questions: Question[],
   rowCount: number,
 ): DashboardData {
+  const crossTabs = tabs.filter((t) => t.by !== null && t.type !== "NA");
   return {
     overview: buildOverview(questions, rowCount),
     notableQuestions: buildNotableQuestions(tabs),
+    topCrossTabs: rankCrossTabs(crossTabs),
   };
 }

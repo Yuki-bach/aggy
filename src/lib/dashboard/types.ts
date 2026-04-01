@@ -19,4 +19,5 @@ export interface RankedQuestion {
 export interface DashboardData {
   overview: SurveyOverview;
   notableQuestions: RankedQuestion[];
+  topCrossTabs: Tab[];
 }

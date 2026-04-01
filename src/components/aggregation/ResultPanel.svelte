@@ -92,7 +92,7 @@
     <div aria-live="polite">
       <!-- Dashboard -->
       {#if dashboardData}
-        <DashboardPanel data={dashboardData} />
+        <DashboardPanel data={dashboardData} {tabs} />
       {/if}
 
       <!-- Result list -->

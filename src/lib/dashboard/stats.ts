@@ -42,6 +42,74 @@ export function skewnessScore(tab: Tab): number {
   return 1 - normalizedEntropy(slice.cells);
 }
 
+const V_THRESHOLD = 0.3;
+const TOP_N_CROSS = 5;
+const MIN_EXPECTED_FREQ = 5;
+const MAX_LOW_EXPECTED_RATIO = 0.2;
+
+/** Build observed frequency matrix from a cross-tab: rows = question options, cols = slices */
+function buildObserved(tab: Tab): number[][] {
+  return tab.codes.map((_, ri) => tab.slices.map((s) => s.cells[ri]?.count ?? 0));
+}
+
+function computeCramersV(observed: number[][]): number {
+  const rows = observed.length;
+  const cols = observed[0].length;
+  if (rows < 2 || cols < 2) return 0;
+
+  const rowTotals = observed.map((row) => row.reduce((a, b) => a + b, 0));
+  const colTotals = observed[0].map((_, ci) => observed.reduce((a, row) => a + row[ci], 0));
+  const grandTotal = rowTotals.reduce((a, b) => a + b, 0);
+  if (grandTotal === 0) return 0;
+
+  // Check expected frequency validity
+  let lowCount = 0;
+  const totalCells = rows * cols;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const expected = (rowTotals[r] * colTotals[c]) / grandTotal;
+      if (expected < MIN_EXPECTED_FREQ) lowCount++;
+    }
+  }
+  if (lowCount / totalCells > MAX_LOW_EXPECTED_RATIO) return Number.NaN;
+
+  // Chi-square
+  let chiSq = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const expected = (rowTotals[r] * colTotals[c]) / grandTotal;
+      if (expected > 0) {
+        chiSq += (observed[r][c] - expected) ** 2 / expected;
+      }
+    }
+  }
+
+  // Cramér's V
+  const minDim = Math.min(rows - 1, cols - 1);
+  if (minDim === 0) return 0;
+  return Math.sqrt(chiSq / (grandTotal * minDim));
+}
+
+/**
+ * Rank cross-tabs by Cramér's V (effect size).
+ * Returns top 5 tabs with V ≥ 0.3, sorted by V descending.
+ * Skips tabs where >20% of cells have expected frequency < 5.
+ */
+export function rankCrossTabs(crossTabs: Tab[]): Tab[] {
+  const scored: { tab: Tab; v: number }[] = [];
+
+  for (const tab of crossTabs) {
+    if (tab.slices.length < 2 || tab.codes.length < 2) continue;
+    const observed = buildObserved(tab);
+    const v = computeCramersV(observed);
+    if (Number.isNaN(v) || v < V_THRESHOLD) continue;
+    scored.push({ tab, v });
+  }
+
+  scored.sort((a, b) => b.v - a.v);
+  return scored.slice(0, TOP_N_CROSS).map((s) => s.tab);
+}
+
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest;
 
