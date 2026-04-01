@@ -7,6 +7,7 @@
   import { t } from "../lib/i18n.svelte";
   import type { RawData, LayoutData } from "../lib/types";
   import { buildDashboard } from "../lib/dashboard/buildDashboard";
+  import { detectAttributes } from "../lib/detectAttributes";
 
   interface Props {
     rawData: RawData;
@@ -25,14 +26,17 @@
   let errorMsg = $state("");
   let aggResult = $state<{ tabs: Tab[]; weightCol: string } | null>(null);
   let running = $state(false);
-  let autoSelectedOnce = $state(false);
 
-  // Initialize crossSelected when questions change
+  // Initialize crossSelected with detected attributes as defaults
   $effect(() => {
+    const saInputs = questions
+      .filter((q) => q.type === "SA")
+      .map((q) => ({ code: q.code, label: q.label, labels: q.labels }));
+    const detected = new Set(detectAttributes(saInputs).map((a) => a.code));
+
     const sel: Record<string, boolean> = {};
-    for (const q of questions) sel[q.code] = false;
+    for (const q of questions) sel[q.code] = detected.has(q.code);
     crossSelected = sel;
-    autoSelectedOnce = false;
   });
 
   // Debounced auto-aggregation
@@ -77,17 +81,6 @@
       ? buildDashboard(aggResult.tabs, questions, rawData.rowCount)
       : null,
   );
-
-  // Auto-select detected attribute questions as cross axes (once after first GT aggregation)
-  $effect(() => {
-    if (autoSelectedOnce || !dashboardData) return;
-    const attrs = dashboardData.attributeQuestions;
-    if (attrs.length === 0) return;
-    autoSelectedOnce = true;
-    const sel = { ...crossSelected };
-    for (const attr of attrs) sel[attr.code] = true;
-    crossSelected = sel;
-  });
 </script>
 
 <ResultPanel

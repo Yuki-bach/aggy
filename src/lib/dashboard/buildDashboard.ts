@@ -1,7 +1,6 @@
 import type { Question, Tab } from "../agg/types";
 import type { DashboardData, RankedQuestion, SurveyOverview } from "./types";
 import { skewnessScore } from "./stats";
-import { detectAttributes } from "../detectAttributes";
 
 const TOP_N = 5;
 
@@ -48,13 +47,8 @@ export function buildDashboard(
   questions: Question[],
   rowCount: number,
 ): DashboardData {
-  const saQuestions = questions
-    .filter((q) => q.type === "SA")
-    .map((q) => ({ code: q.code, label: q.label, labels: q.labels }));
-
   return {
     overview: buildOverview(questions, rowCount),
     notableQuestions: buildNotableQuestions(tabs),
-    attributeQuestions: detectAttributes(saQuestions),
   };
 }
