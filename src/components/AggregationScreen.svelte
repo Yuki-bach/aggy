@@ -25,12 +25,14 @@
   let errorMsg = $state("");
   let aggResult = $state<{ tabs: Tab[]; weightCol: string } | null>(null);
   let running = $state(false);
+  let autoSelectedOnce = $state(false);
 
   // Initialize crossSelected when questions change
   $effect(() => {
     const sel: Record<string, boolean> = {};
     for (const q of questions) sel[q.code] = false;
     crossSelected = sel;
+    autoSelectedOnce = false;
   });
 
   // Debounced auto-aggregation
@@ -75,6 +77,17 @@
       ? buildDashboard(aggResult.tabs, questions, rawData.rowCount)
       : null,
   );
+
+  // Auto-select detected attribute questions as cross axes (once after first GT aggregation)
+  $effect(() => {
+    if (autoSelectedOnce || !dashboardData) return;
+    const attrs = dashboardData.attributeQuestions;
+    if (attrs.length === 0) return;
+    autoSelectedOnce = true;
+    const sel = { ...crossSelected };
+    for (const attr of attrs) sel[attr.code] = true;
+    crossSelected = sel;
+  });
 </script>
 
 <ResultPanel

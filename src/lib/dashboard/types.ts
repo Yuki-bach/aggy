@@ -1,4 +1,5 @@
 import type { QuestionType, Tab } from "../agg/types";
+import type { AttributeResult } from "../detectAttributes";
 
 export interface SurveyOverview {
   responseCount: number;
@@ -19,4 +20,5 @@ export interface RankedQuestion {
 export interface DashboardData {
   overview: SurveyOverview;
   notableQuestions: RankedQuestion[];
+  attributeQuestions: AttributeResult[];
 }
