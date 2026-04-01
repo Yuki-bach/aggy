@@ -170,6 +170,24 @@ const ja: Record<string, string> = {
   "settings.ai.off": "OFF",
   "settings.close": "閉じる",
 
+  // Dashboard
+  "dashboard.title": "ダッシュボード",
+  "dashboard.overview": "調査概要",
+  "dashboard.overview.responses": "回答数",
+  "dashboard.overview.questions": "設問数",
+  "dashboard.overview.choice": "選択式設問",
+  "dashboard.overview.numeric": "数値設問",
+  "dashboard.notable": "特徴的な設問",
+  "dashboard.notable.description": "回答の偏りが大きい設問（低エントロピー）を自動検出しています",
+  "dashboard.notable.score": "偏りスコア",
+  "dashboard.notable.empty": "対象となる設問がありません",
+  "dashboard.segment.title": "セグメント間差異",
+  "dashboard.segment.description":
+    "クロス集計でセグメント間の差が大きい設問（クラメールのV ≥ 0.3）",
+
+  // Toolbar
+  "toolbar.crossAxis": "クロス集計軸",
+
   // Changelog
   "changelog.title": "更新情報",
 };

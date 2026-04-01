@@ -1,20 +1,42 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import type { Tab } from "../../lib/agg/types";
+  import type { Question, Tab } from "../../lib/agg/types";
   import Toolbar from "./Toolbar.svelte";
   import ViewOpts from "./ViewOpts.svelte";
   import TabCard from "./TabCard.svelte";
   import AIBubble from "./AIBubble.svelte";
+  import DashboardPanel from "../dashboard/DashboardPanel.svelte";
   import { t } from "../../lib/i18n.svelte";
   import type { Basis, ChartType, ViewMode } from "./viewTypes";
   import type { PaletteId } from "../../lib/chartConfig";
+  import type { DashboardData } from "../../lib/dashboard/types";
 
   interface Props {
     tabs: Tab[] | null;
     weightCol: string;
+    dashboardData: DashboardData | null;
+    questions: Question[];
+    crossSelected: Record<string, boolean>;
+    onCrossToggle: (key: string, checked: boolean) => void;
+    activeWeightCol: string;
+    weightEnabled: boolean;
+    onWeightToggle: (on: boolean) => void;
+    dateWarnings: string[];
+    errorMsg: string;
   }
 
-  let { tabs, weightCol }: Props = $props();
+  let {
+    tabs,
+    weightCol,
+    dashboardData,
+    questions,
+    crossSelected,
+    onCrossToggle,
+    activeWeightCol,
+    weightEnabled,
+    onWeightToggle,
+    dateWarnings,
+    errorMsg,
+  }: Props = $props();
 
   let viewMode = $state<ViewMode>("table");
   let saChartType = $state<ChartType>("bar-h");
@@ -68,7 +90,26 @@
 <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
   {#if tabs}
     <div aria-live="polite">
-      <Toolbar {tabs} {weightCol} currentViewMode={viewMode} {callbacks} />
+      <!-- Dashboard -->
+      {#if dashboardData}
+        <DashboardPanel data={dashboardData} {tabs} />
+      {/if}
+
+      <!-- Result list -->
+      <Toolbar
+        {tabs}
+        {weightCol}
+        currentViewMode={viewMode}
+        {callbacks}
+        {questions}
+        {crossSelected}
+        {onCrossToggle}
+        {activeWeightCol}
+        {weightEnabled}
+        {onWeightToggle}
+        {dateWarnings}
+        {errorMsg}
+      />
       <ViewOpts
         currentViewMode={viewMode}
         currentBasis={basis}

@@ -40,7 +40,7 @@
 
   <main
     class="grid min-h-0 flex-1 grid-rows-1"
-    style:grid-template-columns={isImport ? "1fr" : "360px 1fr"}
+    style:grid-template-columns="1fr"
   >
     {#if isImport}
       <ImportScreen onComplete={handleComplete} />

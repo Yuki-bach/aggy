@@ -170,6 +170,25 @@ const en: Record<string, string> = {
   "settings.ai.off": "OFF",
   "settings.close": "Close",
 
+  // Dashboard
+  "dashboard.title": "Dashboard",
+  "dashboard.overview": "Survey Overview",
+  "dashboard.overview.responses": "Responses",
+  "dashboard.overview.questions": "Questions",
+  "dashboard.overview.choice": "Choice Questions",
+  "dashboard.overview.numeric": "Numeric Questions",
+  "dashboard.notable": "Notable Questions",
+  "dashboard.notable.description":
+    "Questions with the most skewed response distributions (low entropy)",
+  "dashboard.notable.score": "Skewness",
+  "dashboard.notable.empty": "No applicable questions",
+  "dashboard.segment.title": "Segment Differences",
+  "dashboard.segment.description":
+    "Cross-tabulations with the largest segment differences (Cramér's V ≥ 0.3)",
+
+  // Toolbar
+  "toolbar.crossAxis": "Cross Axes",
+
   // Changelog
   "changelog.title": "What's New",
 };

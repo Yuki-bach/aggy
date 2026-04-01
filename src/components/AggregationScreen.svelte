@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { Tab } from "../lib/agg/types";
   import ResultPanel from "./aggregation/ResultPanel.svelte";
-  import SettingsPanel from "./aggregation/SettingsPanel.svelte";
   import { runAggregation } from "../lib/duckdb";
   import type { Layout } from "../lib/layout";
   import { buildQuestions, findWeightColumn } from "../lib/layout";
   import { t } from "../lib/i18n.svelte";
   import type { RawData, LayoutData } from "../lib/types";
+  import { buildDashboard } from "../lib/dashboard/buildDashboard";
+  import { detectAttributes } from "../lib/detectAttributes";
 
   interface Props {
     rawData: RawData;
@@ -25,46 +25,74 @@
   let weightEnabled = $state(true);
   let errorMsg = $state("");
   let aggResult = $state<{ tabs: Tab[]; weightCol: string } | null>(null);
+  let running = $state(false);
 
-  // Initialize crossSelected when questions change
+  // Initialize crossSelected with detected attributes as defaults
   $effect(() => {
+    const saInputs = questions
+      .filter((q) => q.type === "SA")
+      .map((q) => ({ code: q.code, label: q.label, labels: q.labels }));
+    const detected = new Set(detectAttributes(saInputs).map((a) => a.code));
+
     const sel: Record<string, boolean> = {};
-    for (const q of questions) sel[q.code] = false;
+    for (const q of questions) sel[q.code] = detected.has(q.code);
     crossSelected = sel;
   });
 
-  async function handleRunAggregation(): Promise<void> {
-    errorMsg = "";
-    const activeWeightCol = weightEnabled ? weightCol : "";
-    const crossQuestions = questions.filter((q) => crossSelected[q.code]);
+  // Debounced auto-aggregation
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
+  $effect(() => {
+    // Track dependencies
+    const _cross = crossSelected;
+    const _weightEnabled = weightEnabled;
+    const _questions = questions;
+    const _weightCol = weightCol;
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      void doAggregation(_questions, _cross, _weightEnabled ? _weightCol : "");
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  });
+
+  async function doAggregation(
+    qs: typeof questions,
+    cross: Record<string, boolean>,
+    wCol: string,
+  ): Promise<void> {
+    if (running) return;
+    running = true;
+    errorMsg = "";
+    const crossQuestions = qs.filter((q) => cross[q.code]);
     try {
-      const tabs = await runAggregation(questions, crossQuestions, activeWeightCol);
-      aggResult = { tabs, weightCol: activeWeightCol };
+      const tabs = await runAggregation(qs, crossQuestions, wCol);
+      aggResult = { tabs, weightCol: wCol };
     } catch (e) {
       errorMsg = t("error.aggregation", { msg: (e as Error).message });
+    } finally {
+      running = false;
     }
   }
 
-  // Run aggregation once on mount
-  onMount(() => {
-    void handleRunAggregation();
-  });
+  let dashboardData = $derived(
+    aggResult
+      ? buildDashboard(aggResult.tabs, questions, rawData.rowCount)
+      : null,
+  );
 </script>
 
-<SettingsPanel
-  {rawData}
-  {layout}
-  {preparedLayout}
+<ResultPanel
+  tabs={aggResult?.tabs ?? null}
+  weightCol={aggResult?.weightCol ?? ""}
+  {dashboardData}
   {questions}
   {crossSelected}
   onCrossToggle={(key, checked) => (crossSelected = { ...crossSelected, [key]: checked })}
-  {weightCol}
+  activeWeightCol={weightEnabled ? weightCol : ""}
   {weightEnabled}
   onWeightToggle={(on) => (weightEnabled = on)}
   {dateWarnings}
   {errorMsg}
-  onRun={() => handleRunAggregation()}
 />
-
-<ResultPanel tabs={aggResult?.tabs ?? null} weightCol={aggResult?.weightCol ?? ""} />
