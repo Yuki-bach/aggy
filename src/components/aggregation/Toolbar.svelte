@@ -118,7 +118,7 @@
 
           <!-- チャート設定 -->
           {#if currentViewMode === "chart"}
-            <div class:border-t={hasCross} class:border-border={hasCross} class:pt-3={hasCross}>
+            <div class={["", hasCross && "border-t border-border pt-3"]}>
               <div class="mb-2 text-xs font-medium tracking-wide text-muted uppercase">
                 {t("display.chartSettings")}
               </div>
