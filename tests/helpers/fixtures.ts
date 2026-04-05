@@ -6,7 +6,8 @@ import {
   buildQuestions,
   findWeightColumn,
 } from "../../src/lib/layout";
-import type { Shape, Question } from "../../src/lib/agg/types";
+import type { Question } from "../../src/lib/types";
+import type { Shape } from "../../src/lib/agg/types";
 
 const layoutPath = resolve(import.meta.dirname, "../../testdata/test_layout.json");
 const layout = buildValidLayout(parseLayoutJson(readFileSync(layoutPath, "utf-8")));

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Tab } from "../../lib/agg/types";
+  import type { Tab } from "../../lib/types";
   import Toolbar from "./Toolbar.svelte";
   import ViewOpts from "./ViewOpts.svelte";
   import TabCard from "./TabCard.svelte";
