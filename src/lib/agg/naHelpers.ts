@@ -1,6 +1,6 @@
 /** Shared helpers for NA (Numerical Answer) aggregation */
 
-import type { NaStats } from "./types";
+import type { NaStats } from "../types";
 import { esc } from "./sqlHelpers";
 
 export interface ValueCount {
