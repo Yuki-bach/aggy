@@ -89,10 +89,5 @@
       </div>
       <AIBubble {tabs} {weightCol} />
     </div>
-  {:else}
-    <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
-      <span class="text-4xl" aria-hidden="true">&#x2B1B;</span>
-      <p class="text-base">{t("empty.text")}</p>
-    </div>
   {/if}
 </div>
