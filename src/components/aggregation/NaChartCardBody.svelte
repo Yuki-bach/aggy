@@ -1,9 +1,43 @@
 <script lang="ts">
-  import type { Tab } from "../../lib/types";
-  import { binFrequencies } from "../../lib/agg/naHelpers";
+  import type { Tab, Cell } from "../../lib/types";
   import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
   import { t } from "../../lib/i18n.svelte";
   import type { ChartConfiguration } from "chart.js";
+
+  interface BinResult {
+    labels: string[];
+    cells: Cell[];
+  }
+
+  /** Group numeric values into equal-width bins and compute frequency/pct */
+  function binFrequencies(values: number[], binWidth: number): BinResult {
+    if (binWidth <= 0 || values.length === 0) return { labels: [], cells: [] };
+
+    const n = values.length;
+    const minVal = Math.min(...values);
+    const maxVal = Math.max(...values);
+    const binStart = Math.floor(minVal / binWidth) * binWidth;
+    const binEnd = Math.floor(maxVal / binWidth) * binWidth + binWidth;
+
+    const bins = new Map<number, number>();
+    for (let b = binStart; b < binEnd; b += binWidth) {
+      bins.set(b, 0);
+    }
+
+    for (const v of values) {
+      const b = Math.floor(v / binWidth) * binWidth;
+      bins.set(b, (bins.get(b) ?? 0) + 1);
+    }
+
+    const sortedKeys = [...bins.keys()].sort((a, b) => a - b);
+    const labels = sortedKeys.map((b) => `${b}–${b + binWidth - 1}`);
+    const cells: Cell[] = sortedKeys.map((b) => {
+      const count = bins.get(b)!;
+      return { count, pct: n > 0 ? (count / n) * 100 : null };
+    });
+
+    return { labels, cells };
+  }
 
   interface Props {
     tab: Tab;
