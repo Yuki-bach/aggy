@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tab } from "../../lib/agg/types";
+  import type { Tab } from "../../lib/types";
   import { t } from "../../lib/i18n.svelte";
   import ToggleButton from "../shared/ToggleButton.svelte";
   import ToggleGroup from "../shared/ToggleGroup.svelte";

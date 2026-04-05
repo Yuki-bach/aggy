@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tab } from "../../lib/agg/types";
+  import type { Tab } from "../../lib/types";
   import { binFrequencies } from "../../lib/agg/naHelpers";
   import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
   import { t } from "../../lib/i18n.svelte";

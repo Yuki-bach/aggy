@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tab } from "../../lib/agg/types";
+  import type { Tab } from "../../lib/types";
   import { generateComment } from "../../lib/aiComment";
   import { t } from "../../lib/i18n.svelte";
   import { isAICommentEnabled } from "../../lib/theme";

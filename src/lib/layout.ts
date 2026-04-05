@@ -1,4 +1,4 @@
-import type { Question } from "./agg/types";
+import type { Question } from "./types";
 import type { Diagnostic } from "./validateRawData";
 
 export interface LayoutItem {
