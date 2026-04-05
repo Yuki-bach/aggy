@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tab } from "../../lib/agg/types";
+  import type { Tab } from "../../lib/types";
   import ChartCardBody from "./ChartCardBody.svelte";
   import CrossTable from "./CrossTable.svelte";
   import TabTable from "./TabTable.svelte";

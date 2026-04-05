@@ -1,5 +1,5 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
-import type { Question, Tab } from "./agg/types";
+import type { Question, Tab } from "./types";
 import type { Layout } from "./layout";
 import { validateLayoutStructure, buildValidLayout } from "./layout";
 import { buildTabs } from "./agg/buildTabs";

@@ -56,9 +56,6 @@ const en: Record<string, string> = {
   // Run button
   "run.button": "▶ Run Aggregation",
 
-  // Empty state
-  "empty.text": "Select cross-tabulation axes and run the aggregation",
-
   // Results
   "result.title.tab": "Aggregation Results",
   "result.meta": "{count} questions  /  {weight}",
@@ -96,6 +93,15 @@ const en: Record<string, string> = {
   "na.stat.min": "Min",
   "na.stat.max": "Max",
   "na.binWidth": "Class width",
+
+  // Display settings dropdown
+  "display.settings": "Display",
+  "display.viewMode": "View Mode",
+  "display.tableSettings": "Table Settings",
+  "display.chartSettings": "Chart Settings",
+  "display.pctBasis": "% Basis",
+  "display.saType": "SA Chart Type",
+  "display.maType": "MA Chart Type",
 
   // Chart type
   "chart.barH": "Horizontal Bar",
