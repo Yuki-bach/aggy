@@ -224,15 +224,17 @@
 <div class="p-4 {isCross ? 'h-[400px]' : 'h-80'}">
   {#if !isCross && range > 0}
     <div class="flex items-center justify-end gap-2 mb-2 text-xs text-muted-foreground">
-      <label>{t("na.binWidth")}</label>
-      <input
+      <label>
+        {t("na.binWidth")}
+        <input
         type="range"
         min={0}
         max={sliderMax}
         step={1}
         bind:value={binWidth}
-        class="w-32"
-      />
+          class="w-32"
+        />
+      </label>
       <span class="w-6 text-center tabular-nums">{binWidth || "–"}</span>
     </div>
   {/if}
