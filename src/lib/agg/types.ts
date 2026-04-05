@@ -1,7 +1,5 @@
 /** Aggregation-internal types */
 
-export type { QuestionType, Question, Cell, NaStats, Slice, Axis, Tab } from "../types";
-
 import type { Question, Tab } from "../types";
 
 export type Shape = Pick<Question, "type" | "columns" | "codes">;

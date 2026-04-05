@@ -1,5 +1,6 @@
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import type { Question, TabData, Axis, Tab } from "./types";
+import type { Question, Axis, Tab } from "../types";
+import type { TabData } from "./types";
 import { aggTab } from "./aggTab";
 import { aggCrossTab } from "./aggCrossTab";
 import { aggNaTab } from "./aggNaTab";
