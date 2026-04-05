@@ -5,8 +5,9 @@
  */
 
 import { expect } from "vite-plus/test";
+import type { NaStats } from "../../src/lib/types";
 import { calcPct } from "../../src/lib/agg/types";
-import type { NaStats, TabData } from "../../src/lib/agg/types";
+import type { TabData } from "../../src/lib/agg/types";
 
 // ── Local types ──
 

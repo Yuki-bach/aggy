@@ -56,9 +56,6 @@ const ja: Record<string, string> = {
   // Run button
   "run.button": "▶ 集計を実行",
 
-  // Empty state
-  "empty.text": "クロス集計軸を選んで集計を実行してください",
-
   // Results
   "result.title.tab": "集計結果",
   "result.meta": "{count} 問  ／  {weight}",

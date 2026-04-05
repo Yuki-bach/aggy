@@ -109,6 +109,62 @@ export default defineConfig({
           "no-unassigned-vars": "off", // bind:this vars assigned by Svelte runtime
         },
       },
+      // ── Module boundary rules ──────────────────────────────────
+      // components/ must not reach into lib submodule internals
+      {
+        files: ["src/components/**"],
+        rules: {
+          "no-restricted-imports": [
+            "error",
+            {
+              patterns: [
+                {
+                  group: ["**/lib/agg/*"],
+                  message:
+                    "Import shared types from lib/types.ts; use lib/duckdb.ts for aggregation API",
+                },
+                {
+                  group: ["**/lib/export/formatters/*"],
+                  message: "Use lib/export/export.ts as the public API",
+                },
+              ],
+            },
+          ],
+        },
+      },
+      // lib submodules must not cross-import each other's internals
+      {
+        files: ["src/lib/agg/**"],
+        rules: {
+          "no-restricted-imports": [
+            "error",
+            {
+              patterns: [
+                {
+                  group: ["**/lib/export/*", "**/lib/export/formatters/*"],
+                  message: "agg/ must not depend on export/",
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        files: ["src/lib/export/**"],
+        rules: {
+          "no-restricted-imports": [
+            "error",
+            {
+              patterns: [
+                {
+                  group: ["**/lib/agg/*"],
+                  message: "export/ must not depend on agg/; import shared types from lib/types.ts",
+                },
+              ],
+            },
+          ],
+        },
+      },
     ],
     options: {
       typeAware: true,

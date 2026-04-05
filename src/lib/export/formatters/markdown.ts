@@ -1,4 +1,4 @@
-import type { Tab } from "../../agg/types";
+import type { Tab } from "../../types";
 import { buildExportGrids, type ExportGrid } from "./grid";
 import { downloadFile, today } from "../deliver";
 

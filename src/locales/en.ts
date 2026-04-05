@@ -56,9 +56,6 @@ const en: Record<string, string> = {
   // Run button
   "run.button": "▶ Run Aggregation",
 
-  // Empty state
-  "empty.text": "Select cross-tabulation axes and run the aggregation",
-
   // Results
   "result.title.tab": "Aggregation Results",
   "result.meta": "{count} questions  /  {weight}",

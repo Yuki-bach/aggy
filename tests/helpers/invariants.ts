@@ -1,5 +1,6 @@
 import { expect } from "vite-plus/test";
-import type { Slice, TabData } from "../../src/lib/agg/types";
+import type { Slice } from "../../src/lib/types";
+import type { TabData } from "../../src/lib/agg/types";
 
 // ── Public composite assertions ─────────────────────────────────────
 

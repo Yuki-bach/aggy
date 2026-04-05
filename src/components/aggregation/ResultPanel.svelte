@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Tab } from "../../lib/agg/types";
+  import type { Tab } from "../../lib/types";
   import Toolbar from "./Toolbar.svelte";
   import TabCard from "./TabCard.svelte";
   import AIBubble from "./AIBubble.svelte";
@@ -88,11 +88,6 @@
         {/each}
       </div>
       <AIBubble {tabs} {weightCol} />
-    </div>
-  {:else}
-    <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
-      <span class="text-4xl" aria-hidden="true">&#x2B1B;</span>
-      <p class="text-base">{t("empty.text")}</p>
     </div>
   {/if}
 </div>
