@@ -94,6 +94,15 @@ const en: Record<string, string> = {
   "na.stat.max": "Max",
   "na.binWidth": "Class width",
 
+  // Display settings dropdown
+  "display.settings": "Display",
+  "display.viewMode": "View Mode",
+  "display.tableSettings": "Table Settings",
+  "display.chartSettings": "Chart Settings",
+  "display.pctBasis": "% Basis",
+  "display.saType": "SA Chart Type",
+  "display.maType": "MA Chart Type",
+
   // Chart type
   "chart.barH": "Horizontal Bar",
   "chart.barV": "Vertical Bar",

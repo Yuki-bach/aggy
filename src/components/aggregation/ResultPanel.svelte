@@ -2,7 +2,6 @@
   import { onMount } from "svelte";
   import type { Tab } from "../../lib/types";
   import Toolbar from "./Toolbar.svelte";
-  import ViewOpts from "./ViewOpts.svelte";
   import TabCard from "./TabCard.svelte";
   import AIBubble from "./AIBubble.svelte";
   import { t } from "../../lib/i18n.svelte";
@@ -68,8 +67,9 @@
 <div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
   {#if tabs}
     <div aria-live="polite">
-      <Toolbar {tabs} {weightCol} currentViewMode={viewMode} {callbacks} />
-      <ViewOpts
+      <Toolbar
+        {tabs}
+        {weightCol}
         currentViewMode={viewMode}
         currentBasis={basis}
         {hasCross}
