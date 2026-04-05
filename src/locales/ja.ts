@@ -97,6 +97,15 @@ const ja: Record<string, string> = {
   "na.stat.max": "最大",
   "na.binWidth": "階級幅",
 
+  // Display settings dropdown
+  "display.settings": "表示設定",
+  "display.viewMode": "表示形式",
+  "display.tableSettings": "テーブル設定",
+  "display.chartSettings": "チャート設定",
+  "display.pctBasis": "割合の基準",
+  "display.saType": "SA グラフ種類",
+  "display.maType": "MA グラフ種類",
+
   // Chart type
   "chart.barH": "横棒",
   "chart.barV": "縦棒",
