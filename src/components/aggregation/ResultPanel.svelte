@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { Question, Tab } from "../../lib/agg/types";
+  import type { Question, Tab } from "../../lib/types";
   import Toolbar from "./Toolbar.svelte";
-  import ViewOpts from "./ViewOpts.svelte";
   import TabCard from "./TabCard.svelte";
   import AIBubble from "./AIBubble.svelte";
   import DashboardPanel from "../dashboard/DashboardPanel.svelte";
@@ -100,6 +99,9 @@
         {tabs}
         {weightCol}
         currentViewMode={viewMode}
+        currentBasis={basis}
+        {hasCross}
+        {chartOpts}
         {callbacks}
         {questions}
         {crossSelected}
@@ -109,13 +111,6 @@
         {onWeightToggle}
         {dateWarnings}
         {errorMsg}
-      />
-      <ViewOpts
-        currentViewMode={viewMode}
-        currentBasis={basis}
-        {hasCross}
-        {chartOpts}
-        {callbacks}
       />
       <div class={gridClass}>
         {#each questionCodes as q (q)}
@@ -129,11 +124,6 @@
         {/each}
       </div>
       <AIBubble {tabs} {weightCol} />
-    </div>
-  {:else}
-    <div class="flex h-full flex-col items-center justify-center gap-3 text-muted">
-      <span class="text-4xl" aria-hidden="true">&#x2B1B;</span>
-      <p class="text-base">{t("empty.text")}</p>
     </div>
   {/if}
 </div>

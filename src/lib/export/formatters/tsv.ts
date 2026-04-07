@@ -1,4 +1,4 @@
-import type { Tab } from "../../agg/types";
+import type { Tab } from "../../types";
 import { tabsToLongRows } from "./longFormat";
 
 export function formatTSV(tabs: Tab[]): string {

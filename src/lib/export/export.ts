@@ -1,4 +1,4 @@
-import type { Tab } from "../agg/types";
+import type { Tab } from "../types";
 import { downloadCSV } from "./formatters/csv";
 import { formatTSV } from "./formatters/tsv";
 import { formatMarkdown, downloadMarkdown } from "./formatters/markdown";

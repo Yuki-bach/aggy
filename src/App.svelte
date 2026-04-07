@@ -4,7 +4,8 @@
   import { initTheme } from "./lib/theme";
   import Header from "./components/Header.svelte";
   import ImportScreen from "./components/ImportScreen.svelte";
-  import AggregationScreen from "./components/AggregationScreen.svelte";
+  const AggregationScreen = () =>
+    import("./components/AggregationScreen.svelte");
   import type { Layout } from "./lib/layout";
   import type { RawData, LayoutData } from "./lib/types";
 
@@ -45,12 +46,14 @@
     {#if isImport}
       <ImportScreen onComplete={handleComplete} />
     {:else if loadedData}
-      <AggregationScreen
-        rawData={loadedData.rawData}
-        layout={loadedData.layout}
-        preparedLayout={loadedData.preparedLayout}
-        dateWarnings={loadedData.dateWarnings}
-      />
+      {#await AggregationScreen() then { default: Agg }}
+        <Agg
+          rawData={loadedData.rawData}
+          layout={loadedData.layout}
+          preparedLayout={loadedData.preparedLayout}
+          dateWarnings={loadedData.dateWarnings}
+        />
+      {/await}
     {/if}
   </main>
 </div>

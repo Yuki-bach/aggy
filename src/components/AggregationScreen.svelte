@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { Tab } from "../lib/agg/types";
+  import type { RawData, LayoutData, Tab } from "../lib/types";
   import ResultPanel from "./aggregation/ResultPanel.svelte";
   import { runAggregation } from "../lib/duckdb";
   import type { Layout } from "../lib/layout";
   import { buildQuestions, findWeightColumn } from "../lib/layout";
   import { t } from "../lib/i18n.svelte";
-  import type { RawData, LayoutData } from "../lib/types";
   import { buildDashboard } from "../lib/dashboard/buildDashboard";
   import { detectAttributes } from "../lib/detectAttributes";
 

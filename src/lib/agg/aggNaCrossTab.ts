@@ -1,7 +1,8 @@
 /** NA (Numerical Answer) cross-tabulation */
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import type { Shape, TabData, Slice, NaStats } from "./types";
+import type { Slice, NaStats } from "../types";
+import type { Shape, TabData } from "./types";
 import { calcPct } from "./types";
 import { esc, maShownCondition } from "./sqlHelpers";
 import {

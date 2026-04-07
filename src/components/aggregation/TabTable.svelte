@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tab } from "../../lib/agg/types";
+  import type { Tab } from "../../lib/types";
   import { formatN } from "../../lib/format";
   import { t } from "../../lib/i18n.svelte";
   import Th from "./Th.svelte";

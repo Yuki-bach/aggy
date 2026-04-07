@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vite-plus/test";
-import type { Tab } from "../src/lib/agg/types";
+import type { Tab } from "../src/lib/types";
 import { buildExportGrids } from "../src/lib/export/formatters/grid";
 import { tabsToLongRows } from "../src/lib/export/formatters/longFormat";
 import { formatCSV } from "../src/lib/export/formatters/csv";

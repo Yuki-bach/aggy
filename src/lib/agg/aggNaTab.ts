@@ -1,7 +1,8 @@
 /** NA (Numerical Answer) single tabulation */
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import type { NaStats, TabData } from "./types";
+import type { NaStats } from "../types";
+import type { TabData } from "./types";
 import { calcPct } from "./types";
 import { esc } from "./sqlHelpers";
 import {
@@ -37,7 +38,7 @@ class NaTabAggregator {
   private freqToCells(
     freq: ValueCount[],
     n: number,
-  ): { codes: string[]; cells: import("./types").Cell[] } {
+  ): { codes: string[]; cells: import("../types").Cell[] } {
     const codes = freq.map((f) => String(f.value));
     const cells = freq.map((f) => ({
       count: f.count,

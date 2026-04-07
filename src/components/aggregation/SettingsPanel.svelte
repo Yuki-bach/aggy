@@ -1,12 +1,11 @@
 <script lang="ts">
-  import type { Question } from "../../lib/agg/types";
+  import type { Question, RawData, LayoutData } from "../../lib/types";
   import { t } from "../../lib/i18n.svelte";
   import Button from "../shared/Button.svelte";
   import ToggleButton from "../shared/ToggleButton.svelte";
   import ToggleGroup from "../shared/ToggleGroup.svelte";
   import SectionTitle from "../shared/SectionTitle.svelte";
   import Alert from "../shared/Alert.svelte";
-  import type { RawData, LayoutData } from "../../lib/types";
   import type { Layout } from "../../lib/layout";
   import { countLayoutColumns } from "../../lib/layout";
 

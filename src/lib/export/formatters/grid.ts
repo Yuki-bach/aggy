@@ -1,4 +1,4 @@
-import type { QuestionType, Tab } from "../../agg/types";
+import type { QuestionType, Tab } from "../../types";
 import { t } from "../../i18n.svelte";
 
 export interface ExportGrid {
