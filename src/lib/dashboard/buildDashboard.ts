@@ -1,4 +1,4 @@
-import type { Question, Tab } from "../agg/types";
+import type { Question, Tab } from "../types";
 import type { DashboardData, RankedQuestion, SurveyOverview } from "./types";
 import { rankCrossTabs, skewnessScore } from "./stats";
 

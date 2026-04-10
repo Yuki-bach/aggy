@@ -1,4 +1,4 @@
-import type { Cell, Tab } from "../agg/types";
+import type { Cell, Tab } from "../types";
 
 /**
  * Shannon entropy: -Σ(p × log2(p))

@@ -1,4 +1,4 @@
-import type { QuestionType, Tab } from "../agg/types";
+import type { QuestionType, Tab } from "../types";
 
 export interface SurveyOverview {
   responseCount: number;

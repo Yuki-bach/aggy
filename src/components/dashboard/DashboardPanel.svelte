@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tab } from "../../lib/agg/types";
+  import type { Tab } from "../../lib/types";
   import type { DashboardData } from "../../lib/dashboard/types";
   import { t } from "../../lib/i18n.svelte";
   import OverviewCard from "./OverviewCard.svelte";

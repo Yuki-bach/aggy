@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vite-plus/test";
 import { rankCrossTabs } from "../src/lib/dashboard/stats";
-import type { Tab } from "../src/lib/agg/types";
+import type { Tab } from "../src/lib/types";
 
 /** Helper to build a cross-tab Tab from an observed frequency matrix */
 function makeCrossTab(
