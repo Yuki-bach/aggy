@@ -54,12 +54,32 @@ export async function initDuckDB(): Promise<void> {
   return initPromise;
 }
 
-/** Register CSV text in DuckDB and return headers and row count */
-export async function loadCSV(csvText: string): Promise<{ headers: string[]; rowCount: number }> {
+/**
+ * Register CSV in DuckDB and return headers and row count.
+ *
+ * Pass a `File` whenever possible — DuckDB reads it lazily through
+ * BROWSER_FILEREADER without copying the whole CSV into a JS string
+ * (which would otherwise be held in UTF-16, ~2x the source bytes).
+ * The string overload is kept for tests, benchmarks, and the OPFS
+ * restore path where the source genuinely is already a string.
+ */
+export async function loadCSV(
+  source: File | string,
+): Promise<{ headers: string[]; rowCount: number }> {
   await initDuckDB();
   if (!db) throw new Error("DuckDB is not ready");
 
-  await db.registerFileText("survey.csv", csvText);
+  await db.dropFile("survey.csv").catch(() => {});
+  if (typeof source === "string") {
+    await db.registerFileText("survey.csv", source);
+  } else {
+    await db.registerFileHandle(
+      "survey.csv",
+      source,
+      duckdb.DuckDBDataProtocol.BROWSER_FILEREADER,
+      true,
+    );
+  }
 
   const c = await getConnection();
   await c.query(
