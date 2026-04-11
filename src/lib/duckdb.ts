@@ -38,7 +38,7 @@ export async function initDuckDB(): Promise<void> {
         type: "application/javascript",
       });
       const worker = new Worker(URL.createObjectURL(workerBlob));
-      const logger = new duckdb.ConsoleLogger();
+      const logger = import.meta.env.DEV ? new duckdb.ConsoleLogger() : new duckdb.VoidLogger();
       db = new duckdb.AsyncDuckDB(logger, worker);
       await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
