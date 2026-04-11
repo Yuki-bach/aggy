@@ -41,6 +41,7 @@
   let validationError = $state<string | null>(null);
 
   let loadedFromSaved = false;
+  let pendingRawDataFile: File | null = null;
   let opfsPayload: {
     rawDataText?: string;
     rawDataFileName?: string;
@@ -71,9 +72,9 @@
   async function handleRawDataFile(file: File) {
     try {
       loadError = null;
-      const text = await file.text();
-      const result = await loadCSV(text);
-      opfsPayload = { ...opfsPayload, rawDataText: text, rawDataFileName: file.name };
+      const result = await loadCSV(file);
+      pendingRawDataFile = file;
+      opfsPayload = { ...opfsPayload, rawDataText: undefined, rawDataFileName: file.name };
       rawData = {
         fileName: file.name,
         headers: result.headers,
@@ -105,6 +106,7 @@
       const rawJson = parseLayoutJson(data.layoutJson);
       const result = await loadCSV(data.rawDataText);
 
+      pendingRawDataFile = null;
       opfsPayload = {
         rawDataText: data.rawDataText,
         rawDataFileName: data.rawDataName,
@@ -150,15 +152,19 @@
 
   async function handleProceed() {
     if (!rawData || !layout) return;
-    if (!loadedFromSaved && opfsPayload.rawDataText && opfsPayload.layoutJson) {
+    if (!loadedFromSaved && opfsPayload.layoutJson) {
       try {
-        await saveData(
-          opfsPayload.rawDataFileName!,
-          opfsPayload.rawDataText,
-          opfsPayload.layoutFileName!,
-          opfsPayload.layoutJson,
-        );
-        await refreshSavedFiles();
+        const rawDataText =
+          opfsPayload.rawDataText ?? (pendingRawDataFile ? await pendingRawDataFile.text() : null);
+        if (rawDataText) {
+          await saveData(
+            opfsPayload.rawDataFileName!,
+            rawDataText,
+            opfsPayload.layoutFileName!,
+            opfsPayload.layoutJson,
+          );
+          await refreshSavedFiles();
+        }
       } catch {
         // OPFS save is best-effort
       }
