@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { initDuckDB } from "./lib/duckdb";
+  import { requireDuckDB } from "./lib/duckdb.svelte";
   import { initTheme } from "./lib/theme";
   import Header from "./components/Header.svelte";
   import ImportScreen from "./components/ImportScreen.svelte";
@@ -32,7 +32,7 @@
   // Imperative initialization (runs once after mount)
   onMount(() => {
     initTheme();
-    initDuckDB().catch(() => {});
+    requireDuckDB().catch(() => {});
   });
 </script>
 
