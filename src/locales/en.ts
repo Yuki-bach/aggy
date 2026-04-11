@@ -5,7 +5,10 @@ const en: Record<string, string> = {
   "header.back": "Back to data import",
 
   // DuckDB status
+  "wasm.idle": "DuckDB idle",
   "wasm.loading": "Loading DuckDB...",
+  "wasm.ready": "DuckDB ready",
+  "wasm.error": "DuckDB error: {msg}",
 
   // Import screen
   "import.title": "Load Data",
