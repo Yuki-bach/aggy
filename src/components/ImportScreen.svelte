@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { parseLayoutJson, buildValidLayout, filterLayout } from "../lib/layout";
-  import { loadCSV, prepareDateLayout, runValidation } from "../lib/duckdb";
+  import { loadCSV, prepareDateLayout, runValidation } from "../lib/duckdb.svelte";
   import { saveData, loadSaved } from "../lib/opfs";
   import { t } from "../lib/i18n.svelte";
   import {

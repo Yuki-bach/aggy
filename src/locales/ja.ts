@@ -5,7 +5,10 @@ const ja: Record<string, string> = {
   "header.back": "データ読み込みに戻る",
 
   // DuckDB status
+  "wasm.idle": "DuckDB 待機中",
   "wasm.loading": "DuckDB 読み込み中...",
+  "wasm.ready": "DuckDB 準備完了",
+  "wasm.error": "DuckDB エラー: {msg}",
 
   // Import screen
   "import.title": "データ読み込み",
