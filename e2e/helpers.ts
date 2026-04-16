@@ -6,8 +6,8 @@ export const TESTDATA = path.resolve(import.meta.dirname, "../testdata");
 /** DuckDB Wasm が "DuckDB Ready" になるまで明示待機 + エラー文言不在確認 */
 export async function waitForWasmReady(page: Page): Promise<void> {
   const statusEl = page.locator('[role="status"]');
-  await statusEl.filter({ hasText: "DuckDB Ready" }).waitFor({ timeout: 30_000 });
-  await expect(statusEl).not.toContainText("エラー");
+  await statusEl.filter({ hasText: /DuckDB (ready|準備完了)/ }).waitFor({ timeout: 30_000 });
+  await expect(statusEl).not.toContainText(/エラー|error/i);
 }
 
 /** CSV + Layout JSON をアップロード */
