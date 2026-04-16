@@ -28,7 +28,7 @@ export default defineConfig({
     env: {
       browser: true,
     },
-    ignorePatterns: ["dist/", "node_modules/", "testdata/"],
+    ignorePatterns: ["dist/", "node_modules/", "testdata/", "e2e/"],
     rules: {
       // --- promotion: category default → error ---
       "typescript/no-unnecessary-type-assertion": "error", // suspicious → error
