@@ -424,6 +424,29 @@ describe("filterLayout — MATRIX", () => {
     const filtered = filterLayout(headers, matrixLayout);
     expect(filtered.map((e) => e.key)).toEqual(["q1"]);
   });
+
+  it("removes only the orphan MATRIX parent when mixed with a surviving one", () => {
+    const multi: Layout = [
+      { key: "q3", label: "Surviving matrix", type: "MATRIX" },
+      {
+        key: "q3a",
+        label: "A",
+        type: "SA",
+        matrixKey: "q3",
+        items: [{ code: "1", label: "x" }],
+      },
+      { key: "q4", label: "Orphan matrix", type: "MATRIX" },
+      {
+        key: "q4a",
+        label: "B",
+        type: "SA",
+        matrixKey: "q4",
+        items: [{ code: "1", label: "x" }],
+      },
+    ];
+    const filtered = filterLayout(["q3a"], multi);
+    expect(filtered.map((e) => e.key)).toEqual(["q3", "q3a"]);
+  });
 });
 
 describe("buildQuestions — MATRIX", () => {
