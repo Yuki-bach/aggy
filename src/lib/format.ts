@@ -6,6 +6,6 @@ export function formatN(n: number): string {
 /** NA統計値をフォーマット: null→"-", n→整数, 他→小数2桁 */
 export function formatStat(key: string, value: number | null): string {
   if (value === null) return "-";
-  if (key === "n") return `${value}`;
+  if (key === "n") return formatN(value);
   return value.toFixed(2);
 }

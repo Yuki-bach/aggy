@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Tab, Cell } from "../../lib/types";
   import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
+  import { formatN } from "../../lib/format";
   import { t } from "../../lib/i18n.svelte";
   import type { ChartConfiguration } from "chart.js";
 
@@ -137,7 +138,7 @@
           legend: { display: false },
           title: {
             display: true,
-            text: `n=${sliceStats.n}  ${t("na.stat.mean")}=${sliceStats.mean?.toFixed(2) ?? "-"}  SD=${sliceStats.sd?.toFixed(2) ?? "-"}`,
+            text: `n=${formatN(sliceStats.n)}  ${t("na.stat.mean")}=${sliceStats.mean?.toFixed(2) ?? "-"}  SD=${sliceStats.sd?.toFixed(2) ?? "-"}`,
             color: theme.muted,
             font: { size: 12, weight: "normal" },
           },
