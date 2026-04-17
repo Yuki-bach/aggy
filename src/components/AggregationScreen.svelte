@@ -1,13 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Tab } from "../lib/agg/types";
+  import type { RawData, LayoutData, Tab } from "../lib/types";
   import ResultPanel from "./aggregation/ResultPanel.svelte";
   import SettingsPanel from "./aggregation/SettingsPanel.svelte";
-  import { runAggregation } from "../lib/duckdb";
+  import { runAggregation } from "../lib/duckdb.svelte";
   import type { Layout } from "../lib/layout";
   import { buildQuestions, findWeightColumn } from "../lib/layout";
   import { t } from "../lib/i18n.svelte";
-  import type { RawData, LayoutData } from "../lib/types";
 
   interface Props {
     rawData: RawData;

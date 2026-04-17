@@ -1,4 +1,4 @@
-import type { Tab } from "../../src/lib/agg/types";
+import type { Tab } from "../../src/lib/types";
 
 // ─── SA Grand Total ─────────────────────────────────────────
 export const SA_GT: Tab = {

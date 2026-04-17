@@ -5,7 +5,10 @@ const ja: Record<string, string> = {
   "header.back": "データ読み込みに戻る",
 
   // DuckDB status
+  "wasm.idle": "DuckDB 待機中",
   "wasm.loading": "DuckDB 読み込み中...",
+  "wasm.ready": "DuckDB 準備完了",
+  "wasm.error": "DuckDB エラー: {msg}",
 
   // Import screen
   "import.title": "データ読み込み",
@@ -56,9 +59,6 @@ const ja: Record<string, string> = {
   // Run button
   "run.button": "▶ 集計を実行",
 
-  // Empty state
-  "empty.text": "クロス集計軸を選んで集計を実行してください",
-
   // Results
   "result.title.tab": "集計結果",
   "result.meta": "{count} 問  ／  {weight}",
@@ -96,6 +96,15 @@ const ja: Record<string, string> = {
   "na.stat.min": "最小",
   "na.stat.max": "最大",
   "na.binWidth": "階級幅",
+
+  // Display settings dropdown
+  "display.settings": "表示設定",
+  "display.viewMode": "表示形式",
+  "display.tableSettings": "テーブル設定",
+  "display.chartSettings": "チャート設定",
+  "display.pctBasis": "割合の基準",
+  "display.saType": "SA グラフ種類",
+  "display.maType": "MA グラフ種類",
 
   // Chart type
   "chart.barH": "横棒",
