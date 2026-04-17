@@ -140,7 +140,7 @@
   }
 </script>
 
-<div class="h-[400px] p-4">
+<div class="flex h-[400px] flex-col p-4">
   {#if range > 0}
     <div class="mb-2 flex items-center justify-end gap-2 text-xs text-muted-foreground">
       <label>
@@ -150,5 +150,7 @@
       <span class="w-6 text-center tabular-nums">{binWidth || "–"}</span>
     </div>
   {/if}
-  <canvas bind:this={canvas}></canvas>
+  <div class="relative flex-1 min-h-0">
+    <canvas bind:this={canvas}></canvas>
+  </div>
 </div>
