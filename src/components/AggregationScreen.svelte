@@ -5,7 +5,7 @@
   import SettingsPanel from "./aggregation/SettingsPanel.svelte";
   import { runAggregation } from "../lib/duckdb.svelte";
   import type { Layout } from "../lib/layout";
-  import { buildQuestions, findWeightColumn } from "../lib/layout";
+  import { buildQuestions, buildMatrixGroups, findWeightColumn } from "../lib/layout";
   import { t } from "../lib/i18n.svelte";
 
   interface Props {
@@ -19,6 +19,9 @@
 
   let questions = $derived(buildQuestions(preparedLayout));
   let weightCol = $derived(findWeightColumn(preparedLayout));
+  let matrixLabels = $derived(
+    Object.fromEntries(buildMatrixGroups(preparedLayout).map((g) => [g.matrixKey, g.matrixLabel])),
+  );
 
   let crossSelected = $state<Record<string, boolean>>({});
   let weightEnabled = $state(true);
@@ -38,7 +41,7 @@
     const crossQuestions = questions.filter((q) => crossSelected[q.code]);
 
     try {
-      const tabs = await runAggregation(questions, crossQuestions, activeWeightCol);
+      const tabs = await runAggregation(questions, crossQuestions, activeWeightCol, matrixLabels);
       aggResult = { tabs, weightCol: activeWeightCol };
     } catch (e) {
       errorMsg = t("error.aggregation", { msg: (e as Error).message });

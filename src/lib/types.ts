@@ -46,4 +46,5 @@ export interface Tab {
   codes: string[];
   labels: Record<string, string>;
   slices: Slice[];
+  matrix: { key: string; label: string } | null;
 }

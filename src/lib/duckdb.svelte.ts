@@ -135,9 +135,10 @@ export async function runAggregation(
   questions: Question[],
   crossQuestions: Question[],
   weightCol: string,
+  matrixLabels: Record<string, string> = {},
 ): Promise<Tab[]> {
   const { conn } = await requireDuckDB();
-  return buildTabs(conn, questions, crossQuestions, weightCol);
+  return buildTabs(conn, questions, crossQuestions, weightCol, matrixLabels);
 }
 
 /** Prepare DATE columns in layout (convert to SA with auto-generated items) */

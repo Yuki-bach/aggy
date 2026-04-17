@@ -13,10 +13,11 @@ export async function buildTabs(
   questions: Question[],
   crossQuestions: Question[],
   weightCol: string,
+  matrixLabels: Record<string, string> = {},
 ): Promise<Tab[]> {
   const tabs: Tab[] = [];
   for (const q of questions) {
-    const qTabs = await buildTabsFor(conn, q, crossQuestions, weightCol);
+    const qTabs = await buildTabsFor(conn, q, crossQuestions, weightCol, matrixLabels);
     tabs.push(...qTabs);
   }
   return tabs;
@@ -27,27 +28,33 @@ async function buildTabsFor(
   q: Question,
   crossQuestions: Question[],
   weightCol: string,
+  matrixLabels: Record<string, string>,
 ): Promise<Tab[]> {
   const tabs: Tab[] = [];
   if (q.type === "NA") {
     const tabOutput = await aggNaTab(conn, q.columns[0], weightCol);
-    tabs.push(assembleTab(q, tabOutput));
+    tabs.push(assembleTab(q, tabOutput, matrixLabels));
     for (const axisQuestion of crossQuestions) {
       const crossOutput = await aggNaCrossTab(conn, q.columns[0], axisQuestion, weightCol);
-      tabs.push(assembleTab(q, crossOutput, axisQuestion));
+      tabs.push(assembleTab(q, crossOutput, matrixLabels, axisQuestion));
     }
   } else {
     const tabOutput = await aggTab(conn, q, weightCol);
-    tabs.push(assembleTab(q, tabOutput));
+    tabs.push(assembleTab(q, tabOutput, matrixLabels));
     for (const axisQuestion of crossQuestions) {
       const crossOutput = await aggCrossTab(conn, q, axisQuestion, weightCol);
-      tabs.push(assembleTab(q, crossOutput, axisQuestion));
+      tabs.push(assembleTab(q, crossOutput, matrixLabels, axisQuestion));
     }
   }
   return tabs;
 }
 
-function assembleTab(question: Question, tabData: TabData, axisQuestion?: Question): Tab {
+function assembleTab(
+  question: Question,
+  tabData: TabData,
+  matrixLabels: Record<string, string>,
+  axisQuestion?: Question,
+): Tab {
   return {
     questionCode: question.code,
     type: question.type,
@@ -56,6 +63,9 @@ function assembleTab(question: Question, tabData: TabData, axisQuestion?: Questi
     codes: tabData.codes,
     by: axisQuestion ? buildAxis(tabData, axisQuestion) : null,
     slices: tabData.slices,
+    matrix: question.matrixKey
+      ? { key: question.matrixKey, label: matrixLabels[question.matrixKey] ?? question.matrixKey }
+      : null,
   };
 }
 
