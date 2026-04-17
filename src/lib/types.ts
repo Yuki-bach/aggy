@@ -10,6 +10,7 @@ export interface Question {
   codes: string[];
   label: string;
   labels: Record<string, string>;
+  matrixKey: string | null;
 }
 
 export interface Cell {
