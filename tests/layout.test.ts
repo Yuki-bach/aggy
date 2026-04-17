@@ -5,6 +5,7 @@ import {
   buildValidLayout,
   filterLayout,
   buildQuestions,
+  buildMatrixGroups,
   countLayoutColumns,
 } from "../src/lib/layout";
 import type { Layout } from "../src/lib/layout";
@@ -463,5 +464,41 @@ describe("countLayoutColumns — MATRIX", () => {
   it("counts MATRIX parent as 0 columns", () => {
     // q3: 0, q3a: 1, q3b: 1, q1: 1 = 3
     expect(countLayoutColumns(matrixLayout)).toBe(3);
+  });
+});
+
+describe("buildMatrixGroups", () => {
+  it("returns empty array when layout has no MATRIX entries", () => {
+    expect(buildMatrixGroups(layout)).toEqual([]);
+  });
+
+  it("builds a single group with child codes in layout order", () => {
+    expect(buildMatrixGroups(matrixLayout)).toEqual([
+      {
+        matrixKey: "q3",
+        matrixLabel: "Satisfaction matrix",
+        questionCodes: ["q3a", "q3b"],
+      },
+    ]);
+  });
+
+  it("handles multiple MATRIX parents independently", () => {
+    const multi: Layout = [
+      { key: "m1", label: "M1", type: "MATRIX" },
+      {
+        key: "m1a",
+        label: "A",
+        type: "SA",
+        matrixKey: "m1",
+        items: [{ code: "1", label: "x" }],
+      },
+      { key: "m2", label: "M2", type: "MATRIX" },
+      { key: "m2a", label: "B", type: "NA", matrixKey: "m2" },
+      { key: "m2b", label: "C", type: "NA", matrixKey: "m2" },
+    ];
+    expect(buildMatrixGroups(multi)).toEqual([
+      { matrixKey: "m1", matrixLabel: "M1", questionCodes: ["m1a"] },
+      { matrixKey: "m2", matrixLabel: "M2", questionCodes: ["m2a", "m2b"] },
+    ]);
   });
 });

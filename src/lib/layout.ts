@@ -262,6 +262,28 @@ export function findWeightColumn(layout: Layout): string {
   return layout.find((e) => e.type === "WEIGHT")?.key ?? "";
 }
 
+export interface MatrixGroup {
+  matrixKey: string;
+  matrixLabel: string;
+  questionCodes: string[];
+}
+
+/** Build groups of matrix children keyed by MATRIX parent, preserving layout order */
+export function buildMatrixGroups(layout: Layout): MatrixGroup[] {
+  return layout
+    .filter((e): e is Extract<LayoutQuestion, { type: "MATRIX" }> => e.type === "MATRIX")
+    .map((parent) => ({
+      matrixKey: parent.key,
+      matrixLabel: parent.label,
+      questionCodes: layout
+        .filter(
+          (e) =>
+            (e.type === "SA" || e.type === "MA" || e.type === "NA") && e.matrixKey === parent.key,
+        )
+        .map((e) => e.key),
+    }));
+}
+
 /** Count total layout-defined columns (SA: 1 each, MA: items count, WEIGHT: 1, MATRIX: 0) */
 export function countLayoutColumns(layout: Layout): number {
   return layout.reduce(

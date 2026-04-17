@@ -23,6 +23,7 @@ function makeTab(overrides: Partial<Tab> = {}): Tab {
         ],
       },
     ],
+    matrix: null,
     ...overrides,
   };
 }
