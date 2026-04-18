@@ -31,6 +31,10 @@
 
   let { onComplete }: Props = $props();
 
+  type ValidationOutcome =
+    | { ok: true; diags: Diagnostic[] }
+    | { ok: false; error: string };
+
   let rawData = $state<RawData | null>(null);
   let layout = $state<LayoutData | null>(null);
   let step = $state(1);
@@ -39,6 +43,7 @@
   let validating = $state(false);
   let validationResult = $state<Diagnostic[] | null>(null);
   let validationError = $state<string | null>(null);
+  let validationPromise = $state<Promise<ValidationOutcome> | null>(null);
 
   let loadedFromSaved = false;
   let pendingRawDataFile: File | null = null;
@@ -62,6 +67,19 @@
 
   onMount(() => {
     void refreshSavedFiles();
+  });
+
+  // Prefetch validation as soon as both files are available so handleStart can skip the wait.
+  $effect(() => {
+    if (!rawData || !layout) {
+      validationPromise = null;
+      return;
+    }
+    const rawJson = layout.rawJson;
+    const headers = rawData.headers;
+    validationPromise = runValidation(rawJson, headers)
+      .then<ValidationOutcome>((diags) => ({ ok: true, diags }))
+      .catch<ValidationOutcome>((e) => ({ ok: false, error: (e as Error).message }));
   });
 
   const STEPS = [
@@ -131,11 +149,20 @@
     validationResult = null;
     validationError = null;
     try {
-      const diags = await runValidation(layout.rawJson, rawData.headers);
-      if (diags.length === 0) {
+      let outcome: ValidationOutcome;
+      while (true) {
+        const p = validationPromise;
+        if (!p) return;
+        outcome = await p;
+        if (p === validationPromise) break; // not stale
+      }
+      if (!outcome.ok) {
+        validationError = outcome.error;
+        step = 2;
+      } else if (outcome.diags.length === 0) {
         await handleProceed();
       } else {
-        validationResult = diags;
+        validationResult = outcome.diags;
         step = 2;
       }
     } catch (e) {
