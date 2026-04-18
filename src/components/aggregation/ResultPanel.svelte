@@ -77,15 +77,7 @@
     return items;
   });
 
-  let maxPct = $derived(
-    Math.max(
-      ...(tabs
-        ?.filter((tab) => tab.by === null && tab.type !== "NA")
-        .flatMap((tab) => tab.slices[0]?.cells.map((c) => c.pct ?? 0) ?? []) ?? []),
-      0,
-    ),
-  );
-  let tableOpts = $derived({ basis, maxPct });
+  let tableOpts = $derived({ basis });
   let chartOpts = $derived({ saChartType, maChartType, paletteId });
 
   let minWidth = $derived(viewMode === "chart" ? "400px" : "360px");
