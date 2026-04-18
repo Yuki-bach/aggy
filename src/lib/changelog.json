@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.3.0",
+    "date": "2026-04-18",
+    "changes": [
+      {
+        "ja": "MATRIX 型レイアウトの取り込み・集計表示に対応",
+        "en": "Add MATRIX layout import and aggregation display"
+      }
+    ]
+  },
+  {
     "version": "0.2.0",
     "date": "2026-04-18",
     "changes": [
