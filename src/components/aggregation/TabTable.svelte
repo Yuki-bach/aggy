@@ -18,12 +18,22 @@
   <caption class="sr-only">{t("table.caption.tab", { question: tab.label })}</caption>
   <thead>
     <tr>
-      <Th>{t("table.option")}</Th>
+      <Th class="w-64 min-w-64">{t("table.option")}</Th>
       <Th right>n</Th>
       <Th right>%</Th>
-      <Th aria-hidden="true">
-        <span class="sr-only">{t("table.graph")}</span>
-      </Th>
+      <th
+        class="border-b-2 border-l border-border-strong bg-surface py-3 pr-4 pl-4 align-bottom text-[10px] font-normal text-muted"
+        aria-hidden="true"
+      >
+        <div class="relative h-3">
+          <span class="absolute top-0 left-0">0</span>
+          <span class="absolute top-0 -translate-x-1/2" style:left="20%">20</span>
+          <span class="absolute top-0 -translate-x-1/2" style:left="40%">40</span>
+          <span class="absolute top-0 -translate-x-1/2" style:left="60%">60</span>
+          <span class="absolute top-0 -translate-x-1/2" style:left="80%">80</span>
+          <span class="absolute top-0 right-0">100</span>
+        </div>
+      </th>
     </tr>
   </thead>
   <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
@@ -39,7 +49,13 @@
         <Td right mono class="text-muted">
           {cell.pct !== null ? cell.pct.toFixed(1) + "%" : "-"}
         </Td>
-        <td class="py-3 pr-4 pl-0 border-b border-row-border w-full" aria-hidden="true">
+        <td
+          class="border-b border-l border-row-border w-full px-4 py-3"
+          aria-hidden="true"
+          style:background-image="repeating-linear-gradient(to right, transparent 0 calc(20% - 1px), var(--border-strong) calc(20% - 1px) 20%)"
+          style:background-origin="content-box"
+          style:background-clip="content-box"
+        >
           <div
             class="h-1.5 bg-accent rounded transition-[width] duration-[400ms] opacity-80"
             style:width="{barWidthPct}%"
