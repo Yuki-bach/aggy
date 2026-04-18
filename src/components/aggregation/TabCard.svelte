@@ -58,6 +58,6 @@
       <CrossTable {tab} {crossTabs} basis={tableOpts.basis} />
     {/if}
   {:else}
-    <TabTable {tab} maxPct={tableOpts.maxPct} />
+    <TabTable {tab} />
   {/if}
 </div>

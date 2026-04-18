@@ -7,10 +7,9 @@
 
   interface Props {
     tab: Tab;
-    maxPct: number;
   }
 
-  let { tab, maxPct }: Props = $props();
+  let { tab }: Props = $props();
 
   let slice = $derived(tab.slices[0]);
 </script>
@@ -33,7 +32,7 @@
       {@const label = tab.labels[code]}
       {@const countStr = formatN(cell.count)}
       {@const pct = cell.pct ?? 0}
-      {@const barWidthPct = ((pct / Math.max(maxPct, 1)) * 100).toFixed(1)}
+      {@const barWidthPct = pct.toFixed(1)}
       <tr>
         <Td>{label}</Td>
         <Td right mono>{countStr}</Td>
