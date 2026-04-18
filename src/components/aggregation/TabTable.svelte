@@ -33,17 +33,17 @@
       {@const label = tab.labels[code]}
       {@const countStr = formatN(cell.count)}
       {@const pct = cell.pct ?? 0}
-      {@const barWidth = ((pct / Math.max(maxPct, 1)) * 72).toFixed(1)}
+      {@const barWidthPct = ((pct / Math.max(maxPct, 1)) * 100).toFixed(1)}
       <tr>
         <Td>{label}</Td>
         <Td right mono>{countStr}</Td>
         <Td right mono class="text-muted">
           {cell.pct !== null ? cell.pct.toFixed(1) + "%" : "-"}
         </Td>
-        <td class="py-3 pr-4 pl-0 border-b border-row-border w-20" aria-hidden="true">
+        <td class="py-3 pr-4 pl-0 border-b border-row-border w-full" aria-hidden="true">
           <div
             class="h-1.5 bg-accent rounded transition-[width] duration-[400ms] opacity-80"
-            style:width="{barWidth}px"
+            style:width="{barWidthPct}%"
           ></div>
         </td>
       </tr>

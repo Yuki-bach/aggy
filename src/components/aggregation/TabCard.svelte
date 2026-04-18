@@ -38,25 +38,25 @@
     <span class="ml-auto text-xs text-muted">n={formatN(tabN)}</span>
   </div>
 
-  {#if viewMode === "chart"}
-    {#if isNA}
+  {#if isNA}
+    {#if viewMode === "chart"}
       <NaChartCardBody {tab} {crossTabs} paletteId={chartOpts.paletteId} />
+    {:else if hasCross}
+      <NaCrossTable {tab} {crossTabs} />
     {:else}
+      <NaTabTable {tab} />
+    {/if}
+  {:else if hasCross}
+    {#if viewMode === "chart"}
       <ChartCardBody
         {tab}
         {crossTabs}
         tabChartType={tab.type === "SA" ? chartOpts.saChartType : chartOpts.maChartType}
         paletteId={chartOpts.paletteId}
       />
-    {/if}
-  {:else if isNA}
-    {#if hasCross}
-      <NaCrossTable {tab} {crossTabs} />
     {:else}
-      <NaTabTable {tab} />
+      <CrossTable {tab} {crossTabs} basis={tableOpts.basis} />
     {/if}
-  {:else if hasCross}
-    <CrossTable {tab} {crossTabs} basis={tableOpts.basis} />
   {:else}
     <TabTable {tab} maxPct={tableOpts.maxPct} />
   {/if}

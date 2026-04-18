@@ -40,22 +40,25 @@
     {t("result.meta", { count: questionCount, weight: weightText })}
   </span>
 
-  <ToggleGroup class="ml-auto">
-    <ToggleButton
-      active={currentViewMode === "table"}
-      onclick={() => currentViewMode !== "table" && callbacks.onViewModeChange("table")}
-    >
-      {t("result.view.table")}
-    </ToggleButton>
-    <ToggleButton
-      active={currentViewMode === "chart"}
-      onclick={() => currentViewMode !== "chart" && callbacks.onViewModeChange("chart")}
-    >
-      {t("result.view.chart")}
-    </ToggleButton>
-  </ToggleGroup>
+  <div class="ml-auto flex items-center gap-4">
+    {#if hasCross}
+      <ToggleGroup>
+        <ToggleButton
+          active={currentViewMode === "table"}
+          onclick={() => currentViewMode !== "table" && callbacks.onViewModeChange("table")}
+        >
+          {t("result.view.table")}
+        </ToggleButton>
+        <ToggleButton
+          active={currentViewMode === "chart"}
+          onclick={() => currentViewMode !== "chart" && callbacks.onViewModeChange("chart")}
+        >
+          {t("result.view.chart")}
+        </ToggleButton>
+      </ToggleGroup>
+    {/if}
 
-  {#if hasDetailSettings}
+    {#if hasDetailSettings}
     <div
       class="relative"
       {@attach clickOutside({ onClose: () => (detailOpen = false) })}
@@ -187,5 +190,6 @@
     </div>
   {/if}
 
-  <ExportMenu onExport={(action: ExportAction) => executeExport(action, tabs, weightCol)} />
+    <ExportMenu onExport={(action: ExportAction) => executeExport(action, tabs, weightCol)} />
+  </div>
 </div>
