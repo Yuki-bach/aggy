@@ -18,7 +18,7 @@
   <caption class="sr-only">{t("table.caption.tab", { question: tab.label })}</caption>
   <thead>
     <tr>
-      <Th class="w-64 min-w-64">{t("table.option")}</Th>
+      <Th class="min-w-60">{t("table.option")}</Th>
       <Th right>n</Th>
       <Th right>%</Th>
       <th
