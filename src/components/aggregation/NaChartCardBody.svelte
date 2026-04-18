@@ -222,7 +222,7 @@
   }
 </script>
 
-<div class="p-4 {isCross ? 'h-[400px]' : 'h-80'}">
+<div class="flex flex-col p-4 {isCross ? 'h-[400px]' : 'h-80'}">
   {#if !isCross && range > 0}
     <div class="flex items-center justify-end gap-2 mb-2 text-xs text-muted-foreground">
       <label>
@@ -239,5 +239,7 @@
       <span class="w-6 text-center tabular-nums">{binWidth || "–"}</span>
     </div>
   {/if}
-  <canvas bind:this={canvas}></canvas>
+  <div class="relative flex-1 min-h-0">
+    <canvas bind:this={canvas}></canvas>
+  </div>
 </div>
