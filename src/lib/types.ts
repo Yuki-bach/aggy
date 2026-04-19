@@ -10,6 +10,7 @@ export interface Question {
   codes: string[];
   label: string;
   labels: Record<string, string>;
+  matrixKey: string | null;
 }
 
 export interface Cell {
@@ -45,4 +46,5 @@ export interface Tab {
   codes: string[];
   labels: Record<string, string>;
   slices: Slice[];
+  matrix: { key: string; label: string } | null;
 }

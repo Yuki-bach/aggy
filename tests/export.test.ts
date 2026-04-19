@@ -167,6 +167,7 @@ describe("formatCSV", () => {
       codes: ["1"],
       by: null,
       slices: [{ code: null, n: 10, cells: [{ count: 10, pct: 100 }] }],
+      matrix: null,
     };
     const csv = formatCSV([tab]);
     expect(csv).toContain('""quotes""');
@@ -181,6 +182,7 @@ describe("formatCSV", () => {
       codes: ["1"],
       by: null,
       slices: [{ code: null, n: 5, cells: [{ count: 5, pct: 100 }] }],
+      matrix: null,
     };
     const csv = formatCSV([tab]);
     expect(csv).toContain('"A, B"');
@@ -195,6 +197,7 @@ describe("formatCSV", () => {
       codes: ["1"],
       by: null,
       slices: [{ code: null, n: 5, cells: [{ count: 5, pct: 100 }] }],
+      matrix: null,
     };
     const csv = formatCSV([tab]);
     expect(csv).toContain('"line1\nline2"');
@@ -243,6 +246,7 @@ describe("formatMarkdown", () => {
       codes: ["1"],
       by: null,
       slices: [{ code: null, n: 5, cells: [{ count: 5, pct: 100 }] }],
+      matrix: null,
     };
     const md = formatMarkdown([tab]);
     expect(md).toContain(String.raw`A\|B`);

@@ -67,9 +67,15 @@
     ]
   },
   {
+    "key": "q3",
+    "label": "Satisfaction by Aspect",
+    "type": "MATRIX"
+  },
+  {
     "key": "q3a",
     "label": "Quality Satisfaction",
     "type": "SA",
+    "matrixKey": "q3",
     "items": [
       { "code": "1", "label": "Very satisfied" },
       { "code": "2", "label": "Somewhat satisfied" },
@@ -82,6 +88,7 @@
     "key": "q3b",
     "label": "Price Satisfaction",
     "type": "SA",
+    "matrixKey": "q3",
     "items": [
       { "code": "1", "label": "Very satisfied" },
       { "code": "2", "label": "Somewhat satisfied" },
@@ -94,6 +101,7 @@
     "key": "q3c",
     "label": "Support Satisfaction",
     "type": "SA",
+    "matrixKey": "q3",
     "items": [
       { "code": "1", "label": "Very satisfied" },
       { "code": "2", "label": "Somewhat satisfied" },
@@ -106,6 +114,7 @@
     "key": "q3d",
     "label": "Usability Satisfaction",
     "type": "SA",
+    "matrixKey": "q3",
     "items": [
       { "code": "1", "label": "Very satisfied" },
       { "code": "2", "label": "Somewhat satisfied" },

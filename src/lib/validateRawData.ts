@@ -46,6 +46,7 @@ export async function validateRawData(
 // ─── Internal per-question validators ────────────────────────
 
 function checkDropped(q: LayoutQuestion, headerSet: Set<string>): Diagnostic | null {
+  if (q.type === "MATRIX") return null;
   if (q.type === "MA") {
     const hasAny = q.items.some((item) => headerSet.has(`${q.key}_${item.code}`));
     if (!hasAny) {

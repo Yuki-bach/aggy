@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Tab, Cell } from "../../lib/types";
   import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
+  import { formatN } from "../../lib/format";
   import { t } from "../../lib/i18n.svelte";
   import type { ChartConfiguration } from "chart.js";
 
@@ -137,7 +138,7 @@
           legend: { display: false },
           title: {
             display: true,
-            text: `n=${sliceStats.n}  ${t("na.stat.mean")}=${sliceStats.mean?.toFixed(2) ?? "-"}  SD=${sliceStats.sd?.toFixed(2) ?? "-"}`,
+            text: `n=${formatN(sliceStats.n)}  ${t("na.stat.mean")}=${sliceStats.mean?.toFixed(2) ?? "-"}  SD=${sliceStats.sd?.toFixed(2) ?? "-"}`,
             color: theme.muted,
             font: { size: 12, weight: "normal" },
           },
@@ -221,7 +222,7 @@
   }
 </script>
 
-<div class="p-4 {isCross ? 'h-[400px]' : 'h-80'}">
+<div class="flex flex-col p-4 {isCross ? 'h-[400px]' : 'h-80'}">
   {#if !isCross && range > 0}
     <div class="flex items-center justify-end gap-2 mb-2 text-xs text-muted-foreground">
       <label>
@@ -238,5 +239,7 @@
       <span class="w-6 text-center tabular-nums">{binWidth || "–"}</span>
     </div>
   {/if}
-  <canvas bind:this={canvas}></canvas>
+  <div class="relative flex-1 min-h-0">
+    <canvas bind:this={canvas}></canvas>
+  </div>
 </div>

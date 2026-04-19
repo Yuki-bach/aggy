@@ -6,7 +6,6 @@ export type Basis = "column" | "row";
 
 export interface TableOpts {
   basis: Basis;
-  maxPct: number;
 }
 
 export interface ChartOpts {
