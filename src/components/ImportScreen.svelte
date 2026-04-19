@@ -31,6 +31,10 @@
 
   let { onComplete }: Props = $props();
 
+  type ValidationOutcome =
+    | { ok: true; diags: Diagnostic[] }
+    | { ok: false; error: string };
+
   let rawData = $state<RawData | null>(null);
   let layout = $state<LayoutData | null>(null);
   let step = $state(1);
@@ -39,6 +43,7 @@
   let validating = $state(false);
   let validationResult = $state<Diagnostic[] | null>(null);
   let validationError = $state<string | null>(null);
+  let validationPromise = $state<Promise<ValidationOutcome> | null>(null);
 
   let loadedFromSaved = false;
   let pendingRawDataFile: File | null = null;
@@ -62,6 +67,19 @@
 
   onMount(() => {
     void refreshSavedFiles();
+  });
+
+  // Prefetch validation as soon as both files are available so handleStart can skip the wait.
+  $effect(() => {
+    if (!rawData || !layout) {
+      validationPromise = null;
+      return;
+    }
+    const rawJson = layout.rawJson;
+    const headers = rawData.headers;
+    validationPromise = runValidation(rawJson, headers)
+      .then<ValidationOutcome>((diags) => ({ ok: true, diags }))
+      .catch<ValidationOutcome>((e) => ({ ok: false, error: (e as Error).message }));
   });
 
   const STEPS = [
@@ -131,11 +149,20 @@
     validationResult = null;
     validationError = null;
     try {
-      const diags = await runValidation(layout.rawJson, rawData.headers);
-      if (diags.length === 0) {
+      let outcome: ValidationOutcome;
+      while (true) {
+        const p = validationPromise;
+        if (!p) return;
+        outcome = await p;
+        if (p === validationPromise) break; // not stale
+      }
+      if (!outcome.ok) {
+        validationError = outcome.error;
+        step = 2;
+      } else if (outcome.diags.length === 0) {
         await handleProceed();
       } else {
-        validationResult = diags;
+        validationResult = outcome.diags;
         step = 2;
       }
     } catch (e) {
@@ -153,21 +180,23 @@
   async function handleProceed() {
     if (!rawData || !layout) return;
     if (!loadedFromSaved && opfsPayload.layoutJson) {
-      try {
-        const rawDataText =
-          opfsPayload.rawDataText ?? (pendingRawDataFile ? await pendingRawDataFile.text() : null);
-        if (rawDataText) {
-          await saveData(
-            opfsPayload.rawDataFileName!,
-            rawDataText,
-            opfsPayload.layoutFileName!,
-            opfsPayload.layoutJson,
-          );
-          await refreshSavedFiles();
+      // Fire-and-forget: reading an 11MB File via .text() would block the screen transition ~100-200ms.
+      const fileName = opfsPayload.rawDataFileName!;
+      const layoutFileName = opfsPayload.layoutFileName!;
+      const layoutJson = opfsPayload.layoutJson;
+      const cachedText = opfsPayload.rawDataText;
+      const file = pendingRawDataFile;
+      void (async () => {
+        try {
+          const rawDataText = cachedText ?? (file ? await file.text() : null);
+          if (rawDataText) {
+            await saveData(fileName, rawDataText, layoutFileName, layoutJson);
+            await refreshSavedFiles();
+          }
+        } catch {
+          // OPFS save is best-effort
         }
-      } catch {
-        // OPFS save is best-effort
-      }
+      })();
     }
     const validLayout = buildValidLayout(layout.rawJson);
     const filtered = filterLayout(rawData.headers, validLayout);
