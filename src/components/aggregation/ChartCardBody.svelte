@@ -222,6 +222,7 @@
         scales: {
           [isHorizontal ? "x" : "y"]: {
             beginAtZero: true,
+            max: 100,
             ticks: { color: theme.muted, callback: (v) => `${v}%` },
             grid: { color: theme.gridLine },
           },
