@@ -180,21 +180,23 @@
   async function handleProceed() {
     if (!rawData || !layout) return;
     if (!loadedFromSaved && opfsPayload.layoutJson) {
-      try {
-        const rawDataText =
-          opfsPayload.rawDataText ?? (pendingRawDataFile ? await pendingRawDataFile.text() : null);
-        if (rawDataText) {
-          await saveData(
-            opfsPayload.rawDataFileName!,
-            rawDataText,
-            opfsPayload.layoutFileName!,
-            opfsPayload.layoutJson,
-          );
-          await refreshSavedFiles();
+      // Fire-and-forget: reading an 11MB File via .text() would block the screen transition ~100-200ms.
+      const fileName = opfsPayload.rawDataFileName!;
+      const layoutFileName = opfsPayload.layoutFileName!;
+      const layoutJson = opfsPayload.layoutJson;
+      const cachedText = opfsPayload.rawDataText;
+      const file = pendingRawDataFile;
+      void (async () => {
+        try {
+          const rawDataText = cachedText ?? (file ? await file.text() : null);
+          if (rawDataText) {
+            await saveData(fileName, rawDataText, layoutFileName, layoutJson);
+            await refreshSavedFiles();
+          }
+        } catch {
+          // OPFS save is best-effort
         }
-      } catch {
-        // OPFS save is best-effort
-      }
+      })();
     }
     const validLayout = buildValidLayout(layout.rawJson);
     const filtered = filterLayout(rawData.headers, validLayout);
