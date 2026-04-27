@@ -67,7 +67,7 @@
   });
 </script>
 
-<div class="mb-6 flex items-start gap-4">
+<div class="flex items-start gap-4">
   <div class="min-w-0 flex-1">
     <h2 class="text-xl font-bold">{t("result.title.tab")}</h2>
     <p class="mt-0.5 text-xs text-muted">{metaText}</p>

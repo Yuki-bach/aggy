@@ -61,8 +61,11 @@
       el.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    const offset = el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
-    sc.scrollTo({ top: offset, behavior: "smooth" });
+    const stickyEl = sc.querySelector<HTMLElement>("[data-sticky-toolbar]");
+    const stickyH = stickyEl?.offsetHeight ?? 0;
+    const offset =
+      el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - stickyH;
+    sc.scrollTo({ top: Math.max(0, offset), behavior: "smooth" });
   }
 </script>
 

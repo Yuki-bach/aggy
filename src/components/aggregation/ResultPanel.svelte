@@ -112,49 +112,53 @@
     </Alert>
   {/if}
 
-  <div class="min-h-0 flex-1 overflow-y-auto p-6">
+  <div class="min-h-0 flex-1 overflow-y-auto">
     {#if tabs}
       <div aria-live="polite">
-        <Toolbar
-          {tabs}
-          {weightCol}
-          currentViewMode={viewMode}
-          currentBasis={basis}
-          {hasCross}
-          {chartOpts}
-          {callbacks}
-          {questions}
-          {crossSelected}
-          {onCrossToggle}
-          {weightColumnName}
-          {weightEnabled}
-          {onWeightToggle}
-        />
-        <div class={gridClass}>
-          {#each renderItems as item (item.kind === "matrix" ? `m:${item.matrix.key}` : `s:${item.questionCode}`)}
-            {#if item.kind === "matrix"}
-              <MatrixTabCard
-                matrix={item.matrix}
-                items={item.questionCodes.map((c) => ({
-                  gtTab: tabs.find((tab) => tab.questionCode === c && tab.by === null)!,
-                  crossTabs: tabs.filter((tab) => tab.questionCode === c && tab.by !== null),
-                }))}
-                {viewMode}
-                {tableOpts}
-                {chartOpts}
-              />
-            {:else}
-              <TabCard
-                tab={tabs.find((tab) => tab.questionCode === item.questionCode && tab.by === null)!}
-                crossTabs={tabs.filter((tab) => tab.questionCode === item.questionCode && tab.by !== null)}
-                {viewMode}
-                {tableOpts}
-                {chartOpts}
-              />
-            {/if}
-          {/each}
+        <div class="sticky top-0 z-10 bg-bg px-6 pt-6 pb-3" data-sticky-toolbar>
+          <Toolbar
+            {tabs}
+            {weightCol}
+            currentViewMode={viewMode}
+            currentBasis={basis}
+            {hasCross}
+            {chartOpts}
+            {callbacks}
+            {questions}
+            {crossSelected}
+            {onCrossToggle}
+            {weightColumnName}
+            {weightEnabled}
+            {onWeightToggle}
+          />
         </div>
-        <AIBubble {tabs} {weightCol} />
+        <div class="px-6 pb-6">
+          <div class={gridClass}>
+            {#each renderItems as item (item.kind === "matrix" ? `m:${item.matrix.key}` : `s:${item.questionCode}`)}
+              {#if item.kind === "matrix"}
+                <MatrixTabCard
+                  matrix={item.matrix}
+                  items={item.questionCodes.map((c) => ({
+                    gtTab: tabs.find((tab) => tab.questionCode === c && tab.by === null)!,
+                    crossTabs: tabs.filter((tab) => tab.questionCode === c && tab.by !== null),
+                  }))}
+                  {viewMode}
+                  {tableOpts}
+                  {chartOpts}
+                />
+              {:else}
+                <TabCard
+                  tab={tabs.find((tab) => tab.questionCode === item.questionCode && tab.by === null)!}
+                  crossTabs={tabs.filter((tab) => tab.questionCode === item.questionCode && tab.by !== null)}
+                  {viewMode}
+                  {tableOpts}
+                  {chartOpts}
+                />
+              {/if}
+            {/each}
+          </div>
+          <AIBubble {tabs} {weightCol} />
+        </div>
       </div>
     {/if}
   </div>
