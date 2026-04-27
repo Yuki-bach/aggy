@@ -32,6 +32,7 @@
 </script>
 
 <div
+  id="card-matrix-{matrix.key}"
   class="overflow-hidden rounded-xl border border-border bg-surface shadow-sm{hasCross
     ? ' overflow-x-auto'
     : ''}"
