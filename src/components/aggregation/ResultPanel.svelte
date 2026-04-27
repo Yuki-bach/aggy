@@ -52,6 +52,15 @@
     return () => observer.disconnect();
   });
 
+  // When the last cross axis is unchecked while in chart mode, the View Mode
+  // toggle disappears (it's only shown when hasCross). Without resetting,
+  // the user gets stuck in chart mode with no way back to table. Reset here.
+  $effect(() => {
+    if (!hasCross && viewMode === "chart") {
+      viewMode = "table";
+    }
+  });
+
   let callbacks = $derived({
     onViewModeChange: (m: ViewMode) => (viewMode = m),
     onSaChartTypeChange: (ct: ChartType) => (saChartType = ct),
