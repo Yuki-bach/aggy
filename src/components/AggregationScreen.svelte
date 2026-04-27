@@ -35,23 +35,30 @@
     crossSelected = sel;
   });
 
-  async function handleRunAggregation(): Promise<void> {
-    errorMsg = "";
+  // Increments per scheduled run; only the latest run is allowed to commit results
+  let latestRunId = 0;
+
+  async function handleRunAggregation(runId: number): Promise<void> {
     const activeWeightCol = weightEnabled ? weightColumnName : "";
     const crossQuestions = questions.filter((q) => crossSelected[q.code]);
 
     try {
       const tabs = await runAggregation(questions, crossQuestions, activeWeightCol, matrixLabels);
+      if (runId !== latestRunId) return;
       aggResult = { tabs, weightCol: activeWeightCol };
+      errorMsg = "";
     } catch (e) {
+      if (runId !== latestRunId) return;
       errorMsg = t("error.aggregation", { msg: (e as Error).message });
     }
   }
 
-  // Auto-run aggregation whenever cross selection or weight toggle changes
+  // Auto-run aggregation whenever cross selection or weight toggle changes.
+  // A monotonic runId is captured per scheduling; older runs that finish later are dropped.
   $effect(() => {
     if (questions.length === 0) return;
-    void handleRunAggregation();
+    const runId = ++latestRunId;
+    void handleRunAggregation(runId);
   });
 </script>
 
