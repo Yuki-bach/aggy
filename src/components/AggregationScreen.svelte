@@ -18,8 +18,9 @@
 
   let questions = $derived(buildQuestions(preparedLayout));
   let weightColumnName = $derived(findWeightColumn(preparedLayout));
+  let matrixGroups = $derived(buildMatrixGroups(preparedLayout));
   let matrixLabels = $derived(
-    Object.fromEntries(buildMatrixGroups(preparedLayout).map((g) => [g.matrixKey, g.matrixLabel])),
+    Object.fromEntries(matrixGroups.map((g) => [g.matrixKey, g.matrixLabel])),
   );
 
   let crossSelected = $state<Record<string, boolean>>({});
@@ -54,7 +55,7 @@
   });
 </script>
 
-<SettingsPanel {rawData} {layout} {dateWarnings} />
+<SettingsPanel {rawData} {layout} {questions} {matrixGroups} {dateWarnings} />
 
 <ResultPanel
   tabs={aggResult?.tabs ?? null}

@@ -49,6 +49,7 @@ const en: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "Data Summary",
+  "section.toc": "Index",
   "section.cross": "Cross-Tabulation Axes",
   "section.cross.label": "Cross-tabulation axis selection",
   "summary.rows": "{rows} rows {cols} cols",

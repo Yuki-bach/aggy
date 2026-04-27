@@ -1,16 +1,20 @@
 <script lang="ts">
-  import type { RawData, LayoutData } from "../../lib/types";
+  import type { Question, RawData, LayoutData } from "../../lib/types";
+  import type { MatrixGroup } from "../../lib/layout";
   import { t } from "../../lib/i18n.svelte";
   import SectionTitle from "../shared/SectionTitle.svelte";
   import Alert from "../shared/Alert.svelte";
+  import Toc from "./Toc.svelte";
 
   interface Props {
     rawData: RawData;
     layout: LayoutData;
+    questions: Question[];
+    matrixGroups: MatrixGroup[];
     dateWarnings: string[];
   }
 
-  let { rawData, layout, dateWarnings }: Props = $props();
+  let { rawData, layout, questions, matrixGroups, dateWarnings }: Props = $props();
 </script>
 
 <div
@@ -52,4 +56,10 @@
       {/each}
     </Alert>
   {/if}
+
+  <!-- Table of Contents -->
+  <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
+    <SectionTitle>{t("section.toc")}</SectionTitle>
+    <Toc {questions} {matrixGroups} />
+  </section>
 </div>

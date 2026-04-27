@@ -49,6 +49,7 @@ const ja: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "データ概要",
+  "section.toc": "目次",
   "section.cross": "クロス集計軸",
   "section.cross.label": "クロス集計軸の選択",
   "summary.rows": "{rows} 行 {cols} 列",

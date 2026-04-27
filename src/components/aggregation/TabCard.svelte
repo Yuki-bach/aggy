@@ -25,6 +25,7 @@
 </script>
 
 <div
+  id="card-{tab.questionCode}"
   class="overflow-hidden rounded-xl border border-border bg-surface shadow-sm{hasCross
     ? ' overflow-x-auto'
     : ''}"
