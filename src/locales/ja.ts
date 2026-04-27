@@ -58,7 +58,6 @@ const ja: Record<string, string> = {
   "weight.off": "OFF",
 
   // Data config bar (cross + weight)
-  "cross.empty": "未選択",
   "cross.summary": "{names} +{rest}",
   "cross.popover.empty": "選択可能な設問がありません",
 

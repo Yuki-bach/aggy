@@ -233,6 +233,11 @@ export function buildQuestions(layout: Layout): Question[] {
     });
 }
 
+/** SA/MA only — questions usable as a cross-tabulation axis (NA is excluded) */
+export function getSamaQuestions(questions: Question[]): Question[] {
+  return questions.filter((q) => q.type !== "NA");
+}
+
 function buildNAQuestion(e: NALayout): Question {
   return {
     type: "NA",

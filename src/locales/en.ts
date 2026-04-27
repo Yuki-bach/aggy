@@ -58,7 +58,6 @@ const en: Record<string, string> = {
   "weight.off": "OFF",
 
   // Data config bar (cross + weight)
-  "cross.empty": "None",
   "cross.summary": "{names} +{rest}",
   "cross.popover.empty": "No questions available",
 

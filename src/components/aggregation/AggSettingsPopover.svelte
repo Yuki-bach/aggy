@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Question } from "../../lib/types";
   import { t } from "../../lib/i18n.svelte";
+  import { getSamaQuestions } from "../../lib/layout";
   import ToggleButton from "../shared/ToggleButton.svelte";
   import ToggleGroup from "../shared/ToggleGroup.svelte";
   import { clickOutside } from "../../lib/dismiss";
@@ -25,7 +26,7 @@
 
   let open = $state(false);
 
-  let samaQuestions = $derived(questions.filter((q) => q.type !== "NA"));
+  let samaQuestions = $derived(getSamaQuestions(questions));
   let selectedCount = $derived(samaQuestions.filter((q) => crossSelected[q.code]).length);
 </script>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Question, Tab } from "../../lib/types";
   import { t } from "../../lib/i18n.svelte";
+  import { getSamaQuestions } from "../../lib/layout";
   import ExportMenu from "./ExportMenu.svelte";
   import AggSettingsPopover from "./AggSettingsPopover.svelte";
   import ViewSettingsPopover from "./ViewSettingsPopover.svelte";
@@ -43,8 +44,7 @@
   let questionCount = $derived(new Set(tabs.map((tab) => tab.questionCode)).size);
 
   let selectedCrossNames = $derived.by(() => {
-    const samaQuestions = questions.filter((q) => q.type !== "NA");
-    const selected = samaQuestions.filter((q) => crossSelected[q.code]);
+    const selected = getSamaQuestions(questions).filter((q) => crossSelected[q.code]);
     if (selected.length === 0) return "";
     const names = selected.map((q) => (q.label === q.code ? q.code : q.label));
     if (names.length <= 2) return names.join(", ");
