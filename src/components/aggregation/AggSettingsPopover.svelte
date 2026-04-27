@@ -13,6 +13,7 @@
     weightColumnName: string;
     weightEnabled: boolean;
     onWeightToggle: (on: boolean) => void;
+    onAddDerived?: () => void;
   }
 
   let {
@@ -22,6 +23,7 @@
     weightColumnName,
     weightEnabled,
     onWeightToggle,
+    onAddDerived,
   }: Props = $props();
 
   let open = $state(false);
@@ -107,6 +109,18 @@
               </li>
             {/each}
           </ul>
+        {/if}
+        {#if onAddDerived}
+          <button
+            type="button"
+            class="mt-2 flex w-full cursor-pointer items-center justify-center rounded-md border border-dashed border-border px-2 py-1.5 text-xs text-text-secondary transition-colors hover:border-accent hover:bg-accent-bg hover:text-accent"
+            onclick={() => {
+              open = false;
+              onAddDerived?.();
+            }}
+          >
+            {t("derived.popover.add")}
+          </button>
         {/if}
       </div>
 

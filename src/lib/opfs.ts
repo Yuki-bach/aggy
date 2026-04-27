@@ -10,11 +10,12 @@ export async function saveData(
   rawDataText: string,
   layoutName: string,
   layoutJson: string,
+  folderId?: string,
 ): Promise<SavedEntry> {
   const ts = Date.now();
-  const folderId = String(ts);
+  const id = folderId ?? String(ts);
   const dir = await getAggyDir();
-  const folder = await dir.getDirectoryHandle(folderId, { create: true });
+  const folder = await dir.getDirectoryHandle(id, { create: true });
 
   const rawDataHandle = await folder.getFileHandle(rawDataName, { create: true });
   const rawDataW = await rawDataHandle.createWritable();
@@ -26,7 +27,7 @@ export async function saveData(
   await jsonW.write(layoutJson);
   await jsonW.close();
 
-  return { folderId, rawDataName, layoutName, timestamp: ts };
+  return { folderId: id, rawDataName, layoutName, timestamp: ts };
 }
 
 export async function listSaved(): Promise<SavedEntry[]> {

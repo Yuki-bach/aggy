@@ -9,6 +9,7 @@
     refreshSavedFiles,
     deleteSavedEntry,
   } from "../lib/savedFilesStore.svelte";
+  import type { DerivedRecipe } from "../lib/derivedRecipe";
 
   import FileUploadPanel from "./import/FileUploadPanel.svelte";
   import SavedFiles from "./import/SavedFiles.svelte";
@@ -26,6 +27,8 @@
       layout: LayoutData,
       dateWarnings: string[],
       preparedLayout: Layout,
+      recipes: DerivedRecipe[],
+      folderId: string,
     ) => void;
   }
 
@@ -46,12 +49,14 @@
   let validationPromise = $state<Promise<ValidationOutcome> | null>(null);
 
   let loadedFromSaved = false;
+  let loadedFolderId: string | null = null;
   let pendingRawDataFile: File | null = null;
   let opfsPayload: {
     rawDataText?: string;
     rawDataFileName?: string;
     layoutJson?: string;
     layoutFileName?: string;
+    recipesJson?: string;
   } = {};
 
   let entries = $derived(getSavedEntries());
@@ -92,13 +97,19 @@
       loadError = null;
       const result = await loadCSV(file);
       pendingRawDataFile = file;
-      opfsPayload = { ...opfsPayload, rawDataText: undefined, rawDataFileName: file.name };
+      opfsPayload = {
+        ...opfsPayload,
+        rawDataText: undefined,
+        rawDataFileName: file.name,
+        recipesJson: undefined,
+      };
       rawData = {
         fileName: file.name,
         headers: result.headers,
         rowCount: result.rowCount,
       };
       loadedFromSaved = false;
+      loadedFolderId = null;
     } catch (e) {
       loadError = t("error.csv.load", { msg: (e as Error).message });
     }
@@ -109,9 +120,15 @@
       loadError = null;
       const text = await file.text();
       const rawJson = parseLayoutJson(text);
-      opfsPayload = { ...opfsPayload, layoutJson: text, layoutFileName: file.name };
+      opfsPayload = {
+        ...opfsPayload,
+        layoutJson: text,
+        layoutFileName: file.name,
+        recipesJson: undefined,
+      };
       layout = { fileName: file.name, rawJson };
       loadedFromSaved = false;
+      loadedFolderId = null;
     } catch (e) {
       loadError = t("error.layout.load", { msg: (e as Error).message });
     }
@@ -130,6 +147,7 @@
         rawDataFileName: data.rawDataName,
         layoutJson: data.layoutJson,
         layoutFileName: data.layoutName,
+        recipesJson: data.recipesJson,
       };
       rawData = {
         fileName: data.rawDataName,
@@ -138,6 +156,7 @@
       };
       layout = { fileName: data.layoutName, rawJson };
       loadedFromSaved = true;
+      loadedFolderId = folderId;
     } catch (e) {
       loadError = t("error.saved.load", { msg: (e as Error).message });
     }
@@ -179,6 +198,7 @@
 
   async function handleProceed() {
     if (!rawData || !layout) return;
+    const folderId = loadedFolderId ?? String(Date.now());
     if (!loadedFromSaved && opfsPayload.layoutJson) {
       // Fire-and-forget: reading an 11MB File via .text() would block the screen transition ~100-200ms.
       const fileName = opfsPayload.rawDataFileName!;
@@ -190,7 +210,7 @@
         try {
           const rawDataText = cachedText ?? (file ? await file.text() : null);
           if (rawDataText) {
-            await saveData(fileName, rawDataText, layoutFileName, layoutJson);
+            await saveData(fileName, rawDataText, layoutFileName, layoutJson, folderId);
             await refreshSavedFiles();
           }
         } catch {
@@ -201,7 +221,18 @@
     const validLayout = buildValidLayout(layout.rawJson);
     const filtered = filterLayout(rawData.headers, validLayout);
     const { layout: prepared, warnings } = await prepareDateLayout(filtered);
-    onComplete(rawData, layout, warnings, prepared);
+
+    let recipes: DerivedRecipe[] = [];
+    if (opfsPayload.recipesJson) {
+      try {
+        const parsed = JSON.parse(opfsPayload.recipesJson) as DerivedRecipe[];
+        if (Array.isArray(parsed)) recipes = parsed;
+      } catch {
+        // Stored recipes are corrupted; ignore and start fresh
+      }
+    }
+
+    onComplete(rawData, layout, warnings, prepared, recipes, folderId);
   }
 </script>
 
