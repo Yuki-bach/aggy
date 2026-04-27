@@ -54,7 +54,10 @@
   }
 
   function jumpTo(targetId: string): void {
-    const el = document.querySelector<HTMLElement>(`#${targetId}`);
+    // Question codes are user-supplied (from the layout file) and may contain
+    // digits, dots or other characters that have special meaning in CSS
+    // selectors. CSS.escape sanitizes the id for use inside `#...`.
+    const el = document.querySelector<HTMLElement>(`#${CSS.escape(targetId)}`);
     if (!el) return;
     const sc = findScrollContainer(el);
     if (!sc) {
