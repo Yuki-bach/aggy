@@ -16,8 +16,8 @@ test("ファイルアップロード → 検証 → 集計画面遷移", async (
   // 検証 → 集計画面へ進む
   await proceedToAggregation(page);
 
-  // 集計画面の「集計を実行」ボタンが表示される
-  await expect(page.getByRole("button", { name: /集計を実行/ })).toBeVisible();
+  // 集計画面の「集計設定」ボタンが表示される
+  await expect(page.getByRole("button", { name: /集計設定を開く/ })).toBeVisible();
 });
 
 test("GT集計結果の自動表示", async ({ page }) => {
@@ -46,16 +46,16 @@ test("クロス集計", async ({ page }) => {
     timeout: 30_000,
   });
 
-  // クロス集計軸セクションから q1 のチェックボックスを ON
+  // 集計設定ボタンを押して popover を開く
+  await page.getByRole("button", { name: /集計設定を開く/ }).click();
+
+  // popover 内の最初のチェックボックス（q1 = 性別）を ON
   const crossAxisGroup = page.getByRole("group", {
     name: /クロス集計軸の選択/,
   });
   await crossAxisGroup.getByRole("checkbox").first().check();
 
-  // 集計を実行
-  await page.getByRole("button", { name: /集計を実行/ }).click();
-
-  // クロス集計ヘッダー（「性別」列ヘッダー）がテーブル内に表示されること
+  // 即時集計でクロスヘッダー（「性別」列ヘッダー）がテーブル内に表示されること
   const crossHeader = page.locator("table th", { hasText: "性別" });
   await expect(crossHeader.first()).toBeVisible({ timeout: 30_000 });
 });
