@@ -80,8 +80,14 @@
     </Alert>
   {/if}
 
+  <!-- Table of Contents -->
+  <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
+    <SectionTitle>{t("section.toc")}</SectionTitle>
+    <Toc {questions} {matrixGroups} excludeCodes={derivedCodes} />
+  </section>
+
   <!-- Derived Questions -->
-  <section class="shrink-0 border-b border-border p-4">
+  <section class="shrink-0 border-t border-border p-4">
     <div class="mb-3 flex items-center justify-between">
       <SectionTitle class="m-0">{t("section.derived")}</SectionTitle>
       <button
@@ -95,7 +101,7 @@
     {#if recipes.length === 0}
       <p class="pl-1 text-xs text-muted">{t("derived.empty")}</p>
     {:else}
-      <ul class="flex flex-col gap-0.5">
+      <ul class="flex max-h-[33vh] flex-col gap-0.5 overflow-y-auto">
         {#each recipes as r (r.code)}
           <li class="group flex items-center gap-1 rounded-sm pr-1 hover:bg-surface2">
             <button
@@ -155,11 +161,5 @@
         {/each}
       </ul>
     {/if}
-  </section>
-
-  <!-- Table of Contents -->
-  <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
-    <SectionTitle>{t("section.toc")}</SectionTitle>
-    <Toc {questions} {matrixGroups} excludeCodes={derivedCodes} />
   </section>
 </div>
