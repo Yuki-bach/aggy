@@ -96,10 +96,7 @@ async function prepareCombineSA(
 
   const items = cartesianProduct(sourceItems, sep);
 
-  // Generate label from source labels
-  const label = sourceQuestions.map((q) => q!.label).join("×");
-
-  return { type: "SA", key: recipe.code, label, items };
+  return { type: "SA", key: recipe.code, label: recipe.label, items };
 }
 
 async function prepareBinNA(
@@ -138,9 +135,8 @@ async function prepareBinNA(
   }
 
   const items: LayoutItem[] = recipe.bins.map((b) => ({ code: b.code, label: b.label }));
-  const label = sourceQ.label;
 
-  return { type: "SA", key: recipe.code, label, items };
+  return { type: "SA", key: recipe.code, label: recipe.label, items };
 }
 
 function buildBinCondition(srcCol: string, bin: BinDef): string {

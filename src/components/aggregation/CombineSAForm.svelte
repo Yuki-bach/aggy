@@ -16,6 +16,7 @@
   let { existingRecipes, baseLayout, editing, onCommit, onCancel }: Props = $props();
 
   let code = $state(editing?.code ?? "");
+  let label = $state(editing?.label ?? "");
   let sources = $state<string[]>(editing?.sources ?? []);
   let separator = $state(editing?.separator ?? "_");
   let saving = $state(false);
@@ -26,6 +27,13 @@
   let codePlaceholder = $derived(
     sources.length >= 2 ? sources.join(separator || "_") : "",
   );
+
+  let labelPlaceholder = $derived.by(() => {
+    if (sources.length < 2) return "";
+    return sources
+      .map((src) => baseLayout.find((q) => q.key === src)?.label ?? src)
+      .join("×");
+  });
 
   let sourceItemsList = $derived(
     sources.map((src) => {
@@ -72,13 +80,15 @@
     if (saving) return;
     errorMsg = null;
     const effectiveCode = code.trim() || codePlaceholder;
-    if (!effectiveCode || sources.length < 2) {
+    const effectiveLabel = label.trim() || labelPlaceholder;
+    if (!effectiveCode || !effectiveLabel || sources.length < 2) {
       errorMsg = t("derived.error.required");
       return;
     }
     const myRecipe: CombineSARecipe = {
       type: "combineSA",
       code: effectiveCode,
+      label: effectiveLabel,
       sources,
       separator: separator || "_",
     };
@@ -104,6 +114,21 @@
       bind:value={code}
       placeholder={codePlaceholder}
       class="rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-text focus:border-accent focus:outline-none"
+      autocomplete="off"
+      spellcheck="false"
+    />
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label for="combineSA-label" class="text-sm font-medium text-text">
+      {t("derived.field.label")}
+    </label>
+    <input
+      id="combineSA-label"
+      type="text"
+      bind:value={label}
+      placeholder={labelPlaceholder}
+      class="rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
       autocomplete="off"
       spellcheck="false"
     />

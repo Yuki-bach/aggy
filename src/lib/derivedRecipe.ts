@@ -11,6 +11,7 @@ export interface BinDef {
 export interface CombineSARecipe {
   type: "combineSA";
   code: string;
+  label: string;
   sources: string[];
   separator?: string; // default "_"
 }
@@ -19,6 +20,7 @@ export interface CombineSARecipe {
 export interface BinNARecipe {
   type: "binNA";
   code: string;
+  label: string;
   source: string;
   bins: BinDef[];
 }
@@ -36,6 +38,10 @@ export function validateRecipes(recipes: DerivedRecipe[], layout: Layout): strin
     if (!r.code) {
       errors.push("レシピの code が空です");
       continue;
+    }
+    // label non-empty
+    if (!r.label) {
+      errors.push(`"${r.code}": label が空です`);
     }
 
     // duplicate with layout

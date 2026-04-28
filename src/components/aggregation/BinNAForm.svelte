@@ -27,6 +27,7 @@
   }
 
   let code = $state(editing?.code ?? "");
+  let label = $state(editing?.label ?? "");
   let source = $state(editing?.source ?? "");
   let rows = $state<Row[]>(
     editing?.bins.map((b) => ({
@@ -42,6 +43,13 @@
   let coverage = $state<{ uncoveredCount: number } | null>(null);
 
   let naQuestions = $derived(baseLayout.filter((q) => q.type === "NA"));
+
+  let codePlaceholder = $derived(source ? `${source}_bin` : "");
+  let labelPlaceholder = $derived.by(() => {
+    if (!source) return "";
+    const sourceLabel = baseLayout.find((q) => q.key === source)?.label ?? source;
+    return `${sourceLabel}${t("derived.binNA.label.suffix")}`;
+  });
 
   // Load source stats whenever the source changes
   let statsRunId = 0;
@@ -180,8 +188,9 @@
   async function handleSave(): Promise<void> {
     if (saving) return;
     errorMsg = null;
-    const trimmedCode = code.trim();
-    if (!trimmedCode || !source) {
+    const effectiveCode = code.trim() || codePlaceholder;
+    const effectiveLabel = label.trim() || labelPlaceholder;
+    if (!effectiveCode || !effectiveLabel || !source) {
       errorMsg = t("derived.error.required");
       return;
     }
@@ -192,7 +201,8 @@
     }
     const myRecipe: BinNARecipe = {
       type: "binNA",
-      code: trimmedCode,
+      code: effectiveCode,
+      label: effectiveLabel,
       source,
       bins: parsed.bins,
     };
@@ -216,7 +226,23 @@
       id="binNA-code"
       type="text"
       bind:value={code}
+      placeholder={codePlaceholder}
       class="rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-text focus:border-accent focus:outline-none"
+      autocomplete="off"
+      spellcheck="false"
+    />
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label for="binNA-label" class="text-sm font-medium text-text">
+      {t("derived.field.label")}
+    </label>
+    <input
+      id="binNA-label"
+      type="text"
+      bind:value={label}
+      placeholder={labelPlaceholder}
+      class="rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
       autocomplete="off"
       spellcheck="false"
     />
