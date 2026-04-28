@@ -219,6 +219,22 @@
 
 <div class="mx-auto flex max-w-[820px] flex-col gap-5">
   <div class="flex flex-col gap-1.5">
+    <label for="binNA-source" class="text-sm font-medium text-text">
+      {t("derived.binNA.source")}
+    </label>
+    <select
+      id="binNA-source"
+      bind:value={source}
+      class="rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
+    >
+      <option value="">—</option>
+      {#each naQuestions as q (q.key)}
+        <option value={q.key}>{q.key} — {q.label}</option>
+      {/each}
+    </select>
+  </div>
+
+  <div class="flex flex-col gap-1.5">
     <label for="binNA-code" class="text-sm font-medium text-text">
       {t("derived.field.code")}
     </label>
@@ -246,22 +262,6 @@
       autocomplete="off"
       spellcheck="false"
     />
-  </div>
-
-  <div class="flex flex-col gap-1.5">
-    <label for="binNA-source" class="text-sm font-medium text-text">
-      {t("derived.binNA.source")}
-    </label>
-    <select
-      id="binNA-source"
-      bind:value={source}
-      class="rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
-    >
-      <option value="">—</option>
-      {#each naQuestions as q (q.key)}
-        <option value={q.key}>{q.key} — {q.label}</option>
-      {/each}
-    </select>
   </div>
 
   {#if naStats}

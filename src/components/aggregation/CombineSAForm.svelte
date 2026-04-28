@@ -105,36 +105,6 @@
 
 <div class="mx-auto flex max-w-[720px] flex-col gap-5">
   <div class="flex flex-col gap-1.5">
-    <label for="combineSA-code" class="text-sm font-medium text-text">
-      {t("derived.field.code")}
-    </label>
-    <input
-      id="combineSA-code"
-      type="text"
-      bind:value={code}
-      placeholder={codePlaceholder}
-      class="rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-text focus:border-accent focus:outline-none"
-      autocomplete="off"
-      spellcheck="false"
-    />
-  </div>
-
-  <div class="flex flex-col gap-1.5">
-    <label for="combineSA-label" class="text-sm font-medium text-text">
-      {t("derived.field.label")}
-    </label>
-    <input
-      id="combineSA-label"
-      type="text"
-      bind:value={label}
-      placeholder={labelPlaceholder}
-      class="rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
-      autocomplete="off"
-      spellcheck="false"
-    />
-  </div>
-
-  <div class="flex flex-col gap-1.5">
     <span class="text-sm font-medium text-text">{t("derived.combineSA.sources")}</span>
     <div class="flex max-h-64 flex-col gap-0.5 overflow-y-auto rounded-md border border-border bg-surface p-2">
       {#each saQuestions as q (q.key)}
@@ -194,6 +164,36 @@
       bind:value={separator}
       maxlength="3"
       class="w-24 rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-text focus:border-accent focus:outline-none"
+      autocomplete="off"
+      spellcheck="false"
+    />
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label for="combineSA-code" class="text-sm font-medium text-text">
+      {t("derived.field.code")}
+    </label>
+    <input
+      id="combineSA-code"
+      type="text"
+      bind:value={code}
+      placeholder={codePlaceholder}
+      class="rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-text focus:border-accent focus:outline-none"
+      autocomplete="off"
+      spellcheck="false"
+    />
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label for="combineSA-label" class="text-sm font-medium text-text">
+      {t("derived.field.label")}
+    </label>
+    <input
+      id="combineSA-label"
+      type="text"
+      bind:value={label}
+      placeholder={labelPlaceholder}
+      class="rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
       autocomplete="off"
       spellcheck="false"
     />
