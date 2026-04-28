@@ -23,6 +23,7 @@
     weightColumnName: string;
     weightEnabled: boolean;
     onWeightToggle: (on: boolean) => void;
+    onAddDerived?: () => void;
   }
 
   let {
@@ -39,6 +40,7 @@
     weightColumnName,
     weightEnabled,
     onWeightToggle,
+    onAddDerived,
   }: Props = $props();
 
   let questionCount = $derived(new Set(tabs.map((tab) => tab.questionCode)).size);
@@ -81,6 +83,7 @@
       {weightColumnName}
       {weightEnabled}
       {onWeightToggle}
+      {onAddDerived}
     />
     <ViewSettingsPopover
       {currentViewMode}

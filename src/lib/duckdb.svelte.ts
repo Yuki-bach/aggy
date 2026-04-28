@@ -4,6 +4,10 @@ import type { Layout } from "./layout";
 import { validateLayoutStructure, buildValidLayout } from "./layout";
 import { buildTabs } from "./agg/buildTabs";
 import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
+import { prepareDerivedColumns, checkBinCoverage } from "./derivedPreparation";
+import type { DerivedPreparationResult } from "./derivedPreparation";
+import type { DerivedRecipe, BinDef } from "./derivedRecipe";
+import { esc } from "./agg/sqlHelpers";
 import { validateRawData, type Diagnostic } from "./validateRawData";
 
 export type DuckStatus = "idle" | "loading" | "ready" | "error";
@@ -145,6 +149,63 @@ export async function runAggregation(
 export async function prepareDateLayout(layout: Layout): Promise<DatePreparationResult> {
   const { conn } = await requireDuckDB();
   return prepareDateColumns(conn, layout);
+}
+
+/** Prepare derived columns from recipes (combineSA, binNA) */
+export async function prepareDerivedLayout(
+  layout: Layout,
+  recipes: DerivedRecipe[],
+): Promise<DerivedPreparationResult> {
+  const { conn } = await requireDuckDB();
+  return prepareDerivedColumns(conn, layout, recipes);
+}
+
+/** NA column summary stats used by binNA form (range + quartiles + total) */
+export interface NaStats {
+  min: number;
+  max: number;
+  q1: number;
+  median: number;
+  q3: number;
+  total: number;
+}
+
+export async function getNaStats(source: string): Promise<NaStats> {
+  const { conn } = await requireDuckDB();
+  const col = esc(source);
+  const result = await conn.query(
+    `SELECT
+       MIN(CAST("${col}" AS DOUBLE)) AS lo,
+       MAX(CAST("${col}" AS DOUBLE)) AS hi,
+       QUANTILE_CONT(CAST("${col}" AS DOUBLE), 0.25) AS q1,
+       QUANTILE_CONT(CAST("${col}" AS DOUBLE), 0.5) AS q2,
+       QUANTILE_CONT(CAST("${col}" AS DOUBLE), 0.75) AS q3,
+       COUNT(*) AS total
+     FROM survey
+     WHERE "${col}" IS NOT NULL`,
+  );
+  const row = result.toArray()[0];
+  return {
+    min: Number(row.lo),
+    max: Number(row.hi),
+    q1: Number(row.q1),
+    median: Number(row.q2),
+    q3: Number(row.q3),
+    total: Number(row.total),
+  };
+}
+
+export async function getBinCoverage(
+  source: string,
+  bins: BinDef[],
+): Promise<{ min: number; max: number; uncoveredCount: number }> {
+  const { conn } = await requireDuckDB();
+  return checkBinCoverage(conn, source, bins);
+}
+
+export async function dropDerivedColumn(code: string): Promise<void> {
+  const { conn } = await requireDuckDB();
+  await conn.query(`ALTER TABLE survey DROP COLUMN IF EXISTS "${esc(code)}"`);
 }
 
 if (import.meta.hot) {

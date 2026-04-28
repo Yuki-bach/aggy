@@ -10,11 +10,12 @@ export async function saveData(
   rawDataText: string,
   layoutName: string,
   layoutJson: string,
+  folderId?: string,
 ): Promise<SavedEntry> {
   const ts = Date.now();
-  const folderId = String(ts);
+  const id = folderId ?? String(ts);
   const dir = await getAggyDir();
-  const folder = await dir.getDirectoryHandle(folderId, { create: true });
+  const folder = await dir.getDirectoryHandle(id, { create: true });
 
   const rawDataHandle = await folder.getFileHandle(rawDataName, { create: true });
   const rawDataW = await rawDataHandle.createWritable();
@@ -26,7 +27,7 @@ export async function saveData(
   await jsonW.write(layoutJson);
   await jsonW.close();
 
-  return { folderId, rawDataName, layoutName, timestamp: ts };
+  return { folderId: id, rawDataName, layoutName, timestamp: ts };
 }
 
 export async function listSaved(): Promise<SavedEntry[]> {
@@ -42,6 +43,7 @@ export async function listSaved(): Promise<SavedEntry[]> {
     let layoutName = "";
     for await (const [fileName] of handle.entries()) {
       if (fileName.endsWith(".csv")) rawDataName = fileName;
+      else if (fileName === "recipes.json") continue;
       else if (fileName.endsWith(".json")) layoutName = fileName;
     }
     if (rawDataName && layoutName) {
@@ -53,16 +55,22 @@ export async function listSaved(): Promise<SavedEntry[]> {
   return entries;
 }
 
-export async function loadSaved(
-  folderId: string,
-): Promise<{ rawDataText: string; rawDataName: string; layoutJson: string; layoutName: string }> {
+export async function loadSaved(folderId: string): Promise<{
+  rawDataText: string;
+  rawDataName: string;
+  layoutJson: string;
+  layoutName: string;
+  recipesJson?: string;
+}> {
   const dir = await getAggyDir();
   const folder = await dir.getDirectoryHandle(folderId);
 
   let rawDataName = "";
   let layoutName = "";
+  let hasRecipes = false;
   for await (const [fileName] of folder.entries()) {
     if (fileName.endsWith(".csv")) rawDataName = fileName;
+    else if (fileName === "recipes.json") hasRecipes = true;
     else if (fileName.endsWith(".json")) layoutName = fileName;
   }
   if (!rawDataName || !layoutName) throw new Error("不完全な保存データです");
@@ -72,7 +80,22 @@ export async function loadSaved(
   const jsonFile = await (await folder.getFileHandle(layoutName)).getFile();
   const layoutJson = await jsonFile.text();
 
-  return { rawDataText, rawDataName, layoutJson, layoutName };
+  let recipesJson: string | undefined;
+  if (hasRecipes) {
+    const recipesFile = await (await folder.getFileHandle("recipes.json")).getFile();
+    recipesJson = await recipesFile.text();
+  }
+
+  return { rawDataText, rawDataName, layoutJson, layoutName, recipesJson };
+}
+
+export async function saveRecipes(folderId: string, recipesJson: string): Promise<void> {
+  const dir = await getAggyDir();
+  const folder = await dir.getDirectoryHandle(folderId);
+  const handle = await folder.getFileHandle("recipes.json", { create: true });
+  const w = await handle.createWritable();
+  await w.write(recipesJson);
+  await w.close();
 }
 
 export async function deleteSaved(folderId: string): Promise<void> {
