@@ -204,7 +204,6 @@ const en: Record<string, string> = {
   "derived.save": "Save",
   "derived.saving": "Saving...",
   "derived.field.code": "Code (column name)",
-  "derived.field.code.help": "Becomes a DuckDB column. Must be unique.",
   "derived.field.label": "Label (display name)",
   "derived.combineSA.sources": "Source questions (SA, 2+)",
   "derived.combineSA.separator": "Separator",

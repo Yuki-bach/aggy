@@ -220,7 +220,6 @@
       autocomplete="off"
       spellcheck="false"
     />
-    <p class="text-xs text-muted">{t("derived.field.code.help")}</p>
   </div>
 
   <div class="flex flex-col gap-1.5">

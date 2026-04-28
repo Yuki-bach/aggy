@@ -203,7 +203,6 @@ const ja: Record<string, string> = {
   "derived.save": "保存",
   "derived.saving": "保存中...",
   "derived.field.code": "コード（列名）",
-  "derived.field.code.help": "DuckDBの列として作成。重複不可",
   "derived.field.label": "ラベル（表示名）",
   "derived.combineSA.sources": "ソース設問（SA、2つ以上）",
   "derived.combineSA.separator": "区切り文字",

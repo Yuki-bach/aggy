@@ -23,6 +23,10 @@
 
   let saQuestions = $derived(baseLayout.filter((q) => q.type === "SA"));
 
+  let codePlaceholder = $derived(
+    sources.length >= 2 ? sources.join(separator || "_") : "",
+  );
+
   let sourceItemsList = $derived(
     sources.map((src) => {
       const q = baseLayout.find((e) => e.key === src);
@@ -67,14 +71,14 @@
   async function handleSave(): Promise<void> {
     if (saving) return;
     errorMsg = null;
-    const trimmedCode = code.trim();
-    if (!trimmedCode || sources.length < 2) {
+    const effectiveCode = code.trim() || codePlaceholder;
+    if (!effectiveCode || sources.length < 2) {
       errorMsg = t("derived.error.required");
       return;
     }
     const myRecipe: CombineSARecipe = {
       type: "combineSA",
-      code: trimmedCode,
+      code: effectiveCode,
       sources,
       separator: separator || "_",
     };
@@ -98,11 +102,11 @@
       id="combineSA-code"
       type="text"
       bind:value={code}
+      placeholder={codePlaceholder}
       class="rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-text focus:border-accent focus:outline-none"
       autocomplete="off"
       spellcheck="false"
     />
-    <p class="text-xs text-muted">{t("derived.field.code.help")}</p>
   </div>
 
   <div class="flex flex-col gap-1.5">
