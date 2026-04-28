@@ -66,6 +66,7 @@ async function prepareCombineSA(
   warnings: string[],
 ): Promise<Layout[number] | null> {
   const sep = recipe.separator ?? "_";
+  const sepLit = sep.replaceAll("'", "''");
   const col = esc(recipe.code);
 
   // Verify all sources exist
@@ -80,7 +81,7 @@ async function prepareCombineSA(
   const concatExpr =
     parts.length === 1
       ? parts[0]
-      : `CONCAT(${parts.map((p, i) => (i > 0 ? `'${sep}', ${p}` : p)).join(", ")})`;
+      : `CONCAT(${parts.map((p, i) => (i > 0 ? `'${sepLit}', ${p}` : p)).join(", ")})`;
 
   // WHERE all sources are NOT NULL
   const nullChecks = recipe.sources.map((src) => `"${esc(src)}" IS NOT NULL`).join(" AND ");

@@ -43,6 +43,7 @@ export async function listSaved(): Promise<SavedEntry[]> {
     let layoutName = "";
     for await (const [fileName] of handle.entries()) {
       if (fileName.endsWith(".csv")) rawDataName = fileName;
+      else if (fileName === "recipes.json") continue;
       else if (fileName.endsWith(".json")) layoutName = fileName;
     }
     if (rawDataName && layoutName) {

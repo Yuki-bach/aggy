@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import type { RawData, LayoutData, Tab } from "../lib/types";
   import ResultPanel from "./aggregation/ResultPanel.svelte";
   import SettingsPanel from "./aggregation/SettingsPanel.svelte";
@@ -54,33 +55,26 @@
     | { kind: "recipe"; mode: "type-select" | "edit"; editCode: string | null };
   let viewMode = $state<ViewMode>({ kind: "results" });
 
-  // Re-prepare derived columns whenever recipes change.
-  // The lib does DROP COLUMN IF EXISTS per recipe, so re-running is idempotent
-  // for current recipes — but removed recipes' columns must be dropped explicitly
-  // via the delete handler before the recipes array shrinks.
-  let derivedRunId = 0;
-  $effect(() => {
-    const runId = ++derivedRunId;
-    const snapshot = recipes;
+  // Restore derived columns once on mount for OPFS-loaded recipes.
+  // Subsequent recipe mutations go through handleRecipeCommit / handleDeleteRecipe,
+  // which keep derivedLayout in sync explicitly — avoiding the double prepare
+  // an effect-on-recipes would cause right after a commit.
+  onMount(() => {
+    if (initialRecipes.length === 0) return;
     void (async () => {
       try {
-        const result = await prepareDerivedLayout(preparedLayout, snapshot);
-        if (runId !== derivedRunId) return;
+        const result = await prepareDerivedLayout(preparedLayout, initialRecipes);
         derivedLayout = result.layout;
         derivedWarnings = result.warnings;
       } catch (e) {
-        if (runId !== derivedRunId) return;
         errorMsg = t("error.aggregation", { msg: (e as Error).message });
       }
     })();
   });
 
-  // Initialize crossSelected when questions change
-  $effect(() => {
-    const sel: Record<string, boolean> = {};
-    for (const q of questions) sel[q.code] = false;
-    crossSelected = sel;
-  });
+  // crossSelected starts empty; AggSettingsPopover reads `crossSelected[code] ?? false`
+  // and onCrossToggle adds keys lazily, so we don't need an effect to seed it.
+  // Stale keys for deleted recipes are pruned in handleDeleteRecipe.
 
   // Increments per scheduled run; only the latest run is allowed to commit results
   let latestRunId = 0;
@@ -134,6 +128,7 @@
       delete next[code];
       crossSelected = next;
     }
+    derivedLayout = derivedLayout.filter((q) => q.key !== code);
     recipes = recipes.filter((r) => r.code !== code);
   }
 
