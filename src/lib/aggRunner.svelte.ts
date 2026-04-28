@@ -3,6 +3,10 @@ import { runAggregation } from "./duckdb.svelte";
 import { t } from "./i18n.svelte";
 
 export class AggRunner {
+  // Starts empty and is populated lazily by toggleCross. Consumers read
+  // `crossSelected[code] ?? false`, so missing keys mean "off" — no seeding
+  // effect needed when the question set changes. Stale keys for removed
+  // recipes are dropped via pruneCode().
   crossSelected = $state<Record<string, boolean>>({});
   weightEnabled = $state(true);
   result = $state<{ tabs: Tab[]; weightCol: string } | null>(null);

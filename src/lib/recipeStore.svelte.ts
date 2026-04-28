@@ -38,6 +38,7 @@ export class RecipeStore {
       const result = await prepareDerivedLayout(this.baseLayout, this.recipes);
       this.derivedLayout = result.layout;
       this.derivedWarnings = result.warnings;
+      this.error = "";
     } catch (e) {
       this.error = t("error.aggregation", { msg: (e as Error).message });
     }
@@ -52,6 +53,7 @@ export class RecipeStore {
       this.derivedLayout = result.layout;
       this.derivedWarnings = result.warnings;
       this.recipes = next;
+      this.error = "";
       return null;
     } catch (e) {
       return (e as Error).message;
@@ -73,5 +75,6 @@ export class RecipeStore {
     }
     this.derivedLayout = this.derivedLayout.filter((q) => q.key !== code);
     this.recipes = this.recipes.filter((r) => r.code !== code);
+    this.error = "";
   }
 }
