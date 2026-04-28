@@ -4,6 +4,8 @@ import type { Layout } from "./layout";
 import { validateLayoutStructure, buildValidLayout } from "./layout";
 import { buildTabs } from "./agg/buildTabs";
 import { prepareDateColumns, type DatePreparationResult } from "./datePreparation";
+import { prepareDerivedColumns, type DerivedPreparationResult } from "./derivedPreparation";
+import type { DerivedRecipe } from "./derivedRecipe";
 import { validateRawData, type Diagnostic } from "./validateRawData";
 
 export type DuckStatus = "idle" | "loading" | "ready" | "error";
@@ -145,6 +147,15 @@ export async function runAggregation(
 export async function prepareDateLayout(layout: Layout): Promise<DatePreparationResult> {
   const { conn } = await requireDuckDB();
   return prepareDateColumns(conn, layout);
+}
+
+/** Prepare derived columns from recipes (combineSA, binNA) */
+export async function prepareDerivedLayout(
+  layout: Layout,
+  recipes: DerivedRecipe[],
+): Promise<DerivedPreparationResult> {
+  const { conn } = await requireDuckDB();
+  return prepareDerivedColumns(conn, layout, recipes);
 }
 
 if (import.meta.hot) {
