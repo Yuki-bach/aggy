@@ -1,5 +1,5 @@
-import type { QuestionType, Tab } from "../../agg/types";
-import { t } from "../../i18n";
+import type { QuestionType, Tab } from "../../types";
+import { t } from "../../i18n.svelte";
 
 export interface ExportGrid {
   questionCode: string;
@@ -9,6 +9,11 @@ export interface ExportGrid {
 }
 
 const NA_STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
+
+function fmtNaStat(key: string, value: number | null): string {
+  if (value === null) return "";
+  return key === "n" ? value.toFixed(1) : value.toFixed(2);
+}
 
 export function buildExportGrids(tabs: Tab[]): ExportGrid[] {
   const hasCross = tabs.some((tab) => tab.by !== null);
@@ -61,7 +66,7 @@ function buildNaTabGrid(tab: Tab): ExportGrid {
     tab.questionCode,
     "NA",
     t(`na.stat.${key}`),
-    key === "n" ? stats.n.toFixed(1) : stats[key].toFixed(2),
+    fmtNaStat(key, stats[key]),
   ]);
   return { questionCode: tab.questionCode, type: "NA", headers, rows };
 }
@@ -174,15 +179,10 @@ function buildNaTabCrossGrid(tab: Tab, crossTabs: Tab[]): ExportGrid {
   }
 
   const rows: string[][] = NA_STAT_KEYS.map((key) => {
-    const row = [
-      tab.questionCode,
-      "NA",
-      t(`na.stat.${key}`),
-      key === "n" ? tabStats.n.toFixed(1) : tabStats[key].toFixed(2),
-    ];
+    const row = [tab.questionCode, "NA", t(`na.stat.${key}`), fmtNaStat(key, tabStats[key])];
     for (const ct of crossTabs) {
       for (const slice of ct.slices) {
-        row.push(key === "n" ? slice.stats!.n.toFixed(1) : slice.stats![key].toFixed(2));
+        row.push(fmtNaStat(key, slice.stats![key]));
       }
     }
     return row;

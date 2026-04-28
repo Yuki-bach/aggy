@@ -5,6 +5,8 @@ import {
   buildValidLayout,
   filterLayout,
   buildQuestions,
+  buildMatrixGroups,
+  countLayoutColumns,
 } from "../src/lib/layout";
 import type { Layout } from "../src/lib/layout";
 
@@ -108,6 +110,7 @@ describe("buildQuestions", () => {
       codes: ["1", "2"],
       label: "Gender",
       labels: { "1": "Male", "2": "Female" },
+      matrixKey: null,
     });
   });
 
@@ -121,6 +124,7 @@ describe("buildQuestions", () => {
       codes: ["1", "2", "3"],
       label: "Hobbies",
       labels: { "1": "Sports", "2": "Music", "3": "Reading" },
+      matrixKey: null,
     });
   });
 
@@ -139,6 +143,7 @@ describe("buildQuestions", () => {
       codes: [],
       label: "NPS",
       labels: {},
+      matrixKey: null,
     });
   });
 });
@@ -313,5 +318,187 @@ describe("buildValidLayout", () => {
     expect(result[0].key).toBe("q1");
     expect(result[0].label).toBe("Q1");
     expect(result[1].key).toBe("q2");
+  });
+});
+
+// ─── MATRIX tests ───────────────────────────────────────────
+
+const matrixLayout: Layout = [
+  { key: "q3", label: "Satisfaction matrix", type: "MATRIX" },
+  {
+    key: "q3a",
+    label: "Quality",
+    type: "SA",
+    matrixKey: "q3",
+    items: [
+      { code: "1", label: "Good" },
+      { code: "2", label: "Bad" },
+    ],
+  },
+  {
+    key: "q3b",
+    label: "Price",
+    type: "SA",
+    matrixKey: "q3",
+    items: [
+      { code: "1", label: "Good" },
+      { code: "2", label: "Bad" },
+    ],
+  },
+  {
+    key: "q1",
+    label: "Gender",
+    type: "SA",
+    items: [{ code: "1", label: "Male" }],
+  },
+];
+
+describe("validateLayoutStructure — MATRIX", () => {
+  it("accepts MATRIX parent + children with matching matrixKey", () => {
+    const raw = [
+      { key: "q3", label: "Matrix", type: "MATRIX" },
+      {
+        key: "q3a",
+        label: "A",
+        type: "SA",
+        matrixKey: "q3",
+        items: [{ code: "1", label: "x" }],
+      },
+    ];
+    expect(validateLayoutStructure(raw)).toHaveLength(0);
+  });
+
+  it("detects matrixKey referencing a non-existent MATRIX parent", () => {
+    const raw = [
+      {
+        key: "q3a",
+        label: "A",
+        type: "SA",
+        matrixKey: "missing",
+        items: [{ code: "1", label: "x" }],
+      },
+    ];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain("matrixKey");
+    expect(diags[0].params.reason).toContain("missing");
+  });
+
+  it("detects matrixKey on WEIGHT entry (not allowed)", () => {
+    const raw = [{ key: "w", label: "W", type: "WEIGHT", matrixKey: "q3" }];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain("matrixKey");
+  });
+
+  it("detects empty matrixKey string", () => {
+    const raw = [
+      {
+        key: "q3a",
+        label: "A",
+        type: "SA",
+        matrixKey: "",
+        items: [{ code: "1", label: "x" }],
+      },
+    ];
+    const diags = validateLayoutStructure(raw);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].params.reason).toContain("matrixKey");
+  });
+});
+
+describe("filterLayout — MATRIX", () => {
+  it("keeps MATRIX parent when at least one child survives", () => {
+    const headers = ["q3a", "q3b", "q1"];
+    const filtered = filterLayout(headers, matrixLayout);
+    expect(filtered.map((e) => e.key)).toEqual(["q3", "q3a", "q3b", "q1"]);
+  });
+
+  it("keeps MATRIX parent even when only one child survives", () => {
+    const headers = ["q3a", "q1"];
+    const filtered = filterLayout(headers, matrixLayout);
+    expect(filtered.map((e) => e.key)).toEqual(["q3", "q3a", "q1"]);
+  });
+
+  it("removes orphan MATRIX parent when no children survive", () => {
+    const headers = ["q1"];
+    const filtered = filterLayout(headers, matrixLayout);
+    expect(filtered.map((e) => e.key)).toEqual(["q1"]);
+  });
+
+  it("removes only the orphan MATRIX parent when mixed with a surviving one", () => {
+    const multi: Layout = [
+      { key: "q3", label: "Surviving matrix", type: "MATRIX" },
+      {
+        key: "q3a",
+        label: "A",
+        type: "SA",
+        matrixKey: "q3",
+        items: [{ code: "1", label: "x" }],
+      },
+      { key: "q4", label: "Orphan matrix", type: "MATRIX" },
+      {
+        key: "q4a",
+        label: "B",
+        type: "SA",
+        matrixKey: "q4",
+        items: [{ code: "1", label: "x" }],
+      },
+    ];
+    const filtered = filterLayout(["q3a"], multi);
+    expect(filtered.map((e) => e.key)).toEqual(["q3", "q3a"]);
+  });
+});
+
+describe("buildQuestions — MATRIX", () => {
+  it("skips MATRIX parent and carries matrixKey on children as string", () => {
+    const questions = buildQuestions(matrixLayout);
+    expect(questions.map((q) => q.code)).toEqual(["q3a", "q3b", "q1"]);
+    expect(questions[0].matrixKey).toBe("q3");
+    expect(questions[1].matrixKey).toBe("q3");
+    expect(questions[2].matrixKey).toBe(null);
+  });
+});
+
+describe("countLayoutColumns — MATRIX", () => {
+  it("counts MATRIX parent as 0 columns", () => {
+    // q3: 0, q3a: 1, q3b: 1, q1: 1 = 3
+    expect(countLayoutColumns(matrixLayout)).toBe(3);
+  });
+});
+
+describe("buildMatrixGroups", () => {
+  it("returns empty array when layout has no MATRIX entries", () => {
+    expect(buildMatrixGroups(layout)).toEqual([]);
+  });
+
+  it("builds a single group with child codes in layout order", () => {
+    expect(buildMatrixGroups(matrixLayout)).toEqual([
+      {
+        matrixKey: "q3",
+        matrixLabel: "Satisfaction matrix",
+        questionCodes: ["q3a", "q3b"],
+      },
+    ]);
+  });
+
+  it("handles multiple MATRIX parents independently", () => {
+    const multi: Layout = [
+      { key: "m1", label: "M1", type: "MATRIX" },
+      {
+        key: "m1a",
+        label: "A",
+        type: "SA",
+        matrixKey: "m1",
+        items: [{ code: "1", label: "x" }],
+      },
+      { key: "m2", label: "M2", type: "MATRIX" },
+      { key: "m2a", label: "B", type: "NA", matrixKey: "m2" },
+      { key: "m2b", label: "C", type: "NA", matrixKey: "m2" },
+    ];
+    expect(buildMatrixGroups(multi)).toEqual([
+      { matrixKey: "m1", matrixLabel: "M1", questionCodes: ["m1a"] },
+      { matrixKey: "m2", matrixLabel: "M2", questionCodes: ["m2a", "m2b"] },
+    ]);
   });
 });

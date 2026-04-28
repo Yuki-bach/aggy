@@ -14,7 +14,7 @@ import { performance } from "node:perf_hooks";
 
 import { aggTab } from "../src/lib/agg/aggTab";
 import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
-import type { Question } from "../src/lib/agg/types";
+import type { Question } from "../src/lib/types";
 import { parseLayoutJson, buildValidLayout, filterLayout, buildQuestions } from "../src/lib/layout";
 import { generate, PATTERNS, type PatternDef } from "./generate";
 import type { DuckDBNodeBindings } from "@duckdb/duckdb-wasm/dist/types/src/bindings/bindings_node_base";

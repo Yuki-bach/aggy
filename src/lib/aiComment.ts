@@ -1,7 +1,7 @@
 /** AI analysis comment generation via Chrome Built-in AI (Prompt API) */
 
-import type { Tab } from "./agg/types";
-import { getLocale, t } from "./i18n";
+import type { Tab } from "./types";
+import { getLocale, t } from "./i18n.svelte";
 
 // Chrome Prompt API type declarations
 
@@ -76,7 +76,7 @@ function summarizeResults(tabs: Tab[], weightCol: string, topN: number): string 
       const stats = tab.slices[0].stats!;
       lines.push(`${tab.questionCode}: ${tab.label} (NA, n=${stats.n})`);
       lines.push(
-        `  mean=${stats.mean.toFixed(2)}, median=${stats.median.toFixed(2)}, sd=${stats.sd.toFixed(2)}`,
+        `  mean=${stats.mean?.toFixed(2) ?? "-"}, median=${stats.median?.toFixed(2) ?? "-"}, sd=${stats.sd?.toFixed(2) ?? "-"}`,
       );
       continue;
     }

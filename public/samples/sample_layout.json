@@ -67,9 +67,15 @@
     ]
   },
   {
+    "key": "q3",
+    "label": "各項目の満足度",
+    "type": "MATRIX"
+  },
+  {
     "key": "q3a",
     "label": "品質満足度",
     "type": "SA",
+    "matrixKey": "q3",
     "items": [
       { "code": "1", "label": "非常に満足" },
       { "code": "2", "label": "やや満足" },
@@ -82,6 +88,7 @@
     "key": "q3b",
     "label": "価格満足度",
     "type": "SA",
+    "matrixKey": "q3",
     "items": [
       { "code": "1", "label": "非常に満足" },
       { "code": "2", "label": "やや満足" },
@@ -94,6 +101,7 @@
     "key": "q3c",
     "label": "対応満足度",
     "type": "SA",
+    "matrixKey": "q3",
     "items": [
       { "code": "1", "label": "非常に満足" },
       { "code": "2", "label": "やや満足" },
@@ -106,6 +114,7 @@
     "key": "q3d",
     "label": "使いやすさ満足度",
     "type": "SA",
+    "matrixKey": "q3",
     "items": [
       { "code": "1", "label": "非常に満足" },
       { "code": "2", "label": "やや満足" },

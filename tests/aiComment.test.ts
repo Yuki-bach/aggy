@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vite-plus/test";
 import { buildPromptPayload } from "../src/lib/aiComment";
-import type { Tab } from "../src/lib/agg/types";
+import type { Tab } from "../src/lib/types";
 
 // ─── helpers ─────────────────────────────────────────────────
 
@@ -23,6 +23,7 @@ function makeTab(overrides: Partial<Tab> = {}): Tab {
         ],
       },
     ],
+    matrix: null,
     ...overrides,
   };
 }

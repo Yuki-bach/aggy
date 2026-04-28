@@ -1,4 +1,4 @@
-import type { Question } from "./agg/types";
+import type { Question } from "./types";
 import type { Diagnostic } from "./validateRawData";
 
 export interface LayoutItem {
@@ -8,9 +8,21 @@ export interface LayoutItem {
 
 export type DateGranularity = "year" | "month" | "week" | "day";
 
-type SALayout = { type: "SA"; key: string; label: string; items: LayoutItem[] };
-type MALayout = { type: "MA"; key: string; label: string; items: LayoutItem[] };
-type NALayout = { type: "NA"; key: string; label: string };
+type SALayout = {
+  type: "SA";
+  key: string;
+  label: string;
+  items: LayoutItem[];
+  matrixKey?: string;
+};
+type MALayout = {
+  type: "MA";
+  key: string;
+  label: string;
+  items: LayoutItem[];
+  matrixKey?: string;
+};
+type NALayout = { type: "NA"; key: string; label: string; matrixKey?: string };
 type WeightLayout = { type: "WEIGHT"; key: string; label: string };
 type DateLayout = {
   type: "DATE";
@@ -18,12 +30,19 @@ type DateLayout = {
   label: string;
   granularity: DateGranularity;
 };
+type MatrixLayout = { type: "MATRIX"; key: string; label: string };
 
-export type LayoutQuestion = SALayout | MALayout | NALayout | WeightLayout | DateLayout;
+export type LayoutQuestion =
+  | SALayout
+  | MALayout
+  | NALayout
+  | WeightLayout
+  | DateLayout
+  | MatrixLayout;
 
 export type Layout = LayoutQuestion[];
 
-const VALID_TYPES = new Set(["SA", "MA", "NA", "WEIGHT", "DATE"]);
+const VALID_TYPES = new Set(["SA", "MA", "NA", "WEIGHT", "DATE", "MATRIX"]);
 const VALID_GRANULARITIES = new Set(["year", "month", "week", "day"]);
 
 /** Parse JSON text into an unknown array. Throws only on JSON syntax errors or non-array input. */
@@ -79,6 +98,27 @@ export function validateLayoutStructure(raw: unknown[]): Diagnostic[] {
         severity: "error",
         type: "invalidLayout",
         params: { reason: `"key" が重複しています: ${key}` },
+      });
+    }
+  }
+
+  const matrixKeys = new Set<string>();
+  for (const entry of raw) {
+    if (checkEntry(entry)) continue;
+    const e = entry as Record<string, unknown>;
+    if (e["type"] === "MATRIX") matrixKeys.add(e["key"] as string);
+  }
+  for (const entry of raw) {
+    if (checkEntry(entry)) continue;
+    const e = entry as Record<string, unknown>;
+    const mk = e["matrixKey"];
+    if (typeof mk === "string" && mk !== "" && !matrixKeys.has(mk)) {
+      diagnostics.push({
+        key: e["key"] as string,
+        label: e["label"] as string,
+        severity: "error",
+        type: "invalidLayout",
+        params: { reason: `"matrixKey" が参照する MATRIX エントリが見つかりません: ${mk}` },
       });
     }
   }
@@ -145,6 +185,14 @@ function checkEntry(entry: unknown): string | null {
   ) {
     return `DATE には "granularity"（${[...VALID_GRANULARITIES].join(", ")}）が必要です`;
   }
+  if ("matrixKey" in e && e["matrixKey"] !== undefined) {
+    if (type !== "SA" && type !== "MA" && type !== "NA") {
+      return `"matrixKey" は SA/MA/NA でのみ指定できます`;
+    }
+    if (typeof e["matrixKey"] !== "string" || e["matrixKey"] === "") {
+      return '"matrixKey"（非空の文字列）が必要です';
+    }
+  }
   return null;
 }
 
@@ -154,7 +202,9 @@ export function filterLayout(headers: string[], layout: Layout): Layout {
   const filtered: Layout = [];
 
   for (const q of layout) {
-    if (q.type === "SA" || q.type === "NA" || q.type === "WEIGHT" || q.type === "DATE") {
+    if (q.type === "MATRIX") {
+      filtered.push(q);
+    } else if (q.type === "SA" || q.type === "NA" || q.type === "WEIGHT" || q.type === "DATE") {
       if (headerSet.has(q.key)) filtered.push(q);
     } else if (q.type === "MA") {
       const matchedItems = q.items.filter((item) => headerSet.has(`${q.key}_${item.code}`));
@@ -164,7 +214,13 @@ export function filterLayout(headers: string[], layout: Layout): Layout {
     }
   }
 
-  return filtered;
+  // Remove orphan MATRIX parents whose children did not survive filtering.
+  const survivingMatrixKeys = new Set(
+    filtered.flatMap((q) =>
+      (q.type === "SA" || q.type === "MA" || q.type === "NA") && q.matrixKey ? [q.matrixKey] : [],
+    ),
+  );
+  return filtered.filter((q) => q.type !== "MATRIX" || survivingMatrixKeys.has(q.key));
 }
 
 /** Build Question[] from layout definition */
@@ -185,6 +241,7 @@ function buildNAQuestion(e: NALayout): Question {
     codes: [],
     label: e.label,
     labels: {},
+    matrixKey: e.matrixKey ?? null,
   };
 }
 
@@ -196,6 +253,7 @@ function buildChoiceQuestion(e: SALayout | MALayout): Question {
     codes: e.items.map((i) => i.code),
     label: e.label,
     labels: Object.fromEntries(e.items.map((i) => [i.code, i.label])),
+    matrixKey: e.matrixKey ?? null,
   };
 }
 
@@ -204,7 +262,32 @@ export function findWeightColumn(layout: Layout): string {
   return layout.find((e) => e.type === "WEIGHT")?.key ?? "";
 }
 
-/** Count total layout-defined columns (SA: 1 each, MA: items count, WEIGHT: 1) */
+export interface MatrixGroup {
+  matrixKey: string;
+  matrixLabel: string;
+  questionCodes: string[];
+}
+
+/** Build groups of matrix children keyed by MATRIX parent, preserving layout order */
+export function buildMatrixGroups(layout: Layout): MatrixGroup[] {
+  return layout
+    .filter((e): e is Extract<LayoutQuestion, { type: "MATRIX" }> => e.type === "MATRIX")
+    .map((parent) => ({
+      matrixKey: parent.key,
+      matrixLabel: parent.label,
+      questionCodes: layout
+        .filter(
+          (e) =>
+            (e.type === "SA" || e.type === "MA" || e.type === "NA") && e.matrixKey === parent.key,
+        )
+        .map((e) => e.key),
+    }));
+}
+
+/** Count total layout-defined columns (SA: 1 each, MA: items count, WEIGHT: 1, MATRIX: 0) */
 export function countLayoutColumns(layout: Layout): number {
-  return layout.reduce((acc, e) => acc + (e.type === "MA" ? e.items.length : 1), 0);
+  return layout.reduce(
+    (acc, e) => acc + (e.type === "MATRIX" ? 0 : e.type === "MA" ? e.items.length : 1),
+    0,
+  );
 }

@@ -1,4 +1,4 @@
-import type { Tab } from "../../src/lib/agg/types";
+import type { Tab } from "../../src/lib/types";
 
 // ─── SA Grand Total ─────────────────────────────────────────
 export const SA_GT: Tab = {
@@ -18,6 +18,7 @@ export const SA_GT: Tab = {
       ],
     },
   ],
+  matrix: null,
 };
 
 // ─── MA Grand Total ─────────────────────────────────────────
@@ -39,6 +40,7 @@ export const MA_GT: Tab = {
       ],
     },
   ],
+  matrix: null,
 };
 
 // ─── NA Grand Total ─────────────────────────────────────────
@@ -57,6 +59,7 @@ export const NA_GT: Tab = {
       stats: { n: 8, mean: 3.5, median: 3, sd: 1.2, min: 1, max: 6 },
     },
   ],
+  matrix: null,
 };
 
 // ─── SA Cross ───────────────────────────────────────────────
@@ -93,6 +96,7 @@ export const SA_CROSS: Tab[] = [
         ],
       },
     ],
+    matrix: null,
   },
 ];
 
@@ -126,6 +130,7 @@ export const NA_CROSS: Tab[] = [
         stats: { n: 4, mean: 3.0, median: 3, sd: 1.4, min: 1, max: 6 },
       },
     ],
+    matrix: null,
   },
 ];
 

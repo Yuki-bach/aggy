@@ -1,0 +1,17 @@
+[
+  {
+    "key": "weight",
+    "label": "ウェイト",
+    "type": "WEIGHT"
+  },
+  {
+    "key": "q1",
+    "type": "SA"
+  },
+  {
+    "key": "q2",
+    "label": "満足度",
+    "type": "INVALID_TYPE",
+    "items": [{ "code": "1", "label": "満足" }]
+  }
+]

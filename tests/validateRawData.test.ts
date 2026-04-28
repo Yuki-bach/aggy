@@ -182,6 +182,37 @@ describe("validateRawData", () => {
     expect(result[0].params.count).toBe("1");
   });
 
+  it("MATRIX 親は CSV 列を持たなくても dropped 警告を出さない", async () => {
+    const csv = "q3a,q3b\n1,2\n2,1\n";
+    await loadCSV(csv);
+
+    const layout: Layout = [
+      { type: "MATRIX", key: "q3", label: "満足度" },
+      {
+        type: "SA",
+        key: "q3a",
+        label: "品質",
+        matrixKey: "q3",
+        items: [
+          { code: "1", label: "A" },
+          { code: "2", label: "B" },
+        ],
+      },
+      {
+        type: "SA",
+        key: "q3b",
+        label: "価格",
+        matrixKey: "q3",
+        items: [
+          { code: "1", label: "A" },
+          { code: "2", label: "B" },
+        ],
+      },
+    ];
+    const result = await validateRawData(getConn(), ["q3a", "q3b"], layout);
+    expect(result).toEqual([]);
+  });
+
   it("複数問題の混在 → 全件返却", async () => {
     const csv = "q1,q3_1\n1,0\n9,3\n";
     await loadCSV(csv);

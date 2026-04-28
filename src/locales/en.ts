@@ -5,7 +5,10 @@ const en: Record<string, string> = {
   "header.back": "Back to data import",
 
   // DuckDB status
+  "wasm.idle": "DuckDB idle",
   "wasm.loading": "Loading DuckDB...",
+  "wasm.ready": "DuckDB ready",
+  "wasm.error": "DuckDB error: {msg}",
 
   // Import screen
   "import.title": "Load Data",
@@ -13,7 +16,7 @@ const en: Record<string, string> = {
   "import.step.select": "Select Files",
   "import.step.proceed": "Aggregate",
   "import.proceed": "Proceed to Aggregation →",
-  "import.step.validate": "Validate",
+  "import.start": "Start Aggregation",
 
   // Validation step
   "validation.title": "Data Validation",
@@ -56,9 +59,6 @@ const en: Record<string, string> = {
   // Run button
   "run.button": "▶ Run Aggregation",
 
-  // Empty state
-  "empty.text": "Select cross-tabulation axes and run the aggregation",
-
   // Results
   "result.title.tab": "Aggregation Results",
   "result.meta": "{count} questions  /  {weight}",
@@ -95,6 +95,16 @@ const en: Record<string, string> = {
   "na.stat.sd": "Std Dev",
   "na.stat.min": "Min",
   "na.stat.max": "Max",
+  "na.binWidth": "Class width",
+
+  // Display settings dropdown
+  "display.settings": "Display",
+  "display.viewMode": "View Mode",
+  "display.tableSettings": "Table Settings",
+  "display.chartSettings": "Chart Settings",
+  "display.pctBasis": "% Basis",
+  "display.saType": "SA Chart Type",
+  "display.maType": "MA Chart Type",
 
   // Chart type
   "chart.barH": "Horizontal Bar",
@@ -168,6 +178,9 @@ const en: Record<string, string> = {
   "settings.ai.on": "ON",
   "settings.ai.off": "OFF",
   "settings.close": "Close",
+
+  // Changelog
+  "changelog.title": "What's New",
 };
 
 export default en;
