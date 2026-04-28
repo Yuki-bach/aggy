@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import type { Tab } from "../../lib/types";
+  import type { Question, Tab } from "../../lib/types";
   import Toolbar from "./Toolbar.svelte";
   import TabCard from "./TabCard.svelte";
   import MatrixTabCard from "./MatrixTabCard.svelte";
   import AIBubble from "./AIBubble.svelte";
+  import Alert from "../shared/Alert.svelte";
   import { t } from "../../lib/i18n.svelte";
   import type { Basis, ChartType, ViewMode } from "./viewTypes";
   import type { PaletteId } from "../../lib/chartConfig";
@@ -12,9 +12,26 @@
   interface Props {
     tabs: Tab[] | null;
     weightCol: string;
+    questions: Question[];
+    crossSelected: Record<string, boolean>;
+    onCrossToggle: (key: string, checked: boolean) => void;
+    weightColumnName: string;
+    weightEnabled: boolean;
+    onWeightToggle: (on: boolean) => void;
+    errorMsg: string;
   }
 
-  let { tabs, weightCol }: Props = $props();
+  let {
+    tabs,
+    weightCol,
+    questions,
+    crossSelected,
+    onCrossToggle,
+    weightColumnName,
+    weightEnabled,
+    onWeightToggle,
+    errorMsg,
+  }: Props = $props();
 
   let viewMode = $state<ViewMode>("table");
   let saChartType = $state<ChartType>("bar-h");
@@ -33,6 +50,15 @@
       attributeFilter: ["data-theme"],
     });
     return () => observer.disconnect();
+  });
+
+  // When the last cross axis is unchecked while in chart mode, the View Mode
+  // toggle disappears (it's only shown when hasCross). Without resetting,
+  // the user gets stuck in chart mode with no way back to table. Reset here.
+  $effect(() => {
+    if (!hasCross && viewMode === "chart") {
+      viewMode = "table";
+    }
   });
 
   let callbacks = $derived({
@@ -88,43 +114,61 @@
   );
 </script>
 
-<div class="overflow-y-auto bg-bg p-6" role="region" aria-label={t("section.results")}>
-  {#if tabs}
-    <div aria-live="polite">
-      <Toolbar
-        {tabs}
-        {weightCol}
-        currentViewMode={viewMode}
-        currentBasis={basis}
-        {hasCross}
-        {chartOpts}
-        {callbacks}
-      />
-      <div class={gridClass}>
-        {#each renderItems as item (item.kind === "matrix" ? `m:${item.matrix.key}` : `s:${item.questionCode}`)}
-          {#if item.kind === "matrix"}
-            <MatrixTabCard
-              matrix={item.matrix}
-              items={item.questionCodes.map((c) => ({
-                gtTab: tabs.find((tab) => tab.questionCode === c && tab.by === null)!,
-                crossTabs: tabs.filter((tab) => tab.questionCode === c && tab.by !== null),
-              }))}
-              {viewMode}
-              {tableOpts}
-              {chartOpts}
-            />
-          {:else}
-            <TabCard
-              tab={tabs.find((tab) => tab.questionCode === item.questionCode && tab.by === null)!}
-              crossTabs={tabs.filter((tab) => tab.questionCode === item.questionCode && tab.by !== null)}
-              {viewMode}
-              {tableOpts}
-              {chartOpts}
-            />
-          {/if}
-        {/each}
-      </div>
-      <AIBubble {tabs} {weightCol} />
-    </div>
+<div class="flex min-h-0 flex-col bg-bg" role="region" aria-label={t("section.results")}>
+  {#if errorMsg}
+    <Alert variant="error" class="mx-6 mt-4 shrink-0">
+      {errorMsg}
+    </Alert>
   {/if}
+
+  <div class="min-h-0 flex-1 overflow-y-auto">
+    {#if tabs}
+      <div aria-live="polite">
+        <div class="sticky top-0 z-10 bg-bg px-6 pt-6 pb-3" data-sticky-toolbar>
+          <Toolbar
+            {tabs}
+            {weightCol}
+            currentViewMode={viewMode}
+            currentBasis={basis}
+            {hasCross}
+            {chartOpts}
+            {callbacks}
+            {questions}
+            {crossSelected}
+            {onCrossToggle}
+            {weightColumnName}
+            {weightEnabled}
+            {onWeightToggle}
+          />
+        </div>
+        <div class="px-6 pb-6">
+          <div class={gridClass}>
+            {#each renderItems as item (item.kind === "matrix" ? `m:${item.matrix.key}` : `s:${item.questionCode}`)}
+              {#if item.kind === "matrix"}
+                <MatrixTabCard
+                  matrix={item.matrix}
+                  items={item.questionCodes.map((c) => ({
+                    gtTab: tabs.find((tab) => tab.questionCode === c && tab.by === null)!,
+                    crossTabs: tabs.filter((tab) => tab.questionCode === c && tab.by !== null),
+                  }))}
+                  {viewMode}
+                  {tableOpts}
+                  {chartOpts}
+                />
+              {:else}
+                <TabCard
+                  tab={tabs.find((tab) => tab.questionCode === item.questionCode && tab.by === null)!}
+                  crossTabs={tabs.filter((tab) => tab.questionCode === item.questionCode && tab.by !== null)}
+                  {viewMode}
+                  {tableOpts}
+                  {chartOpts}
+                />
+              {/if}
+            {/each}
+          </div>
+          <AIBubble {tabs} {weightCol} />
+        </div>
+      </div>
+    {/if}
+  </div>
 </div>

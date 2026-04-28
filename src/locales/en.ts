@@ -49,6 +49,7 @@ const en: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "Data Summary",
+  "section.toc": "Index",
   "section.cross": "Cross-Tabulation Axes",
   "section.cross.label": "Cross-tabulation axis selection",
   "summary.rows": "{rows} rows {cols} cols",
@@ -56,14 +57,18 @@ const en: Record<string, string> = {
   "weight.on": "ON",
   "weight.off": "OFF",
 
-  // Run button
-  "run.button": "▶ Run Aggregation",
+  // Data config bar (cross + weight)
+  "cross.summary": "{names} +{rest}",
+  "cross.popover.empty": "No questions available",
 
   // Results
   "result.title.tab": "Aggregation Results",
-  "result.meta": "{count} questions  /  {weight}",
-  "result.weight.applied": "Weighted: {col}",
+  "result.meta.count": "{count} questions",
+  "result.meta.cross": "Cross: {names}",
+  "result.weight.applied": "Weighted",
   "result.weight.none": "Unweighted",
+  "agg.settings": "Aggregation",
+  "agg.settings.label": "Open aggregation settings",
   "result.view.table": "Table",
   "result.view.chart": "Chart",
   "result.pct.column": "Col %",
@@ -99,6 +104,7 @@ const en: Record<string, string> = {
 
   // Display settings dropdown
   "display.settings": "Display",
+  "display.disabled.tooltip": "Select a cross-tabulation axis to enable",
   "display.viewMode": "View Mode",
   "display.tableSettings": "Table Settings",
   "display.chartSettings": "Chart Settings",

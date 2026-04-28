@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { RawData, LayoutData, Tab } from "../lib/types";
   import ResultPanel from "./aggregation/ResultPanel.svelte";
   import SettingsPanel from "./aggregation/SettingsPanel.svelte";
@@ -18,9 +17,10 @@
   let { rawData, layout, preparedLayout, dateWarnings }: Props = $props();
 
   let questions = $derived(buildQuestions(preparedLayout));
-  let weightCol = $derived(findWeightColumn(preparedLayout));
+  let weightColumnName = $derived(findWeightColumn(preparedLayout));
+  let matrixGroups = $derived(buildMatrixGroups(preparedLayout));
   let matrixLabels = $derived(
-    Object.fromEntries(buildMatrixGroups(preparedLayout).map((g) => [g.matrixKey, g.matrixLabel])),
+    Object.fromEntries(matrixGroups.map((g) => [g.matrixKey, g.matrixLabel])),
   );
 
   let crossSelected = $state<Record<string, boolean>>({});
@@ -35,38 +35,43 @@
     crossSelected = sel;
   });
 
-  async function handleRunAggregation(): Promise<void> {
-    errorMsg = "";
-    const activeWeightCol = weightEnabled ? weightCol : "";
+  // Increments per scheduled run; only the latest run is allowed to commit results
+  let latestRunId = 0;
+
+  async function handleRunAggregation(runId: number): Promise<void> {
+    const activeWeightCol = weightEnabled ? weightColumnName : "";
     const crossQuestions = questions.filter((q) => crossSelected[q.code]);
 
     try {
       const tabs = await runAggregation(questions, crossQuestions, activeWeightCol, matrixLabels);
+      if (runId !== latestRunId) return;
       aggResult = { tabs, weightCol: activeWeightCol };
+      errorMsg = "";
     } catch (e) {
+      if (runId !== latestRunId) return;
       errorMsg = t("error.aggregation", { msg: (e as Error).message });
     }
   }
 
-  // Run aggregation once on mount
-  onMount(() => {
-    void handleRunAggregation();
+  // Auto-run aggregation whenever cross selection or weight toggle changes.
+  // A monotonic runId is captured per scheduling; older runs that finish later are dropped.
+  $effect(() => {
+    if (questions.length === 0) return;
+    const runId = ++latestRunId;
+    void handleRunAggregation(runId);
   });
 </script>
 
-<SettingsPanel
-  {rawData}
-  {layout}
-  {preparedLayout}
+<SettingsPanel {rawData} {layout} {questions} {matrixGroups} {dateWarnings} />
+
+<ResultPanel
+  tabs={aggResult?.tabs ?? null}
+  weightCol={aggResult?.weightCol ?? ""}
   {questions}
   {crossSelected}
   onCrossToggle={(key, checked) => (crossSelected = { ...crossSelected, [key]: checked })}
-  {weightCol}
+  {weightColumnName}
   {weightEnabled}
   onWeightToggle={(on) => (weightEnabled = on)}
-  {dateWarnings}
   {errorMsg}
-  onRun={() => handleRunAggregation()}
 />
-
-<ResultPanel tabs={aggResult?.tabs ?? null} weightCol={aggResult?.weightCol ?? ""} />

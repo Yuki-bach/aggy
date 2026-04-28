@@ -49,6 +49,7 @@ const ja: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "データ概要",
+  "section.toc": "目次",
   "section.cross": "クロス集計軸",
   "section.cross.label": "クロス集計軸の選択",
   "summary.rows": "{rows} 行 {cols} 列",
@@ -56,14 +57,18 @@ const ja: Record<string, string> = {
   "weight.on": "ON",
   "weight.off": "OFF",
 
-  // Run button
-  "run.button": "▶ 集計を実行",
+  // Data config bar (cross + weight)
+  "cross.summary": "{names} +{rest}",
+  "cross.popover.empty": "選択可能な設問がありません",
 
   // Results
   "result.title.tab": "集計結果",
-  "result.meta": "{count} 問  ／  {weight}",
-  "result.weight.applied": "ウェイトバック適用: {col}",
+  "result.meta.count": "{count}問",
+  "result.meta.cross": "クロス: {names}",
+  "result.weight.applied": "ウェイトバック適用",
   "result.weight.none": "実数集計",
+  "agg.settings": "集計設定",
+  "agg.settings.label": "集計設定を開く",
   "result.view.table": "テーブル",
   "result.view.chart": "チャート",
   "result.pct.column": "縦%",
@@ -99,6 +104,7 @@ const ja: Record<string, string> = {
 
   // Display settings dropdown
   "display.settings": "表示設定",
+  "display.disabled.tooltip": "クロス集計軸を選択すると有効になります",
   "display.viewMode": "表示形式",
   "display.tableSettings": "テーブル設定",
   "display.chartSettings": "チャート設定",
