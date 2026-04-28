@@ -1,77 +1,124 @@
 <script lang="ts">
-  import type { RawData, LayoutData, Tab } from "../lib/types";
+  import { onMount } from "svelte";
+  import type { RawData, LayoutData } from "../lib/types";
   import ResultPanel from "./aggregation/ResultPanel.svelte";
   import SettingsPanel from "./aggregation/SettingsPanel.svelte";
-  import { runAggregation } from "../lib/duckdb.svelte";
+  import DerivedRecipePanel from "./aggregation/DerivedRecipePanel.svelte";
   import type { Layout } from "../lib/layout";
-  import { buildQuestions, buildMatrixGroups, findWeightColumn } from "../lib/layout";
   import { t } from "../lib/i18n.svelte";
+  import type { DerivedRecipe } from "../lib/derivedRecipe";
+  import { saveRecipes } from "../lib/opfs";
+  import { RecipeStore } from "../lib/recipeStore.svelte";
+  import { AggRunner } from "../lib/aggRunner.svelte";
 
   interface Props {
     rawData: RawData;
     layout: LayoutData;
     preparedLayout: Layout;
     dateWarnings: string[];
+    initialRecipes: DerivedRecipe[];
+    folderId: string;
   }
 
-  let { rawData, layout, preparedLayout, dateWarnings }: Props = $props();
+  let {
+    rawData,
+    layout,
+    preparedLayout,
+    dateWarnings,
+    initialRecipes,
+    folderId,
+  }: Props = $props();
 
-  let questions = $derived(buildQuestions(preparedLayout));
-  let weightColumnName = $derived(findWeightColumn(preparedLayout));
-  let matrixGroups = $derived(buildMatrixGroups(preparedLayout));
-  let matrixLabels = $derived(
-    Object.fromEntries(matrixGroups.map((g) => [g.matrixKey, g.matrixLabel])),
-  );
+  const recipeStore = new RecipeStore(preparedLayout, initialRecipes);
+  const aggRunner = new AggRunner();
 
-  let crossSelected = $state<Record<string, boolean>>({});
-  let weightEnabled = $state(true);
-  let errorMsg = $state("");
-  let aggResult = $state<{ tabs: Tab[]; weightCol: string } | null>(null);
+  type ViewMode =
+    | { kind: "results" }
+    | { kind: "recipe"; mode: "type-select" | "edit"; editCode: string | null };
+  let viewMode = $state<ViewMode>({ kind: "results" });
 
-  // Initialize crossSelected when questions change
-  $effect(() => {
-    const sel: Record<string, boolean> = {};
-    for (const q of questions) sel[q.code] = false;
-    crossSelected = sel;
+  onMount(() => {
+    void recipeStore.restoreInitial();
   });
 
-  // Increments per scheduled run; only the latest run is allowed to commit results
-  let latestRunId = 0;
+  // Auto-run aggregation whenever questions / cross selection / weight toggle change.
+  // The runner's internal runId guards against out-of-order completions.
+  $effect(() => {
+    if (recipeStore.questions.length === 0) return;
+    void aggRunner.run(
+      recipeStore.questions,
+      recipeStore.weightColumnName,
+      recipeStore.matrixLabels,
+    );
+  });
 
-  async function handleRunAggregation(runId: number): Promise<void> {
-    const activeWeightCol = weightEnabled ? weightColumnName : "";
-    const crossQuestions = questions.filter((q) => crossSelected[q.code]);
+  // Persist recipes whenever they change. Best-effort.
+  $effect(() => {
+    const json = JSON.stringify(recipeStore.recipes);
+    void saveRecipes(folderId, json).catch(() => {});
+  });
 
-    try {
-      const tabs = await runAggregation(questions, crossQuestions, activeWeightCol, matrixLabels);
-      if (runId !== latestRunId) return;
-      aggResult = { tabs, weightCol: activeWeightCol };
-      errorMsg = "";
-    } catch (e) {
-      if (runId !== latestRunId) return;
-      errorMsg = t("error.aggregation", { msg: (e as Error).message });
-    }
+  // Surface either the recipe-side or aggregation-side error on the result screen.
+  let resultError = $derived(aggRunner.error || recipeStore.error);
+
+  function handleAddRecipe(): void {
+    viewMode = { kind: "recipe", mode: "type-select", editCode: null };
   }
 
-  // Auto-run aggregation whenever cross selection or weight toggle changes.
-  // A monotonic runId is captured per scheduling; older runs that finish later are dropped.
-  $effect(() => {
-    if (questions.length === 0) return;
-    const runId = ++latestRunId;
-    void handleRunAggregation(runId);
-  });
+  function handleEditRecipe(code: string): void {
+    viewMode = { kind: "recipe", mode: "edit", editCode: code };
+  }
+
+  async function handleDeleteRecipe(code: string): Promise<void> {
+    if (!confirm(t("derived.delete.confirm", { code }))) return;
+    await recipeStore.remove(code);
+    aggRunner.pruneCode(code);
+  }
+
+  async function handleRecipeCommit(next: DerivedRecipe[]): Promise<string | null> {
+    const err = await recipeStore.commit(next);
+    if (err === null) viewMode = { kind: "results" };
+    return err;
+  }
+
+  function handleRecipeCancel(): void {
+    viewMode = { kind: "results" };
+  }
 </script>
 
-<SettingsPanel {rawData} {layout} {questions} {matrixGroups} {dateWarnings} />
-
-<ResultPanel
-  tabs={aggResult?.tabs ?? null}
-  weightCol={aggResult?.weightCol ?? ""}
-  {questions}
-  {crossSelected}
-  onCrossToggle={(key, checked) => (crossSelected = { ...crossSelected, [key]: checked })}
-  {weightColumnName}
-  {weightEnabled}
-  onWeightToggle={(on) => (weightEnabled = on)}
-  {errorMsg}
+<SettingsPanel
+  {rawData}
+  {layout}
+  questions={recipeStore.questions}
+  matrixGroups={recipeStore.matrixGroups}
+  dateWarnings={[...dateWarnings, ...recipeStore.derivedWarnings]}
+  recipes={recipeStore.recipes}
+  onAddRecipe={handleAddRecipe}
+  onEditRecipe={handleEditRecipe}
+  onDeleteRecipe={handleDeleteRecipe}
 />
+
+{#if viewMode.kind === "recipe"}
+  <DerivedRecipePanel
+    recipes={recipeStore.recipes}
+    baseLayout={preparedLayout}
+    derivedLayout={recipeStore.derivedLayout}
+    initialMode={viewMode.mode}
+    initialEditCode={viewMode.editCode}
+    onCommit={handleRecipeCommit}
+    onCancel={handleRecipeCancel}
+  />
+{:else}
+  <ResultPanel
+    tabs={aggRunner.result?.tabs ?? null}
+    weightCol={aggRunner.result?.weightCol ?? ""}
+    questions={recipeStore.questions}
+    crossSelected={aggRunner.crossSelected}
+    onCrossToggle={(key, checked) => aggRunner.toggleCross(key, checked)}
+    weightColumnName={recipeStore.weightColumnName}
+    weightEnabled={aggRunner.weightEnabled}
+    onWeightToggle={(on) => aggRunner.toggleWeight(on)}
+    errorMsg={resultError}
+    onAddDerived={handleAddRecipe}
+  />
+{/if}

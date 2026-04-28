@@ -8,6 +8,7 @@
     import("./components/AggregationScreen.svelte");
   import type { Layout } from "./lib/layout";
   import type { RawData, LayoutData } from "./lib/types";
+  import type { DerivedRecipe } from "./lib/derivedRecipe";
 
   let screen = $state<"import" | "aggregation">("import");
   let loadedData = $state<{
@@ -15,6 +16,8 @@
     layout: LayoutData;
     preparedLayout: Layout;
     dateWarnings: string[];
+    recipes: DerivedRecipe[];
+    folderId: string;
   } | null>(null);
 
   let isImport = $derived(screen === "import");
@@ -24,8 +27,10 @@
     layout: LayoutData,
     dateWarnings: string[],
     preparedLayout: Layout,
+    recipes: DerivedRecipe[],
+    folderId: string,
   ) {
-    loadedData = { rawData, layout, preparedLayout, dateWarnings };
+    loadedData = { rawData, layout, preparedLayout, dateWarnings, recipes, folderId };
     screen = "aggregation";
   }
 
@@ -52,6 +57,8 @@
           layout={loadedData.layout}
           preparedLayout={loadedData.preparedLayout}
           dateWarnings={loadedData.dateWarnings}
+          initialRecipes={loadedData.recipes}
+          folderId={loadedData.folderId}
         />
       {/await}
     {/if}

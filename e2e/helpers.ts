@@ -21,8 +21,9 @@ export async function uploadFiles(page: Page): Promise<void> {
 /** 「集計開始」ボタンをクリックして集計画面へ進む */
 export async function proceedToAggregation(page: Page): Promise<void> {
   await page.getByRole("button", { name: /集計開始/ }).click();
-  // 正常データの場合はバリデーションをスキップして直接集計画面へ遷移
-  await expect(page.getByRole("button", { name: /集計を実行/ })).toBeVisible({
+  // 正常データの場合はバリデーションをスキップして直接集計画面へ遷移し、
+  // 自動集計が完了して結果テーブルが描画されたことを「xxx の集計結果」表記で確認する
+  await expect(page.getByText(/の集計結果/).first()).toBeVisible({
     timeout: 30_000,
   });
 }

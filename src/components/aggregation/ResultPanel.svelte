@@ -19,6 +19,7 @@
     weightEnabled: boolean;
     onWeightToggle: (on: boolean) => void;
     errorMsg: string;
+    onAddDerived?: () => void;
   }
 
   let {
@@ -31,6 +32,7 @@
     weightEnabled,
     onWeightToggle,
     errorMsg,
+    onAddDerived,
   }: Props = $props();
 
   let viewMode = $state<ViewMode>("table");
@@ -139,6 +141,7 @@
             {weightColumnName}
             {weightEnabled}
             {onWeightToggle}
+            {onAddDerived}
           />
         </div>
         <div class="px-6 pb-6">

@@ -66,6 +66,7 @@ async function prepareCombineSA(
   warnings: string[],
 ): Promise<Layout[number] | null> {
   const sep = recipe.separator ?? "_";
+  const sepLit = sep.replaceAll("'", "''");
   const col = esc(recipe.code);
 
   // Verify all sources exist
@@ -80,7 +81,7 @@ async function prepareCombineSA(
   const concatExpr =
     parts.length === 1
       ? parts[0]
-      : `CONCAT(${parts.map((p, i) => (i > 0 ? `'${sep}', ${p}` : p)).join(", ")})`;
+      : `CONCAT(${parts.map((p, i) => (i > 0 ? `'${sepLit}', ${p}` : p)).join(", ")})`;
 
   // WHERE all sources are NOT NULL
   const nullChecks = recipe.sources.map((src) => `"${esc(src)}" IS NOT NULL`).join(" AND ");
@@ -96,10 +97,7 @@ async function prepareCombineSA(
 
   const items = cartesianProduct(sourceItems, sep);
 
-  // Generate label from source labels
-  const label = sourceQuestions.map((q) => q!.label).join("×");
-
-  return { type: "SA", key: recipe.code, label, items };
+  return { type: "SA", key: recipe.code, label: recipe.label, items };
 }
 
 async function prepareBinNA(
@@ -138,9 +136,8 @@ async function prepareBinNA(
   }
 
   const items: LayoutItem[] = recipe.bins.map((b) => ({ code: b.code, label: b.label }));
-  const label = sourceQ.label;
 
-  return { type: "SA", key: recipe.code, label, items };
+  return { type: "SA", key: recipe.code, label: recipe.label, items };
 }
 
 function buildBinCondition(srcCol: string, bin: BinDef): string {

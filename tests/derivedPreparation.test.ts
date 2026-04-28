@@ -42,7 +42,12 @@ describe("prepareDerivedColumns", () => {
 
     it("2設問の掛け合わせ列を作成", async () => {
       const recipes: DerivedRecipe[] = [
-        { type: "combineSA", code: "gender_age", sources: ["gender", "age"] },
+        {
+          type: "combineSA",
+          code: "gender_age",
+          label: "性別×年代",
+          sources: ["gender", "age"],
+        },
       ];
       const { layout: newLayout, warnings } = await prepareDerivedColumns(
         getConn(),
@@ -75,7 +80,7 @@ describe("prepareDerivedColumns", () => {
     it("NULLソースがあれば派生列もNULL", async () => {
       await loadCSVAsTable("gender,age,score\n1,,75\n,2,30\n1,2,90\n");
       const recipes: DerivedRecipe[] = [
-        { type: "combineSA", code: "ga", sources: ["gender", "age"] },
+        { type: "combineSA", code: "ga", label: "性別×年代", sources: ["gender", "age"] },
       ];
       const { warnings } = await prepareDerivedColumns(getConn(), layout, recipes);
       expect(warnings).toEqual([]);
@@ -87,7 +92,13 @@ describe("prepareDerivedColumns", () => {
 
     it("カスタムseparator", async () => {
       const recipes: DerivedRecipe[] = [
-        { type: "combineSA", code: "ga", sources: ["gender", "age"], separator: "-" },
+        {
+          type: "combineSA",
+          code: "ga",
+          label: "性別×年代",
+          sources: ["gender", "age"],
+          separator: "-",
+        },
       ];
       const { layout: newLayout } = await prepareDerivedColumns(getConn(), layout, recipes);
 
@@ -112,6 +123,7 @@ describe("prepareDerivedColumns", () => {
         {
           type: "binNA",
           code: "score_bin",
+          label: "スコア",
           source: "score",
           bins: [
             { code: "low", label: "低", min: null, max: 50 },
@@ -148,6 +160,7 @@ describe("prepareDerivedColumns", () => {
         {
           type: "binNA",
           code: "score_sa",
+          label: "スコア",
           source: "score",
           bins: [
             { code: "10", label: "10", min: 10, max: 11 },
@@ -170,6 +183,7 @@ describe("prepareDerivedColumns", () => {
         {
           type: "binNA",
           code: "score_bin",
+          label: "スコア",
           source: "score",
           bins: [{ code: "low", label: "低", min: 0, max: 50 }],
         },
@@ -185,6 +199,7 @@ describe("prepareDerivedColumns", () => {
         {
           type: "binNA",
           code: "sb",
+          label: "スコア",
           source: "score",
           bins: [{ code: "all", label: "全て", min: null, max: null }],
         },
@@ -205,7 +220,7 @@ describe("prepareDerivedColumns", () => {
 
     it("同じレシピを2回実行してもエラーなし", async () => {
       const recipes: DerivedRecipe[] = [
-        { type: "combineSA", code: "ga", sources: ["gender", "age"] },
+        { type: "combineSA", code: "ga", label: "性別×年代", sources: ["gender", "age"] },
       ];
       await prepareDerivedColumns(getConn(), layout, recipes);
       const { warnings } = await prepareDerivedColumns(getConn(), layout, recipes);
