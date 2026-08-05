@@ -91,6 +91,8 @@ export default defineConfig({
       "typescript/triple-slash-reference": "off", // correctness; used in ambient declarations
       "typescript/no-misused-promises": "off", // pedantic; too noisy
       "import/no-named-as-default": "off", // suspicious; false positives
+      "vitest/expect-expect": "off", // assertions can live in shared oracle/property helpers
+      "vitest/no-conditional-expect": "off", // guards narrow discriminated aggregation results
       "no-await-in-loop": "off", // perf; DuckDB Wasm requires sequential await
       "typescript/no-unsafe-type-assertion": "off", // suspicious; too noisy
       "unicorn/no-array-sort": "off", // suspicious; [...arr].sort() pattern is safe
