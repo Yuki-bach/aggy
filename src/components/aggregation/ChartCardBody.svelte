@@ -4,6 +4,7 @@
   import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
   import type { ChartType } from "./viewTypes";
   import type { ChartConfiguration } from "chart.js";
+  import { t as translate } from "../../lib/i18n.svelte";
 
   interface Props {
     tab: Tab;
@@ -236,6 +237,9 @@
   }
 </script>
 
-<div class="p-4 {isCross ? 'h-[400px]' : 'h-80'}">
-  <canvas bind:this={canvas}></canvas>
-</div>
+<figure class="p-4 {isCross ? 'h-[400px]' : 'h-80'}">
+  <canvas bind:this={canvas} aria-hidden="true"></canvas>
+  <figcaption class="sr-only">
+    {translate("table.caption.cross", { question: tab.label })}
+  </figcaption>
+</figure>

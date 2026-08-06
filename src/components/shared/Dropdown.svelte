@@ -5,11 +5,12 @@
   interface Props {
     open: boolean;
     onclose: () => void;
+    label: string;
     trigger: Snippet;
     children: Snippet;
   }
 
-  let { open, onclose, trigger, children }: Props = $props();
+  let { open, onclose, label, trigger, children }: Props = $props();
 </script>
 
 <div {@attach clickOutside({ onClose: onclose })}>
@@ -17,6 +18,8 @@
   {#if open}
     <div
       class="absolute top-[calc(100%+8px)] right-0 z-100 w-[300px] rounded-xl border border-border bg-surface p-4 shadow-lg"
+      role="dialog"
+      aria-label={label}
     >
       {@render children()}
     </div>

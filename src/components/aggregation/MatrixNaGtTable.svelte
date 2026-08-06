@@ -4,20 +4,23 @@
   import { t } from "../../lib/i18n.svelte";
   import Th from "./Th.svelte";
   import Td from "./Td.svelte";
+  import { TD_BASE } from "./tableCellStyles";
 
   interface Props {
     tabs: Tab[];
+    caption: string;
   }
 
-  let { tabs }: Props = $props();
+  let { tabs, caption }: Props = $props();
 
   const STAT_KEYS = ["n", "mean", "median", "sd", "min", "max"] as const;
 </script>
 
 <table class="w-full border-collapse text-sm tabular-nums">
+  <caption class="sr-only">{caption}</caption>
   <thead>
     <tr>
-      <Th></Th>
+      <Th><span class="sr-only">{t("table.question")}</span></Th>
       {#each STAT_KEYS as key (key)}
         <Th right>{t(`na.stat.${key}`)}</Th>
       {/each}
@@ -27,7 +30,7 @@
     {#each tabs as tab (tab.questionCode)}
       {@const stats = tab.slices[0].stats!}
       <tr>
-        <Td>{tab.label}</Td>
+        <th scope="row" class="{TD_BASE} text-left font-normal">{tab.label}</th>
         {#each STAT_KEYS as key (key)}
           <Td right mono>{formatStat(key, stats[key])}</Td>
         {/each}

@@ -25,9 +25,12 @@
     <caption class="sr-only">{t("table.caption.cross", { question: tab.label })}</caption>
     <thead>
       <tr>
-        <th class="py-3 px-4"></th>
+        <th scope="col" class="py-3 px-4">
+          <span class="sr-only">{t("table.total")}</span>
+        </th>
         {#each tab.codes as code (code)}
           <th
+            scope="col"
             class="{TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2"
           >
             {tab.labels[code]}
@@ -38,11 +41,12 @@
     <tbody>
       <!-- Tab total row -->
       <tr class="[&_td]:border-b-2 [&_td]:border-border-strong">
-        <td
+        <th
+          scope="row"
           class="{TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong bg-tab-bg text-accent"
         >
           {t("table.total")}
-        </td>
+        </th>
         {#each tab.codes as code, i (code)}
           {@const cell = tabSlice.cells[i]}
           <td class="{TD_BASE} {MONO} text-accent bg-tab-bg">
@@ -54,22 +58,23 @@
       <!-- Cross sub rows -->
       {#each crossTabs as ct (ct.by!.code)}
         <tr>
-          <td
+          <th
             colspan={tab.codes.length + 1}
             class="py-3 px-4 bg-cross-bg text-accent2 font-bold text-xs tracking-wide border-b-2 border-border-strong border-t-2 border-t-border-strong"
           >
             {ct.by!.label}
-          </td>
+          </th>
         </tr>
         {#each ct.slices as slice (`${ct.by!.code}-${slice.code}`)}
           <tr>
-            <td
+            <th
+              scope="row"
               class="{TD_BASE} text-left text-xs font-bold whitespace-nowrap border-r-2 border-r-border-strong text-accent2"
             >
               {ct.by!.labels[slice.code!]}
               <br />
               <span class="text-muted text-xs font-normal">n={formatN(slice.n)}</span>
-            </td>
+            </th>
             {#each tab.codes as _code, i (_code)}
               {@const cell = slice.cells[i]}
               <td class="{TD_BASE} {MONO} text-accent2 border-l border-l-row-border">
@@ -87,12 +92,15 @@
     <caption class="sr-only">{t("table.caption.cross", { question: tab.label })}</caption>
     <thead>
       <tr>
-        <th rowspan="2" class="py-3 px-4"></th>
-        <th colspan="2" class="{TH_BASE} text-center bg-tab-bg text-accent">
+        <th scope="col" rowspan="2" class="py-3 px-4">
+          <span class="sr-only">{t("table.option")}</span>
+        </th>
+        <th scope="colgroup" colspan="2" class="{TH_BASE} text-center bg-tab-bg text-accent">
           {t("table.total")}
         </th>
         {#each crossTabs as ct (ct.by!.code)}
           <th
+            scope="colgroup"
             colspan={ct.slices.length}
             class="{TH_BASE} text-center bg-cross-bg border-l border-border text-accent2 {hasMultipleAxes
               ? 'border-l-2 border-l-border-strong'
@@ -108,6 +116,7 @@
         {#each crossTabs as ct, gi (ct.by!.code)}
           {#each ct.slices as slice, si (`${ct.by!.code}-${slice.code}`)}
             <th
+              scope="col"
               class="{TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2 {hasMultipleAxes &&
               si === 0 &&
               gi > 0
@@ -126,7 +135,7 @@
       {#each tab.codes as code, i (code)}
         {@const tabCell = tabSlice.cells[i]}
         <tr>
-          <Td>{tab.labels[code]}</Td>
+          <th scope="row" class="{TD_BASE} text-left font-normal">{tab.labels[code]}</th>
           <Td right mono>{formatN(tabCell.count)}</Td>
           <Td right mono class="text-muted">
             {tabCell.pct !== null ? tabCell.pct.toFixed(1) + "%" : "-"}

@@ -51,9 +51,7 @@
   }
 </script>
 
-<div
-  role="button"
-  tabindex="0"
+<label
   class="relative rounded-lg border-2 border-dashed border-border-strong px-4 py-5 transition-colors hover:border-accent hover:bg-accent-bg{isDragOver
     ? ' drag-over'
     : ''}{isLoaded ? ' loaded' : ''}"
@@ -81,4 +79,4 @@
       <span class="text-sm font-medium text-text-secondary">{text}</span>
     {/if}
   </div>
-</div>
+</label>

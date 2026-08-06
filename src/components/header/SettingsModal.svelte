@@ -54,7 +54,7 @@
   });
 </script>
 
-<Dropdown {open} onclose={() => (open = false)}>
+<Dropdown {open} label={t("header.settings")} onclose={() => (open = false)}>
   {#snippet trigger()}
     <IconButton
       size="md"
@@ -62,6 +62,8 @@
       label={t("header.settings")}
       data-i18n="header.settings"
       data-i18n-attr="aria-label"
+      aria-expanded={open}
+      aria-haspopup="dialog"
       onclick={handleToggle}
     >
       &#x2699;
@@ -75,6 +77,8 @@
         <div class="flex gap-0.5 rounded-lg bg-surface2 p-0.5" data-seg-name="lang">
           {#each [{ value: "ja", label: "日本語" }, { value: "en", label: "English" }] as o (o.value)}
             <button
+              type="button"
+              aria-pressed={o.value === locale}
               class="flex-1 cursor-pointer whitespace-nowrap rounded-md border-none px-3 py-1 text-xs transition-[background,color,box-shadow] duration-150 hover:text-text {o.value ===
               locale
                 ? 'bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
@@ -99,6 +103,8 @@
         <div class="flex gap-0.5 rounded-lg bg-surface2 p-0.5" data-seg-name="theme">
           {#each [{ value: "light", label: t("settings.theme.light") }, { value: "dark", label: t("settings.theme.dark") }, { value: "system", label: t("settings.theme.system") }] as o (o.value)}
             <button
+              type="button"
+              aria-pressed={o.value === theme}
               class="flex-1 cursor-pointer whitespace-nowrap rounded-md border-none px-3 py-1 text-xs transition-[background,color,box-shadow] duration-150 hover:text-text {o.value ===
               theme
                 ? 'bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
@@ -124,6 +130,8 @@
           <div class="flex gap-0.5 rounded-lg bg-surface2 p-0.5" data-seg-name="ai">
             {#each [{ value: "on", label: t("settings.ai.on") }, { value: "off", label: t("settings.ai.off") }] as o (o.value)}
               <button
+                type="button"
+                aria-pressed={(aiEnabled ? "on" : "off") === o.value}
                 class="flex-1 cursor-pointer whitespace-nowrap rounded-md border-none px-3 py-1 text-xs transition-[background,color,box-shadow] duration-150 hover:text-text {(aiEnabled ? 'on' : 'off') ===
                 o.value
                   ? 'bg-surface text-text shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
