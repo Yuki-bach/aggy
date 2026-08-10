@@ -130,7 +130,7 @@
           <span class="truncate text-text" title={weightColumnName}>
             {t("weight.label", { col: weightColumnName })}
           </span>
-          <ToggleGroup>
+          <ToggleGroup role="group" aria-label={t("weight.label", { col: weightColumnName })}>
             <ToggleButton active={weightEnabled} onclick={() => onWeightToggle(true)}>
               {t("weight.on")}
             </ToggleButton>

@@ -16,10 +16,16 @@
   }
 </script>
 
-<Dropdown {open} onclose={() => (open = false)}>
+<Dropdown {open} label={t("changelog.title")} onclose={() => (open = false)}>
   {#snippet trigger()}
     <div class="relative">
-      <IconButton size="md" label={t("changelog.title")} onclick={toggle}>
+      <IconButton
+        size="md"
+        label={t("changelog.title")}
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        onclick={toggle}
+      >
         <svg
           width="18"
           height="18"
@@ -29,13 +35,17 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
+          aria-hidden="true"
         >
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
       </IconButton>
       {#if hasUnread}
-        <span class="absolute top-0.5 right-0.5 size-2.5 rounded-full bg-red-500"></span>
+        <span
+          class="absolute top-0.5 right-0.5 size-2.5 rounded-full bg-red-500"
+          aria-hidden="true"
+        ></span>
       {/if}
     </div>
   {/snippet}

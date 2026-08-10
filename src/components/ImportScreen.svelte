@@ -237,13 +237,14 @@
 </script>
 
 {#snippet StepIndicator(currentStep: number)}
-  <div class="mb-6 flex items-center justify-center gap-0">
+  <ol class="mb-6 flex items-center justify-center gap-0" aria-label={t("import.title")}>
     {#each STEPS as s, i (s.num)}
       {@const isDone = s.num < currentStep}
       {@const isActive = s.num === currentStep}
-      <div class="flex items-center">
+      <li class="flex items-center" aria-current={isActive ? "step" : undefined}>
         {#if i > 0}
           <div
+            aria-hidden="true"
             class="mx-2 h-px w-8 transition-colors duration-300 {s.num <= currentStep
               ? 'bg-accent'
               : 'bg-border'}"
@@ -269,9 +270,9 @@
             {t(s.labelKey)}
           </span>
         </div>
-      </div>
+      </li>
     {/each}
-  </div>
+  </ol>
 {/snippet}
 
 <div class="flex items-center justify-center p-6">

@@ -103,24 +103,30 @@
   }
 </script>
 
-<div class="mx-auto flex max-w-[720px] flex-col gap-5">
-  <div class="flex flex-col gap-1.5">
-    <span class="text-sm font-medium text-text">{t("derived.combineSA.sources")}</span>
+<form
+  class="mx-auto flex max-w-[720px] flex-col gap-5"
+  onsubmit={(event) => {
+    event.preventDefault();
+    void handleSave();
+  }}
+>
+  <fieldset class="flex flex-col gap-1.5 border-0 p-0">
+    <legend class="text-sm font-medium text-text">{t("derived.combineSA.sources")}</legend>
     <div class="flex max-h-64 flex-col gap-0.5 overflow-y-auto rounded-md border border-border bg-surface p-2">
       {#each saQuestions as q (q.key)}
         {@const checked = sources.includes(q.key)}
         {@const order = sources.indexOf(q.key)}
-        <label
-          class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-surface2"
-        >
-          <input
-            type="checkbox"
-            {checked}
-            onchange={() => toggleSource(q.key)}
-            class="size-4 cursor-pointer accent-accent"
-          />
-          <span class="shrink-0 font-mono text-xs text-muted">{q.key}</span>
-          <span class="flex-1 truncate text-text">{q.label}</span>
+        <div class="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-surface2">
+          <label class="flex min-w-0 flex-1 cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              {checked}
+              onchange={() => toggleSource(q.key)}
+              class="size-4 cursor-pointer accent-accent"
+            />
+            <span class="shrink-0 font-mono text-xs text-muted">{q.key}</span>
+            <span class="flex-1 truncate text-text">{q.label}</span>
+          </label>
           {#if checked}
             <span class="shrink-0 rounded bg-accent-bg px-1.5 text-xs font-bold text-accent">
               {order + 1}
@@ -146,13 +152,13 @@
               aria-label="Move down"
             >↓</button>
           {/if}
-        </label>
+        </div>
       {/each}
       {#if saQuestions.length === 0}
         <p class="px-2 py-2 text-xs text-muted">No SA questions</p>
       {/if}
     </div>
-  </div>
+  </fieldset>
 
   <div class="flex flex-col gap-1.5">
     <label for="combineSA-sep" class="text-sm font-medium text-text">
@@ -224,11 +230,11 @@
   {/if}
 
   <div class="flex justify-end gap-2 pt-2">
-    <Button variant="secondary" size="md" onclick={onCancel} disabled={saving}>
+    <Button variant="secondary" size="md" type="button" onclick={onCancel} disabled={saving}>
       {t("derived.cancel")}
     </Button>
-    <Button variant="primary" size="md" onclick={handleSave} disabled={saving}>
+    <Button variant="primary" size="md" type="submit" disabled={saving}>
       {saving ? t("derived.saving") : t("derived.save")}
     </Button>
   </div>
-</div>
+</form>

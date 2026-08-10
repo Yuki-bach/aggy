@@ -31,15 +31,18 @@
   let chartType = $derived(firstType === "MA" ? chartOpts.maChartType : chartOpts.saChartType);
 </script>
 
-<div
+<article
   id="card-matrix-{matrix.key}"
+  aria-labelledby="card-matrix-title-{matrix.key}"
   class="overflow-hidden rounded-xl border border-border bg-surface shadow-sm{hasCross
     ? ' overflow-x-auto'
     : ''}"
 >
   <div class="flex items-baseline gap-3 border-b border-border p-4">
     <div class="flex min-w-0 flex-col gap-0.5">
-      <span class="text-sm font-bold text-accent">{matrix.label}</span>
+      <h3 id="card-matrix-title-{matrix.key}" class="text-sm font-bold text-accent">
+        {matrix.label}
+      </h3>
       <span class="text-xs tracking-wide text-muted">{matrix.key}</span>
     </div>
     <span class="text-xs tracking-wide text-muted">{firstType} MATRIX</span>
@@ -49,11 +52,14 @@
     {#if hasCross}
       <div class="divide-y divide-border">
         {#each items as it (it.gtTab.questionCode)}
-          <div>
-            <div class="bg-surface2 px-4 py-2 text-xs font-bold text-muted">
+          <section aria-labelledby="matrix-item-title-{it.gtTab.questionCode}">
+            <h4
+              id="matrix-item-title-{it.gtTab.questionCode}"
+              class="bg-surface2 px-4 py-2 text-xs font-bold text-muted"
+            >
               {it.gtTab.label}
               <span class="ml-2 text-muted">({it.gtTab.questionCode})</span>
-            </div>
+            </h4>
             {#if it.gtTab.type === "NA"}
               <NaChartCardBody
                 tab={it.gtTab}
@@ -70,7 +76,7 @@
                 paletteId={chartOpts.paletteId}
               />
             {/if}
-          </div>
+          </section>
         {/each}
       </div>
     {:else if firstType === "NA"}
@@ -81,22 +87,25 @@
   {:else if hasCross}
     <div class="divide-y divide-border">
       {#each items as it (it.gtTab.questionCode)}
-        <div>
-          <div class="bg-surface2 px-4 py-2 text-xs font-bold text-muted">
+        <section aria-labelledby="matrix-table-title-{it.gtTab.questionCode}">
+          <h4
+            id="matrix-table-title-{it.gtTab.questionCode}"
+            class="bg-surface2 px-4 py-2 text-xs font-bold text-muted"
+          >
             {it.gtTab.label}
             <span class="ml-2 text-muted">({it.gtTab.questionCode})</span>
-          </div>
+          </h4>
           {#if it.gtTab.type === "NA"}
             <NaCrossTable tab={it.gtTab} crossTabs={it.crossTabs} />
           {:else}
             <CrossTable tab={it.gtTab} crossTabs={it.crossTabs} basis={tableOpts.basis} />
           {/if}
-        </div>
+        </section>
       {/each}
     </div>
   {:else if firstType === "NA"}
-    <MatrixNaGtTable tabs={gtTabs} />
+    <MatrixNaGtTable tabs={gtTabs} caption={matrix.label} />
   {:else}
-    <MatrixGtTable tabs={gtTabs} />
+    <MatrixGtTable tabs={gtTabs} caption={matrix.label} />
   {/if}
-</div>
+</article>

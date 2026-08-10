@@ -3,6 +3,7 @@
   import { Chart, getSeriesColor, getThemeColors, type PaletteId } from "../../lib/chartConfig";
   import type { ChartType } from "./viewTypes";
   import type { ChartConfiguration } from "chart.js";
+  import { t as translate } from "../../lib/i18n.svelte";
 
   interface Props {
     tabs: Tab[];
@@ -11,6 +12,12 @@
   }
 
   let { tabs, chartType, paletteId }: Props = $props();
+
+  let accessibleLabel = $derived(
+    translate("table.caption.tab", {
+      question: tabs.map((tab) => tab.label).join(", "),
+    }),
+  );
 
   let canvas: HTMLCanvasElement;
   let chart: Chart | null = null;
@@ -126,6 +133,7 @@
   }
 </script>
 
-<div class="h-[400px] p-4">
-  <canvas bind:this={canvas}></canvas>
-</div>
+<figure class="h-[400px] p-4">
+  <canvas bind:this={canvas} aria-hidden="true"></canvas>
+  <figcaption class="sr-only">{accessibleLabel}</figcaption>
+</figure>

@@ -24,15 +24,18 @@
   let isNA = $derived(tab.type === "NA");
 </script>
 
-<div
+<article
   id="card-{tab.questionCode}"
+  aria-labelledby="card-title-{tab.questionCode}"
   class="overflow-hidden rounded-xl border border-border bg-surface shadow-sm{hasCross
     ? ' overflow-x-auto'
     : ''}"
 >
   <div class="flex items-baseline gap-3 border-b border-border p-4">
     <div class="flex min-w-0 flex-col gap-0.5">
-      <span class="text-sm font-bold text-accent">{tab.label}</span>
+      <h3 id="card-title-{tab.questionCode}" class="text-sm font-bold text-accent">
+        {tab.label}
+      </h3>
       <span class="text-xs tracking-wide text-muted">{tab.questionCode}</span>
     </div>
     <span class="text-xs tracking-wide text-muted">{tab.type}</span>
@@ -61,4 +64,4 @@
   {:else}
     <TabTable {tab} />
   {/if}
-</div>
+</article>

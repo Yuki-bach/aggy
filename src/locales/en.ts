@@ -49,6 +49,8 @@ const en: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "Data Summary",
+  "section.settings": "Aggregation settings",
+  "section.results": "Aggregation results",
   "section.toc": "Index",
   "section.cross": "Cross-Tabulation Axes",
   "section.cross.label": "Cross-tabulation axis selection",
@@ -121,6 +123,8 @@ const en: Record<string, string> = {
   // Table headers
   "table.option": "Option",
   "table.graph": "Graph",
+  "table.value": "Value",
+  "table.question": "Question",
   "table.total": "Total",
   "table.caption.tab": "Aggregation results for {question}",
   "table.caption.cross": "Cross-tabulation results for {question}",

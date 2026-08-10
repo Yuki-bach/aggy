@@ -11,6 +11,10 @@
 
   let { tabs, paletteId }: Props = $props();
 
+  let accessibleLabel = $derived(
+    t("table.caption.tab", { question: tabs.map((tab) => tab.label).join(", ") }),
+  );
+
   let canvas: HTMLCanvasElement;
   let chart: Chart | null = null;
   let binWidth = $state(0);
@@ -150,7 +154,8 @@
       <span class="w-6 text-center tabular-nums">{binWidth || "–"}</span>
     </div>
   {/if}
-  <div class="relative flex-1 min-h-0">
-    <canvas bind:this={canvas}></canvas>
-  </div>
+  <figure class="relative flex-1 min-h-0">
+    <canvas bind:this={canvas} aria-hidden="true"></canvas>
+    <figcaption class="sr-only">{accessibleLabel}</figcaption>
+  </figure>
 </div>

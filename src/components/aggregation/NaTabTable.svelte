@@ -4,6 +4,7 @@
   import { t } from "../../lib/i18n.svelte";
   import Th from "./Th.svelte";
   import Td from "./Td.svelte";
+  import { TD_BASE } from "./tableCellStyles";
 
   interface Props {
     tab: Tab;
@@ -21,13 +22,13 @@
   <thead>
     <tr>
       <Th>{t("table.option")}</Th>
-      <Th right></Th>
+      <Th right><span class="sr-only">{t("table.value")}</span></Th>
     </tr>
   </thead>
   <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
     {#each STAT_KEYS as key (key)}
       <tr>
-        <Td>{t(`na.stat.${key}`)}</Td>
+        <th scope="row" class="{TD_BASE} text-left font-normal">{t(`na.stat.${key}`)}</th>
         <Td right mono>{formatStat(key, stats[key])}</Td>
       </tr>
     {/each}

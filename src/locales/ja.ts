@@ -49,6 +49,8 @@ const ja: Record<string, string> = {
 
   // Aggregation screen
   "section.summary": "データ概要",
+  "section.settings": "集計設定",
+  "section.results": "集計結果",
   "section.toc": "目次",
   "section.cross": "クロス集計軸",
   "section.cross.label": "クロス集計軸の選択",
@@ -121,6 +123,8 @@ const ja: Record<string, string> = {
   // Table headers
   "table.option": "選択肢",
   "table.graph": "グラフ",
+  "table.value": "値",
+  "table.question": "設問",
   "table.total": "全体",
   "table.caption.tab": "{question} の集計結果",
   "table.caption.cross": "{question} のクロス集計結果",

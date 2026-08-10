@@ -11,6 +11,7 @@
 </script>
 
 <th
+  scope="col"
   class="py-3 px-4 text-xs font-bold tracking-wide border-b-2 border-border-strong text-text-secondary bg-surface2 {right
     ? 'text-right'
     : 'text-left'} {cls ?? ''}"
