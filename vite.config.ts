@@ -196,6 +196,12 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
+    rolldownOptions: {
+      input: {
+        landing: "index.html",
+        app: "app/index.html",
+      },
+    },
   },
   optimizeDeps: {
     exclude: ["@duckdb/duckdb-wasm"],
