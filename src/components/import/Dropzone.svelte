@@ -52,7 +52,7 @@
 </script>
 
 <label
-  class="relative rounded-lg border-2 border-dashed border-border-strong px-4 py-5 transition-colors hover:border-accent hover:bg-accent-bg{isDragOver
+  class="relative block rounded-lg border-2 border-dashed border-border-strong px-4 py-5 transition-colors hover:border-accent hover:bg-accent-bg{isDragOver
     ? ' drag-over'
     : ''}{isLoaded ? ' loaded' : ''}"
   ondragenter={handleDragEnter}
