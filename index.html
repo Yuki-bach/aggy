@@ -41,7 +41,7 @@
         </a>
         <nav class="site-nav" aria-label="メインナビゲーション">
           <a href="#features">できること</a>
-          <a href="#privacy">データの扱い</a>
+          <a href="#how-it-works">使い方</a>
           <a href="#faq">FAQ</a>
           <a class="nav-cta" href="/app/">集計を始める</a>
         </nav>
@@ -55,11 +55,10 @@
             <p class="eyebrow"><span></span>ブラウザ完結のアンケート集計ツール</p>
             <h1>ローデータを外に出さずに、<em>すばやくクロス集計。</em></h1>
             <p class="hero-lead">
-              CSVとレイアウトJSONを読み込むだけ。インストールもアカウント登録も不要で、GT集計・クロス集計・グラフ表示までブラウザ内で完結します。
+              CSVとレイアウトJSONを読み込むだけ。GT集計・クロス集計からグラフ表示、出力までをひとつの画面で進められます。
             </p>
             <div class="hero-actions">
               <a class="button button-primary" href="/app/">無料で集計を始める <span>→</span></a>
-              <a class="button button-secondary" href="/app/">サンプルデータで試す</a>
             </div>
             <ul class="trust-list" aria-label="Aggyの特徴">
               <li><span>✓</span>データ送信なし</li>
@@ -133,44 +132,13 @@
         </div>
       </section>
 
-      <section class="section problem-section">
-        <div class="shell narrow intro-center">
-          <p class="section-label">WHY AGGY</p>
-          <h2>集計するだけなのに、<br />準備が重くなっていませんか？</h2>
-          <p>表計算ソフトの繰り返し作業と、専用ツールの導入負担。その間を埋めるのがAggyです。</p>
-        </div>
-        <div class="shell pain-grid">
-          <article>
-            <span class="pain-number">01</span>
-            <h3>Excelでは手作業が増える</h3>
-            <p>
-              設問ごとのピボット、MAのまとめ直し、クロス軸の変更。調査票が長いほど同じ操作が積み上がります。
-            </p>
-          </article>
-          <article>
-            <span class="pain-number">02</span>
-            <h3>専用ソフトは導入が重い</h3>
-            <p>
-              インストール、OSやOfficeの制約、アカウント登録。まず集計したいだけでも準備が必要です。
-            </p>
-          </article>
-          <article>
-            <span class="pain-number">03</span>
-            <h3>回答データを預けたくない</h3>
-            <p>
-              顧客や従業員の回答を含むローデータを、外部の分析サービスへアップロードできない場面があります。
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section feature-section" id="features">
+      <section class="section feature-section" id="why-aggy">
         <div class="shell section-heading split-heading">
           <div>
             <p class="section-label light">THREE REASONS</p>
             <h2>Aggyなら、集計までが軽い。</h2>
           </div>
-          <p>高度な統計ソフトを立ち上げる前の集計を、迷わず、速く、安全に。</p>
+          <p>ローカル処理、速い結果表示、調査データへの特化がAggyの核です。</p>
         </div>
         <div class="shell feature-grid">
           <article class="feature-card privacy-card">
@@ -246,7 +214,7 @@
         </div>
       </section>
 
-      <section class="section capabilities-section">
+      <section class="section capabilities-section" id="features">
         <div class="shell capabilities-grid">
           <div class="capability-copy">
             <p class="section-label">BUILT FOR SURVEYS</p>
@@ -296,39 +264,6 @@
         </div>
       </section>
 
-      <section class="section privacy-section" id="privacy">
-        <div class="shell privacy-grid">
-          <div class="privacy-copy">
-            <p class="section-label light">PRIVACY BY ARCHITECTURE</p>
-            <h2>「送らない」を、<br />仕組みで実現。</h2>
-            <p>
-              読み込んだローデータとレイアウトは、集計のためにAggyのサーバーへ送信されません。DuckDB
-              Wasmが、あなたのブラウザの中で処理します。
-            </p>
-            <ul>
-              <li><span>✓</span>回答データのサーバーアップロードなし</li>
-              <li><span>✓</span>集計SQLは端末上で実行</li>
-              <li><span>✓</span>保存データはブラウザ内のOPFSへ</li>
-            </ul>
-          </div>
-          <div class="architecture-card" aria-label="データ処理の仕組み">
-            <div class="arch-label">DATA FLOW</div>
-            <div class="arch-row input-row">
-              <span>INPUT</span><b>survey.csv</b><b>layout.json</b>
-            </div>
-            <div class="arch-arrow">↓</div>
-            <div class="browser-box">
-              <small>YOUR BROWSER</small><strong>DuckDB Wasm</strong
-              ><span>検証 · 集計 · 可視化</span>
-            </div>
-            <div class="arch-row output-row"><span>OUTPUT</span><b>CSV</b><b>MD</b><b>JSON</b></div>
-            <div class="no-server">
-              <i>×</i><span><b>Aggy server</b>回答データは送信されません</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section class="section fit-section">
         <div class="shell section-heading intro-center">
           <p class="section-label">GOOD FIT</p>
@@ -340,9 +275,8 @@
             <h3>こんな用途に向いています</h3>
             <ul>
               <li><span>✓</span>回収済みCSVのGT・クロス集計</li>
-              <li><span>✓</span>社外へ出しにくい回答データの集計</li>
               <li><span>✓</span>継続調査を同じ設問定義で反復集計</li>
-              <li><span>✓</span>Excelでの集計作業を減らしたい</li>
+              <li><span>✓</span>表・グラフ・各種形式へのすばやい出力</li>
             </ul>
           </article>
           <article class="fit-notyet">
@@ -352,7 +286,7 @@
               <li><span>—</span>アンケートの作成・配信・回答回収</li>
               <li><span>—</span>自由回答の本格的なコーディング</li>
               <li><span>—</span>高度な統計検定・多変量解析</li>
-              <li><span>—</span>共同編集やPowerPointレポート作成</li>
+              <li><span>—</span>共同編集やレポート自動作成</li>
             </ul>
           </article>
         </div>
@@ -374,12 +308,6 @@
               </p>
             </details>
             <details>
-              <summary>無料で利用できますか？アカウントは必要ですか？</summary>
-              <p>
-                現在のAggyは無料で、アカウント登録なしに利用できます。ブラウザでアプリを開き、すぐにサンプルデータを試せます。
-              </p>
-            </details>
-            <details>
               <summary>レイアウトJSONとは何ですか？</summary>
               <p>
                 CSVの各列がどの設問に対応し、SA・MA・NAなどのどの形式で、回答コードにどのラベルを表示するかを定義するファイルです。サンプルをダウンロードして確認できます。
@@ -389,12 +317,6 @@
               <summary>GoogleフォームなどのCSVも使えますか？</summary>
               <p>
                 CSVと対応するレイアウトJSONを用意すれば、回収サービスに依存せず利用できます。列名とレイアウト定義が一致している必要があります。
-              </p>
-            </details>
-            <details>
-              <summary>なぜ集計結果をすばやく表示できるのですか？</summary>
-              <p>
-                分析向けデータベースのDuckDBをWebAssemblyとしてブラウザ内で動かし、SQLで集計しているためです。データをサーバーと往復させずに処理できます。
               </p>
             </details>
           </div>
