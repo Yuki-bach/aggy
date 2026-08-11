@@ -4,6 +4,7 @@
   import { t } from "../../lib/i18n.svelte";
   import Th from "./Th.svelte";
   import Td from "./Td.svelte";
+  import { TD_BASE } from "./tableCellStyles";
 
   interface Props {
     tab: Tab;
@@ -23,9 +24,10 @@
       <Th right>%</Th>
       <th
         class="border-b-2 border-l border-border-strong bg-surface py-3 pr-4 pl-4 align-bottom text-[10px] font-normal text-muted"
-        aria-hidden="true"
+        scope="col"
       >
-        <div class="relative h-3">
+        <span class="sr-only">{t("table.graph")}</span>
+        <div class="relative h-3" aria-hidden="true">
           <span class="absolute top-0 left-0">0</span>
           <span class="absolute top-0 -translate-x-1/2" style:left="20%">20</span>
           <span class="absolute top-0 -translate-x-1/2" style:left="40%">40</span>
@@ -44,7 +46,7 @@
       {@const pct = cell.pct ?? 0}
       {@const barWidthPct = pct.toFixed(1)}
       <tr>
-        <Td>{label}</Td>
+        <th scope="row" class="{TD_BASE} text-left font-normal">{label}</th>
         <Td right mono>{countStr}</Td>
         <Td right mono class="text-muted">
           {cell.pct !== null ? cell.pct.toFixed(1) + "%" : "-"}

@@ -11,6 +11,8 @@
 </script>
 
 <button
+  type="button"
+  aria-pressed={active}
   class="min-h-7 cursor-pointer border px-3 py-1 font-sans text-xs font-medium transition-[background,color,border-color] duration-150 {active
     ? 'border-accent bg-accent text-accent-contrast'
     : 'border-border bg-surface text-text-secondary'}"

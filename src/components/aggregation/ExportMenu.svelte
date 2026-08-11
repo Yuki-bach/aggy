@@ -27,9 +27,12 @@
 
 <div class="relative" {@attach clickOutside({ onClose: () => (open = false) })}>
   <button
+    type="button"
     class="relative flex size-9 cursor-pointer items-center justify-center rounded-lg border border-border text-muted transition-colors hover:border-accent hover:text-accent"
     onclick={() => (open = !open)}
     aria-label={t("export.label")}
+    aria-expanded={open}
+    aria-haspopup="dialog"
     title={t("export.label")}
   >
     {#if showFeedback}
@@ -66,19 +69,24 @@
   {#if open}
     <div
       class="absolute right-0 z-10 mt-1 min-w-48 rounded-lg border border-border bg-surface shadow-lg"
+      role="dialog"
+      aria-label={t("export.label")}
     >
       <div class="px-3 pt-2.5 pb-1 text-xs font-medium tracking-wide text-muted uppercase">
         {t("export.section.copy")}
       </div>
       <button
+        type="button"
         class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs text-text hover:bg-accent-bg"
         onclick={() => handleAction("copy-tsv")}>TSV</button
       >
       <button
+        type="button"
         class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs text-text hover:bg-accent-bg"
         onclick={() => handleAction("copy-markdown")}>Markdown</button
       >
       <button
+        type="button"
         class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs text-text hover:bg-accent-bg"
         onclick={() => handleAction("copy-json")}>JSON</button
       >
@@ -92,14 +100,17 @@
       </div>
       <div class="pb-1.5">
         <button
+          type="button"
           class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs text-text hover:bg-accent-bg"
           onclick={() => handleAction("download-csv")}>CSV</button
         >
         <button
+          type="button"
           class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs text-text hover:bg-accent-bg"
           onclick={() => handleAction("download-markdown")}>Markdown (.md)</button
         >
         <button
+          type="button"
           class="block w-full cursor-pointer px-3 py-1.5 text-left text-xs text-text hover:bg-accent-bg"
           onclick={() => handleAction("download-json")}>JSON (.json)</button
         >

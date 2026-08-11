@@ -27,10 +27,13 @@
   <caption class="sr-only">{t("table.caption.cross", { question: tab.label })}</caption>
   <thead>
     <tr>
-      <th rowspan="2" class="py-3 px-4"></th>
-      <th class="{TH_BASE} text-center bg-tab-bg text-accent">{t("table.total")}</th>
+      <th scope="col" rowspan="2" class="py-3 px-4">
+        <span class="sr-only">{t("table.option")}</span>
+      </th>
+      <th scope="col" class="{TH_BASE} text-center bg-tab-bg text-accent">{t("table.total")}</th>
       {#each crossGroups as group (group.axis.code)}
         <th
+          scope="colgroup"
           colspan={group.tab.slices.length}
           class="{TH_BASE} text-center bg-cross-bg border-l border-border text-accent2 {hasMultipleAxes
             ? 'border-l-2 border-l-border-strong'
@@ -41,10 +44,13 @@
       {/each}
     </tr>
     <tr>
-      <th class="{TH_BASE} text-right text-xs bg-surface2"></th>
+      <th scope="col" class="{TH_BASE} text-right text-xs bg-surface2">
+        <span class="sr-only">{t("table.value")}</span>
+      </th>
       {#each crossGroups as group, gi (group.axis.code)}
         {#each group.tab.slices as slice, si (`${group.axis.code}-${slice.code}`)}
           <th
+            scope="col"
             class="{TH_BASE} text-right text-xs whitespace-nowrap border-l border-row-border bg-surface2 {hasMultipleAxes &&
             si === 0 &&
             gi > 0
@@ -62,7 +68,9 @@
   <tbody class="[&_tr:hover_td]:bg-row-hover [&_tr:last-child_td]:border-b-0">
     {#each STAT_KEYS as key (key)}
       <tr>
-        <td class="{TD_BASE} text-left text-sm">{t(`na.stat.${key}`)}</td>
+        <th scope="row" class="{TD_BASE} text-left text-sm font-normal">
+          {t(`na.stat.${key}`)}
+        </th>
         <td class="{TD_BASE} {MONO} text-accent">{formatStat(key, tabStats[key])}</td>
         {#each crossGroups as group, gi (group.axis.code)}
           {#each group.tab.slices as slice, si (`${group.axis.code}-${slice.code}`)}

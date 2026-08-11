@@ -217,7 +217,13 @@
   }
 </script>
 
-<div class="mx-auto flex max-w-[820px] flex-col gap-5">
+<form
+  class="mx-auto flex max-w-[820px] flex-col gap-5"
+  onsubmit={(event) => {
+    event.preventDefault();
+    void handleSave();
+  }}
+>
   <div class="flex flex-col gap-1.5">
     <label for="binNA-source" class="text-sm font-medium text-text">
       {t("derived.binNA.source")}
@@ -292,27 +298,30 @@
     </div>
   {/if}
 
-  <div class="flex flex-col gap-2">
-    <span class="text-sm font-medium text-text">{t("derived.binNA.bins")}</span>
+  <fieldset class="flex flex-col gap-2 border-0 p-0">
+    <legend class="text-sm font-medium text-text">{t("derived.binNA.bins")}</legend>
     <div class="overflow-x-auto rounded-md border border-border bg-surface">
       <table class="w-full text-sm">
+        <caption class="sr-only">{t("derived.binNA.bins")}</caption>
         <thead class="bg-surface2">
           <tr>
-            <th class="w-[20%] px-2 py-2 text-left text-xs font-bold text-muted">
+            <th scope="col" class="w-[20%] px-2 py-2 text-left text-xs font-bold text-muted">
               {t("derived.binNA.bin.code")}
             </th>
-            <th class="w-[28%] px-2 py-2 text-left text-xs font-bold text-muted">
+            <th scope="col" class="w-[28%] px-2 py-2 text-left text-xs font-bold text-muted">
               {t("derived.binNA.bin.label")}
             </th>
-            <th class="w-[20%] px-2 py-2 text-left text-xs font-bold text-muted">
+            <th scope="col" class="w-[20%] px-2 py-2 text-left text-xs font-bold text-muted">
               {t("derived.binNA.bin.min")}
               <span class="font-normal text-muted">({t("derived.binNA.bin.minHint")})</span>
             </th>
-            <th class="w-[20%] px-2 py-2 text-left text-xs font-bold text-muted">
+            <th scope="col" class="w-[20%] px-2 py-2 text-left text-xs font-bold text-muted">
               {t("derived.binNA.bin.max")}
               <span class="font-normal text-muted">({t("derived.binNA.bin.maxHint")})</span>
             </th>
-            <th class="w-[12%] px-2 py-2"></th>
+            <th scope="col" class="w-[12%] px-2 py-2">
+              <span class="sr-only">{t("derived.delete")}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -321,6 +330,7 @@
               <td class="px-2 py-1.5">
                 <input
                   type="text"
+                  aria-label={`${t("derived.binNA.bin.code")} ${i + 1}`}
                   bind:value={row.code}
                   class="w-full rounded-sm border border-border bg-surface px-2 py-1 font-mono text-xs text-text focus:border-accent focus:outline-none"
                   autocomplete="off"
@@ -330,6 +340,7 @@
               <td class="px-2 py-1.5">
                 <input
                   type="text"
+                  aria-label={`${t("derived.binNA.bin.label")} ${i + 1}`}
                   bind:value={row.label}
                   class="w-full rounded-sm border border-border bg-surface px-2 py-1 text-xs text-text focus:border-accent focus:outline-none"
                   autocomplete="off"
@@ -339,6 +350,7 @@
               <td class="px-2 py-1.5">
                 <input
                   type="text"
+                  aria-label={`${t("derived.binNA.bin.min")} ${i + 1}`}
                   inputmode="decimal"
                   bind:value={row.min}
                   class="w-full rounded-sm border border-border bg-surface px-2 py-1 font-mono text-xs text-text focus:border-accent focus:outline-none"
@@ -349,6 +361,7 @@
               <td class="px-2 py-1.5">
                 <input
                   type="text"
+                  aria-label={`${t("derived.binNA.bin.max")} ${i + 1}`}
                   inputmode="decimal"
                   bind:value={row.max}
                   class="w-full rounded-sm border border-border bg-surface px-2 py-1 font-mono text-xs text-text focus:border-accent focus:outline-none"
@@ -374,7 +387,7 @@
       class="self-start cursor-pointer rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-text-secondary hover:bg-surface2 hover:text-text"
       onclick={addRow}
     >+ {t("derived.binNA.bin.add")}</button>
-  </div>
+  </fieldset>
 
   {#if coverage && naStats}
     {#if coverage.uncoveredCount === 0}
@@ -396,11 +409,11 @@
   {/if}
 
   <div class="flex justify-end gap-2 pt-2">
-    <Button variant="secondary" size="md" onclick={onCancel} disabled={saving}>
+    <Button variant="secondary" size="md" type="button" onclick={onCancel} disabled={saving}>
       {t("derived.cancel")}
     </Button>
-    <Button variant="primary" size="md" onclick={handleSave} disabled={saving}>
+    <Button variant="primary" size="md" type="submit" disabled={saving}>
       {saving ? t("derived.saving") : t("derived.save")}
     </Button>
   </div>
-</div>
+</form>

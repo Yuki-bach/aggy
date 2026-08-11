@@ -124,8 +124,9 @@
           </div>
           <div class="flex flex-col gap-2 text-xs text-text-secondary">
             <div class="flex items-center justify-between">
-              <span>{t("display.saType")}</span>
+              <label for="display-sa-type">{t("display.saType")}</label>
               <select
+                id="display-sa-type"
                 class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-xs text-text"
                 value={chartOpts.saChartType}
                 onchange={(e) =>
@@ -139,8 +140,9 @@
               </select>
             </div>
             <div class="flex items-center justify-between">
-              <span>{t("display.maType")}</span>
+              <label for="display-ma-type">{t("display.maType")}</label>
               <select
+                id="display-ma-type"
                 class="cursor-pointer rounded-sm border border-border bg-surface px-2 py-1 text-xs text-text"
                 value={chartOpts.maChartType}
                 onchange={(e) =>
