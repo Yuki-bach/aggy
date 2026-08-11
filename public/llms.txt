@@ -1,0 +1,21 @@
+# Aggy
+
+> Aggy is a free, browser-based tool for aggregating raw survey data. It performs grand totals, cross-tabulation, weighted aggregation, charts, and exports entirely in the browser without uploading response data to an external server.
+
+Aggy supports Japanese and English. It accepts a response CSV and a layout JSON that defines the survey questions. Aggregation runs locally with DuckDB Wasm.
+
+## Documentation
+
+- [Aggy overview (Japanese)](https://aggy.pages.dev/aggy.md): Features, supported question types, usage, limitations, and frequently asked questions in Japanese.
+- [Aggy overview (English)](https://aggy.pages.dev/aggy.en.md): Features, supported question types, usage, limitations, and frequently asked questions in English.
+- [Layout JSON Schema](https://aggy.pages.dev/schemas/layout.schema.json): Machine-readable schema for the layout JSON accepted by Aggy.
+
+## Main pages
+
+- [Aggy (Japanese)](https://aggy.pages.dev/): Japanese product overview and frequently asked questions.
+- [Aggy (English)](https://aggy.pages.dev/en/): English product overview and frequently asked questions.
+- [Aggy web application](https://aggy.pages.dev/app/): The browser-based survey aggregation application.
+
+## Source code
+
+- [Aggy on GitHub](https://github.com/Yuki-bach/aggy): Source code, releases, and technical documentation.
