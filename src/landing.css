@@ -177,6 +177,10 @@ a {
   color: var(--white);
 }
 
+.mobile-nav {
+  display: none;
+}
+
 .nav-cta {
   padding: 10px 19px;
   border: 1px solid rgba(255, 255, 255, 0.42);
@@ -1349,6 +1353,27 @@ a {
 
   .site-nav > a:not(.nav-cta) {
     display: none;
+  }
+
+  .mobile-nav {
+    display: flex;
+    gap: var(--space-5);
+    padding-bottom: var(--space-3);
+    overflow-x: auto;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: var(--text-label);
+    font-weight: 600;
+    line-height: 1.4;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+
+  .mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-nav a:hover {
+    color: var(--white);
   }
 
   .hero {
