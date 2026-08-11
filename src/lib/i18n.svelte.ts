@@ -43,8 +43,12 @@ export function setLocale(locale: string): void {
 
 /** Initialize i18n: detect locale from localStorage or browser setting */
 export function initI18n(): void {
+  const requested = new URLSearchParams(window.location.search).get("lang");
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved && isLocale(saved)) {
+  if (requested && isLocale(requested)) {
+    currentLocale = requested;
+    localStorage.setItem(STORAGE_KEY, requested);
+  } else if (saved && isLocale(saved)) {
     currentLocale = saved;
   } else {
     const browserLang = navigator.language.split("-")[0];

@@ -199,6 +199,7 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         landing: "index.html",
+        landingEn: "en/index.html",
         app: "app/index.html",
       },
     },
