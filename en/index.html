@@ -31,6 +31,7 @@
     <link rel="alternate" hreflang="x-default" href="https://aggy.pages.dev/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script src="/landing-locale.js"></script>
+    <script type="module" src="/src/landing.ts"></script>
     <link rel="stylesheet" href="/src/landing.css" />
     <title>Aggy — Fast, private survey data aggregation</title>
   </head>
@@ -60,11 +61,18 @@
     </header>
 
     <main id="main">
-      <section class="hero">
+      <section class="hero" data-hero>
+        <canvas class="data-flow-canvas" data-data-flow aria-hidden="true"></canvas>
+        <div class="hero-data-field" aria-hidden="true">
+          <span>10001, 34, Tokyo, satisfied, continue</span>
+          <span>10002, 28, Osaka, somewhat, recommend</span>
+          <span>10003, 45, Aichi, satisfied, continue</span>
+          <span>10004, 31, Fukuoka, neutral, undecided</span>
+        </div>
         <div class="hero-grid shell">
           <div class="hero-copy">
             <p class="eyebrow"><span></span>SURVEY AGGREGATION, ENTIRELY IN YOUR BROWSER</p>
-            <h1>Turn raw data into<em>answers—fast</em></h1>
+            <h1>Turn raw data <em>into answers—fast</em></h1>
             <p class="hero-lead">
               Load a CSV and a layout JSON, then move from grand totals and cross-tabs to charts and
               exports—all in one place.
