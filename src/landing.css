@@ -21,6 +21,17 @@
   --text-card-title: 21px;
   --text-section-title: clamp(32px, 4vw, 48px);
   --text-hero: clamp(42px, 5vw, 66px);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-14: 56px;
+  --space-24: 96px;
+  --space-28: 112px;
   font-family: "Inter", "Avenir Next", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   color: var(--ink);
   background: var(--white);
@@ -636,7 +647,7 @@ a {
 }
 
 .section {
-  padding: 112px 0;
+  padding: var(--space-28) 0;
 }
 
 .intro-center {
@@ -660,7 +671,7 @@ a {
 .section-heading > p,
 .capability-copy > p,
 .faq-heading > p {
-  margin: 20px 0 0;
+  margin: var(--space-5) 0 0;
   color: var(--muted);
   font-size: var(--text-body);
 }
@@ -708,15 +719,15 @@ a {
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 54px;
+  gap: var(--space-4);
+  margin-top: var(--space-14);
 }
 
 .feature-card {
   position: relative;
   overflow: hidden;
   min-height: 420px;
-  padding: 32px;
+  padding: var(--space-8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
@@ -910,15 +921,15 @@ a {
 .steps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-top: 58px;
+  gap: var(--space-4);
+  margin-top: var(--space-14);
   padding: 0;
   list-style: none;
 }
 
 .steps-grid li {
   position: relative;
-  padding: 31px;
+  padding: var(--space-8);
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--white);
@@ -1020,7 +1031,7 @@ a {
 }
 
 .center-action {
-  margin-top: 41px;
+  margin-top: var(--space-10);
   text-align: center;
 }
 
@@ -1044,7 +1055,7 @@ a {
 .capabilities-grid {
   display: grid;
   grid-template-columns: 0.82fr 1.18fr;
-  gap: 90px;
+  gap: var(--space-24);
 }
 
 .capability-copy {
@@ -1054,7 +1065,7 @@ a {
 }
 
 .capability-copy .text-link {
-  margin-top: 30px;
+  margin-top: var(--space-8);
 }
 
 .capability-list {
@@ -1103,12 +1114,12 @@ a {
 .fit-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-top: 50px;
+  gap: var(--space-4);
+  margin-top: var(--space-14);
 }
 
 .fit-grid article {
-  padding: 38px 42px;
+  padding: var(--space-10);
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--white);
@@ -1153,7 +1164,7 @@ a {
 .faq-grid {
   display: grid;
   grid-template-columns: 0.7fr 1.3fr;
-  gap: 100px;
+  gap: var(--space-24);
 }
 
 .faq-heading {
@@ -1323,11 +1334,11 @@ a {
   }
 
   .feature-card {
-    padding: 25px;
+    padding: var(--space-8);
   }
 
   .capabilities-grid {
-    gap: 55px;
+    gap: var(--space-14);
   }
 }
 
@@ -1378,7 +1389,7 @@ a {
   .capabilities-grid,
   .faq-grid {
     grid-template-columns: 1fr;
-    gap: 50px;
+    gap: var(--space-14);
   }
 
   .capability-copy {
@@ -1386,7 +1397,7 @@ a {
   }
 
   .section {
-    padding: 84px 0;
+    padding: calc(var(--space-10) * 2) 0;
   }
 }
 
@@ -1400,7 +1411,7 @@ a {
   }
 
   .hero {
-    padding: 112px 0 75px;
+    padding: var(--space-28) 0 calc(var(--space-10) * 2);
   }
 
   .hero-actions {
@@ -1440,11 +1451,11 @@ a {
   }
 
   .fit-grid article {
-    padding: 28px;
+    padding: var(--space-6);
   }
 
   .feature-card {
-    padding: 25px;
+    padding: var(--space-6);
   }
 
   .privacy-visual,
