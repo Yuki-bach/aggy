@@ -59,7 +59,7 @@
             <p class="m-0 mb-2">{@html t("gs.section1.sample")}</p>
             <div class="flex gap-3">
               <a
-                href="samples/sample_data.csv"
+                href="/samples/sample_data.csv"
                 download="sample_data.csv"
                 class="flex items-center gap-1 rounded border border-border-strong bg-surface px-3 py-1 text-xs font-semibold text-accent transition-colors hover:border-accent hover:bg-accent-bg dark:bg-surface2 dark:border-accent"
               >
@@ -68,8 +68,8 @@
               </a>
               <a
                 href={getLocale() === "ja"
-                  ? "samples/sample_layout.json"
-                  : "samples/sample_layout_en.json"}
+                  ? "/samples/sample_layout.json"
+                  : "/samples/sample_layout_en.json"}
                 download="sample_layout.json"
                 class="flex items-center gap-1 rounded border border-border-strong bg-surface px-3 py-1 text-xs font-semibold text-accent transition-colors hover:border-accent hover:bg-accent-bg dark:bg-surface2 dark:border-accent"
               >
