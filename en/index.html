@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071b3f" />
+    <meta
+      name="description"
+      content="Aggregate raw survey data quickly in your browser without sending it to an external server. Free, with no installation or account required."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aggy" />
+    <meta property="og:title" content="Aggy — Fast, private survey data aggregation" />
+    <meta
+      property="og:description"
+      content="From grand totals and cross-tabs to charts and exports, everything runs in your browser. No installation or account required."
+    />
+    <meta property="og:url" content="https://aggy.pages.dev/en/" />
+    <meta property="og:image" content="https://aggy.pages.dev/og.png" />
+    <meta property="og:image:alt" content="Aggy survey aggregation interface" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Aggy — Fast, private survey data aggregation" />
+    <meta
+      name="twitter:description"
+      content="Aggregate raw survey data directly in your browser. No installation or account required."
+    />
+    <meta name="twitter:image" content="https://aggy.pages.dev/og.png" />
+    <link rel="canonical" href="https://aggy.pages.dev/en/" />
+    <link rel="alternate" hreflang="ja" href="https://aggy.pages.dev/" />
+    <link rel="alternate" hreflang="en" href="https://aggy.pages.dev/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://aggy.pages.dev/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script src="/landing-locale.js"></script>
+    <link rel="stylesheet" href="/src/landing.css" />
+    <title>Aggy — Fast, private survey data aggregation</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="brand" href="/en/" aria-label="Aggy home">
+          <span class="brand-mark" aria-hidden="true"> <i></i><i></i><i></i><i></i><i></i> </span>
+          <span>Aggy</span>
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="#how-it-works">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#faq">FAQ</a>
+          <a href="/?lang=ja" lang="ja">日本語</a>
+          <a class="nav-cta" href="/app/?lang=en">Start aggregating</a>
+        </nav>
+      </div>
+      <nav class="shell mobile-nav" aria-label="On this page">
+        <a href="#how-it-works">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+        <a href="/?lang=ja" lang="ja">日本語</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="hero-grid shell">
+          <div class="hero-copy">
+            <p class="eyebrow"><span></span>SURVEY AGGREGATION, ENTIRELY IN YOUR BROWSER</p>
+            <h1>Turn raw data into<em>answers—fast</em></h1>
+            <p class="hero-lead">
+              Load a CSV and a layout JSON, then move from grand totals and cross-tabs to charts and
+              exports—all in one place.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="/app/?lang=en"
+                >Start aggregating for free <span aria-hidden="true">→</span></a
+              >
+            </div>
+            <ul class="trust-list" aria-label="Why use Aggy">
+              <li><span aria-hidden="true">✓</span>No data uploads</li>
+              <li><span aria-hidden="true">✓</span>No installation</li>
+              <li><span aria-hidden="true">✓</span>No account</li>
+            </ul>
+          </div>
+
+          <figure class="product-stage">
+            <div class="speed-note" aria-hidden="true">
+              <span class="speed-icon" aria-hidden="true">↯</span>
+              <span><b>Fast response</b>See results in seconds</span>
+            </div>
+            <div class="app-window" aria-hidden="true">
+              <div class="window-bar">
+                <div class="window-brand"><b>Aggy</b><span>SURVEY AGGREGATION</span></div>
+                <div class="status"><i></i> DuckDB ready</div>
+              </div>
+              <div class="window-body">
+                <aside class="mock-sidebar">
+                  <small>DATA OVERVIEW</small>
+                  <strong>customer_survey.csv</strong>
+                  <span>12,480 rows · 86 columns</span>
+                  <small>CROSS-TAB AXES</small>
+                  <div class="axis-pill">Age group <b>×</b></div>
+                  <div class="axis-pill">Usage frequency <b>×</b></div>
+                  <small>QUESTIONS</small>
+                  <ol>
+                    <li class="active">Overall satisfaction</li>
+                    <li>Intent to continue</li>
+                    <li>Likelihood to recommend</li>
+                    <li>Reasons for use</li>
+                  </ol>
+                </aside>
+                <div class="mock-result">
+                  <div class="result-heading">
+                    <div>
+                      <small>Q12</small>
+                      <p class="mock-title">Overall satisfaction</p>
+                    </div>
+                    <div class="view-toggle"><b>Table</b><span>Chart</span></div>
+                  </div>
+                  <div class="mock-table" role="presentation">
+                    <div class="tr th">
+                      <span>Answer</span><span>Total</span><span>20s</span><span>30s</span>
+                    </div>
+                    <div class="tr">
+                      <b>Satisfied</b><span>42.8%</span><span class="hot">48.2%</span
+                      ><span>44.1%</span>
+                    </div>
+                    <div class="tr">
+                      <b>Somewhat</b><span>31.6%</span><span>29.4%</span
+                      ><span class="hot">35.8%</span>
+                    </div>
+                    <div class="tr">
+                      <b>Neutral</b><span>15.2%</span><span>13.1%</span><span>12.9%</span>
+                    </div>
+                    <div class="tr">
+                      <b>Dissatisfied</b><span>10.4%</span><span>9.3%</span><span>7.2%</span>
+                    </div>
+                  </div>
+                  <div class="mini-chart" aria-hidden="true">
+                    <div><span>Satisfied</span><i style="--bar: 82%"></i><b>42.8</b></div>
+                    <div><span>Somewhat</span><i style="--bar: 61%"></i><b>31.6</b></div>
+                    <div><span>Neutral</span><i style="--bar: 29%"></i><b>15.2</b></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="local-note" aria-hidden="true">
+              <span>●</span>Your data stays in your browser
+            </div>
+            <figcaption class="sr-only">
+              An example Aggy screen showing a cross-tab table and chart by age group
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section feature-section" id="why-aggy">
+        <div class="shell section-heading split-heading">
+          <div>
+            <p class="section-label light" aria-hidden="true">THREE REASONS</p>
+            <h2>Survey analysis,<br />made simpler.</h2>
+          </div>
+          <p>Keep your data private and get the tables your research needs—quickly.</p>
+        </div>
+        <div class="shell feature-grid">
+          <article class="feature-card privacy-card">
+            <div class="feature-index">01</div>
+            <div class="privacy-visual" aria-hidden="true">
+              <div class="browser-shape">
+                <span></span><b>YOUR BROWSER</b>
+                <div class="data-file">CSV</div>
+              </div>
+              <div class="blocked-path"><i></i><span>SERVER</span></div>
+            </div>
+            <h3>Your data stays with you</h3>
+            <p>
+              From loading your CSV to generating results, everything is processed locally. Your
+              response data is never sent to Aggy's servers.
+            </p>
+          </article>
+          <article class="feature-card speed-card">
+            <div class="feature-index">02</div>
+            <div class="speed-visual" aria-hidden="true">
+              <div class="speed-lines"><i></i><i></i><i></i><i></i></div>
+              <b>DUCKDB<br />WASM</b>
+            </div>
+            <h3>Results appear fast</h3>
+            <p>
+              DuckDB aggregates raw data directly in your browser, so you can switch cross-tab axes
+              and views without breaking your flow.
+            </p>
+          </article>
+          <article class="feature-card survey-card">
+            <div class="feature-index">03</div>
+            <div class="survey-visual" aria-hidden="true">
+              <span>SA</span><span>MA</span><span>NA</span><span>DATE</span><span>MATRIX</span>
+            </div>
+            <h3>Built for survey data</h3>
+            <p>
+              Single-answer, multiple-answer, numeric, date, and matrix questions are all handled in
+              one aggregation run.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section steps-section" id="how-it-works">
+        <div class="shell section-heading intro-center">
+          <p class="section-label" aria-hidden="true">HOW IT WORKS</p>
+          <h2>Go from files to results in 3 steps.</h2>
+          <p>
+            Sample files are included, so you can see how Aggy works in your browser right away.
+          </p>
+        </div>
+        <ol class="shell steps-grid">
+          <li>
+            <span class="step-number" aria-hidden="true">1</span>
+            <div class="step-visual files-visual" aria-hidden="true"><i>CSV</i><i>JSON</i></div>
+            <h3>Prepare your files</h3>
+            <p>Bring a CSV of responses and a layout JSON that defines your questions.</p>
+          </li>
+          <li>
+            <span class="step-number" aria-hidden="true">2</span>
+            <div class="step-visual drop-visual" aria-hidden="true">
+              <span>↓</span><i>Load in your browser</i>
+            </div>
+            <h3>Load them in your browser</h3>
+            <p>Select both files. Aggy validates the format and response codes automatically.</p>
+          </li>
+          <li>
+            <span class="step-number" aria-hidden="true">3</span>
+            <div class="step-visual result-visual" aria-hidden="true">
+              <i></i><i></i><i></i><i></i>
+            </div>
+            <h3>Choose axes and aggregate</h3>
+            <p>Select cross-tab axes, explore tables and charts, then export what you need.</p>
+          </li>
+        </ol>
+        <div class="center-action">
+          <a class="text-link" href="/app/?lang=en"
+            >Try it with sample files <span aria-hidden="true">→</span></a
+          >
+        </div>
+      </section>
+
+      <section class="section capabilities-section" id="features">
+        <div class="shell capabilities-grid">
+          <div class="capability-copy">
+            <p class="section-label" aria-hidden="true">BUILT FOR SURVEYS</p>
+            <h2>From aggregation to export,<br />all in one place.</h2>
+            <p>Review, aggregate, transform, and export your data without changing tools.</p>
+            <a class="text-link" href="/app/?lang=en"
+              >Open the app <span aria-hidden="true">→</span></a
+            >
+          </div>
+          <ol class="capability-list">
+            <li>
+              <span aria-hidden="true">01</span>
+              <div>
+                <h3>Grand totals &amp; cross-tabs</h3>
+                <p>Aggregate every question at once, with support for multiple cross-tab axes.</p>
+              </div>
+            </li>
+            <li>
+              <span aria-hidden="true">02</span>
+              <div>
+                <h3>Weighted results</h3>
+                <p>Choose a weight column and see weighted results throughout your analysis.</p>
+              </div>
+            </li>
+            <li>
+              <span aria-hidden="true">03</span>
+              <div>
+                <h3>Derived questions</h3>
+                <p>Combine or recode single-answer questions and bin numeric responses.</p>
+              </div>
+            </li>
+            <li>
+              <span aria-hidden="true">04</span>
+              <div>
+                <h3>Tables &amp; charts</h3>
+                <p>Switch row and column percentages, then explore bars, stacks, and histograms.</p>
+              </div>
+            </li>
+            <li>
+              <span aria-hidden="true">05</span>
+              <div>
+                <h3>Flexible exports</h3>
+                <p>Download or copy results as CSV, TSV, Markdown, or JSON.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section fit-section">
+        <div class="shell section-heading intro-center">
+          <p class="section-label" aria-hidden="true">GOOD FIT</p>
+          <h2>Turn collected responses into results right away.</h2>
+        </div>
+        <div class="shell fit-grid">
+          <article class="fit-yes">
+            <p aria-hidden="true">AGGY IS FOR YOU</p>
+            <h3>Aggy is a good fit for</h3>
+            <ul>
+              <li>
+                <span aria-hidden="true">✓</span>Grand totals and cross-tabs from collected CSVs
+              </li>
+              <li>
+                <span aria-hidden="true">✓</span>Recurring surveys that reuse question definitions
+              </li>
+              <li><span aria-hidden="true">✓</span>Reviewing and exporting tables and charts</li>
+            </ul>
+          </article>
+          <article class="fit-notyet">
+            <p aria-hidden="true">NOT YET</p>
+            <h3>Not currently supported</h3>
+            <ul>
+              <li><span aria-hidden="true">—</span>Survey creation, distribution, or collection</li>
+              <li><span aria-hidden="true">—</span>Full-scale coding of open-ended responses</li>
+              <li>
+                <span aria-hidden="true">—</span>Advanced statistical tests or multivariate analysis
+              </li>
+              <li><span aria-hidden="true">—</span>Collaborative editing or automated reports</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section faq-section" id="faq">
+        <div class="shell faq-grid">
+          <div class="faq-heading">
+            <p class="section-label" aria-hidden="true">FAQ</p>
+            <h2>Frequently asked questions</h2>
+            <p>Everything you need to know before getting started.</p>
+          </div>
+          <div class="faq-list">
+            <details open>
+              <summary>What happens to the data I load?</summary>
+              <p>
+                Your response data is never sent to Aggy's servers. DuckDB Wasm loads, validates,
+                and aggregates it entirely in your browser.
+              </p>
+            </details>
+            <details>
+              <summary>What is a layout JSON?</summary>
+              <p>
+                It defines which question each CSV column belongs to, the question type—such as
+                single-answer, multiple-answer, or numeric—and the labels for response codes. You
+                can download a sample to see the format.
+              </p>
+            </details>
+            <details>
+              <summary>Can I use a CSV from Google Forms or another survey tool?</summary>
+              <p>
+                Yes. Aggy works independently of the collection service as long as you provide a
+                matching layout JSON. CSV column names must match the layout definition.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="final-cta">
+        <div class="shell cta-inner">
+          <p class="section-label light" aria-hidden="true">READY TO TABULATE?</p>
+          <h2>Start turning survey data<br />into answers today.</h2>
+          <p>Use the sample CSV and layout JSON to see real aggregation results in seconds.</p>
+          <a class="button button-white" href="/app/?lang=en"
+            >Open Aggy <span aria-hidden="true">→</span></a
+          >
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand footer-brand" href="/en/"
+            ><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span
+            ><span>Aggy</span></a
+          >
+          <p>Survey aggregation, entirely in your browser</p>
+        </div>
+        <nav aria-label="Footer navigation">
+          <a href="/app/?lang=en">Open app</a><a href="https://github.com/Yuki-bach/aggy">GitHub</a
+          ><a href="/aggy.en.md">Markdown version</a>
+        </nav>
+        <small>© 2026 Aggy</small>
+      </div>
+    </footer>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "@id": "https://aggy.pages.dev/#web-application",
+        "name": "Aggy",
+        "url": "https://aggy.pages.dev/en/",
+        "sameAs": "https://github.com/Yuki-bach/aggy",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web browser",
+        "inLanguage": ["en", "ja"],
+        "isAccessibleForFree": true,
+        "description": "A browser-based tool for grand totals and cross-tabulation without sending raw survey data to an external server.",
+        "featureList": [
+          "Grand totals",
+          "Cross-tabulation",
+          "Weighted aggregation",
+          "Charts",
+          "CSV, Markdown, and JSON exports"
+        ]
+      }
+    </script>
+  </body>
+</html>
