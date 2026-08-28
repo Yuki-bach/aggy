@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import type { RawData, LayoutData } from "../lib/types";
   import ResultPanel from "./aggregation/ResultPanel.svelte";
   import SettingsPanel from "./aggregation/SettingsPanel.svelte";
@@ -8,8 +8,8 @@
   import { t } from "../lib/i18n.svelte";
   import type { DerivedRecipe } from "../lib/derivedRecipe";
   import { saveRecipes } from "../lib/opfs";
-  import { RecipeStore } from "../lib/recipeStore.svelte";
-  import { AggRunner } from "../lib/aggRunner.svelte";
+  import { AnalysisSession } from "../lib/analysisSession.svelte";
+  import { registerAggyWebMcpTools } from "../lib/webmcp";
 
   interface Props {
     rawData: RawData;
@@ -29,8 +29,12 @@
     folderId,
   }: Props = $props();
 
-  const recipeStore = new RecipeStore(preparedLayout, initialRecipes);
-  const aggRunner = new AggRunner();
+  // A new AggregationScreen is mounted for each imported dataset; these props are session seeds.
+  const session = untrack(
+    () => new AnalysisSession(rawData, layout, preparedLayout, initialRecipes),
+  );
+  const recipeStore = session.recipeStore;
+  const aggRunner = session.aggRunner;
 
   type ViewMode =
     | { kind: "results" }
@@ -38,18 +42,21 @@
   let viewMode = $state<ViewMode>({ kind: "results" });
 
   onMount(() => {
-    void recipeStore.restoreInitial();
-  });
-
-  // Auto-run aggregation whenever questions / cross selection / weight toggle change.
-  // The runner's internal runId guards against out-of-order completions.
-  $effect(() => {
-    if (recipeStore.questions.length === 0) return;
-    void aggRunner.run(
-      recipeStore.questions,
-      recipeStore.weightColumnName,
-      recipeStore.matrixLabels,
-    );
+    let disposed = false;
+    let unregister: (() => void) | undefined;
+    void session
+      .initialize()
+      .then(async (error) => {
+        if (error || disposed) return;
+        const cleanup = await registerAggyWebMcpTools(session);
+        if (disposed) cleanup();
+        else unregister = cleanup;
+      })
+      .catch(() => {});
+    return () => {
+      disposed = true;
+      unregister?.();
+    };
   });
 
   // Persist recipes whenever they change. Best-effort.
@@ -71,12 +78,11 @@
 
   async function handleDeleteRecipe(code: string): Promise<void> {
     if (!confirm(t("derived.delete.confirm", { code }))) return;
-    await recipeStore.remove(code);
-    aggRunner.pruneCode(code);
+    await session.deleteRecipe(code);
   }
 
   async function handleRecipeCommit(next: DerivedRecipe[]): Promise<string | null> {
-    const err = await recipeStore.commit(next);
+    const err = await session.commitRecipes(next);
     if (err === null) viewMode = { kind: "results" };
     return err;
   }
@@ -114,10 +120,10 @@
     weightCol={aggRunner.result?.weightCol ?? ""}
     questions={recipeStore.questions}
     crossSelected={aggRunner.crossSelected}
-    onCrossToggle={(key, checked) => aggRunner.toggleCross(key, checked)}
+    onCrossToggle={(key, checked) => void session.setCrossAxis(key, checked)}
     weightColumnName={recipeStore.weightColumnName}
     weightEnabled={aggRunner.weightEnabled}
-    onWeightToggle={(on) => aggRunner.toggleWeight(on)}
+    onWeightToggle={(on) => void session.setWeighting(on)}
     errorMsg={resultError}
     onAddDerived={handleAddRecipe}
   />

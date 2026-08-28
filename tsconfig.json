@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "types": ["vitest/importMeta"],
+    "types": ["vitest/importMeta", "webmcp-types"],
     "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",

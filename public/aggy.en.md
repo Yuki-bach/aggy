@@ -66,7 +66,7 @@ You can download a sample CSV and sample layout JSON from the app.
 
 ### What happens to the data I load?
 
-Your response data is never sent to Aggy's servers. DuckDB Wasm loads, validates, and aggregates it entirely in your browser.
+Your response data is never sent to Aggy's servers. DuckDB Wasm loads, validates, and aggregates it entirely in your browser. Running WebMCP site tools may share question metadata, recipes, and aggregate results with your active AI, but never respondent-level raw data.
 
 ### Is Aggy free to use?
 

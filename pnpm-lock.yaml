@@ -61,6 +61,9 @@ importers:
       vitest:
         specifier: 4.1.10
         version: 4.1.10(@types/node@20.19.43)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.2.7(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.5)(typescript@7.0.2))
+      webmcp-types:
+        specifier: ^0.1.5
+        version: 0.1.5
 
 packages:
 
@@ -1784,6 +1787,9 @@ packages:
       jsdom:
         optional: true
 
+  webmcp-types@0.1.5:
+    resolution: {integrity: sha512-QAfuzNJ+hiY2JLpPbD/6xZruLQlsqtWUDqQCRruqD0dbtZHDg6IUZ2K0zctlRokwuscGlr47i6hKv8mQPSQLhw==}
+
   why-is-node-running@2.3.0:
     resolution: {integrity: sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==}
     engines: {node: '>=8'}
@@ -3146,6 +3152,8 @@ snapshots:
       '@vitest/coverage-v8': 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
     transitivePeerDependencies:
       - msw
+
+  webmcp-types@0.1.5: {}
 
   why-is-node-running@2.3.0:
     dependencies:

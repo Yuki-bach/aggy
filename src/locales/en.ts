@@ -165,7 +165,7 @@ const en: Record<string, string> = {
   "gs.section1.sampleLayout": "Sample Layout",
   "gs.section2.title": "Security",
   "gs.section2.p1":
-    "Aggy runs <strong>entirely serverless</strong>. All processing happens in your browser, and uploaded data is never sent to any external server.",
+    "Aggy runs <strong>entirely serverless</strong> and never sends respondent-level raw data to an external server. When you run site tools in a WebMCP-compatible browser, question metadata, recipes, and aggregate results may be shared with your active AI following your request and the browser's safety review.",
   "gs.section3.title": "Basic Usage",
   "gs.section3.step1": "Load a raw data file and a layout file",
   "gs.section3.step2": "Select cross-tabulation axes if needed",
