@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { waitForWasmReady, uploadFiles, proceedToAggregation } from "./helpers";
+import { openApp, waitForWasmReady, uploadFiles, proceedToAggregation } from "./helpers";
 
 /** OPFS が利用可能かチェックし、不可なら true を返す */
 async function isOpfsUnavailable(page: Page): Promise<boolean> {
@@ -32,8 +32,7 @@ async function clearOpfs(page: Page): Promise<void> {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
-  await waitForWasmReady(page);
+  await openApp(page);
 
   // OPFS が利用不可なブラウザ（WebKit テスト環境など）ではスキップ
   if (await isOpfsUnavailable(page)) {
@@ -52,8 +51,7 @@ test.beforeEach(async ({ page }) => {
 async function createHistoryEntry(page: Page): Promise<void> {
   await uploadFiles(page);
   await proceedToAggregation(page);
-  await page.goto("/");
-  await waitForWasmReady(page);
+  await openApp(page);
 }
 
 test("集計画面遷移後、履歴にエントリが追加される", async ({ page }) => {
