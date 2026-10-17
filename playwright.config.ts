@@ -15,7 +15,7 @@ export default defineConfig({
   },
   webServer: {
     command: "vp build && vp preview --port 4173 --strictPort",
-    url: "http://localhost:4173",
+    url: "http://localhost:4173/app/",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

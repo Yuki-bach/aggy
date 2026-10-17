@@ -1,10 +1,9 @@
 import { test, expect } from "@playwright/test";
 import path from "node:path";
-import { waitForWasmReady, uploadCustomFiles, TESTDATA } from "./helpers";
+import { openApp, uploadCustomFiles, TESTDATA } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
-  await waitForWasmReady(page);
+  await openApp(page);
 });
 
 test("SA未定義コード → 診断画面にエラー表示、集計へ進めない", async ({ page }) => {
