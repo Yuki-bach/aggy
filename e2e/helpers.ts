@@ -3,6 +3,19 @@ import path from "node:path";
 
 export const TESTDATA = path.resolve(import.meta.dirname, "../testdata");
 
+/**
+ * 集計アプリのエントリ。`/` はランディングページで、DuckDB もインポート UI も無い。
+ * Playwright の `goto("/")` は baseURL のパスを無視してオリジン直下へ行く。
+ */
+export const APP_PATH = "/app/";
+
+/** アプリを開いて DuckDB の起動完了まで待つ */
+export async function openApp(page: Page): Promise<void> {
+  await page.goto(APP_PATH);
+  await expect(page).toHaveURL(/\/app\/(?:index\.html)?(?:\?.*)?$/);
+  await waitForWasmReady(page);
+}
+
 /** DuckDB Wasm が "DuckDB Ready" になるまで明示待機 + エラー文言不在確認 */
 export async function waitForWasmReady(page: Page): Promise<void> {
   const statusEl = page.locator('[role="status"]');
