@@ -25,7 +25,7 @@ const baseLayout: Layout = [
   { type: "NA", key: "q4", label: "スコア" },
 ];
 
-describe("validateRecipes", () => {
+describe(validateRecipes, () => {
   it("正常なcombineSA → エラーなし", () => {
     const recipes: DerivedRecipe[] = [
       { type: "combineSA", code: "q1_q2", label: "性別×年代", sources: ["q1", "q2"] },
@@ -188,5 +188,125 @@ describe("validateRecipes", () => {
       },
     ];
     expect(validateRecipes(recipes, baseLayout)).toEqual([]);
+  });
+
+  it("正常なgroupSA → エラーなし", () => {
+    const recipes: DerivedRecipe[] = [
+      {
+        type: "groupSA",
+        code: "q1_grp",
+        label: "性別（まとめ）",
+        source: "q1",
+        groups: [
+          { code: "1", label: "男性", sources: ["1"] },
+          { code: "2", label: "女性", sources: ["2"] },
+        ],
+      },
+    ];
+    expect(validateRecipes(recipes, baseLayout)).toEqual([]);
+  });
+
+  it("groupSA: ソースがSA型でない → エラー", () => {
+    const recipes: DerivedRecipe[] = [
+      {
+        type: "groupSA",
+        code: "x",
+        label: "X",
+        source: "q4",
+        groups: [{ code: "1", label: "A", sources: ["1"] }],
+      },
+    ];
+    const errors = validateRecipes(recipes, baseLayout);
+    expect(errors.some((e) => e.includes("SA型ではありません"))).toBe(true);
+  });
+
+  it("groupSA: groups空 → エラー", () => {
+    const recipes: DerivedRecipe[] = [
+      { type: "groupSA", code: "x", label: "X", source: "q1", groups: [] },
+    ];
+    const errors = validateRecipes(recipes, baseLayout);
+    expect(errors.some((e) => e.includes("1つ以上"))).toBe(true);
+  });
+
+  it("groupSA: group code 重複 → エラー", () => {
+    const recipes: DerivedRecipe[] = [
+      {
+        type: "groupSA",
+        code: "x",
+        label: "X",
+        source: "q1",
+        groups: [
+          { code: "a", label: "A", sources: ["1"] },
+          { code: "a", label: "B", sources: ["2"] },
+        ],
+      },
+    ];
+    const errors = validateRecipes(recipes, baseLayout);
+    expect(errors.some((e) => e.includes("重複した code"))).toBe(true);
+  });
+
+  it("groupSA: 選択肢の重複割当 → エラー", () => {
+    const recipes: DerivedRecipe[] = [
+      {
+        type: "groupSA",
+        code: "x",
+        label: "X",
+        source: "q1",
+        groups: [
+          { code: "a", label: "A", sources: ["1"] },
+          { code: "b", label: "B", sources: ["1"] },
+        ],
+      },
+    ];
+    const errors = validateRecipes(recipes, baseLayout);
+    expect(errors.some((e) => e.includes("複数の group"))).toBe(true);
+  });
+
+  it("groupSA: 未割当の選択肢 → エラー", () => {
+    const recipes: DerivedRecipe[] = [
+      {
+        type: "groupSA",
+        code: "x",
+        label: "X",
+        source: "q1",
+        groups: [{ code: "a", label: "A", sources: ["1"] }],
+      },
+    ];
+    const errors = validateRecipes(recipes, baseLayout);
+    expect(errors.some((e) => e.includes("未割当"))).toBe(true);
+  });
+
+  it("groupSA: 存在しない選択肢 code → エラー", () => {
+    const recipes: DerivedRecipe[] = [
+      {
+        type: "groupSA",
+        code: "x",
+        label: "X",
+        source: "q1",
+        groups: [
+          { code: "a", label: "A", sources: ["1", "99"] },
+          { code: "b", label: "B", sources: ["2"] },
+        ],
+      },
+    ];
+    const errors = validateRecipes(recipes, baseLayout);
+    expect(errors.some((e) => e.includes("選択肢に存在しません"))).toBe(true);
+  });
+
+  it("groupSA: group sources 空 → エラー", () => {
+    const recipes: DerivedRecipe[] = [
+      {
+        type: "groupSA",
+        code: "x",
+        label: "X",
+        source: "q1",
+        groups: [
+          { code: "a", label: "A", sources: [] },
+          { code: "b", label: "B", sources: ["1", "2"] },
+        ],
+      },
+    ];
+    const errors = validateRecipes(recipes, baseLayout);
+    expect(errors.some((e) => e.includes("sources が空"))).toBe(true);
   });
 });

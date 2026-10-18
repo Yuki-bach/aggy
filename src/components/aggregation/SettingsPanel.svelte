@@ -36,7 +36,9 @@
   let derivedCodes = $derived(new Set(recipes.map((r) => r.code)));
 
   function recipeKindLabel(r: DerivedRecipe): string {
-    return r.type === "combineSA" ? t("derived.kind.combineSA") : t("derived.kind.binNA");
+    if (r.type === "combineSA") return t("derived.kind.combineSA");
+    if (r.type === "binNA") return t("derived.kind.binNA");
+    return t("derived.kind.groupSA");
   }
 </script>
 

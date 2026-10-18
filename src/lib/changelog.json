@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.4.0",
+    "date": "2026-10-18",
+    "changes": [
+      {
+        "ja": "派生設問に「選択肢まとめ」（groupSA）を追加。1つのSAの選択肢をまとめて新しい軸を作れる",
+        "en": "Add Group SA derived recipe to collapse choices within one SA question into a new axis"
+      }
+    ]
+  },
+  {
     "version": "0.3.0",
     "date": "2026-04-18",
     "changes": [
