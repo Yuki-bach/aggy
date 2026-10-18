@@ -25,7 +25,7 @@ const baseLayout: Layout = [
   { type: "NA", key: "q4", label: "スコア" },
 ];
 
-describe(validateRecipes, () => {
+describe("validateRecipes", () => {
   it("正常なcombineSA → エラーなし", () => {
     const recipes: DerivedRecipe[] = [
       { type: "combineSA", code: "q1_q2", label: "性別×年代", sources: ["q1", "q2"] },

@@ -34,7 +34,7 @@ const layout: Layout = [
   { type: "NA", key: "score", label: "スコア" },
 ];
 
-describe(prepareDerivedColumns, () => {
+describe("prepareDerivedColumns", () => {
   describe("combineSA", () => {
     beforeEach(async () => {
       await loadCSVAsTable("gender,age,score\n1,1,75\n2,2,30\n1,2,90\n");
@@ -331,7 +331,7 @@ describe(prepareDerivedColumns, () => {
   });
 });
 
-describe(checkBinCoverage, () => {
+describe("checkBinCoverage", () => {
   beforeEach(async () => {
     await loadCSVAsTable("score\n10\n30\n75\n90\n");
   });
