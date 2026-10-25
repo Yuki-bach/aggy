@@ -2,8 +2,8 @@
  * Benchmark data generator — produces CSV + layout JSON for each pattern.
  *
  * Usage:
- *   tsx bench/generate.ts            # generate all patterns
- *   tsx bench/generate.ts rows       # generate a specific pattern
+ *   node bench/generate.ts           # generate all patterns
+ *   node bench/generate.ts rows      # generate a specific pattern
  */
 
 import { mkdirSync, writeFileSync } from "node:fs";

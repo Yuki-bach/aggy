@@ -2,7 +2,7 @@
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Shape, TabData } from "./types";
-import { calcPct } from "./types";
+import { calcPct } from "./types.ts";
 import {
   esc,
   weightExpr,
@@ -10,8 +10,8 @@ import {
   maWeightedCountExpr,
   maShownCondition,
   maNoneSelectedCondition,
-} from "./sqlHelpers";
-import { NO_ANSWER_VALUE } from "./constants";
+} from "./sqlHelpers.ts";
+import { NO_ANSWER_VALUE } from "./constants.ts";
 
 export async function aggTab(
   conn: AsyncDuckDBConnection,
@@ -25,10 +25,13 @@ export async function aggTab(
 }
 
 class TabAggregator {
-  constructor(
-    private conn: AsyncDuckDBConnection,
-    private weightCol: string,
-  ) {}
+  private conn: AsyncDuckDBConnection;
+  private weightCol: string;
+
+  constructor(conn: AsyncDuckDBConnection, weightCol: string) {
+    this.conn = conn;
+    this.weightCol = weightCol;
+  }
 
   async aggregateSA(column: string, codes: string[]): Promise<TabData> {
     const wExpr = weightExpr(this.weightCol);

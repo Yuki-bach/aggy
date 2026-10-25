@@ -3,8 +3,8 @@
  * Benchmark runner — measures aggregate() execution time for each data pattern.
  *
  * Usage:
- *   tsx bench/run.ts              # run all patterns
- *   tsx bench/run.ts rows         # run a specific pattern
+ *   node bench/run.ts             # run all patterns
+ *   node bench/run.ts rows        # run a specific pattern
  */
 
 import { createRequire } from "node:module";
@@ -12,11 +12,16 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
-import { aggTab } from "../src/lib/agg/aggTab";
-import { aggCrossTab } from "../src/lib/agg/aggCrossTab";
+import { aggTab } from "../src/lib/agg/aggTab.ts";
+import { aggCrossTab } from "../src/lib/agg/aggCrossTab.ts";
 import type { Question } from "../src/lib/types";
-import { parseLayoutJson, buildValidLayout, filterLayout, buildQuestions } from "../src/lib/layout";
-import { generate, PATTERNS, type PatternDef } from "./generate";
+import {
+  parseLayoutJson,
+  buildValidLayout,
+  filterLayout,
+  buildQuestions,
+} from "../src/lib/layout.ts";
+import { generate, PATTERNS, type PatternDef } from "./generate.ts";
 import type { DuckDBNodeBindings } from "@duckdb/duckdb-wasm/dist/types/src/bindings/bindings_node_base";
 import type { DuckDBConnection } from "@duckdb/duckdb-wasm/dist/types/src/bindings/connection";
 
