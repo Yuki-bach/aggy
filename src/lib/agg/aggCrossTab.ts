@@ -2,7 +2,7 @@
 
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Shape, TabData } from "./types";
-import { calcPct } from "./types";
+import { calcPct } from "./types.ts";
 import {
   esc,
   weightExpr,
@@ -10,8 +10,8 @@ import {
   maWeightedCountExpr,
   maShownCondition,
   maNoneSelectedCondition,
-} from "./sqlHelpers";
-import { NO_ANSWER_VALUE } from "./constants";
+} from "./sqlHelpers.ts";
+import { NO_ANSWER_VALUE } from "./constants.ts";
 
 type CrossSliceData = {
   code: string;
@@ -36,11 +36,15 @@ export async function aggCrossTab(
 }
 
 class CrossTabAggregator {
-  constructor(
-    private conn: AsyncDuckDBConnection,
-    private weightCol: string,
-    private axisShape: Shape,
-  ) {}
+  private conn: AsyncDuckDBConnection;
+  private weightCol: string;
+  private axisShape: Shape;
+
+  constructor(conn: AsyncDuckDBConnection, weightCol: string, axisShape: Shape) {
+    this.conn = conn;
+    this.weightCol = weightCol;
+    this.axisShape = axisShape;
+  }
 
   // ── SA main × SA cross ──
 
