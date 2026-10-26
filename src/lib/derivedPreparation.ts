@@ -1,6 +1,12 @@
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { Layout, LayoutItem } from "./layout";
-import type { DerivedRecipe, CombineSARecipe, BinNARecipe, BinDef } from "./derivedRecipe";
+import type {
+  DerivedRecipe,
+  CombineSARecipe,
+  BinNARecipe,
+  GroupSARecipe,
+  BinDef,
+} from "./derivedRecipe";
 import { esc } from "./agg/sqlHelpers";
 
 export interface DerivedPreparationResult {
@@ -23,8 +29,11 @@ export async function prepareDerivedColumns(
     if (recipe.type === "combineSA") {
       const entry = await prepareCombineSA(conn, recipe, layout, warnings);
       if (entry) newLayout.push(entry);
-    } else {
+    } else if (recipe.type === "binNA") {
       const entry = await prepareBinNA(conn, recipe, layout, warnings);
+      if (entry) newLayout.push(entry);
+    } else {
+      const entry = await prepareGroupSA(conn, recipe, layout, warnings);
       if (entry) newLayout.push(entry);
     }
   }
@@ -136,6 +145,46 @@ async function prepareBinNA(
   }
 
   const items: LayoutItem[] = recipe.bins.map((b) => ({ code: b.code, label: b.label }));
+
+  return { type: "SA", key: recipe.code, label: recipe.label, items };
+}
+
+async function prepareGroupSA(
+  conn: AsyncDuckDBConnection,
+  recipe: GroupSARecipe,
+  layout: Layout,
+  warnings: string[],
+): Promise<Layout[number] | null> {
+  const sourceQ = layout.find((q) => q.key === recipe.source);
+  if (!sourceQ || sourceQ.type !== "SA") {
+    warnings.push(`${recipe.code}: ソース "${recipe.source}" が見つかりません`);
+    return null;
+  }
+
+  const col = esc(recipe.code);
+  const srcCol = esc(recipe.source);
+  const srcVal = `CAST("${srcCol}" AS VARCHAR)`;
+
+  const whenClauses = recipe.groups.map((g) => {
+    const list = g.sources.map((c) => `'${c.replaceAll("'", "''")}'`).join(", ");
+    const thenCode = g.code.replaceAll("'", "''");
+    return `WHEN ${srcVal} IN (${list}) THEN '${thenCode}'`;
+  });
+
+  await conn.query(`ALTER TABLE survey ADD COLUMN "${col}" VARCHAR`);
+  await conn.query(
+    `UPDATE survey SET "${col}" = CASE ${whenClauses.join(" ")} ELSE NULL END WHERE "${srcCol}" IS NOT NULL`,
+  );
+
+  const unmatchedResult = await conn.query(
+    `SELECT COUNT(*) AS n FROM survey WHERE "${srcCol}" IS NOT NULL AND "${col}" IS NULL`,
+  );
+  const unmatchedCount = Number(unmatchedResult.toArray()[0].n);
+  if (unmatchedCount > 0) {
+    warnings.push(`${recipe.code}: ${unmatchedCount}件がどのグループにも該当しませんでした`);
+  }
+
+  const items: LayoutItem[] = recipe.groups.map((g) => ({ code: g.code, label: g.label }));
 
   return { type: "SA", key: recipe.code, label: recipe.label, items };
 }

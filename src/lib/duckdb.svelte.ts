@@ -151,7 +151,7 @@ export async function prepareDateLayout(layout: Layout): Promise<DatePreparation
   return prepareDateColumns(conn, layout);
 }
 
-/** Prepare derived columns from recipes (combineSA, binNA) */
+/** Prepare derived columns from recipes (combineSA, binNA, groupSA) */
 export async function prepareDerivedLayout(
   layout: Layout,
   recipes: DerivedRecipe[],
