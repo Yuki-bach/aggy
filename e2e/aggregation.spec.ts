@@ -1,9 +1,8 @@
 import { test, expect } from "@playwright/test";
-import { waitForWasmReady, uploadFiles, proceedToAggregation } from "./helpers";
+import { openApp, uploadFiles, proceedToAggregation } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
-  await waitForWasmReady(page);
+  await openApp(page);
 });
 
 test("ファイルアップロード → 検証 → 集計画面遷移", async ({ page }) => {

@@ -7,8 +7,8 @@
     "build": "vp build",
     "test": "vp test run",
     "check": "vp check",
-    "bench:gen": "tsx bench/generate.ts",
-    "bench": "tsx bench/run.ts",
+    "bench:gen": "node bench/generate.ts",
+    "bench": "node bench/run.ts",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "prepare": "vp config"
@@ -16,15 +16,14 @@
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.33.1-dev57.0",
     "chart.js": "^4.5.1",
-    "svelte": "^5.56.8"
+    "svelte": "^5.57.2"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.1",
-    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@playwright/test": "^1.64.0",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tailwindcss/vite": "^4.3.3",
     "@vitest/coverage-v8": "catalog:",
     "tailwindcss": "^4.3.3",
-    "tsx": "4.23.5",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",

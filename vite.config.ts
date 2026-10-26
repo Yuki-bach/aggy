@@ -8,6 +8,8 @@ export default defineConfig({
     "*": "vp check --fix",
   },
   fmt: {
+    // Release Please writes this file with `*` bullets. Oxfmt 0.72 rewrites them to `-`.
+    ignorePatterns: ["CHANGELOG.md"],
     semi: true,
     singleQuote: false,
     tabWidth: 2,

@@ -1,4 +1,7 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
+import mvpWorkerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
+import ehWorkerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
+import { instantiateWithVerifiedWasm, integrityForWasmUrl, wasmModuleUrl } from "./duckdbWasm";
 import type { Question, Tab } from "./types";
 import type { Layout } from "./layout";
 import { validateLayoutStructure, buildValidLayout } from "./layout";
@@ -24,8 +27,6 @@ interface DuckInstance {
   conn: duckdb.AsyncDuckDBConnection;
 }
 
-const DUCKDB_CDN = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev18.0/dist";
-
 let instance: DuckInstance | null = null;
 let initPromise: Promise<DuckInstance> | null = null;
 
@@ -35,30 +36,36 @@ async function doInit(): Promise<DuckInstance> {
 
   const BUNDLES: duckdb.DuckDBBundles = {
     mvp: {
-      mainModule: `${DUCKDB_CDN}/duckdb-mvp.wasm`,
-      mainWorker: `${DUCKDB_CDN}/duckdb-browser-mvp.worker.js`,
+      mainModule: wasmModuleUrl("mvp"),
+      mainWorker: mvpWorkerUrl,
     },
     eh: {
-      mainModule: `${DUCKDB_CDN}/duckdb-eh.wasm`,
-      mainWorker: `${DUCKDB_CDN}/duckdb-browser-eh.worker.js`,
+      mainModule: wasmModuleUrl("eh"),
+      mainWorker: ehWorkerUrl,
     },
   };
 
   const bundle = await duckdb.selectBundle(BUNDLES);
-  const workerBlob = new Blob([`importScripts("${bundle.mainWorker!}");`], {
-    type: "application/javascript",
-  });
-  const worker = new Worker(URL.createObjectURL(workerBlob));
+  // Workers are same-origin Vite assets, so they can be started directly.
+  const worker = new Worker(bundle.mainWorker!);
   const logger = import.meta.env.DEV ? new duckdb.ConsoleLogger() : new duckdb.VoidLogger();
 
   // Build the instance fully before publishing it: a second caller must
   // never observe a half-instantiated AsyncDuckDB through `instance`.
   const db = new duckdb.AsyncDuckDB(logger, worker);
-  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-  const conn = await db.connect();
-
-  dbStatus.value = "ready";
-  return { db, conn };
+  try {
+    await instantiateWithVerifiedWasm(
+      (wasmObjectUrl) => db.instantiate(wasmObjectUrl, bundle.pthreadWorker),
+      bundle.mainModule,
+      integrityForWasmUrl(bundle.mainModule),
+    );
+    const conn = await db.connect();
+    dbStatus.value = "ready";
+    return { db, conn };
+  } catch (err) {
+    await db.terminate().catch(() => {});
+    throw err;
+  }
 }
 
 /**
