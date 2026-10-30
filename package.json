@@ -14,7 +14,7 @@
     "prepare": "vp config"
   },
   "dependencies": {
-    "@duckdb/duckdb-wasm": "^1.33.1-dev57.0",
+    "@duckdb/duckdb-wasm": "1.33.1-dev110.0",
     "chart.js": "^4.5.1",
     "svelte": "^5.57.2"
   },
