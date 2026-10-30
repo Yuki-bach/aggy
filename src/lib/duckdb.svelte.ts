@@ -1,6 +1,7 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
-import mvpWorkerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
-import ehWorkerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
+import baseWorkerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-base.worker.js?url";
+import threadsWorkerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-threads.worker.js?url";
+import threadsPthreadWorkerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-threads.pthread.worker.js?url";
 import { instantiateWithVerifiedWasm, integrityForWasmUrl, wasmModuleUrl } from "./duckdbWasm";
 import type { Question, Tab } from "./types";
 import type { Layout } from "./layout";
@@ -34,14 +35,18 @@ async function doInit(): Promise<DuckInstance> {
   dbStatus.value = "loading";
   dbStatus.errorMessage = null;
 
+  // `base` is the single-threaded successor of the old EH build.
+  // `threads` is selected only when SIMD, threads, and cross-origin isolation
+  // are all available (this app sends COOP/COEP).
   const BUNDLES: duckdb.DuckDBBundles = {
-    mvp: {
-      mainModule: wasmModuleUrl("mvp"),
-      mainWorker: mvpWorkerUrl,
+    base: {
+      mainModule: wasmModuleUrl("base"),
+      mainWorker: baseWorkerUrl,
     },
-    eh: {
-      mainModule: wasmModuleUrl("eh"),
-      mainWorker: ehWorkerUrl,
+    threads: {
+      mainModule: wasmModuleUrl("threads"),
+      mainWorker: threadsWorkerUrl,
+      pthreadWorker: threadsPthreadWorkerUrl,
     },
   };
 

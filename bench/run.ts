@@ -42,9 +42,9 @@ let conn: DuckDBConnection;
 
 async function initDuckDB(): Promise<void> {
   const logger = new ConsoleLogger();
+  // Node's blocking runtime always instantiates `base` (single-threaded).
   const bundles = {
-    mvp: { mainModule: resolve(DUCKDB_DIST, "duckdb-mvp.wasm") },
-    eh: { mainModule: resolve(DUCKDB_DIST, "duckdb-eh.wasm") },
+    base: { mainModule: resolve(DUCKDB_DIST, "duckdb-base.wasm") },
   };
   db = await createDuckDB(bundles, logger, NODE_RUNTIME);
   await db.instantiate();

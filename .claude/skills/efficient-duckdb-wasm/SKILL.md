@@ -9,19 +9,20 @@ description: ブラウザで DuckDB Wasm (@duckdb/duckdb-wasm) を使うとき�
 
 ## 1. バンドル選択と初期化
 
-DuckDB Wasm は MVP / EH (Exception Handling) / COI (Cross-Origin Isolated) など複数のビルドを提供している。ブラウザの機能サポートに応じて `selectBundle` で自動選択する。
+`@duckdb/duckdb-wasm@1.33.1-dev110.0`（DuckDB 2.0）以降、バンドルは `base`（シングルスレッド、Wasm 例外ハンドリング必須）と `threads`（SIMD + スレッド + Cross-Origin Isolation が揃ったときだけ）の 2 種類。ブラウザの機能サポートに応じて `selectBundle` で自動選択する。Wasm 例外をサポートしない環境では `selectBundle` が例外を投げる。
 
 ```ts
 import * as duckdb from "@duckdb/duckdb-wasm";
 
 const BUNDLES: duckdb.DuckDBBundles = {
-  mvp: {
-    mainModule: `${CDN}/duckdb-mvp.wasm`,
-    mainWorker: `${CDN}/duckdb-browser-mvp.worker.js`,
+  base: {
+    mainModule: `${CDN}/duckdb-base.wasm`,
+    mainWorker: `${CDN}/duckdb-browser-base.worker.js`,
   },
-  eh: {
-    mainModule: `${CDN}/duckdb-eh.wasm`,
-    mainWorker: `${CDN}/duckdb-browser-eh.worker.js`,
+  threads: {
+    mainModule: `${CDN}/duckdb-threads.wasm`,
+    mainWorker: `${CDN}/duckdb-browser-threads.worker.js`,
+    pthreadWorker: `${CDN}/duckdb-browser-threads.pthread.worker.js`,
   },
 };
 
@@ -31,7 +32,7 @@ const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
 await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 ```
 
-**なぜ:** EH ビルドは Wasm ネイティブ例外を使うため、Chrome 系では大幅に速い。MVP は古いブラウザ向けのフォールバックとして JS で例外をエミュレートするので遅くなる。`selectBundle` に任せれば各ブラウザに最適なビルドが選ばれる。
+**なぜ:** `base` は Wasm ネイティブ例外を使うシングルスレッドビルド。`threads` はさらに共有メモリでクエリを並列化するが、ページが cross-origin isolated でないと選ばれない。`selectBundle` に渡せば、条件を満たすブラウザだけ `threads` になり、それ以外は `base` に落ちる。
 
 **Tips:**
 
@@ -42,7 +43,7 @@ await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
 `AsyncDuckDB` は内部で Web Worker にクエリを投げ、メインスレッドをブロックしない。**必ず `AsyncDuckDB` を使うこと**。`DuckDB`（同期版）はメインスレッドで動くので UI を固める。
 
-**シングルワーカー＝シングルスレッド実行:** DuckDB Wasm は Worker 1 つの上でクエリを順次処理する。同一接続に対して `Promise.all` で並列にクエリを投げても内部でシリアライズされるだけなので、コードは常に `await` で逐次実行する。
+**接続は逐次:** `threads` バンドルは 1 クエリの中を並列化するが、同一接続のクエリ自体は Worker 上で順に処理される。`Promise.all` で並列に投げても内部でシリアライズされるだけなので、コードは常に `await` で逐次実行する。
 
 ```ts
 // ❌ NG: 並列に見えるが内部でシリアライズされ、ハンドリングが複雑になるだけ
@@ -61,6 +62,8 @@ DuckDB は内部でマルチスレッド実行をサポートしているが、�
 Cross-Origin-Embedder-Policy: require-corp
 Cross-Origin-Opener-Policy:  same-origin
 ```
+
+`threads` バンドルを `selectBundle` に渡してあると、上記ヘッダに加えて Wasm SIMD と threads があるブラウザでは自動的にそちらが選ばれる。渡さなければ常に `base` になる。
 
 **トレードオフ:** これらのヘッダを設定すると、CORP ヘッダのない外部リソース（画像、iframe、OAuth ポップアップ、解析タグなど）が読み込めなくなる。サードパーティ統合がある場合は副作用を確認すること。多くの一般用途では COI を諦めて単一スレッドで動かす方が現実的。
 
@@ -168,7 +171,7 @@ await conn.query(`
 DuckDB Wasm を使ったコードを見るとき、上から順に確認する:
 
 - [ ] `AsyncDuckDB` を Web Worker 上で動かしているか（同期版を使っていないか）
-- [ ] `selectBundle` で MVP/EH を切り替えているか
+- [ ] `selectBundle` で base/threads を切り替えているか
 - [ ] CSV/Parquet を `File` のまま `registerFileHandle` に渡しているか（`await file.text()` していないか）
 - [ ] 同一接続のクエリを `Promise.all` していないか
 - [ ] 大きな結果に対して `query()` ではなく `send()` でストリーミングしているか
