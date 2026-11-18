@@ -25,7 +25,23 @@ export interface BinNARecipe {
   bins: BinDef[];
 }
 
-export type DerivedRecipe = CombineSARecipe | BinNARecipe;
+/** 新しい選択肢 = 元の SA 選択肢の束 */
+export interface ItemGroup {
+  code: string;
+  label: string;
+  sources: string[]; // original item codes
+}
+
+/** SA → SA（選択肢まとめ） */
+export interface GroupSARecipe {
+  type: "groupSA";
+  code: string;
+  label: string;
+  source: string;
+  groups: ItemGroup[];
+}
+
+export type DerivedRecipe = CombineSARecipe | BinNARecipe | GroupSARecipe;
 
 /** Validate recipes structurally against the layout. Returns error messages. */
 export function validateRecipes(recipes: DerivedRecipe[], layout: Layout): string[] {
@@ -57,8 +73,10 @@ export function validateRecipes(recipes: DerivedRecipe[], layout: Layout): strin
 
     if (r.type === "combineSA") {
       validateCombineSA(r, layout, errors);
-    } else {
+    } else if (r.type === "binNA") {
       validateBinNA(r, layout, errors);
+    } else {
+      validateGroupSA(r, layout, errors);
     }
   }
 
@@ -114,5 +132,60 @@ function validateBinNA(r: BinNARecipe, layout: Layout, errors: string[]): void {
         `"${r.code}": bin "${bin.code}" の min (${bin.min}) が max (${bin.max}) 以上です`,
       );
     }
+  }
+}
+
+function validateGroupSA(r: GroupSARecipe, layout: Layout, errors: string[]): void {
+  const found = layout.find((e) => e.key === r.source);
+  if (!found) {
+    errors.push(`"${r.code}": ソース "${r.source}" がレイアウトに存在しません`);
+    return;
+  }
+  if (found.type !== "SA") {
+    errors.push(`"${r.code}": ソース "${r.source}" はSA型ではありません（${found.type}）`);
+    return;
+  }
+
+  if (r.groups.length === 0) {
+    errors.push(`"${r.code}": groups は1つ以上必要です`);
+    return;
+  }
+
+  const itemCodes = new Set(found.items.map((it) => it.code));
+  const groupCodes = new Set<string>();
+  const assigned = new Set<string>();
+
+  for (const g of r.groups) {
+    if (!g.code) {
+      errors.push(`"${r.code}": group の code が空です`);
+      continue;
+    }
+    if (!g.label) {
+      errors.push(`"${r.code}": group "${g.code}" の label が空です`);
+    }
+    if (groupCodes.has(g.code)) {
+      errors.push(`"${r.code}": groups 内に重複した code があります: ${g.code}`);
+    }
+    groupCodes.add(g.code);
+
+    if (g.sources.length === 0) {
+      errors.push(`"${r.code}": group "${g.code}" の sources が空です`);
+      continue;
+    }
+
+    for (const src of g.sources) {
+      if (!itemCodes.has(src)) {
+        errors.push(`"${r.code}": group "${g.code}" のソース "${src}" が選択肢に存在しません`);
+      }
+      if (assigned.has(src)) {
+        errors.push(`"${r.code}": 選択肢 "${src}" が複数の group に割り当てられています`);
+      }
+      assigned.add(src);
+    }
+  }
+
+  const unassigned = [...itemCodes].filter((c) => !assigned.has(c));
+  if (unassigned.length > 0) {
+    errors.push(`"${r.code}": 未割当の選択肢があります: ${unassigned.join(", ")}`);
   }
 }

@@ -213,6 +213,108 @@ describe("prepareDerivedColumns", () => {
     });
   });
 
+  describe("groupSA", () => {
+    beforeEach(async () => {
+      await loadCSVAsTable("gender,age,score\n1,1,75\n2,2,30\n1,2,90\n");
+    });
+
+    it("選択肢まとめ列を作成", async () => {
+      const recipes: DerivedRecipe[] = [
+        {
+          type: "groupSA",
+          code: "gender_grp",
+          label: "性別（まとめ）",
+          source: "gender",
+          groups: [
+            { code: "M", label: "男性", sources: ["1"] },
+            { code: "F", label: "女性", sources: ["2"] },
+          ],
+        },
+      ];
+      const { layout: newLayout, warnings } = await prepareDerivedColumns(
+        getConn(),
+        layout,
+        recipes,
+      );
+
+      expect(warnings).toEqual([]);
+
+      const derived = newLayout.find((q) => q.key === "gender_grp");
+      expect(derived).toBeDefined();
+      expect(derived!.type).toBe("SA");
+      expect(derived!.label).toBe("性別（まとめ）");
+      if (derived!.type === "SA") {
+        expect(derived!.items).toEqual([
+          { code: "M", label: "男性" },
+          { code: "F", label: "女性" },
+        ]);
+      }
+
+      const result = await getConn().query(`SELECT "gender_grp" FROM survey ORDER BY rowid`);
+      const values = result.toArray().map((r: Record<string, unknown>) => r.gender_grp);
+      expect(values).toEqual(["M", "F", "M"]);
+    });
+
+    it("複数選択肢を1グループにまとめられる", async () => {
+      const satLayout: Layout = [
+        {
+          type: "SA",
+          key: "sat",
+          label: "満足度",
+          items: [
+            { code: "1", label: "とても満足" },
+            { code: "2", label: "満足" },
+            { code: "3", label: "普通" },
+            { code: "4", label: "不満" },
+            { code: "5", label: "とても不満" },
+          ],
+        },
+      ];
+      await loadCSVAsTable("sat\n1\n2\n3\n4\n5\n");
+      const recipes: DerivedRecipe[] = [
+        {
+          type: "groupSA",
+          code: "sat_grp",
+          label: "満足度（3段階）",
+          source: "sat",
+          groups: [
+            { code: "1", label: "満足計", sources: ["1", "2"] },
+            { code: "2", label: "普通", sources: ["3"] },
+            { code: "3", label: "不満計", sources: ["4", "5"] },
+          ],
+        },
+      ];
+      const { warnings } = await prepareDerivedColumns(getConn(), satLayout, recipes);
+      expect(warnings).toEqual([]);
+
+      const result = await getConn().query(`SELECT "sat_grp" FROM survey ORDER BY rowid`);
+      const values = result.toArray().map((r: Record<string, unknown>) => r.sat_grp);
+      expect(values).toEqual(["1", "1", "2", "3", "3"]);
+    });
+
+    it("NULLソースは派生列もNULL", async () => {
+      await loadCSVAsTable("gender,age,score\n1,1,75\n,2,30\n");
+      const recipes: DerivedRecipe[] = [
+        {
+          type: "groupSA",
+          code: "g",
+          label: "性別",
+          source: "gender",
+          groups: [
+            { code: "M", label: "男性", sources: ["1"] },
+            { code: "F", label: "女性", sources: ["2"] },
+          ],
+        },
+      ];
+      const { warnings } = await prepareDerivedColumns(getConn(), layout, recipes);
+      expect(warnings).toEqual([]);
+
+      const result = await getConn().query(`SELECT "g" FROM survey ORDER BY rowid`);
+      const values = result.toArray().map((r: Record<string, unknown>) => r.g);
+      expect(values).toEqual(["M", null]);
+    });
+  });
+
   describe("再実行（冪等性）", () => {
     beforeEach(async () => {
       await loadCSVAsTable("gender,age,score\n1,1,75\n2,2,30\n");
