@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1](https://github.com/Yuki-bach/aggy/compare/v0.3.0...v0.3.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* DuckDB の worker を同梱し wasm を SHA-384 で検証する ([e77ef46](https://github.com/Yuki-bach/aggy/commit/e77ef4689b5cac8db11bbb9b794f29c9fc4441ad))
+* **e2e:** open the app at /app/ instead of the landing page ([b266095](https://github.com/Yuki-bach/aggy/commit/b266095c1513dad0433c793f777309fe5767c28c))
+* **e2e:** ランディングではなく /app/ の集計アプリを開く ([5dd3051](https://github.com/Yuki-bach/aggy/commit/5dd3051b6332f62e29034c267bbaa8d5a0a823a2))
+
 ## [0.3.0](https://github.com/Yuki-bach/aggy/compare/v0.2.0...v0.3.0) (2026-08-11)
 
 
